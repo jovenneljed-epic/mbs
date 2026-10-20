@@ -1,0 +1,791 @@
+﻿/* =========================================================
+   EPIC MEMBERSHIP DIRECTORY
+   PROFESSIONAL PRINT DOCUMENT
+========================================================= */
+
+.membership-print-document {
+    width: 100%;
+    max-width: 190mm;
+    margin: 0 auto;
+    padding: 0;
+    background: #ffffff;
+    color: #172033;
+    font-family:
+        "Segoe UI",
+        Inter,
+        Arial,
+        sans-serif;
+    font-size: 9px;
+    line-height: 1.4;
+    box-sizing: border-box;
+}
+
+/* =========================================================
+   TOP ACCENT
+========================================================= */
+
+.print-top-accent {
+    height: 4px;
+    width: 100%;
+    background:
+        linear-gradient(
+            90deg,
+            #172033 0%,
+            #304a70 45%,
+            #6f89aa 75%,
+            #172033 100%
+        );
+    margin-bottom: 15px;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.print-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 13px;
+    border-bottom: 1px solid #dfe5ec;
+}
+
+.print-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.print-brand-mark {
+    width: 42px;
+    height: 42px;
+    border-radius: 9px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background:
+        linear-gradient(
+            135deg,
+            #172033,
+            #344e73
+        );
+
+    color: #ffffff;
+
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 1px;
+
+    box-shadow:
+        0 3px 10px rgba(23, 32, 51, 0.18);
+}
+
+.print-brand-name {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 1.6px;
+    color: #172033;
+}
+
+.print-brand-system {
+    margin-top: 2px;
+    font-size: 7px;
+    font-weight: 600;
+    letter-spacing: 1.1px;
+    color: #778396;
+}
+
+.print-header-right {
+    text-align: right;
+}
+
+.print-document-type {
+    font-size: 7px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    color: #344e73;
+}
+
+.print-document-code {
+    margin-top: 3px;
+    font-family: Consolas, monospace;
+    font-size: 7px;
+    color: #8a94a3;
+}
+
+/* =========================================================
+   TITLE
+========================================================= */
+
+.print-title-section {
+    padding: 22px 0 16px;
+}
+
+.print-title-overline {
+    font-size: 7px;
+    font-weight: 800;
+    letter-spacing: 1.8px;
+    color: #607796;
+    margin-bottom: 5px;
+}
+
+.print-title-section h1 {
+    margin: 0;
+    color: #172033;
+    font-size: 25px;
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+}
+
+.print-title-section > p {
+    max-width: 125mm;
+    margin: 7px 0 15px;
+    color: #697588;
+    font-size: 9px;
+}
+
+.print-title-meta {
+    display: grid;
+    grid-template-columns:
+        1.3fr
+        1.3fr
+        0.6fr;
+
+    border-top: 1px solid #e1e6ed;
+    border-bottom: 1px solid #e1e6ed;
+}
+
+.print-title-meta > div {
+    padding: 8px 10px;
+    border-right: 1px solid #e1e6ed;
+}
+
+.print-title-meta > div:last-child {
+    border-right: none;
+}
+
+.print-title-meta span {
+    display: block;
+    font-size: 6px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    color: #8a94a3;
+}
+
+.print-title-meta strong {
+    display: block;
+    margin-top: 2px;
+    font-size: 8px;
+    color: #26344b;
+}
+
+/* =========================================================
+   SUMMARY CARDS
+========================================================= */
+
+.print-summary {
+    display: grid;
+    grid-template-columns:
+        repeat(6, 1fr);
+
+    gap: 6px;
+    margin: 2px 0 20px;
+}
+
+.print-summary-card {
+    min-height: 51px;
+    padding: 8px 8px 7px;
+
+    border: 1px solid #e0e5eb;
+    border-radius: 6px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #ffffff,
+            #f7f9fb
+        );
+
+    box-sizing: border-box;
+}
+
+.print-summary-card.primary {
+    border-color: #b8c6d8;
+    background:
+        linear-gradient(
+            145deg,
+            #f3f6fa,
+            #ffffff
+        );
+}
+
+.summary-label {
+    display: block;
+    font-size: 5.8px;
+    line-height: 1;
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: #7b8798;
+}
+
+.print-summary-card strong {
+    display: block;
+    margin-top: 5px;
+
+    color: #172033;
+    font-size: 16px;
+    line-height: 1;
+    font-weight: 800;
+}
+
+.print-summary-card small {
+    display: block;
+    margin-top: 4px;
+
+    color: #8993a1;
+    font-size: 6px;
+}
+
+/* =========================================================
+   DIRECTORY SECTION
+========================================================= */
+
+.print-directory-section {
+    margin-top: 4px;
+}
+
+.print-section-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.print-section-heading > div:first-child > span {
+    display: block;
+    margin-bottom: 3px;
+
+    color: #718198;
+    font-size: 6px;
+    font-weight: 800;
+    letter-spacing: 1.3px;
+}
+
+.print-section-heading h2 {
+    margin: 0;
+    color: #172033;
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.print-section-count {
+    padding: 4px 7px;
+
+    border: 1px solid #d7dee7;
+    border-radius: 4px;
+
+    color: #64748a;
+    background: #f7f9fb;
+
+    font-size: 6px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+}
+
+.print-section-line {
+    height: 2px;
+    margin: 7px 0 9px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #172033 0,
+            #4c6688 35%,
+            #dfe5ec 35%,
+            #dfe5ec 100%
+        );
+}
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+.print-members-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+
+    table-layout: fixed;
+
+    border: 1px solid #dce2e9;
+    border-radius: 5px;
+
+    overflow: hidden;
+}
+
+.print-members-table thead th {
+    padding: 7px 5px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #273952,
+            #1d2a3e
+        );
+
+    color: #ffffff;
+
+    border-right: 1px solid rgba(
+        255,
+        255,
+        255,
+        0.08
+    );
+
+    font-size: 6px;
+    font-weight: 800;
+    letter-spacing: 0.7px;
+    text-align: left;
+
+    white-space: nowrap;
+}
+
+.print-members-table thead th:last-child {
+    border-right: none;
+}
+
+.print-members-table tbody td {
+    padding: 6px 5px;
+
+    border-right: 1px solid #e8ecf1;
+    border-bottom: 1px solid #e8ecf1;
+
+    color: #3c485b;
+
+    font-size: 7px;
+    vertical-align: middle;
+}
+
+.print-members-table tbody tr:nth-child(even) {
+    background: #f8fafc;
+}
+
+.print-members-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.print-members-table tbody td:last-child {
+    border-right: none;
+}
+
+/* =========================================================
+   COLUMN WIDTHS
+========================================================= */
+
+.col-no {
+    width: 4%;
+    text-align: center !important;
+}
+
+.col-member {
+    width: 24%;
+}
+
+.col-code {
+    width: 11%;
+}
+
+.col-gender {
+    width: 8%;
+}
+
+.col-contact {
+    width: 13%;
+}
+
+.col-ministry {
+    width: 14%;
+}
+
+.col-status {
+    width: 11%;
+}
+
+.col-date {
+    width: 15%;
+}
+
+/* =========================================================
+   MEMBER
+========================================================= */
+
+.member-number {
+    text-align: center;
+    color: #8792a1 !important;
+    font-family: Consolas, monospace;
+    font-size: 6.5px !important;
+}
+
+.print-member {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+.print-avatar {
+    flex: 0 0 22px;
+
+    width: 22px;
+    height: 22px;
+
+    border-radius: 50%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background:
+        linear-gradient(
+            135deg,
+            #263a57,
+            #7187a5
+        );
+
+    color: #ffffff;
+
+    font-size: 6px;
+    font-weight: 800;
+    letter-spacing: 0.4px;
+}
+
+.print-member-info {
+    min-width: 0;
+}
+
+.print-member-info strong {
+    display: block;
+
+    color: #253249;
+
+    font-size: 7px;
+    font-weight: 800;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.print-member-info span {
+    display: block;
+
+    margin-top: 1px;
+
+    color: #8993a1;
+
+    font-size: 5.5px;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* =========================================================
+   CODE
+========================================================= */
+
+.print-member-code {
+    display: inline-block;
+
+    padding: 3px 4px;
+
+    border: 1px solid #dce2e9;
+    border-radius: 3px;
+
+    background: #f4f6f9;
+
+    color: #53647b;
+
+    font-family: Consolas, monospace;
+    font-size: 5.7px;
+    font-weight: 700;
+}
+
+/* =========================================================
+   MINISTRY
+========================================================= */
+
+.print-ministry {
+    color: #53647b;
+    font-size: 6.5px;
+    font-weight: 600;
+}
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+.print-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+
+    font-size: 5.7px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+}
+
+.print-status i {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.print-status.active {
+    color: #3d6655;
+}
+
+.print-status.active i {
+    background: #4e8069;
+}
+
+.print-status.inactive {
+    color: #8a5d5d;
+}
+
+.print-status.inactive i {
+    background: #a06c6c;
+}
+
+/* =========================================================
+   CERTIFICATION
+========================================================= */
+
+.print-certification {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+
+    margin-top: 18px;
+    padding: 10px 12px;
+
+    border: 1px solid #dfe5eb;
+    border-left: 3px solid #344e73;
+    border-radius: 5px;
+
+    background: #f8fafc;
+}
+
+.certification-icon {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #e7edf4;
+
+    color: #405976;
+
+    font-size: 9px;
+    font-weight: 800;
+}
+
+.print-certification span {
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: #51647c;
+
+    font-size: 6px;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.print-certification p {
+    margin: 0;
+
+    color: #737e8d;
+
+    font-size: 6.5px;
+    line-height: 1.5;
+}
+
+/* =========================================================
+   SIGNATURES
+========================================================= */
+
+.print-signatures {
+    display: grid;
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 18px;
+
+    margin-top: 28px;
+}
+
+.signature-block {
+    text-align: left;
+}
+
+.signature-line {
+    height: 19px;
+
+    border-bottom: 1px solid #53647a;
+
+    margin-bottom: 5px;
+}
+
+.signature-block strong {
+    display: block;
+
+    color: #344154;
+
+    font-size: 7px;
+    font-weight: 800;
+}
+
+.signature-block span {
+    display: block;
+
+    margin-top: 2px;
+
+    color: #8a94a2;
+
+    font-size: 5.8px;
+}
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.print-footer {
+    display: grid;
+
+    grid-template-columns:
+        1fr
+        1.4fr
+        1fr;
+
+    align-items: center;
+
+    margin-top: 28px;
+    padding: 8px 0;
+
+    border-top: 1px solid #dce2e9;
+}
+
+.print-footer strong {
+    display: block;
+
+    color: #34445b;
+
+    font-size: 6.5px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+}
+
+.print-footer span {
+    display: block;
+
+    margin-top: 1px;
+
+    color: #8b95a3;
+
+    font-size: 5.5px;
+}
+
+.print-footer-center {
+    text-align: center;
+
+    color: #8993a1;
+
+    font-size: 5.5px;
+    font-weight: 700;
+    letter-spacing: 0.7px;
+}
+
+.print-footer-right {
+    text-align: right;
+}
+
+/* =========================================================
+   FOOTER BAR
+========================================================= */
+
+.print-footer-bar {
+    height: 2px;
+    margin-top: 3px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #172033,
+            #526b8c,
+            #172033
+        );
+}
+
+/* =========================================================
+   PRINT SETTINGS
+========================================================= */
+
+@media print {
+
+    .membership-print-document {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        background: #ffffff;
+    }
+
+    .print-top-accent {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .print-brand-mark,
+    .print-summary-card,
+    .print-members-table thead th,
+    .print-avatar,
+    .print-certification,
+    .print-status i,
+    .print-member-code,
+    .print-footer-bar {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    .print-members-table {
+        page-break-inside: auto;
+    }
+
+    .print-members-table tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+
+    .print-members-table thead {
+        display: table-header-group;
+    }
+
+    .print-certification,
+    .print-signatures {
+        page-break-inside: avoid;
+    }
+
+    @page {
+        size: A4 portrait;
+        margin: 10mm 9mm 12mm 9mm;
+    }
+}

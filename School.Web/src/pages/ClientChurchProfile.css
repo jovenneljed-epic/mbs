@@ -1,0 +1,1051 @@
+﻿/* =========================================================
+   EPIC CLIENT CHURCH PROFILE
+   Inner-page styling only
+   Does NOT control sidebar/header/outer portal layout
+========================================================= */
+
+.epic-church-profile {
+    position: relative;
+    width: 100%;
+    min-height: 100%;
+    padding: 32px;
+    overflow: hidden;
+    isolation: isolate;
+    color: #eaf4ff;
+    background:
+        radial-gradient(
+            circle at 10% 0%,
+            rgba(0, 153, 255, 0.12),
+            transparent 32%
+        ),
+        radial-gradient(
+            circle at 95% 20%,
+            rgba(0, 217, 255, 0.08),
+            transparent 28%
+        ),
+        linear-gradient(
+            145deg,
+            #071426 0%,
+            #091a30 48%,
+            #06111f 100%
+        );
+    border-radius: 18px;
+}
+
+/* =========================================================
+   BACKGROUND GRID
+========================================================= */
+
+.epic-profile-grid {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    opacity: 0.28;
+
+    background-image:
+        linear-gradient(
+            rgba(91, 173, 255, 0.055) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(91, 173, 255, 0.055) 1px,
+            transparent 1px
+        );
+
+    background-size: 38px 38px;
+
+    mask-image:
+        linear-gradient(
+            to bottom,
+            black,
+            transparent 92%
+        );
+}
+
+/* =========================================================
+   AMBIENT GLOWS
+========================================================= */
+
+.epic-profile-glow {
+    position: absolute;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: 50%;
+    filter: blur(80px);
+}
+
+.epic-profile-glow-one {
+    width: 340px;
+    height: 340px;
+    top: -180px;
+    left: -120px;
+    background: rgba(0, 153, 255, 0.14);
+}
+
+.epic-profile-glow-two {
+    width: 300px;
+    height: 300px;
+    right: -120px;
+    top: 260px;
+    background: rgba(0, 220, 255, 0.08);
+}
+
+/* =========================================================
+   MAIN CONTENT
+========================================================= */
+
+.epic-profile-main {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+}
+
+/* =========================================================
+   PAGE HEADER
+========================================================= */
+
+.epic-profile-page-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 28px;
+    margin-bottom: 24px;
+}
+
+.epic-profile-page-title {
+    min-width: 0;
+}
+
+.epic-profile-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 9px;
+
+    color: #50cfff;
+
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+.epic-profile-eyebrow span {
+    width: 25px;
+    height: 2px;
+    border-radius: 999px;
+
+    background: linear-gradient(
+        90deg,
+        #1dbfff,
+        #66e5ff
+    );
+}
+
+.epic-profile-page-title h1 {
+    margin: 0;
+
+    color: #f4faff;
+
+    font-size: clamp(28px, 3vw, 42px);
+    font-weight: 800;
+    line-height: 1.08;
+    letter-spacing: -0.035em;
+}
+
+.epic-profile-page-title p {
+    max-width: 650px;
+    margin: 10px 0 0;
+
+    color: #8fa8c0;
+
+    font-size: 14px;
+    line-height: 1.65;
+}
+
+/* =========================================================
+   VERIFIED ACCOUNT
+========================================================= */
+
+.epic-profile-verified {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+
+    padding: 11px 15px;
+
+    border: 1px solid rgba(88, 206, 255, 0.16);
+    border-radius: 13px;
+
+    background: rgba(17, 44, 70, 0.58);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.035),
+        0 12px 35px rgba(0, 0, 0, 0.15);
+
+    backdrop-filter: blur(14px);
+}
+
+.epic-profile-verified-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 34px;
+    height: 34px;
+
+    border-radius: 10px;
+
+    color: #031522;
+    background: linear-gradient(
+        135deg,
+        #5ce3ff,
+        #26aeea
+    );
+
+    font-size: 16px;
+    font-weight: 900;
+
+    box-shadow:
+        0 0 18px rgba(53, 204, 255, 0.25);
+}
+
+.epic-profile-verified strong {
+    display: block;
+
+    color: #dff8ff;
+
+    font-size: 12px;
+    font-weight: 750;
+}
+
+.epic-profile-verified small {
+    display: block;
+    margin-top: 2px;
+
+    color: #7892aa;
+
+    font-size: 10px;
+}
+
+/* =========================================================
+   CHURCH HERO
+========================================================= */
+
+.epic-profile-hero {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+
+    min-height: 150px;
+    margin-bottom: 22px;
+    padding: 28px 30px;
+
+    overflow: hidden;
+
+    border: 1px solid rgba(83, 194, 255, 0.17);
+    border-radius: 20px;
+
+    background:
+        radial-gradient(
+            circle at 0% 50%,
+            rgba(0, 178, 255, 0.12),
+            transparent 35%
+        ),
+        linear-gradient(
+            135deg,
+            rgba(13, 43, 69, 0.92),
+            rgba(8, 25, 43, 0.82)
+        );
+
+    box-shadow:
+        0 22px 55px rgba(0, 0, 0, 0.24),
+        inset 0 1px 0 rgba(255, 255, 255, 0.045);
+
+    backdrop-filter: blur(18px);
+}
+
+.epic-profile-hero::after {
+    content: "";
+    position: absolute;
+    width: 280px;
+    height: 280px;
+
+    right: -100px;
+    top: -150px;
+
+    border-radius: 50%;
+
+    background: rgba(0, 200, 255, 0.07);
+
+    filter: blur(15px);
+
+    pointer-events: none;
+}
+
+.epic-profile-hero-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    min-width: 0;
+}
+
+.epic-profile-church-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    width: 82px;
+    height: 82px;
+
+    border: 1px solid rgba(94, 221, 255, 0.28);
+    border-radius: 22px;
+
+    color: #e9fbff;
+
+    background:
+        linear-gradient(
+            145deg,
+            #123f61,
+            #0a263f
+        );
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 12px 35px rgba(0, 0, 0, 0.22),
+        0 0 28px rgba(28, 184, 255, 0.1);
+
+    font-size: 25px;
+    font-weight: 850;
+    letter-spacing: 0.04em;
+}
+
+.epic-profile-hero-info {
+    min-width: 0;
+}
+
+.epic-profile-hero-label {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #4ecdf8;
+
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+}
+
+.epic-profile-hero-info h2 {
+    margin: 0;
+
+    overflow: hidden;
+
+    color: #f3faff;
+
+    font-size: clamp(21px, 2.2vw, 29px);
+    font-weight: 780;
+    line-height: 1.2;
+    letter-spacing: -0.025em;
+    text-overflow: ellipsis;
+}
+
+.epic-profile-hero-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    margin-top: 8px;
+
+    color: #829db6;
+
+    font-size: 12px;
+}
+
+.epic-profile-meta-divider {
+    color: #3b6684;
+}
+
+/* =========================================================
+   ACTIVE STATUS
+========================================================= */
+
+.epic-profile-active {
+    position: relative;
+    z-index: 2;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+
+    flex-shrink: 0;
+
+    padding: 9px 14px;
+
+    border: 1px solid rgba(50, 221, 160, 0.17);
+    border-radius: 999px;
+
+    color: #78edc2;
+
+    background: rgba(20, 112, 81, 0.13);
+
+    font-size: 11px;
+    font-weight: 750;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.epic-profile-active-dot {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: #35e7a4;
+
+    box-shadow:
+        0 0 0 4px rgba(53, 231, 164, 0.09),
+        0 0 12px rgba(53, 231, 164, 0.5);
+}
+
+/* =========================================================
+   INFORMATION SECTIONS
+========================================================= */
+
+.epic-profile-sections {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+}
+
+/* =========================================================
+   PROFILE CARD
+========================================================= */
+
+.epic-profile-card {
+    min-width: 0;
+
+    padding: 24px;
+
+    border: 1px solid rgba(89, 175, 224, 0.12);
+    border-radius: 17px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(16, 42, 65, 0.74),
+            rgba(8, 25, 42, 0.68)
+        );
+
+    box-shadow:
+        0 16px 42px rgba(0, 0, 0, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.035);
+
+    backdrop-filter: blur(15px);
+
+    transition:
+        border-color 180ms ease,
+        transform 180ms ease,
+        box-shadow 180ms ease;
+}
+
+.epic-profile-card:hover {
+    border-color: rgba(79, 196, 255, 0.22);
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 20px 48px rgba(0, 0, 0, 0.24),
+        0 0 30px rgba(0, 173, 255, 0.035),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.epic-profile-card-heading {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+
+    margin-bottom: 22px;
+    padding-bottom: 18px;
+
+    border-bottom: 1px solid rgba(108, 172, 209, 0.09);
+}
+
+.epic-profile-card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 40px;
+    height: 40px;
+
+    flex-shrink: 0;
+
+    border: 1px solid rgba(64, 199, 255, 0.17);
+    border-radius: 11px;
+
+    color: #55d7ff;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(28, 128, 178, 0.18),
+            rgba(8, 72, 112, 0.14)
+        );
+
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.epic-profile-card-title span {
+    display: block;
+
+    margin-bottom: 3px;
+
+    color: #4dbedc;
+
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.17em;
+}
+
+.epic-profile-card-title h2 {
+    margin: 0;
+
+    color: #edf7ff;
+
+    font-size: 17px;
+    font-weight: 720;
+    letter-spacing: -0.01em;
+}
+
+/* =========================================================
+   INFO GRID
+========================================================= */
+
+.epic-profile-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 22px;
+}
+
+.epic-profile-info-item {
+    min-width: 0;
+}
+
+.epic-profile-info-item span {
+    display: block;
+
+    margin-bottom: 6px;
+
+    color: #69859d;
+
+    font-size: 9px;
+    font-weight: 750;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.epic-profile-info-item strong {
+    display: block;
+
+    min-width: 0;
+
+    overflow: hidden;
+
+    color: #dcecf8;
+
+    font-size: 13px;
+    font-weight: 620;
+    line-height: 1.45;
+
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+.epic-profile-break strong {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+/* =========================================================
+   SUCCESS
+========================================================= */
+
+.epic-profile-success {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 7px;
+
+    color: #67e9ba !important;
+
+    font-size: 12px !important;
+    font-weight: 700 !important;
+}
+
+.epic-profile-success i {
+    display: inline-block;
+
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: #38dfa1;
+
+    box-shadow:
+        0 0 0 3px rgba(56, 223, 161, 0.08),
+        0 0 10px rgba(56, 223, 161, 0.4);
+}
+
+/* =========================================================
+   SECURITY
+========================================================= */
+
+.epic-profile-security {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    margin-top: 22px;
+    padding: 17px 19px;
+
+    border: 1px solid rgba(77, 201, 255, 0.11);
+    border-radius: 15px;
+
+    background:
+        linear-gradient(
+            100deg,
+            rgba(11, 48, 72, 0.64),
+            rgba(8, 30, 49, 0.52)
+        );
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+.epic-profile-security-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 36px;
+    height: 36px;
+
+    flex-shrink: 0;
+
+    border-radius: 10px;
+
+    color: #69e6ff;
+
+    background: rgba(26, 163, 209, 0.1);
+
+    font-size: 15px;
+    font-weight: 900;
+}
+
+.epic-profile-security-content {
+    min-width: 0;
+    flex: 1;
+}
+
+.epic-profile-security-content strong {
+    display: block;
+
+    color: #dff7ff;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.epic-profile-security-content p {
+    margin: 3px 0 0;
+
+    color: #7893aa;
+
+    font-size: 10px;
+    line-height: 1.55;
+}
+
+.epic-profile-security-badge {
+    flex-shrink: 0;
+
+    padding: 6px 9px;
+
+    border: 1px solid rgba(77, 207, 255, 0.13);
+    border-radius: 7px;
+
+    color: #56c9ec;
+
+    background: rgba(28, 145, 190, 0.08);
+
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+}
+
+/* =========================================================
+   LOADING / ERROR STATE
+========================================================= */
+
+.epic-profile-state {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    min-height: 420px;
+    padding: 30px;
+
+    border-radius: 18px;
+
+    background:
+        radial-gradient(
+            circle at 50% 0%,
+            rgba(0, 159, 255, 0.09),
+            transparent 40%
+        ),
+        #071526;
+
+    color: #eaf6ff;
+}
+
+.epic-profile-loading-card,
+.epic-profile-error-card {
+    width: min(100%, 470px);
+
+    padding: 38px 32px;
+
+    text-align: center;
+
+    border: 1px solid rgba(83, 189, 245, 0.14);
+    border-radius: 18px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(15, 42, 65, 0.82),
+            rgba(7, 25, 43, 0.78)
+        );
+
+    box-shadow:
+        0 24px 65px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+
+    backdrop-filter: blur(16px);
+}
+
+.epic-profile-loading-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 54px;
+    height: 54px;
+
+    margin: 0 auto 18px;
+
+    border-radius: 15px;
+
+    color: white;
+
+    background:
+        linear-gradient(
+            135deg,
+            #20bce8,
+            #1768bd
+        );
+
+    font-size: 25px;
+    font-weight: 900;
+
+    box-shadow:
+        0 0 28px rgba(24, 181, 237, 0.2);
+}
+
+.epic-profile-spinner {
+    width: 28px;
+    height: 28px;
+
+    margin: 0 auto 18px;
+
+    border: 2px solid rgba(94, 209, 255, 0.16);
+    border-top-color: #50d5ff;
+
+    border-radius: 50%;
+
+    animation: epicProfileSpin 0.8s linear infinite;
+}
+
+@keyframes epicProfileSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.epic-profile-loading-card h2,
+.epic-profile-error-card h2 {
+    margin: 0;
+
+    color: #edf8ff;
+
+    font-size: 20px;
+    font-weight: 750;
+}
+
+.epic-profile-loading-card p,
+.epic-profile-error-card p {
+    margin: 8px auto 0;
+
+    max-width: 360px;
+
+    color: #809bb3;
+
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+.epic-profile-error-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 48px;
+    height: 48px;
+
+    margin: 0 auto 15px;
+
+    border: 1px solid rgba(255, 106, 106, 0.18);
+    border-radius: 14px;
+
+    color: #ff9898;
+
+    background: rgba(220, 63, 63, 0.1);
+
+    font-size: 20px;
+    font-weight: 900;
+}
+
+.epic-profile-error-brand {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: #4ecbf5;
+
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+}
+
+.epic-profile-error-actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 9px;
+
+    margin-top: 22px;
+}
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+.epic-profile-primary-button,
+.epic-profile-secondary-button {
+    min-height: 39px;
+
+    padding: 0 15px;
+
+    border-radius: 9px;
+
+    font-family: inherit;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        transform 160ms ease,
+        border-color 160ms ease,
+        background 160ms ease,
+        box-shadow 160ms ease;
+}
+
+.epic-profile-primary-button {
+    border: 1px solid rgba(78, 210, 255, 0.28);
+
+    color: #031520;
+
+    background:
+        linear-gradient(
+            135deg,
+            #5bdefe,
+            #25aee7
+        );
+
+    box-shadow:
+        0 8px 22px rgba(20, 173, 230, 0.14);
+}
+
+.epic-profile-primary-button:hover {
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 11px 27px rgba(20, 173, 230, 0.22);
+}
+
+.epic-profile-secondary-button {
+    border: 1px solid rgba(104, 173, 213, 0.17);
+
+    color: #a8c3d8;
+
+    background: rgba(24, 52, 76, 0.65);
+}
+
+.epic-profile-secondary-button:hover {
+    transform: translateY(-1px);
+
+    border-color: rgba(89, 196, 241, 0.28);
+
+    background: rgba(30, 66, 94, 0.75);
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1050px) {
+
+    .epic-church-profile {
+        padding: 26px;
+    }
+
+    .epic-profile-sections {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media (max-width: 720px) {
+
+    .epic-church-profile {
+        padding: 20px;
+        border-radius: 14px;
+    }
+
+    .epic-profile-page-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .epic-profile-verified {
+        width: 100%;
+    }
+
+    .epic-profile-hero {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 23px;
+    }
+
+    .epic-profile-hero-left {
+        width: 100%;
+    }
+
+    .epic-profile-active {
+        align-self: flex-start;
+    }
+
+    .epic-profile-card {
+        padding: 20px;
+    }
+
+}
+
+@media (max-width: 520px) {
+
+    .epic-church-profile {
+        padding: 15px;
+    }
+
+    .epic-profile-page-title h1 {
+        font-size: 27px;
+    }
+
+    .epic-profile-page-title p {
+        font-size: 12px;
+    }
+
+    .epic-profile-hero {
+        padding: 19px;
+        border-radius: 16px;
+    }
+
+    .epic-profile-hero-left {
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    .epic-profile-church-avatar {
+        width: 62px;
+        height: 62px;
+
+        border-radius: 17px;
+
+        font-size: 19px;
+    }
+
+    .epic-profile-hero-info h2 {
+        font-size: 20px;
+    }
+
+    .epic-profile-hero-meta {
+        display: block;
+        line-height: 1.6;
+    }
+
+    .epic-profile-meta-divider {
+        display: none;
+    }
+
+    .epic-profile-info-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .epic-profile-security {
+        align-items: flex-start;
+        padding: 15px;
+    }
+
+    .epic-profile-security-badge {
+        display: none;
+    }
+
+    .epic-profile-error-actions {
+        flex-direction: column;
+    }
+
+    .epic-profile-primary-button,
+    .epic-profile-secondary-button {
+        width: 100%;
+    }
+
+}

@@ -1,0 +1,55 @@
+## =========================================================
+## .NET / Visual Studio Build & Cache
+## =========================================================
+**/bin/
+**/obj/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+
+## =========================================================
+## Node.js & Vite Frontend
+## =========================================================
+node_modules/
+**/node_modules/
+School.Web/dist/
+School.Web/dist-ssr/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+## Local environment files
+.env.local
+.env.*.local
+*.local
+
+## =========================================================
+## OS & Editor Specific
+## =========================================================
+.DS_Store
+Thumbs.db
+ehthumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+## =========================================================
+## SQL Server Local Cache
+## =========================================================
+*.mdf
+*.ldf

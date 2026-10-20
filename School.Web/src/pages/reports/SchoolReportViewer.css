@@ -1,0 +1,528 @@
+/* =========================================================
+   SCHOOL REPORT VIEWER STYLES
+   Mobile Bible School & Seminary Academic System
+   Clean, Professional, Facebook/Apple Hybrid Palette
+   ========================================================= */
+
+.school-report-viewer {
+    width: 100%;
+    min-height: calc(100vh - 70px);
+    background: #f0f2f5;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #1c1e21;
+    padding-bottom: 60px;
+}
+
+/* Sticky Top Navigation Bar */
+.report-viewer-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #ffffff;
+    border-bottom: 1px solid #e4e6eb;
+    padding: 12px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+}
+
+.report-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: #e7f3ff;
+    color: #1877f2;
+    border: 1px solid #cce4ff;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.report-back-btn:hover {
+    background: #1877f2;
+    color: #ffffff;
+    border-color: #1877f2;
+    box-shadow: 0 2px 6px rgba(24, 119, 242, 0.25);
+}
+
+.report-viewer-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-report-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border: 1px solid transparent;
+}
+
+.btn-report-action.btn-secondary {
+    background: #ffffff;
+    color: #4b4f56;
+    border-color: #ced0d4;
+}
+
+.btn-report-action.btn-secondary:hover {
+    background: #f2f3f5;
+    color: #1c1e21;
+}
+
+.btn-report-action.btn-primary {
+    background: #1877f2;
+    color: #ffffff;
+    border-color: #1877f2;
+    box-shadow: 0 2px 4px rgba(24, 119, 242, 0.25);
+}
+
+.btn-report-action.btn-primary:hover {
+    background: #166fe5;
+}
+
+/* Viewer Content Container */
+.report-viewer-content {
+    max-width: 1400px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+/* Official Header Card */
+.report-official-header-card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e4e6eb;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+}
+
+.school-letterhead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 18px;
+    border-bottom: 2px solid #1877f2;
+    margin-bottom: 18px;
+}
+
+.letterhead-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.school-emblem {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    background: #1877f2;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(24, 119, 242, 0.3);
+}
+
+.school-name {
+    font-size: 21px;
+    font-weight: 800;
+    color: #050505;
+    letter-spacing: -0.3px;
+    margin: 0;
+}
+
+.school-department {
+    font-size: 13px;
+    color: #65676b;
+    margin: 2px 0 0 0;
+    font-weight: 500;
+}
+
+.letterhead-right {
+    text-align: right;
+}
+
+.doc-badge {
+    display: inline-block;
+    background: #e7f3ff;
+    color: #1877f2;
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.doc-date {
+    font-size: 12px;
+    color: #8a8d91;
+    margin-top: 4px;
+}
+
+.report-headline-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.report-headline-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #050505;
+    margin: 0 0 4px 0;
+}
+
+.report-headline-desc {
+    font-size: 13.5px;
+    color: #65676b;
+    margin: 0;
+    max-width: 800px;
+}
+
+/* KPI Summary Metric Cards */
+.report-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.report-kpi-card {
+    background: #ffffff;
+    border-radius: 10px;
+    border: 1px solid #e4e6eb;
+    padding: 16px 18px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.kpi-icon-box {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.kpi-icon-box.blue { background: #e7f3ff; color: #1877f2; }
+.kpi-icon-box.green { background: #eafaf1; color: #27ae60; }
+.kpi-icon-box.purple { background: #f3e8ff; color: #9333ea; }
+.kpi-icon-box.amber { background: #fef3c7; color: #d97706; }
+.kpi-icon-box.red { background: #fee2e2; color: #ef4444; }
+
+.kpi-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.kpi-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #65676b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.kpi-value {
+    font-size: 20px;
+    font-weight: 800;
+    color: #050505;
+    margin: 2px 0 0 0;
+}
+
+.kpi-subtext {
+    font-size: 11px;
+    color: #8a8d91;
+    margin-top: 1px;
+}
+
+/* Filter Card */
+.report-filter-card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e4e6eb;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px;
+}
+
+.report-search-field {
+    position: relative;
+    flex: 1;
+    min-width: 250px;
+    display: flex;
+    align-items: center;
+}
+
+.report-search-field .search-icon {
+    position: absolute;
+    left: 12px;
+    color: #8a8d91;
+    pointer-events: none;
+}
+
+.report-search-field input {
+    width: 100%;
+    padding: 8px 32px 8px 36px;
+    border: 1px solid #ced0d4;
+    border-radius: 8px;
+    background: #f0f2f5;
+    font-size: 13px;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.report-search-field input:focus {
+    background: #ffffff;
+    border-color: #1877f2;
+    box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.15);
+}
+
+.filter-select-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.filter-select-item select {
+    padding: 8px 12px;
+    border: 1px solid #ced0d4;
+    border-radius: 8px;
+    background: #ffffff;
+    font-size: 13px;
+    color: #1c1e21;
+    outline: none;
+    cursor: pointer;
+}
+
+.filter-select-item select:focus {
+    border-color: #1877f2;
+}
+
+/* Report Table Card */
+.report-table-card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e4e6eb;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.table-responsive-box {
+    overflow-x: auto;
+    width: 100%;
+}
+
+.school-report-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13.5px;
+    text-align: left;
+}
+
+.school-report-table th {
+    background: #f7f8fa;
+    color: #65676b;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 12px 14px;
+    border-bottom: 1px solid #e4e6eb;
+    white-space: nowrap;
+}
+
+.school-report-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #f0f2f5;
+    color: #1c1e21;
+    vertical-align: middle;
+}
+
+.school-report-table tbody tr:hover {
+    background: #f9fafb;
+}
+
+.std-id-tag {
+    font-family: ui-monospace, Menlo, Monaco, Consolas, monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: #1877f2;
+    background: #e7f3ff;
+    padding: 3px 8px;
+    border-radius: 6px;
+    display: inline-block;
+}
+
+.std-name-cell strong {
+    display: block;
+    font-size: 13.5px;
+    color: #050505;
+}
+
+.std-name-cell span {
+    font-size: 11.5px;
+    color: #8a8d91;
+}
+
+.badge-program {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11.5px;
+    font-weight: 600;
+    background: #f0f2f5;
+    color: #334155;
+}
+
+.badge-mode {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.badge-status {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.badge-status.active { background: #dcfce7; color: #15803d; }
+.badge-status.inactive { background: #f1f5f9; color: #64748b; }
+.badge-status.paid { background: #dcfce7; color: #15803d; }
+.badge-status.partial { background: #fef3c7; color: #b45309; }
+.badge-status.unpaid { background: #fee2e2; color: #b91c1c; }
+
+.table-empty-box {
+    padding: 40px 20px;
+    text-align: center;
+    color: #8a8d91;
+}
+
+.table-empty-box p {
+    font-size: 14px;
+    margin: 8px 0 0 0;
+}
+
+/* Formal Signatures Section */
+.report-signoff-card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e4e6eb;
+    padding: 24px;
+    margin-top: 20px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.signoff-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #65676b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 24px;
+}
+
+.signoff-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    text-align: center;
+}
+
+.signoff-line {
+    width: 80%;
+    margin: 36px auto 8px;
+    border-bottom: 1px solid #1c1e21;
+}
+
+.signoff-name {
+    font-weight: 700;
+    color: #050505;
+    font-size: 13.5px;
+}
+
+.signoff-role {
+    font-size: 11.5px;
+    color: #65676b;
+}
+
+/* Print Optimization */
+@media print {
+    body {
+        background: #ffffff !important;
+        color: #000000 !important;
+    }
+
+    .report-viewer-topbar,
+    .report-filter-card,
+    .btn-report-action,
+    .epic-sidebar,
+    .epic-header {
+        display: none !important;
+    }
+
+    .school-report-viewer {
+        padding: 0 !important;
+        background: #ffffff !important;
+    }
+
+    .report-viewer-content {
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .report-official-header-card,
+    .report-kpi-grid,
+    .report-table-card,
+    .report-signoff-card {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin-bottom: 20px !important;
+    }
+
+    .school-report-table th,
+    .school-report-table td {
+        border: 1px solid #ccc !important;
+        padding: 8px !important;
+    }
+
+    .school-report-table th {
+        background: #f0f0f0 !important;
+    }
+}

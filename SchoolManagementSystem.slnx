@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="School.Admin/School.Admin.csproj" Id="9d3b4189-3bce-4643-a7b7-67981645c645" />
+  <Project Path="School.Api/School.Api.csproj" />
+  <Project Path="School.Core/School.Core.csproj" />
+  <Project Path="School.Infrastructure/School.Infrastructure.vbproj" />
+  <Project Path="School.Shared/School.Shared.csproj" />
+</Solution>
