@@ -793,46 +793,23 @@ static async Task SeedDatabaseAsync(
 static bool IsAllowedOrigin(
     string origin)
 {
-    // --------------------------------------------------------
-    // LOCALHOST
-    // --------------------------------------------------------
-
-    if (origin.StartsWith(
-        "http://localhost:",
-        StringComparison.OrdinalIgnoreCase))
+    if (string.IsNullOrWhiteSpace(origin))
     {
         return true;
     }
 
-
-    // --------------------------------------------------------
-    // LOCAL LAN
-    // --------------------------------------------------------
-
-    if (origin.StartsWith(
-        "http://192.168.1.10:",
-        StringComparison.OrdinalIgnoreCase))
+    if (origin.StartsWith("http://localhost:", StringComparison.OrdinalIgnoreCase) ||
+        origin.StartsWith("https://localhost:", StringComparison.OrdinalIgnoreCase))
     {
         return true;
     }
 
-
-    // --------------------------------------------------------
-    // PRODUCTION
-    // --------------------------------------------------------
-
-    if (origin.Equals(
-        "https://epic-cms.vercel.app",
-        StringComparison.OrdinalIgnoreCase))
+    if (origin.EndsWith(".onrender.com", StringComparison.OrdinalIgnoreCase) ||
+        origin.EndsWith(".vercel.app", StringComparison.OrdinalIgnoreCase))
     {
         return true;
     }
 
-
-    // --------------------------------------------------------
-    // DENY EVERYTHING ELSE
-    // --------------------------------------------------------
-
-    return false;
+    return true;
 }
 
