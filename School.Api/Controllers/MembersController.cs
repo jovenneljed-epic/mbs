@@ -1167,7 +1167,8 @@ namespace School.Api.Controllers
         }
 
         // =========================================================
-        // DEACTIVATE MEMBER
+        // =========================================================
+        // DELETE / UNENROLL MEMBER (PERMANENT)
         // DELETE: /api/Members/{id}
         // =========================================================
 
@@ -1177,61 +1178,107 @@ namespace School.Api.Controllers
             int id)
         {
             var member =
-                await FindTenantMemberAsync(id);
+                await _context.Members
+                    .FirstOrDefaultAsync(m => m.MemberId == id);
 
             if (member == null)
             {
                 return NotFound(new
                 {
                     message =
-                        "MEMBER NOT FOUND.",
+                        "STUDENT RECORD NOT FOUND.",
 
                     memberId =
                         id
                 });
             }
 
-            member.Status =
-                "INACTIVE";
+            // Unlink foreign keys from related tables
+            var visitors = await _context.Visitors
+                .Where(v => v.ConvertedMemberId == id)
+                .ToListAsync();
+            foreach (var v in visitors) v.ConvertedMemberId = null;
 
-            member.UpdatedDate =
-                DateTime.UtcNow;
+            var depts = await _context.EventDepartments
+                .Where(d => d.DepartmentHeadMemberId == id)
+                .ToListAsync();
+            foreach (var d in depts) d.DepartmentHeadMemberId = null;
 
-            // Also deactivate the member login account.
-            var user =
-                await _context.Users
-                    .FirstOrDefaultAsync(
-                        u => u.MemberId == id);
+            var needs = await _context.EventNeeds
+                .Where(n => n.ResponsibleMemberId == id)
+                .ToListAsync();
+            foreach (var n in needs) n.ResponsibleMemberId = null;
 
-            if (user != null)
+            var checklists = await _context.EventChecklists
+                .Where(c => c.AssignedMemberId == id || c.CompletedByMemberId == id)
+                .ToListAsync();
+            foreach (var c in checklists)
             {
-                user.IsActive = false;
-                user.UpdatedDate = DateTime.UtcNow;
+                if (c.AssignedMemberId == id) c.AssignedMemberId = null;
+                if (c.CompletedByMemberId == id) c.CompletedByMemberId = null;
             }
 
+            // Remove associated child records
+            var assignments = await _context.EventAssignments
+                .Where(ea => ea.MemberId == id)
+                .ToListAsync();
+            if (assignments.Count > 0) _context.EventAssignments.RemoveRange(assignments);
+
+            var passes = await _context.CRBreakPasses
+                .Where(p => p.MemberId == id)
+                .ToListAsync();
+            if (passes.Count > 0) _context.CRBreakPasses.RemoveRange(passes);
+
+            var attendances = await _context.Attendances
+                .Where(a => a.MemberId == id)
+                .ToListAsync();
+            if (attendances.Count > 0) _context.Attendances.RemoveRange(attendances);
+
+            var givings = await _context.Givings
+                .Where(g => g.MemberId == id)
+                .ToListAsync();
+            if (givings.Count > 0) _context.Givings.RemoveRange(givings);
+
+            var minMembers = await _context.MinistryMembers
+                .Where(mm => mm.MemberId == id)
+                .ToListAsync();
+            if (minMembers.Count > 0)
+            {
+                var minIds = minMembers.Select(m => m.MinistryMemberId).ToList();
+                var ratings = await _context.MinistryPerformanceRatings
+                    .Where(r => minIds.Contains(r.MinistryMemberId))
+                    .ToListAsync();
+                if (ratings.Count > 0) _context.MinistryPerformanceRatings.RemoveRange(ratings);
+                _context.MinistryMembers.RemoveRange(minMembers);
+            }
+
+            var clientMembers = await _context.ClientMembers
+                .Where(cm => cm.MemberId == id)
+                .ToListAsync();
+            if (clientMembers.Count > 0) _context.ClientMembers.RemoveRange(clientMembers);
+
+            var users = await _context.Users
+                .Where(u => u.MemberId == id)
+                .ToListAsync();
+            foreach (var u in users) u.MemberId = null;
+
+            // Delete photo file if any
+            DeleteExistingPhoto(member.PhotoPath);
+
+            // Permanently remove the member
+            _context.Members.Remove(member);
             await _context.SaveChangesAsync();
 
             return Ok(new
             {
                 message =
-                    "MEMBER AND MEMBER ACCOUNT DEACTIVATED SUCCESSFULLY.",
+                    "STUDENT RECORD AND ALL ASSOCIATED DATA REMOVED PERMANENTLY.",
 
                 memberId =
-                    member.MemberId,
-
-                customerId =
-                    member.CustomerId,
-
-                memberCode =
-                    member.MemberCode,
-
-                status =
-                    member.Status,
-
-                accountDeactivated =
-                    user != null
+                    id
             });
         }
+
 
         // =========================================================
         // TENANT-SCOPED MEMBER QUERY
@@ -1277,6 +1324,12 @@ namespace School.Api.Controllers
             FindTenantMemberAsync(
                 int memberId)
         {
+            if (IsCurrentUserAdmin())
+            {
+                return await _context.Members
+                    .FirstOrDefaultAsync(m => m.MemberId == memberId);
+            }
+
             var query =
                 GetTenantMembersQuery();
 
@@ -1305,21 +1358,33 @@ namespace School.Api.Controllers
 
             if (IsCurrentUserAdmin())
             {
-                if (suppliedCustomerId <= 0)
+                if (suppliedCustomerId > 0)
                 {
-                    return null;
+                    var exists =
+                        await _context.Customers
+                            .AsNoTracking()
+                            .AnyAsync(c =>
+                                c.CustomerId ==
+                                suppliedCustomerId);
+
+                    if (exists)
+                    {
+                        return suppliedCustomerId;
+                    }
                 }
 
-                var exists =
-                    await _context.Customers
-                        .AsNoTracking()
-                        .AnyAsync(c =>
-                            c.CustomerId ==
-                            suppliedCustomerId);
+                var claimCustId = GetCurrentCustomerId();
+                if (claimCustId.HasValue && claimCustId.Value > 0)
+                {
+                    return claimCustId.Value;
+                }
 
-                return exists
-                    ? suppliedCustomerId
-                    : null;
+                var defaultCustomerId = await _context.Customers
+                    .OrderBy(c => c.CustomerId)
+                    .Select(c => c.CustomerId)
+                    .FirstOrDefaultAsync();
+
+                return defaultCustomerId > 0 ? defaultCustomerId : 1;
             }
 
             // =====================================================
@@ -1539,11 +1604,17 @@ namespace School.Api.Controllers
 
         private bool IsCurrentUserAdmin()
         {
-            return string.Equals(
-                GetCurrentRole(),
-                "ADMIN",
-                StringComparison
-                    .OrdinalIgnoreCase);
+            var role = GetCurrentRole();
+            if (string.Equals(role, "ADMIN", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(role, "ADMINISTRATOR", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(role, "SUPER ADMIN", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(role, "SUPERADMIN", StringComparison.OrdinalIgnoreCase) ||
+                role.Contains("ADMIN", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            return User.IsInRole("ADMIN") || User.IsInRole("Administrator");
         }
 
         // =========================================================

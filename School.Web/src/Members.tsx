@@ -598,6 +598,7 @@ const Members: React.FC = () => {
         }
 
         const payload = {
+            customerId: editingMember?.customerId || 1,
             memberCode: form.memberCode.trim(),
             firstName: form.firstName.trim(),
             middleName: form.middleName.trim(),
@@ -644,15 +645,18 @@ const Members: React.FC = () => {
     const handleDeleteStudent = async (student: Member) => {
         const studentName = getFullName(student);
         const confirmed = window.confirm(
-            `Are you sure you want to unenroll / delete student record for:\n\n${studentName} (${student.memberCode || "No ID"})\n\nThis will remove their enrollment and study load.`
+            `Are you sure you want to permanently delete the student record for:\n\n${studentName} (${student.memberCode || "No ID"})\n\nThis will completely remove all their enrollment records and data from the database.`
         );
         if (!confirmed) return;
 
         try {
+            // Optimistically remove from state immediately
+            setMembers(prev => prev.filter(m => m.memberId !== student.memberId));
+
             await apiFetch(`/Members/${student.memberId}`, {
                 method: "DELETE"
             });
-            setMessage(`Student ${studentName} was successfully dropped/removed.`);
+            setMessage(`Student ${studentName} was permanently removed.`);
 
             // If we are currently viewing this student's profile, switch back to directory
             if (selectedStudent?.memberId === student.memberId) {
@@ -663,6 +667,7 @@ const Members: React.FC = () => {
         } catch (err: unknown) {
             const e = err as Error;
             setError(e.message || "Failed to delete student record.");
+            await fetchStudents();
         }
     };
 
