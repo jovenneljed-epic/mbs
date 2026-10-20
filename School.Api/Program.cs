@@ -271,13 +271,9 @@ static void ConfigureResend(
     var resendApiKey =
         configuration["Resend:ApiKey"];
 
-    if (string.IsNullOrWhiteSpace(
-        resendApiKey))
+    if (string.IsNullOrWhiteSpace(resendApiKey))
     {
-        throw new InvalidOperationException(
-            "Resend API key is missing. " +
-            "Check appsettings.json, User Secrets, " +
-            "or environment variables.");
+        resendApiKey = "re_placeholder_optional_email_key";
     }
 
 
