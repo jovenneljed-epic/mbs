@@ -1,5 +1,4 @@
-const API_URL =
-    "http://localhost:5109/api";
+import { API_BASE_URL as API_URL } from "../config";
 
 
 
