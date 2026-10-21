@@ -5,7 +5,10 @@ import {
     getLandingPageContent,
     saveLandingPageContent,
     LANDING_CONTENT_EVENT,
+    COLOR_THEME_PRESETS,
+    DEFAULT_COLOR_THEME,
     type LandingPageContent,
+    type ColorThemeSettings,
 } from "../services/landingPageContent";
 import { PromoVideoPlayer } from "../components/PromoVideoPlayer";
 import { getVideoMediaUrl, saveVideoMedia, VIDEO_MEDIA_EVENT } from "../services/videoMediaStorage";
@@ -28,7 +31,8 @@ import {
     Download,
     Building2,
     Compass,
-    Scroll
+    Scroll,
+    Palette
 } from "lucide-react";
 
 interface SalesLandingPageProps {
@@ -300,6 +304,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
 
     // Admissions / Host Modal
     const [showModal, setShowModal] = useState(false);
+    const [showThemeDrawer, setShowThemeDrawer] = useState(false);
     const [modalContextTitle, setModalContextTitle] = useState("Admissions & Enrollment Application");
     const [formData, setFormData] = useState<DemoFormData>(INITIAL_FORM_DATA);
     const [submitting, setSubmitting] = useState(false);
@@ -449,8 +454,25 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
         return matchesCat && matchesQuery;
     });
 
+    const theme: ColorThemeSettings = landingContent.colorTheme || DEFAULT_COLOR_THEME;
+    const themeStyles = {
+        "--apple-blue": theme.primary,
+        "--apple-blue-hover": theme.primaryHover,
+        "--apple-blue-light": theme.secondary,
+        "--apple-blue-glow": theme.glow,
+        "--theme-primary": theme.primary,
+        "--theme-primary-hover": theme.primaryHover,
+        "--theme-secondary": theme.secondary,
+        "--theme-glow": theme.glow,
+        "--theme-hero-glow": theme.heroGlow,
+        "--theme-bg-start": theme.heroBgStart,
+        "--theme-bg-end": theme.heroBgEnd,
+        "--theme-gradient": theme.gradient,
+        "--theme-card-accent": theme.cardAccent,
+    } as React.CSSProperties;
+
     return (
-        <div className="apple-page-wrapper">
+        <div className="apple-page-wrapper" style={themeStyles}>
             {/* =========================================================
                 APPLE RIBBON BANNER
             ========================================================= */}
@@ -1415,6 +1437,80 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                     </div>
                 </div>
             )}
+
+            {/* =========================================================
+                FLOATING THEME QUICK-SWITCHER
+            ========================================================= */}
+            <div className="landing-floating-theme-widget">
+                <button
+                    type="button"
+                    className="theme-launcher-btn"
+                    onClick={() => setShowThemeDrawer(prev => !prev)}
+                    title="Switch Color Theme"
+                    style={{
+                        background: theme.primary,
+                        boxShadow: `0 8px 24px ${theme.glow}`
+                    }}
+                >
+                    <Palette size={16} />
+                    <span>Theme</span>
+                </button>
+
+                {showThemeDrawer && (
+                    <div className="theme-floating-drawer">
+                        <div className="drawer-header">
+                            <div className="drawer-title">
+                                <Palette size={16} color={theme.primary} />
+                                <strong>Color Theme</strong>
+                            </div>
+                            <button
+                                type="button"
+                                className="drawer-close-btn"
+                                onClick={() => setShowThemeDrawer(false)}
+                                aria-label="Close theme selector"
+                            >
+                                <X size={14} />
+                            </button>
+                        </div>
+
+                        <p className="drawer-subtitle">
+                            Active: <strong>{theme.name}</strong>
+                        </p>
+
+                        <div className="drawer-theme-list">
+                            {Object.values(COLOR_THEME_PRESETS).map((preset) => {
+                                const isSelected = theme.themeId === preset.themeId;
+                                return (
+                                    <button
+                                        key={preset.themeId}
+                                        type="button"
+                                        className={`drawer-theme-item ${isSelected ? "active" : ""}`}
+                                        onClick={() => {
+                                            const updated = {
+                                                ...landingContent,
+                                                colorTheme: { ...preset }
+                                            };
+                                            saveLandingPageContent(updated);
+                                            setLandingContent(updated);
+                                        }}
+                                    >
+                                        <div className="item-swatches">
+                                            <span style={{ background: preset.primary }} />
+                                            <span style={{ background: preset.secondary }} />
+                                            <span style={{ background: preset.heroBgEnd }} />
+                                        </div>
+                                        <div className="item-text">
+                                            <span>{preset.name}</span>
+                                            <small>{preset.badge}</small>
+                                        </div>
+                                        {isSelected && <CheckCircle2 size={14} color={preset.primary} />}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 };

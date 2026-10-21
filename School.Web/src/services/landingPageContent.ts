@@ -55,6 +55,132 @@ export interface PromoVideoSettings {
     scenes: PromoScene[];
 }
 
+export interface ColorThemeSettings {
+    themeId: string;
+    name: string;
+    badge: string;
+    description: string;
+    primary: string;
+    primaryHover: string;
+    secondary: string;
+    glow: string;
+    heroGlow: string;
+    heroBgStart: string;
+    heroBgEnd: string;
+    gradient: string;
+    cardAccent: string;
+}
+
+export const COLOR_THEME_PRESETS: Record<string, ColorThemeSettings> = {
+    "classic-navy": {
+        themeId: "classic-navy",
+        name: "Classic Seminary",
+        badge: "RECOMMENDED",
+        description: "Prestigious seminary cobalt with golden celestial accents & deep navy backdrop.",
+        primary: "#1877f2",
+        primaryHover: "#1464cc",
+        secondary: "#f59e0b",
+        glow: "rgba(24, 119, 242, 0.35)",
+        heroGlow: "rgba(24, 119, 242, 0.16)",
+        heroBgStart: "#050a14",
+        heroBgEnd: "#0a1224",
+        gradient: "linear-gradient(180deg, #ffffff 20%, #93c5fd 65%, #f59e0b 100%)",
+        cardAccent: "rgba(24, 119, 242, 0.2)",
+    },
+    "emerald-academic": {
+        themeId: "emerald-academic",
+        name: "Living Word Emerald",
+        badge: "NATURE & GROWTH",
+        description: "Deep botanical forest greens & bright mint symbolizing spiritual fruitfulness and life.",
+        primary: "#10b981",
+        primaryHover: "#059669",
+        secondary: "#34d399",
+        glow: "rgba(16, 185, 129, 0.35)",
+        heroGlow: "rgba(16, 185, 129, 0.16)",
+        heroBgStart: "#020f0a",
+        heroBgEnd: "#051b12",
+        gradient: "linear-gradient(180deg, #ffffff 20%, #a7f3d0 65%, #10b981 100%)",
+        cardAccent: "rgba(16, 185, 129, 0.2)",
+    },
+    "covenant-crimson": {
+        themeId: "covenant-crimson",
+        name: "Covenant Crimson & Wine",
+        badge: "HISTORIC SEMINARY",
+        description: "Dignified historical wine, rich burgundy, and rose gold of ancient theological institutions.",
+        primary: "#e11d48",
+        primaryHover: "#be123c",
+        secondary: "#fb7185",
+        glow: "rgba(225, 29, 72, 0.35)",
+        heroGlow: "rgba(225, 29, 72, 0.18)",
+        heroBgStart: "#100307",
+        heroBgEnd: "#1f070e",
+        gradient: "linear-gradient(180deg, #ffffff 20%, #fecdd3 65%, #fb7185 100%)",
+        cardAccent: "rgba(225, 29, 72, 0.2)",
+    },
+    "royal-amethyst": {
+        themeId: "royal-amethyst",
+        name: "Royal Amethyst & Violet",
+        badge: "INSPIRATIONAL",
+        description: "Majestic apostolic purple with glowing violet highlights and deep velvet shadows.",
+        primary: "#8b5cf6",
+        primaryHover: "#7c3aed",
+        secondary: "#c084fc",
+        glow: "rgba(139, 92, 246, 0.35)",
+        heroGlow: "rgba(139, 92, 246, 0.18)",
+        heroBgStart: "#0b0517",
+        heroBgEnd: "#170b2e",
+        gradient: "linear-gradient(180deg, #ffffff 20%, #ddd6fe 65%, #c084fc 100%)",
+        cardAccent: "rgba(139, 92, 246, 0.2)",
+    },
+    "cyber-cyan": {
+        themeId: "cyber-cyan",
+        name: "Midnight Obsidian & Cyan",
+        badge: "MODERN TECH",
+        description: "Ultra-modern, high-contrast dark mode with radiant cyan and sapphire tones.",
+        primary: "#06b6d4",
+        primaryHover: "#0891b2",
+        secondary: "#38bdf8",
+        glow: "rgba(6, 182, 212, 0.35)",
+        heroGlow: "rgba(6, 182, 212, 0.16)",
+        heroBgStart: "#020617",
+        heroBgEnd: "#081024",
+        gradient: "linear-gradient(180deg, #ffffff 20%, #a5f3fc 65%, #38bdf8 100%)",
+        cardAccent: "rgba(6, 182, 212, 0.2)",
+    },
+    "desert-harvest": {
+        themeId: "desert-harvest",
+        name: "Desert Harvest & Gold",
+        badge: "BIBLICAL LANDS",
+        description: "Warm Near-Eastern biblical tones, ancient parchment, terracotta, and amber harvest gold.",
+        primary: "#f59e0b",
+        primaryHover: "#d97706",
+        secondary: "#fbbf24",
+        glow: "rgba(245, 158, 11, 0.35)",
+        heroGlow: "rgba(245, 158, 11, 0.16)",
+        heroBgStart: "#0f0904",
+        heroBgEnd: "#1e1308",
+        gradient: "linear-gradient(180deg, #ffffff 20%, #fde68a 65%, #f59e0b 100%)",
+        cardAccent: "rgba(245, 158, 11, 0.2)",
+    },
+    "monochrome-titanium": {
+        themeId: "monochrome-titanium",
+        name: "Titanium Slate Minimalist",
+        badge: "MINIMALIST",
+        description: "Refined Apple Pro titanium finish with monochrome steel and crisp silver accents.",
+        primary: "#f8fafc",
+        primaryHover: "#e2e8f0",
+        secondary: "#94a3b8",
+        glow: "rgba(255, 255, 255, 0.25)",
+        heroGlow: "rgba(255, 255, 255, 0.1)",
+        heroBgStart: "#09090b",
+        heroBgEnd: "#18181b",
+        gradient: "linear-gradient(180deg, #ffffff 30%, #cbd5e1 65%, #94a3b8 100%)",
+        cardAccent: "rgba(255, 255, 255, 0.15)",
+    },
+};
+
+export const DEFAULT_COLOR_THEME: ColorThemeSettings = COLOR_THEME_PRESETS["classic-navy"];
+
 export interface LandingPageContent {
     ribbonText: string;
     ribbonCta: string;
@@ -74,6 +200,7 @@ export interface LandingPageContent {
     carouselSubheadline: string;
     modules: FieldModuleItem[];
     promoVideo: PromoVideoSettings;
+    colorTheme: ColorThemeSettings;
 }
 
 export const DEFAULT_LANDING_CONTENT: LandingPageContent = {
@@ -224,6 +351,7 @@ export const DEFAULT_LANDING_CONTENT: LandingPageContent = {
             },
         ],
     },
+    colorTheme: DEFAULT_COLOR_THEME,
 };
 
 const STORAGE_KEY = "sms_landing_content";
@@ -253,6 +381,12 @@ export const getLandingPageContent = (): LandingPageContent => {
                 };
             });
 
+            const parsedTheme = parsed.colorTheme || {};
+            const resolvedTheme: ColorThemeSettings = {
+                ...DEFAULT_COLOR_THEME,
+                ...parsedTheme,
+            };
+
             return {
                 ...DEFAULT_LANDING_CONTENT,
                 ...parsed,
@@ -265,6 +399,7 @@ export const getLandingPageContent = (): LandingPageContent => {
                     ...promo,
                     scenes: mergedScenes,
                 },
+                colorTheme: resolvedTheme,
             };
         }
     } catch (e) {

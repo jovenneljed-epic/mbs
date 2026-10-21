@@ -4,10 +4,12 @@ import {
     getLandingPageContent,
     saveLandingPageContent,
     resetLandingPageContent,
+    COLOR_THEME_PRESETS,
     type LandingPageContent,
     type FieldModuleItem,
     type PromoVideoSettings,
-    type PromoScene
+    type PromoScene,
+    type ColorThemeSettings
 } from "../../services/landingPageContent";
 import { PromoVideoPlayer } from "../../components/PromoVideoPlayer";
 import {
@@ -29,7 +31,8 @@ import {
     Play,
     UploadCloud,
     Trash2,
-    Video
+    Video,
+    Palette
 } from "lucide-react";
 
 interface LandingPageEditorProps {
@@ -46,7 +49,7 @@ const GRADIENT_PRESETS = [
 
 export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({ onNavigateToSite }) => {
     const [content, setContent] = useState<LandingPageContent>(getLandingPageContent);
-    const [activeTab, setActiveTab] = useState<"hero" | "video" | "banner" | "modules" | "preview">("video");
+    const [activeTab, setActiveTab] = useState<"hero" | "theme" | "video" | "banner" | "modules" | "preview">("hero");
     const [savedNotification, setSavedNotification] = useState(false);
 
     useEffect(() => {
@@ -57,6 +60,30 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({ onNavigate
         setContent(prev => ({
             ...prev,
             [field]: value,
+        }));
+    };
+
+    const handleSelectTheme = (themeId: string) => {
+        const preset = COLOR_THEME_PRESETS[themeId];
+        if (preset) {
+            setContent(prev => ({
+                ...prev,
+                colorTheme: { ...preset }
+            }));
+        }
+    };
+
+    const handleCustomColorChange = (field: keyof ColorThemeSettings, value: string) => {
+        setContent(prev => ({
+            ...prev,
+            colorTheme: {
+                ...prev.colorTheme,
+                themeId: "custom",
+                name: "Custom Palette",
+                badge: "CUSTOM",
+                description: "User customized color palette",
+                [field]: value
+            }
         }));
     };
 
@@ -382,6 +409,15 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({ onNavigate
 
                 <button
                     type="button"
+                    className={`editor-tab-btn ${activeTab === "theme" ? "active" : ""}`}
+                    onClick={() => setActiveTab("theme")}
+                >
+                    <Palette size={16} />
+                    <span>🎨 Color Theme</span>
+                </button>
+
+                <button
+                    type="button"
                     className={`editor-tab-btn ${activeTab === "video" ? "active" : ""}`}
                     onClick={() => setActiveTab("video")}
                 >
@@ -535,6 +571,248 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({ onNavigate
                                 onChange={e => handleChange("guarantee3", e.target.value)}
                                 placeholder="e.g. 80% Subsidized Tuition"
                             />
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* TAB: COLOR THEME SELECTOR */}
+            {activeTab === "theme" && (
+                <div className="editor-card theme-editor-card">
+                    <div className="theme-editor-header">
+                        <div>
+                            <h3>
+                                <Palette size={20} color="#1877f2" />
+                                Landing Page Color Theme &amp; Visual Identity
+                            </h3>
+                            <p style={{ margin: "4px 0 0", color: "#65676b", fontSize: "13px" }}>
+                                Choose from 7 calibrated academic themes or fine-tune a custom color scheme. Updates live homepage buttons, badges, gradients, and glows immediately.
+                            </p>
+                        </div>
+                        <div className="theme-active-indicator">
+                            <span className="theme-swatch-dot" style={{ background: content.colorTheme?.primary || "#1877f2" }} />
+                            <span>Active: <strong>{content.colorTheme?.name || "Custom Palette"}</strong></span>
+                            <span className="theme-badge-pill" style={{ background: content.colorTheme?.primary || "#1877f2", color: "#fff" }}>
+                                {content.colorTheme?.badge || "ACTIVE"}
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* PRESET CARDS GRID */}
+                    <div className="theme-presets-grid">
+                        {Object.values(COLOR_THEME_PRESETS).map((preset) => {
+                            const isSelected = content.colorTheme?.themeId === preset.themeId;
+                            return (
+                                <div
+                                    key={preset.themeId}
+                                    className={`theme-preset-card ${isSelected ? "selected" : ""}`}
+                                    onClick={() => handleSelectTheme(preset.themeId)}
+                                >
+                                    <div className="theme-preset-card-top">
+                                        <div className="theme-swatches-strip">
+                                            <span
+                                                className="swatch-segment"
+                                                style={{ background: preset.heroBgEnd }}
+                                                title={`Dark Base: ${preset.heroBgEnd}`}
+                                            />
+                                            <span
+                                                className="swatch-segment"
+                                                style={{ background: preset.primary }}
+                                                title={`Primary: ${preset.primary}`}
+                                            />
+                                            <span
+                                                className="swatch-segment"
+                                                style={{ background: preset.secondary }}
+                                                title={`Secondary: ${preset.secondary}`}
+                                            />
+                                            <span
+                                                className="swatch-segment"
+                                                style={{ background: preset.gradient }}
+                                                title="Heading Gradient"
+                                            />
+                                        </div>
+                                        <span className="theme-card-badge">{preset.badge}</span>
+                                    </div>
+
+                                    <div className="theme-preset-info">
+                                        <h4>{preset.name}</h4>
+                                        <p>{preset.description}</p>
+                                    </div>
+
+                                    <div className="theme-preset-footer">
+                                        <div className="theme-hex-tags">
+                                            <span className="hex-tag" style={{ borderLeft: `3px solid ${preset.primary}` }}>
+                                                {preset.primary}
+                                            </span>
+                                            <span className="hex-tag" style={{ borderLeft: `3px solid ${preset.secondary}` }}>
+                                                {preset.secondary}
+                                            </span>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            className={`btn-select-theme ${isSelected ? "active" : ""}`}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleSelectTheme(preset.themeId);
+                                            }}
+                                        >
+                                            {isSelected ? "✓ Active" : "Select Theme"}
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {/* LIVE KEYNOTE PREVIEW SANDBOX */}
+                    <div className="theme-live-preview-box" style={{
+                        background: `radial-gradient(circle at 50% 20%, ${content.colorTheme?.heroGlow || "rgba(24,119,242,0.16)"} 0%, transparent 70%), linear-gradient(180deg, ${content.colorTheme?.heroBgStart || "#050a14"} 0%, ${content.colorTheme?.heroBgEnd || "#0a1224"} 100%)`,
+                        borderColor: content.colorTheme?.cardAccent || "rgba(255, 255, 255, 0.15)"
+                    }}>
+                        <div className="preview-watermark">
+                            <span>LIVE HOMEPAGE HERO PREVIEW</span>
+                        </div>
+
+                        <div className="preview-hero-content">
+                            <span
+                                className="preview-hero-badge"
+                                style={{
+                                    color: content.colorTheme?.secondary || "#f59e0b",
+                                    borderColor: content.colorTheme?.primary || "#1877f2",
+                                    boxShadow: `0 0 12px ${content.colorTheme?.glow || "rgba(24,119,242,0.35)"}`
+                                }}
+                            >
+                                ★ {content.heroBadge || "ACCREDITED THEOLOGICAL EDUCATION"}
+                            </span>
+
+                            <h2 className="preview-hero-title">
+                                <span style={{ color: "#ffffff", display: "block" }}>
+                                    {content.heroTitleWhite || "Deep Biblical Truth."}
+                                </span>
+                                <span style={{
+                                    background: content.colorTheme?.gradient || "linear-gradient(180deg, #ffffff 20%, #93c5fd 65%, #f59e0b 100%)",
+                                    WebkitBackgroundClip: "text",
+                                    WebkitTextFillColor: "transparent",
+                                    display: "block"
+                                }}>
+                                    {content.heroTitleGradient || "Everywhere You Are Called."}
+                                </span>
+                            </h2>
+
+                            <p className="preview-hero-subtitle">
+                                {content.heroSubtitle || "Mobile Bible School delivers rigorous, Christ-centered seminary instruction directly to local churches."}
+                            </p>
+
+                            <div className="preview-hero-ctas">
+                                <button
+                                    type="button"
+                                    className="preview-btn-primary"
+                                    style={{
+                                        background: content.colorTheme?.primary || "#1877f2",
+                                        boxShadow: `0 4px 18px ${content.colorTheme?.glow || "rgba(24,119,242,0.35)"}`
+                                    }}
+                                >
+                                    {content.ctaPrimary || "Apply for Admission"} →
+                                </button>
+                                <button type="button" className="preview-btn-ghost">
+                                    {content.ctaSecondary || "Explore Field Modules"}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* CUSTOM COLOR PALETTE TUNER */}
+                    <div className="custom-theme-tuner">
+                        <h4>
+                            <Sparkles size={16} color="#1877f2" />
+                            Fine-Tune Custom Color Palette
+                        </h4>
+                        <p style={{ margin: "2px 0 16px", fontSize: "12px", color: "#65676b" }}>
+                            Want a bespoke look? Pick exact hex colors below. Changes will be saved as your Custom Palette.
+                        </p>
+
+                        <div className="tuner-form-grid">
+                            <div className="tuner-field">
+                                <label>Primary Accent Color (Buttons &amp; Active Rings)</label>
+                                <div className="color-picker-row">
+                                    <input
+                                        type="color"
+                                        value={content.colorTheme?.primary?.startsWith("#") ? content.colorTheme.primary : "#1877f2"}
+                                        onChange={(e) => {
+                                            handleCustomColorChange("primary", e.target.value);
+                                            handleCustomColorChange("glow", `${e.target.value}55`);
+                                        }}
+                                    />
+                                    <input
+                                        type="text"
+                                        value={content.colorTheme?.primary || "#1877f2"}
+                                        onChange={(e) => handleCustomColorChange("primary", e.target.value)}
+                                        placeholder="#1877f2"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="tuner-field">
+                                <label>Secondary Highlight (Badges &amp; Gold Accents)</label>
+                                <div className="color-picker-row">
+                                    <input
+                                        type="color"
+                                        value={content.colorTheme?.secondary?.startsWith("#") ? content.colorTheme.secondary : "#f59e0b"}
+                                        onChange={(e) => handleCustomColorChange("secondary", e.target.value)}
+                                    />
+                                    <input
+                                        type="text"
+                                        value={content.colorTheme?.secondary || "#f59e0b"}
+                                        onChange={(e) => handleCustomColorChange("secondary", e.target.value)}
+                                        placeholder="#f59e0b"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="tuner-field">
+                                <label>Hero Background (Top Tint)</label>
+                                <div className="color-picker-row">
+                                    <input
+                                        type="color"
+                                        value={content.colorTheme?.heroBgStart?.startsWith("#") ? content.colorTheme.heroBgStart : "#050a14"}
+                                        onChange={(e) => handleCustomColorChange("heroBgStart", e.target.value)}
+                                    />
+                                    <input
+                                        type="text"
+                                        value={content.colorTheme?.heroBgStart || "#050a14"}
+                                        onChange={(e) => handleCustomColorChange("heroBgStart", e.target.value)}
+                                        placeholder="#050a14"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="tuner-field">
+                                <label>Hero Background (Bottom Tint)</label>
+                                <div className="color-picker-row">
+                                    <input
+                                        type="color"
+                                        value={content.colorTheme?.heroBgEnd?.startsWith("#") ? content.colorTheme.heroBgEnd : "#0a1224"}
+                                        onChange={(e) => handleCustomColorChange("heroBgEnd", e.target.value)}
+                                    />
+                                    <input
+                                        type="text"
+                                        value={content.colorTheme?.heroBgEnd || "#0a1224"}
+                                        onChange={(e) => handleCustomColorChange("heroBgEnd", e.target.value)}
+                                        placeholder="#0a1224"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="tuner-actions" style={{ marginTop: 20 }}>
+                            <button
+                                type="button"
+                                className="btn-editor-save"
+                                onClick={handleSave}
+                            >
+                                <Save size={15} />
+                                <span>Save Color Theme Changes</span>
+                            </button>
                         </div>
                     </div>
                 </div>
