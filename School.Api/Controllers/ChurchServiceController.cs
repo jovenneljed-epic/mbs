@@ -240,64 +240,36 @@ namespace School.Api.Controllers
                 return client.CustomerId;
             }
             // =====================================================
-            // INTERNAL EPIC CHURCH ROLES
+            // ACADEMIC / SYSTEM USERS (ADMIN, SCHOOL OWNER, FACULTY, STAFF, ETC.)
             // =====================================================
 
-            if (IsInternalRole)
+            var userId = CurrentUserId;
+
+            if (userId.HasValue)
             {
-                var userId = CurrentUserId;
+                var customerId =
+                    await _context.Users
+                        .AsNoTracking()
+                        .Where(u =>
+                            u.UserId == userId.Value &&
+                            u.IsActive)
+                        .Select(u =>
+                            u.CustomerId)
+                        .FirstOrDefaultAsync();
 
-                if (userId.HasValue)
+                if (customerId > 0)
                 {
-                    var customerId =
-                        await _context.Users
-                            .AsNoTracking()
-                            .Where(u =>
-                                u.UserId == userId.Value)
-                            .Select(u =>
-                                u.CustomerId)
-                            .FirstOrDefaultAsync();
-
-                    if (customerId > 0)
-                    {
-                        return customerId;
-                    }
+                    return customerId;
                 }
-
-                // Fallback for internal EPIC staff accounts
-                return 1;
-            }
-            // =====================================================
-            // ADMIN
-            // =====================================================
-
-            if (CurrentRole == "ADMIN")
-            {
-                var userId =
-                    CurrentUserId;
-
-                if (userId.HasValue)
-                {
-                    var customerId =
-                        await _context.Users
-                            .AsNoTracking()
-                            .Where(u =>
-                                u.UserId ==
-                                userId.Value)
-                            .Select(u =>
-                                u.CustomerId)
-                            .FirstOrDefaultAsync();
-
-                    if (customerId > 0)
-                    {
-                        return customerId;
-                    }
-                }
-
-                return GetCustomerIdFromToken();
             }
 
-            return null;
+            var tokenCustomerId = GetCustomerIdFromToken();
+            if (tokenCustomerId.HasValue && tokenCustomerId.Value > 0)
+            {
+                return tokenCustomerId.Value;
+            }
+
+            return 1;
         }
 
         // =========================================================
@@ -331,15 +303,6 @@ namespace School.Api.Controllers
 
             var role =
                 CurrentRole;
-
-            if (!IsInternalRole &&
-      !IsClientRole)
-            {
-                return (
-                    Forbid(),
-                    null
-                );
-            }
 
             // =====================================================
             // CLIENT IDENTITY
