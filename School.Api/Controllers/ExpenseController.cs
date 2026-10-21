@@ -1,4 +1,4 @@
-﻿
+
 using School.Api.Data;
 using School.Api.Models;
 
@@ -293,15 +293,27 @@ namespace School.Api.Controllers
             }
             else
             {
-                // ADMIN behavior.
+                // ADMIN / STAFF behavior.
                 //
                 // If CustomerId was supplied, preserve it.
-                // If not supplied, use CustomerId 1 for the
-                // current single-church installation.
+                // If not supplied, resolve from user token or active school customer.
 
                 if (expense.CustomerId <= 0)
                 {
-                    expense.CustomerId = 1;
+                    var tokenCustomerId = GetCustomerId();
+                    if (tokenCustomerId.HasValue && tokenCustomerId.Value > 0)
+                    {
+                        expense.CustomerId = tokenCustomerId.Value;
+                    }
+                    else
+                    {
+                        var defaultCustomer = await _context.Customers
+                            .AsNoTracking()
+                            .Select(c => c.CustomerId)
+                            .FirstOrDefaultAsync();
+
+                        expense.CustomerId = defaultCustomer > 0 ? defaultCustomer : 1;
+                    }
                 }
             }
 
