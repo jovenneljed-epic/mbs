@@ -1580,6 +1580,89 @@
 }
 
 /* =========================================================
+   STUDENT TABS & SIGN UP FORM
+   ========================================================= */
+
+.epic-student-tabs {
+    display: flex;
+    background: #eef2f7;
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 22px;
+    gap: 4px;
+}
+
+.epic-student-tab {
+    flex: 1;
+    padding: 10px 14px;
+    border: none;
+    background: transparent;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.epic-student-tab:hover {
+    color: #0f172a;
+}
+
+.epic-student-tab.active {
+    background: #ffffff;
+    color: #1677ff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.epic-signup-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 999px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.epic-signup-prompt {
+    margin-top: 18px;
+    text-align: center;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.epic-link-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    color: #1677ff;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+
+.epic-link-btn:hover {
+    color: #0b5ed7;
+}
+
+.epic-input-hint {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-top: 4px;
+    display: block;
+}
+
+/* =========================================================
    REDUCED MOTION
    ========================================================= */
 

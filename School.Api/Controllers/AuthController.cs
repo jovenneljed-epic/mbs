@@ -1,4 +1,4 @@
-﻿
+
 using BCrypt.Net;
 
 using School.Api.Data;
@@ -184,15 +184,21 @@ namespace School.Api.Controllers
                     .AsNoTracking()
                     .FirstOrDefaultAsync(r =>
                         r.RoleName != null &&
-                        r.RoleName.ToUpper() == "MEMBER" &&
-                        r.IsActive);
+                        (r.RoleName.ToUpper() == "MEMBER" ||
+                         r.RoleName.ToUpper() == "MEMBERS" ||
+                         r.RoleName.ToUpper() == "STUDENT" ||
+                         r.RoleName.ToUpper() == "STUDENTS") &&
+                        r.IsActive)
+                ?? await _context.Roles
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(r => r.IsActive && r.RoleId != 1);
 
             if (memberRole == null)
             {
                 return StatusCode(500, new
                 {
                     message =
-                        "MEMBER ROLE IS NOT CONFIGURED."
+                        "STUDENT / MEMBER ROLE IS NOT CONFIGURED."
                 });
             }
 
@@ -205,7 +211,7 @@ namespace School.Api.Controllers
                     request.Password);
 
             // --------------------------------------------------------
-            // CREATE USER
+            // CREATE USER (ACTIVATED FOR AUTHENTIC STUDENT)
             // --------------------------------------------------------
 
             var user = new User
@@ -222,31 +228,51 @@ namespace School.Api.Controllers
 
                 MemberId = member.MemberId,
 
-                CustomerId = member.CustomerId,
+                CustomerId = member.CustomerId > 0 ? member.CustomerId : 1,
 
-                IsActive = false,
+                IsActive = true,
 
-                ApprovalStatus = "PENDING",
+                ApprovalStatus = "APPROVED",
 
-                AccountType = "MEMBER",
+                AccountType = "STUDENT",
 
                 Email =
                     string.IsNullOrWhiteSpace(request.Email)
                         ? null
                         : request.Email.Trim(),
 
-                CreatedDate = DateTime.Now
+                CreatedDate = DateTime.UtcNow
             };
 
             _context.Users.Add(user);
+
+            // --------------------------------------------------------
+            // PROVISION CLIENTMEMBER FOR CLIENT PORTAL ACCESS
+            // --------------------------------------------------------
+
+            var clientRole = await _context.ClientRoles
+                .FirstOrDefaultAsync(cr => cr.RoleName == "CLIENT_MEMBER" || cr.RoleName == "STUDENT")
+                ?? await _context.ClientRoles.OrderByDescending(cr => cr.ClientRoleId).FirstOrDefaultAsync();
+
+            var clientMember = new ClientMember
+            {
+                CustomerId = member.CustomerId > 0 ? member.CustomerId : 1,
+                MemberId = member.MemberId,
+                ClientRoleId = clientRole?.ClientRoleId ?? 4,
+                Username = username,
+                PasswordHash = passwordHash,
+                Status = "ACTIVE",
+                IsActive = true,
+                CreatedDate = DateTime.UtcNow
+            };
+            _context.ClientMembers.Add(clientMember);
 
             await _context.SaveChangesAsync();
 
             return Ok(new
             {
                 message =
-                    "REGISTRATION SUCCESSFUL. " +
-                    "YOUR ACCOUNT IS PENDING APPROVAL.",
+                    "STUDENT ACCOUNT ACTIVATED SUCCESSFULLY! You can now sign in.",
 
                 userId = user.UserId,
 
@@ -258,13 +284,7 @@ namespace School.Api.Controllers
 
                 memberId = user.MemberId,
 
-                customerId = user.CustomerId,
-
-                approvalStatus =
-                    user.ApprovalStatus,
-
-                accountType =
-                    user.AccountType
+                studentId = member.MemberCode
             });
         }
 

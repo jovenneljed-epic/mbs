@@ -179,6 +179,26 @@ const ClientLogin: React.FC<ClientLoginProps> = ({
         useState("");
 
     // =====================================================
+    // STUDENT ACCOUNT ACTIVATION / SIGN UP STATE
+    // =====================================================
+
+    const [isSignUp, setIsSignUp] =
+        useState(false);
+
+    const [isSigningUp, setIsSigningUp] =
+        useState(false);
+
+    const [signUpForm, setSignUpForm] =
+        useState({
+            memberCode: "",
+            lastName: "",
+            username: "",
+            password: "",
+            confirmPassword: "",
+            email: ""
+        });
+
+    // =====================================================
     // LOAD REMEMBERED USERNAME
     // =====================================================
 
@@ -980,17 +1000,75 @@ const ClientLogin: React.FC<ClientLoginProps> = ({
         }, []);
 
     // =====================================================
-    // QUICK DEMO ACCOUNT FILLER
+    // STUDENT ACCOUNT ACTIVATION / REGISTRATION HANDLER
     // =====================================================
 
-    const handleSetDemoAccount = useCallback(
-        (demoUsername: string, demoPassword: string) => {
-            setEmail(demoUsername);
-            setPassword(demoPassword);
+    const handleSignUpSubmit = useCallback(
+        async (event: FormEvent<HTMLFormElement>) => {
+            event.preventDefault();
             setErrorMessage("");
-            setSuccessMessage(`Loaded test credentials for "${demoUsername}". Click Enter Student Portal below.`);
+            setSuccessMessage("");
+
+            const code = signUpForm.memberCode.trim();
+            const last = signUpForm.lastName.trim();
+            const user = signUpForm.username.trim();
+
+            if (!code) {
+                setErrorMessage("Authentic Student ID is required.");
+                return;
+            }
+            if (!last) {
+                setErrorMessage("Last Name is required to verify your enrollment.");
+                return;
+            }
+            if (!user) {
+                setErrorMessage("Please choose a username.");
+                return;
+            }
+            if (signUpForm.password.length < 6) {
+                setErrorMessage("Password must be at least 6 characters.");
+                return;
+            }
+            if (signUpForm.password !== signUpForm.confirmPassword) {
+                setErrorMessage("Passwords do not match.");
+                return;
+            }
+
+            setIsSigningUp(true);
+
+            try {
+                const baseUrl = API_BASE_URL.replace(/\/+$/, "");
+                const res = await axios.post(`${baseUrl}/Auth/register`, {
+                    memberCode: code,
+                    lastName: last,
+                    username: user,
+                    password: signUpForm.password,
+                    email: signUpForm.email.trim() || undefined
+                });
+
+                setSuccessMessage(
+                    res.data?.message ||
+                    "Student account activated successfully! You can now sign in with your credentials."
+                );
+
+                // Auto-fill sign-in fields
+                setEmail(user);
+                setPassword(signUpForm.password);
+
+                // Switch to Sign In tab
+                setIsSignUp(false);
+            } catch (err: unknown) {
+                const error = err as AxiosError<{ message?: string }>;
+                const msg =
+                    error.response?.data?.message ||
+                    error.message ||
+                    "Failed to activate student account. Please verify your Student ID and Last Name.";
+                setErrorMessage(msg);
+            } finally {
+                setIsSigningUp(false);
+            }
         },
-        []
+        [signUpForm]
     );
 
     // =====================================================
@@ -1284,75 +1362,43 @@ const ClientLogin: React.FC<ClientLoginProps> = ({
 
                             </div>
 
+                            {/* TABS: SIGN IN vs ACTIVATE / SIGN UP */}
+                            <div className="epic-student-tabs">
+                                <button
+                                    type="button"
+                                    className={`epic-student-tab ${!isSignUp ? "active" : ""}`}
+                                    onClick={() => {
+                                        setIsSignUp(false);
+                                        setErrorMessage("");
+                                        setSuccessMessage("");
+                                    }}
+                                >
+                                    Student Sign In
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`epic-student-tab ${isSignUp ? "active" : ""}`}
+                                    onClick={() => {
+                                        setIsSignUp(true);
+                                        setErrorMessage("");
+                                        setSuccessMessage("");
+                                    }}
+                                >
+                                    Activate Student ID
+                                </button>
+                            </div>
+
                             <div className="epic-login-heading">
 
                                 <h2>
-                                    Student Sign In
+                                    {isSignUp ? "Student Account Activation" : "Student Sign In"}
                                 </h2>
 
                                 <p>
-                                    Sign in to access your courses and student learning area.
+                                    {isSignUp
+                                        ? "Enter your authentic Student ID provided upon enrollment to set up your learning account."
+                                        : "Sign in to access your courses and student learning area."}
                                 </p>
-
-                            </div>
-
-                            {/* DEMO / TEST CREDENTIALS BOX */}
-
-                            <div className="epic-student-demo-card">
-
-                                <div className="epic-student-demo-header">
-
-                                    <span className="epic-student-demo-badge">
-                                        ⚡ 1-CLICK TEST LOGIN
-                                    </span>
-
-                                    <span className="epic-student-demo-hint">
-                                        Select student account:
-                                    </span>
-
-                                </div>
-
-                                <div className="epic-student-demo-grid">
-
-                                    <button
-                                        type="button"
-                                        className="epic-student-demo-btn"
-                                        onClick={() =>
-                                            handleSetDemoAccount("student", "student123")
-                                        }
-                                        title="Click to fill student / student123"
-                                    >
-
-                                        <span className="epic-student-demo-role">
-                                            Student #1
-                                        </span>
-
-                                        <strong>student</strong>
-
-                                        <small>STD-2026-0001</small>
-
-                                    </button>
-
-                                    <button
-                                        type="button"
-                                        className="epic-student-demo-btn"
-                                        onClick={() =>
-                                            handleSetDemoAccount("admin", "admin123")
-                                        }
-                                        title="Click to fill admin / admin123"
-                                    >
-
-                                        <span className="epic-student-demo-role">
-                                            Student #2
-                                        </span>
-
-                                        <strong>admin</strong>
-
-                                        <small>STD-2026-0002</small>
-
-                                    </button>
-
-                                </div>
 
                             </div>
 
@@ -1398,201 +1444,503 @@ const ClientLogin: React.FC<ClientLoginProps> = ({
 
                             {/* FORM */}
 
-                            <form
-                                className="epic-login-form"
-                                onSubmit={
-                                    handleSubmit
-                                }
-                                noValidate
-                            >
-
-                                {/* USERNAME / EMAIL */}
-
-                                <div className="epic-login-field">
-
-                                    <label htmlFor="client-email">
-                                        Student Username, Email, or Student ID (LRN)
-                                    </label>
-
-                                    <div className="epic-login-input-wrapper">
-
-                                        <span className="epic-input-icon">
-                                            👤
-                                        </span>
-
-                                        <input
-                                            id="client-email"
-                                            name="email"
-                                            type="text"
-                                            value={email}
-                                            onChange={
-                                                handleUsernameChange
-                                            }
-                                            placeholder="Enter username, email, or student ID (e.g. student)"
-                                            autoComplete="username"
-                                            disabled={
-                                                isSubmitting
-                                            }
-                                            required
-                                        />
-
-                                    </div>
-
-                                </div>
-
-                                {/* PASSWORD */}
-
-                                <div className="epic-login-field">
-
-                                    <div className="epic-login-label-row">
-
-                                        <label htmlFor="client-password">
-                                            Student Password
-                                        </label>
-
-                                        <button
-                                            type="button"
-                                            className="epic-forgot-button"
-                                            onClick={
-                                                handleForgotPassword
-                                            }
-                                            disabled={
-                                                isSubmitting
-                                            }
-                                        >
-                                            Forgot password?
-                                        </button>
-
-                                    </div>
-
-                                    <div className="epic-login-input-wrapper">
-
-                                        <span className="epic-input-icon">
-                                            🔒
-                                        </span>
-
-                                        <input
-                                            id="client-password"
-                                            name="password"
-                                            type={
-                                                showPassword
-                                                    ? "text"
-                                                    : "password"
-                                            }
-                                            value={password}
-                                            onChange={
-                                                handlePasswordChange
-                                            }
-                                            placeholder="Enter your student password (e.g. student123)"
-                                            autoComplete="current-password"
-                                            disabled={
-                                                isSubmitting
-                                            }
-                                            required
-                                        />
-
-                                        <button
-                                            type="button"
-                                            className="epic-show-password"
-                                            onClick={() =>
-                                                setShowPassword(
-                                                    previous =>
-                                                        !previous
-                                                )
-                                            }
-                                            disabled={
-                                                isSubmitting
-                                            }
-                                            aria-label={
-                                                showPassword
-                                                    ? "Hide password"
-                                                    : "Show password"
-                                            }
-                                        >
-
-                                            {
-                                                showPassword
-                                                    ? "Hide"
-                                                    : "Show"
-                                            }
-
-                                        </button>
-
-                                    </div>
-
-                                </div>
-
-                                {/* REMEMBER ME */}
-
-                                <div className="epic-login-options">
-
-                                    <label className="epic-remember">
-
-                                        <input
-                                            type="checkbox"
-                                            checked={
-                                                rememberMe
-                                            }
-                                            onChange={
-                                                event =>
-                                                    setRememberMe(
-                                                        event.target.checked
-                                                    )
-                                            }
-                                            disabled={
-                                                isSubmitting
-                                            }
-                                        />
-
-                                        <span className="epic-custom-checkbox">
-                                            ✓
-                                        </span>
-
-                                        <span>
-                                            Remember my student ID
-                                        </span>
-
-                                    </label>
-
-                                </div>
-
-                                {/* SIGN IN */}
-
-                                <button
-                                    type="submit"
-                                    className="epic-client-signin-button"
-                                    disabled={
-                                        isSubmitting
+                            {!isSignUp ? (
+                                <form
+                                    className="epic-login-form"
+                                    onSubmit={
+                                        handleSubmit
                                     }
+                                    noValidate
                                 >
 
-                                    {isSubmitting ? (
+                                    {/* USERNAME / EMAIL */}
 
-                                        <>
+                                    <div className="epic-login-field">
 
-                                            <span className="epic-login-spinner" />
+                                        <label htmlFor="client-email">
+                                            Student Username, Email, or Student ID (LRN)
+                                        </label>
 
-                                            Entering Student Portal...
+                                        <div className="epic-login-input-wrapper">
 
-                                        </>
-
-                                    ) : (
-
-                                        <>
-
-                                            Enter Student Learning Area
-
-                                            <span>
-                                                →
+                                            <span className="epic-input-icon">
+                                                👤
                                             </span>
 
-                                        </>
+                                            <input
+                                                id="client-email"
+                                                name="email"
+                                                type="text"
+                                                value={email}
+                                                onChange={
+                                                    handleUsernameChange
+                                                }
+                                                placeholder="Enter username, email, or student ID (e.g. student)"
+                                                autoComplete="username"
+                                                disabled={
+                                                    isSubmitting
+                                                }
+                                                required
+                                            />
 
-                                    )}
+                                        </div>
 
-                                </button>
+                                    </div>
 
-                            </form>
+                                    {/* PASSWORD */}
+
+                                    <div className="epic-login-field">
+
+                                        <div className="epic-login-label-row">
+
+                                            <label htmlFor="client-password">
+                                                Student Password
+                                            </label>
+
+                                            <button
+                                                type="button"
+                                                className="epic-forgot-button"
+                                                onClick={
+                                                    handleForgotPassword
+                                                }
+                                                disabled={
+                                                    isSubmitting
+                                                }
+                                            >
+                                                Forgot password?
+                                            </button>
+
+                                        </div>
+
+                                        <div className="epic-login-input-wrapper">
+
+                                            <span className="epic-input-icon">
+                                                🔒
+                                            </span>
+
+                                            <input
+                                                id="client-password"
+                                                name="password"
+                                                type={
+                                                    showPassword
+                                                        ? "text"
+                                                        : "password"
+                                                }
+                                                value={password}
+                                                onChange={
+                                                    handlePasswordChange
+                                                }
+                                                placeholder="Enter your student password (e.g. student123)"
+                                                autoComplete="current-password"
+                                                disabled={
+                                                    isSubmitting
+                                                }
+                                                required
+                                            />
+
+                                            <button
+                                                type="button"
+                                                className="epic-show-password"
+                                                onClick={() =>
+                                                    setShowPassword(
+                                                        previous =>
+                                                            !previous
+                                                    )
+                                                }
+                                                disabled={
+                                                    isSubmitting
+                                                }
+                                                aria-label={
+                                                    showPassword
+                                                        ? "Hide password"
+                                                        : "Show password"
+                                                }
+                                            >
+
+                                                {
+                                                    showPassword
+                                                        ? "Hide"
+                                                        : "Show"
+                                                }
+
+                                            </button>
+
+                                        </div>
+
+                                    </div>
+
+                                    {/* REMEMBER ME */}
+
+                                    <div className="epic-login-options">
+
+                                        <label className="epic-remember">
+
+                                            <input
+                                                type="checkbox"
+                                                checked={
+                                                    rememberMe
+                                                }
+                                                onChange={
+                                                    event =>
+                                                        setRememberMe(
+                                                            event.target.checked
+                                                        )
+                                                }
+                                                disabled={
+                                                    isSubmitting
+                                                }
+                                            />
+
+                                            <span className="epic-custom-checkbox">
+                                                ✓
+                                            </span>
+
+                                            <span>
+                                                Remember my student ID
+                                            </span>
+
+                                        </label>
+
+                                    </div>
+
+                                    {/* SIGN IN */}
+
+                                    <button
+                                        type="submit"
+                                        className="epic-client-signin-button"
+                                        disabled={
+                                            isSubmitting
+                                        }
+                                    >
+
+                                        {isSubmitting ? (
+
+                                            <>
+
+                                                <span className="epic-login-spinner" />
+
+                                                Entering Student Portal...
+
+                                            </>
+
+                                        ) : (
+
+                                            <>
+
+                                                Enter Student Learning Area
+
+                                                <span>
+                                                    →
+                                                </span>
+
+                                            </>
+
+                                        )}
+
+                                    </button>
+
+                                    <div className="epic-signup-prompt">
+                                        <span>Enrolled student without an account? </span>
+                                        <button
+                                            type="button"
+                                            className="epic-link-btn"
+                                            onClick={() => {
+                                                setIsSignUp(true);
+                                                setErrorMessage("");
+                                                setSuccessMessage("");
+                                            }}
+                                        >
+                                            Activate Your Student ID →
+                                        </button>
+                                    </div>
+
+                                </form>
+                            ) : (
+                                <form
+                                    className="epic-login-form"
+                                    onSubmit={handleSignUpSubmit}
+                                    noValidate
+                                >
+
+                                    {/* AUTHENTIC STUDENT ID (LRN) */}
+
+                                    <div className="epic-login-field">
+
+                                        <label htmlFor="signup-member-code">
+                                            Authentic Student ID / LRN Number *
+                                        </label>
+
+                                        <div className="epic-login-input-wrapper">
+
+                                            <span className="epic-input-icon">
+                                                🆔
+                                            </span>
+
+                                            <input
+                                                id="signup-member-code"
+                                                type="text"
+                                                value={signUpForm.memberCode}
+                                                onChange={e =>
+                                                    setSignUpForm(prev => ({
+                                                        ...prev,
+                                                        memberCode: e.target.value
+                                                    }))
+                                                }
+                                                placeholder="e.g. STD-2026-0001 (assigned upon enrollment)"
+                                                disabled={isSigningUp}
+                                                required
+                                            />
+
+                                        </div>
+
+                                        <span className="epic-input-hint">
+                                            Must match the Student ID registered by the Administrator.
+                                        </span>
+
+                                    </div>
+
+                                    {/* STUDENT LAST NAME */}
+
+                                    <div className="epic-login-field">
+
+                                        <label htmlFor="signup-last-name">
+                                            Student Last Name (for Verification) *
+                                        </label>
+
+                                        <div className="epic-login-input-wrapper">
+
+                                            <span className="epic-input-icon">
+                                                📋
+                                            </span>
+
+                                            <input
+                                                id="signup-last-name"
+                                                type="text"
+                                                value={signUpForm.lastName}
+                                                onChange={e =>
+                                                    setSignUpForm(prev => ({
+                                                        ...prev,
+                                                        lastName: e.target.value
+                                                    }))
+                                                }
+                                                placeholder="Enter your registered last name"
+                                                disabled={isSigningUp}
+                                                required
+                                            />
+
+                                        </div>
+
+                                    </div>
+
+                                    {/* CHOOSE USERNAME */}
+
+                                    <div className="epic-login-field">
+
+                                        <label htmlFor="signup-username">
+                                            Choose Student Username *
+                                        </label>
+
+                                        <div className="epic-login-input-wrapper">
+
+                                            <span className="epic-input-icon">
+                                                👤
+                                            </span>
+
+                                            <input
+                                                id="signup-username"
+                                                type="text"
+                                                value={signUpForm.username}
+                                                onChange={e =>
+                                                    setSignUpForm(prev => ({
+                                                        ...prev,
+                                                        username: e.target.value
+                                                    }))
+                                                }
+                                                placeholder="e.g. juan.delacruz"
+                                                autoComplete="username"
+                                                disabled={isSigningUp}
+                                                required
+                                            />
+
+                                        </div>
+
+                                    </div>
+
+                                    {/* EMAIL (OPTIONAL) */}
+
+                                    <div className="epic-login-field">
+
+                                        <label htmlFor="signup-email">
+                                            Email Address (Optional)
+                                        </label>
+
+                                        <div className="epic-login-input-wrapper">
+
+                                            <span className="epic-input-icon">
+                                                ✉️
+                                            </span>
+
+                                            <input
+                                                id="signup-email"
+                                                type="email"
+                                                value={signUpForm.email}
+                                                onChange={e =>
+                                                    setSignUpForm(prev => ({
+                                                        ...prev,
+                                                        email: e.target.value
+                                                    }))
+                                                }
+                                                placeholder="student@example.com"
+                                                disabled={isSigningUp}
+                                            />
+
+                                        </div>
+
+                                    </div>
+
+                                    {/* PASSWORD */}
+
+                                    <div className="epic-login-field">
+
+                                        <label htmlFor="signup-password">
+                                            Create Password (min. 6 characters) *
+                                        </label>
+
+                                        <div className="epic-login-input-wrapper">
+
+                                            <span className="epic-input-icon">
+                                                🔒
+                                            </span>
+
+                                            <input
+                                                id="signup-password"
+                                                type={
+                                                    showPassword
+                                                        ? "text"
+                                                        : "password"
+                                                }
+                                                value={signUpForm.password}
+                                                onChange={e =>
+                                                    setSignUpForm(prev => ({
+                                                        ...prev,
+                                                        password: e.target.value
+                                                    }))
+                                                }
+                                                placeholder="Create a secure password"
+                                                autoComplete="new-password"
+                                                disabled={isSigningUp}
+                                                required
+                                            />
+
+                                            <button
+                                                type="button"
+                                                className="epic-show-password"
+                                                onClick={() =>
+                                                    setShowPassword(prev => !prev)
+                                                }
+                                                disabled={isSigningUp}
+                                                aria-label={
+                                                    showPassword
+                                                        ? "Hide password"
+                                                        : "Show password"
+                                                }
+                                            >
+                                                {showPassword ? "Hide" : "Show"}
+                                            </button>
+
+                                        </div>
+
+                                    </div>
+
+                                    {/* CONFIRM PASSWORD */}
+
+                                    <div className="epic-login-field">
+
+                                        <label htmlFor="signup-confirm-password">
+                                            Confirm Password *
+                                        </label>
+
+                                        <div className="epic-login-input-wrapper">
+
+                                            <span className="epic-input-icon">
+                                                🔒
+                                            </span>
+
+                                            <input
+                                                id="signup-confirm-password"
+                                                type={
+                                                    showPassword
+                                                        ? "text"
+                                                        : "password"
+                                                }
+                                                value={signUpForm.confirmPassword}
+                                                onChange={e =>
+                                                    setSignUpForm(prev => ({
+                                                        ...prev,
+                                                        confirmPassword: e.target.value
+                                                    }))
+                                                }
+                                                placeholder="Re-enter your password"
+                                                autoComplete="new-password"
+                                                disabled={isSigningUp}
+                                                required
+                                            />
+
+                                        </div>
+
+                                    </div>
+
+                                    {/* ACTIVATE SUBMIT BUTTON */}
+
+                                    <button
+                                        type="submit"
+                                        className="epic-client-signin-button"
+                                        disabled={isSigningUp}
+                                    >
+
+                                        {isSigningUp ? (
+
+                                            <>
+
+                                                <span className="epic-login-spinner" />
+
+                                                Verifying Student ID & Activating...
+
+                                            </>
+
+                                        ) : (
+
+                                            <>
+
+                                                Activate Student Account
+
+                                                <span>
+                                                    →
+                                                </span>
+
+                                            </>
+
+                                        )}
+
+                                    </button>
+
+                                    <div className="epic-signup-prompt">
+                                        <span>Already activated your account? </span>
+                                        <button
+                                            type="button"
+                                            className="epic-link-btn"
+                                            onClick={() => {
+                                                setIsSignUp(false);
+                                                setErrorMessage("");
+                                                setSuccessMessage("");
+                                            }}
+                                        >
+                                            Sign In Here →
+                                        </button>
+                                    </div>
+
+                                </form>
+                            )}
 
                             {/* DIVIDER */}
 

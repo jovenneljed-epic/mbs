@@ -1,4 +1,4 @@
-﻿using BCrypt.Net;
+using BCrypt.Net;
 
 using School.Api.Data;
 using School.Api.Models;
@@ -94,8 +94,13 @@ namespace School.Api.Services
                 await _context.Roles
                     .FirstOrDefaultAsync(r =>
                         r.RoleName != null &&
-                        r.RoleName.Trim().ToUpper() == "MEMBER" &&
-                        r.IsActive);
+                        (r.RoleName.Trim().ToUpper() == "MEMBER" ||
+                         r.RoleName.Trim().ToUpper() == "MEMBERS" ||
+                         r.RoleName.Trim().ToUpper() == "STUDENT" ||
+                         r.RoleName.Trim().ToUpper() == "STUDENTS") &&
+                        r.IsActive)
+                ?? await _context.Roles
+                    .FirstOrDefaultAsync(r => r.IsActive && r.RoleId != 1);
 
             if (role == null)
             {
