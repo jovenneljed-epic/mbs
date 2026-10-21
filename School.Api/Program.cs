@@ -1,6 +1,7 @@
 
 using School.Api.Authorization;
 using School.Api.Data;
+using School.Api.Models;
 using School.Api.Services;
 using School.Core.Interfaces;
 
