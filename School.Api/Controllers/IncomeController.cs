@@ -1,4 +1,4 @@
-﻿using School.Api.Data;
+using School.Api.Data;
 using School.Api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +16,53 @@ namespace School.Api.Controllers
         public IncomeController(ApplicationDbContext context)
         {
             _context = context;
+        }
+
+        private int? GetCustomerIdFromToken()
+        {
+            var value =
+                User.FindFirst("customerId")?.Value
+                ?? User.FindFirst("CustomerId")?.Value
+                ?? User.FindFirst("tenantId")?.Value;
+
+            return int.TryParse(value, out var id) && id > 0
+                ? id
+                : null;
+        }
+
+        private async Task<int> ResolveCustomerIdAsync(int? requestCustomerId = null)
+        {
+            if (requestCustomerId.HasValue && requestCustomerId.Value > 0)
+            {
+                var exists = await _context.Customers
+                    .AsNoTracking()
+                    .AnyAsync(c => c.CustomerId == requestCustomerId.Value);
+
+                if (exists)
+                {
+                    return requestCustomerId.Value;
+                }
+            }
+
+            var tokenCustomerId = GetCustomerIdFromToken();
+            if (tokenCustomerId.HasValue)
+            {
+                var exists = await _context.Customers
+                    .AsNoTracking()
+                    .AnyAsync(c => c.CustomerId == tokenCustomerId.Value);
+
+                if (exists)
+                {
+                    return tokenCustomerId.Value;
+                }
+            }
+
+            var defaultCustomer = await _context.Customers
+                .AsNoTracking()
+                .Select(c => c.CustomerId)
+                .FirstOrDefaultAsync();
+
+            return defaultCustomer > 0 ? defaultCustomer : 1;
         }
 
         // =========================================================
@@ -127,11 +174,11 @@ namespace School.Api.Controllers
         //
         // CALCULATES:
         //
-        // TOTAL INCOME
+        // TOTAL SCHOOL REVENUE / INCOME
         // TOTAL EXPENSES
-        // NET CHURCH FUNDS
+        // NET SCHOOL OPERATING FUNDS
         //
-        // NET CHURCH FUNDS =
+        // NET SCHOOL FUNDS =
         // TOTAL INCOME - TOTAL EXPENSES
         // =========================================================
 
@@ -286,13 +333,16 @@ namespace School.Api.Controllers
 
 
             // =====================================================
-            // NET CHURCH FUNDS
+            // NET SCHOOL FUNDS / OPERATING INCOME
             //
             // INCOME - EXPENSES
             // =====================================================
 
-            var netChurchFunds =
+            var netSchoolFunds =
                 totalIncome - totalExpenses;
+
+            var netChurchFunds =
+                netSchoolFunds;
 
 
             // =====================================================
@@ -399,8 +449,13 @@ namespace School.Api.Controllers
 
 
                 // =================================================
-                // NET CHURCH FUNDS
+                // NET FUNDS / OPERATING REVENUE
                 // =================================================
+
+                netSchoolFunds,
+
+                netOperatingIncome =
+                    netSchoolFunds,
 
                 netChurchFunds,
 
@@ -427,6 +482,11 @@ namespace School.Api.Controllers
                     totalIncome,
 
                     totalExpenses,
+
+                    netSchoolFunds,
+
+                    netOperatingIncome =
+                        netSchoolFunds,
 
                     netChurchFunds
                 }
@@ -556,6 +616,14 @@ namespace School.Api.Controllers
 
             income.RecordedDate =
                 DateTime.Now;
+
+
+            // =====================================================
+            // TENANT / CUSTOMER RESOLUTION
+            // =====================================================
+
+            income.CustomerId =
+                await ResolveCustomerIdAsync(income.CustomerId);
 
 
             // =====================================================
@@ -774,6 +842,17 @@ namespace School.Api.Controllers
 
             income.RecordedDate =
                 DateTime.Now;
+
+            if (updatedIncome.CustomerId > 0)
+            {
+                income.CustomerId =
+                    await ResolveCustomerIdAsync(updatedIncome.CustomerId);
+            }
+            else if (income.CustomerId <= 0)
+            {
+                income.CustomerId =
+                    await ResolveCustomerIdAsync();
+            }
 
 
             // =====================================================
