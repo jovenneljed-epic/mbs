@@ -1,4 +1,4 @@
-﻿/* =========================================================
+/* =========================================================
    EPIC CLIENT PORTAL
    FUTURISTIC • ELEGANT • PROFESSIONAL DASHBOARD
    STRUCTURE PRESERVED
@@ -9,12 +9,12 @@
        EPIC COLOR SYSTEM
        ===================================================== */
 
-    --epic-primary: #2563eb;
-    --epic-primary-dark: #1747b5;
-    --epic-primary-light: #eff6ff;
+    --epic-primary: var(--theme-primary, #2563eb);
+    --epic-primary-dark: var(--theme-primary-hover, #1747b5);
+    --epic-primary-light: var(--epic-primary-soft, #eff6ff);
 
-    --epic-cyan: #06b6d4;
-    --epic-cyan-soft: #ecfeff;
+    --epic-cyan: var(--theme-secondary, #06b6d4);
+    --epic-cyan-soft: var(--theme-secondary-soft, #ecfeff);
 
     --epic-bg: #f4f7fb;
     --epic-bg-deep: #eef3f9;
@@ -49,7 +49,7 @@
         0 12px 35px rgba(15, 23, 42, 0.10);
 
     --epic-blue-glow:
-        0 8px 25px rgba(37, 99, 235, 0.20);
+        var(--theme-glow, rgba(37, 99, 235, 0.20));
 }
 
 
@@ -250,9 +250,9 @@
     background:
         linear-gradient(
             135deg,
-            #2563eb 0%,
-            #1d4ed8 55%,
-            #06b6d4 120%
+            var(--epic-primary, #2563eb) 0%,
+            var(--epic-primary-dark, #1d4ed8) 55%,
+            var(--epic-cyan, #06b6d4) 120%
         );
 
     color: #ffffff;
@@ -262,7 +262,7 @@
     font-weight: 800;
 
     box-shadow:
-        0 4px 14px rgba(37, 99, 235, 0.28);
+        0 4px 14px var(--epic-blue-glow, rgba(37, 99, 235, 0.28));
 
     border:
         2px solid rgba(255, 255, 255, 0.9);
@@ -353,16 +353,16 @@
     background:
         linear-gradient(
             120deg,
-            #0f2f72 0%,
-            #1747b5 42%,
-            #2563eb 76%,
-            #0891b2 130%
+            var(--theme-bg-start, #0f2f72) 0%,
+            var(--epic-primary-dark, #1747b5) 42%,
+            var(--epic-primary, #2563eb) 76%,
+            var(--epic-cyan, #0891b2) 130%
         );
 
     color: #ffffff;
 
     box-shadow:
-        0 15px 40px rgba(23, 71, 181, 0.18);
+        0 15px 40px var(--epic-blue-glow, rgba(23, 71, 181, 0.18));
 
     position: relative;
 
@@ -961,7 +961,7 @@
         linear-gradient(
             135deg,
             var(--epic-primary),
-            #1d4ed8
+            var(--epic-primary-dark)
         );
 
     color: #ffffff;
@@ -973,7 +973,7 @@
     cursor: pointer;
 
     box-shadow:
-        0 5px 15px rgba(37, 99, 235, 0.18);
+        0 5px 15px var(--epic-blue-glow, rgba(37, 99, 235, 0.18));
 
     transition:
         background 0.2s ease,
@@ -985,15 +985,15 @@
     background:
         linear-gradient(
             135deg,
-            #1d4ed8,
-            #1747b5
+            var(--epic-primary-dark),
+            var(--theme-bg-start, #1747b5)
         );
 
     transform:
         translateY(-2px);
 
     box-shadow:
-        0 8px 20px rgba(37, 99, 235, 0.25);
+        0 8px 20px var(--epic-blue-glow, rgba(37, 99, 235, 0.25));
 }
 
 
@@ -1135,9 +1135,9 @@
     background:
         linear-gradient(
             135deg,
-            #1747b5,
-            #2563eb,
-            #06b6d4
+            var(--epic-primary-dark),
+            var(--epic-primary),
+            var(--epic-cyan)
         );
 
     color: #ffffff;
@@ -1147,7 +1147,7 @@
     font-weight: 850;
 
     box-shadow:
-        0 10px 25px rgba(37, 99, 235, 0.28);
+        0 10px 25px var(--epic-blue-glow, rgba(37, 99, 235, 0.28));
 }
 
 
@@ -1372,7 +1372,7 @@
         linear-gradient(
             135deg,
             var(--epic-primary),
-            #1d4ed8
+            var(--epic-primary-dark)
         );
 
     color: #ffffff;
@@ -1384,7 +1384,7 @@
     cursor: pointer;
 
     box-shadow:
-        0 5px 15px rgba(37, 99, 235, 0.18);
+        0 5px 15px var(--epic-blue-glow, rgba(37, 99, 235, 0.18));
 
     transition:
         background 0.2s ease,
@@ -1396,15 +1396,15 @@
     background:
         linear-gradient(
             135deg,
-            #1d4ed8,
-            #1747b5
+            var(--epic-primary-dark),
+            var(--theme-bg-start, #1747b5)
         );
 
     transform:
         translateY(-2px);
 
     box-shadow:
-        0 8px 20px rgba(37, 99, 235, 0.25);
+        0 8px 20px var(--epic-blue-glow, rgba(37, 99, 235, 0.25));
 }
 
 

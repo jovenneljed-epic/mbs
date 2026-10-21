@@ -408,9 +408,64 @@ export const getLandingPageContent = (): LandingPageContent => {
     return DEFAULT_LANDING_CONTENT;
 };
 
+export const applyGlobalTheme = (theme?: ColorThemeSettings): void => {
+    try {
+        const activeTheme = theme || getLandingPageContent().colorTheme || DEFAULT_COLOR_THEME;
+        if (!activeTheme || typeof document === "undefined") return;
+
+        const root = document.documentElement;
+
+        // Primary Brand (Admin Portal, Buttons, Highlights, Active Navigation)
+        root.style.setProperty("--epic-primary", activeTheme.primary);
+        root.style.setProperty("--epic-primary-dark", activeTheme.primaryHover);
+        root.style.setProperty("--epic-primary-light", `${activeTheme.primary}1f`);
+        root.style.setProperty("--epic-primary-soft", `${activeTheme.primary}18`);
+        root.style.setProperty("--epic-accent", activeTheme.primary);
+        root.style.setProperty("--epic-accent-soft", `${activeTheme.primary}18`);
+        root.style.setProperty("--border-focus", activeTheme.primary);
+
+        // App Shell & Admin Sidebar Colors
+        root.style.setProperty("--epic-navy", activeTheme.primary);
+        root.style.setProperty("--epic-navy-2", activeTheme.primaryHover);
+        root.style.setProperty("--epic-blue", activeTheme.primary);
+        root.style.setProperty("--epic-blue-dark", activeTheme.primaryHover);
+        root.style.setProperty("--epic-indigo", activeTheme.primary);
+        root.style.setProperty("--epic-blue-glow", activeTheme.glow);
+        root.style.setProperty("--epic-primary-glow", activeTheme.glow);
+
+        // Secondary / Cyan / Gold Accents
+        root.style.setProperty("--epic-cyan", activeTheme.secondary);
+        root.style.setProperty("--epic-cyan-soft", `${activeTheme.secondary}22`);
+        root.style.setProperty("--epic-secondary", activeTheme.secondary);
+        root.style.setProperty("--theme-secondary-soft", `${activeTheme.secondary}22`);
+
+        // Landing Page / Keynote Apple theme variables
+        root.style.setProperty("--apple-blue", activeTheme.primary);
+        root.style.setProperty("--apple-blue-hover", activeTheme.primaryHover);
+        root.style.setProperty("--apple-blue-light", activeTheme.secondary);
+        root.style.setProperty("--apple-blue-glow", activeTheme.glow);
+        root.style.setProperty("--theme-primary", activeTheme.primary);
+        root.style.setProperty("--theme-primary-hover", activeTheme.primaryHover);
+        root.style.setProperty("--theme-secondary", activeTheme.secondary);
+        root.style.setProperty("--theme-glow", activeTheme.glow);
+        root.style.setProperty("--theme-hero-glow", activeTheme.heroGlow);
+        root.style.setProperty("--theme-bg-start", activeTheme.heroBgStart);
+        root.style.setProperty("--theme-bg-end", activeTheme.heroBgEnd);
+        root.style.setProperty("--theme-gradient", activeTheme.gradient);
+        root.style.setProperty("--theme-card-accent", activeTheme.cardAccent);
+
+        root.setAttribute("data-theme-id", activeTheme.themeId);
+    } catch (e) {
+        console.warn("Failed to apply global theme:", e);
+    }
+};
+
 export const saveLandingPageContent = (content: LandingPageContent): void => {
     try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(content));
+        if (content.colorTheme) {
+            applyGlobalTheme(content.colorTheme);
+        }
         window.dispatchEvent(new CustomEvent(LANDING_CONTENT_EVENT, { detail: content }));
     } catch (e) {
         console.error("Failed to save landing page content:", e);
@@ -420,6 +475,7 @@ export const saveLandingPageContent = (content: LandingPageContent): void => {
 export const resetLandingPageContent = (): LandingPageContent => {
     try {
         localStorage.removeItem(STORAGE_KEY);
+        applyGlobalTheme(DEFAULT_COLOR_THEME);
         window.dispatchEvent(new CustomEvent(LANDING_CONTENT_EVENT, { detail: DEFAULT_LANDING_CONTENT }));
     } catch (e) {
         console.error("Failed to reset landing page content:", e);

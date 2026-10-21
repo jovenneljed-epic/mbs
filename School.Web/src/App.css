@@ -8,11 +8,11 @@
 :root {
     --epic-sidebar-width: 270px;
 
-    --epic-navy: #1877f2;
-    --epic-navy-2: #166fe5;
-    --epic-blue: #1877f2;
-    --epic-blue-dark: #0e5aae;
-    --epic-indigo: #1877f2;
+    --epic-navy: var(--epic-primary, #1877f2);
+    --epic-navy-2: var(--epic-primary-dark, #166fe5);
+    --epic-blue: var(--epic-primary, #1877f2);
+    --epic-blue-dark: var(--epic-primary-dark, #0e5aae);
+    --epic-indigo: var(--epic-primary, #1877f2);
 
     --epic-bg: #f0f2f5;
     --epic-white: #ffffff;
@@ -160,13 +160,13 @@ textarea {
 
     border-radius: 50%;
 
-    background: #1877f2;
+    background: var(--epic-primary, #1877f2);
 
     color: #ffffff;
 
     box-shadow:
         0 4px 12px
-        rgba(24, 119, 242, 0.35);
+        var(--epic-primary-glow, rgba(24, 119, 242, 0.35));
 }
 
 .epic-brand-text {
@@ -186,7 +186,7 @@ textarea {
 .epic-brand-subtitle {
     margin-top: 2px;
 
-    color: #1877f2;
+    color: var(--epic-primary, #1877f2);
 
     font-size: 10px;
     font-weight: 700;
@@ -224,9 +224,9 @@ textarea {
 
     border-radius: 50%;
 
-    background: #e7f3ff;
+    background: var(--epic-primary-light, #e7f3ff);
 
-    color: #1877f2;
+    color: var(--epic-primary, #1877f2);
 
     font-size: 16px;
 }
@@ -376,9 +376,9 @@ textarea {
 }
 
 .epic-nav-item.active {
-    color: #1877f2;
+    color: var(--epic-primary, #1877f2);
 
-    background: #e7f3ff;
+    background: var(--epic-primary-light, #e7f3ff);
     font-weight: 700;
 
     box-shadow: none;
@@ -395,7 +395,7 @@ textarea {
     text-align: center;
 
     font-size: 16px;
-    color: #1877f2;
+    color: var(--epic-primary, #1877f2);
 }
 
 .epic-nav-item > span:last-child {
@@ -475,7 +475,7 @@ textarea {
     display: grid;
     place-items: center;
 
-    background: #1877f2;
+    background: var(--epic-primary, #1877f2);
 
     color: #ffffff;
 
@@ -682,10 +682,10 @@ textarea {
     height: 36px;
     flex: 0 0 36px;
     border-radius: 50%;
-    background: #1877f2;
+    background: var(--epic-primary, #1877f2);
     display: grid;
     place-items: center;
-    box-shadow: 0 2px 6px rgba(24, 119, 242, 0.35);
+    box-shadow: 0 2px 6px var(--epic-primary-glow, rgba(24, 119, 242, 0.35));
 }
 
 .fb-topbar-search {
@@ -704,8 +704,8 @@ textarea {
 
 .fb-topbar-search:focus-within {
     background: #ffffff;
-    border-color: #1877f2;
-    box-shadow: 0 0 0 3px rgba(24, 119, 242, 0.15);
+    border-color: var(--epic-primary, #1877f2);
+    box-shadow: 0 0 0 3px var(--epic-primary-soft, rgba(24, 119, 242, 0.15));
 }
 
 .fb-topbar-search input {
@@ -758,7 +758,7 @@ textarea {
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    background: #1877f2;
+    background: var(--epic-primary, #1877f2);
     color: #ffffff;
     border: none;
     border-radius: 9999px;
@@ -766,15 +766,15 @@ textarea {
     font-size: 13px;
     font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 2px 6px rgba(24, 119, 242, 0.35);
+    box-shadow: 0 2px 6px var(--epic-primary-glow, rgba(24, 119, 242, 0.35));
     transition: all 0.15s ease;
     white-space: nowrap;
 }
 
 .fb-edit-landing-btn:hover {
-    background: #166fe5;
+    background: var(--epic-primary-dark, #166fe5);
     transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgba(24, 119, 242, 0.4);
+    box-shadow: 0 4px 10px var(--epic-primary-glow, rgba(24, 119, 242, 0.4));
 }
 
 .epic-topbar-right {
@@ -791,8 +791,8 @@ textarea {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    background: #e7f3ff;
-    color: #1877f2;
+    background: var(--epic-primary-light, #e7f3ff);
+    color: var(--epic-primary, #1877f2);
     border: 1px solid rgba(24, 119, 242, 0.25);
     border-radius: 9999px;
     padding: 6px 13px;
@@ -804,7 +804,7 @@ textarea {
 }
 
 .fb-public-switch-btn:hover {
-    background: #1877f2;
+    background: var(--epic-primary, #1877f2);
     color: #ffffff;
 }
 
@@ -875,7 +875,7 @@ textarea {
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: #1877f2;
+    background: var(--epic-primary, #1877f2);
     color: #ffffff;
     display: grid;
     place-items: center;
@@ -905,8 +905,8 @@ textarea {
 .fb-role-pill {
     display: inline-block;
     margin-top: 1px;
-    background: #e7f3ff;
-    color: #1877f2;
+    background: var(--epic-primary-light, #e7f3ff);
+    color: var(--epic-primary, #1877f2);
     font-size: 10px;
     font-weight: 800;
     padding: 1px 6px;

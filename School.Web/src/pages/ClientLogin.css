@@ -4,11 +4,12 @@
    ========================================================= */
 
 :root {
-    --epic-navy: #07111f;
-    --epic-navy-light: #0c1b2e;
-    --epic-blue: #1677ff;
-    --epic-blue-dark: #0b5ed7;
-    --epic-cyan: #29c7ff;
+    --epic-navy: var(--theme-bg-start, #07111f);
+    --epic-navy-light: var(--theme-bg-end, #0c1b2e);
+    --epic-blue: var(--epic-primary, #1677ff);
+    --epic-blue-dark: var(--epic-primary-dark, #0b5ed7);
+    --epic-cyan: var(--epic-secondary, #29c7ff);
+    --epic-blue-glow: var(--epic-primary-glow, rgba(22, 119, 255, 0.24));
 
     --epic-white: #ffffff;
     --epic-text: #102033;
@@ -1060,9 +1061,9 @@
     background:
         linear-gradient(
             135deg,
-            #0b63df,
-            #1677ff 55%,
-            #159fe9
+            var(--epic-blue-dark, #0b63df),
+            var(--epic-blue, #1677ff) 55%,
+            var(--epic-cyan, #159fe9)
         );
 
     color: white;
@@ -1075,7 +1076,7 @@
     cursor: pointer;
 
     box-shadow:
-        0 12px 25px rgba(22, 119, 255, 0.24);
+        0 12px 25px var(--epic-blue-glow, rgba(22, 119, 255, 0.24));
 
     transition:
         transform 0.2s ease,
@@ -1612,7 +1613,7 @@
 
 .epic-student-tab.active {
     background: #ffffff;
-    color: #1677ff;
+    color: var(--epic-blue, #1677ff);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
@@ -1643,7 +1644,7 @@
     background: none;
     border: none;
     padding: 0;
-    color: #1677ff;
+    color: var(--epic-blue, #1677ff);
     font-weight: 600;
     font-size: 13px;
     cursor: pointer;

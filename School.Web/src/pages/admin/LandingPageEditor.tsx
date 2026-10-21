@@ -4,6 +4,7 @@ import {
     getLandingPageContent,
     saveLandingPageContent,
     resetLandingPageContent,
+    applyGlobalTheme,
     COLOR_THEME_PRESETS,
     type LandingPageContent,
     type FieldModuleItem,
@@ -70,21 +71,26 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({ onNavigate
                 ...prev,
                 colorTheme: { ...preset }
             }));
+            applyGlobalTheme(preset);
         }
     };
 
     const handleCustomColorChange = (field: keyof ColorThemeSettings, value: string) => {
-        setContent(prev => ({
-            ...prev,
-            colorTheme: {
+        setContent(prev => {
+            const nextTheme = {
                 ...prev.colorTheme,
                 themeId: "custom",
                 name: "Custom Palette",
                 badge: "CUSTOM",
                 description: "User customized color palette",
                 [field]: value
-            }
-        }));
+            };
+            applyGlobalTheme(nextTheme);
+            return {
+                ...prev,
+                colorTheme: nextTheme
+            };
+        });
     };
 
     const handleVideoSettingChange = (field: keyof PromoVideoSettings, value: any) => {

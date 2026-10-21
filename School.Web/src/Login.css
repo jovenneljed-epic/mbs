@@ -29,7 +29,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    background: radial-gradient( circle at 20% 20%, rgba(68, 91, 255, 0.25), transparent 35% ), radial-gradient( circle at 80% 80%, rgba(35, 63, 150, 0.35), transparent 40% ), linear-gradient( 145deg, #081329 0%, #101c36 48%, #172b54 100% );
+    background: radial-gradient( circle at 20% 20%, var(--theme-hero-glow, rgba(68, 91, 255, 0.25)), transparent 35% ), radial-gradient( circle at 80% 80%, var(--epic-primary-glow, rgba(35, 63, 150, 0.35)), transparent 40% ), linear-gradient( 145deg, var(--theme-bg-start, #081329) 0%, var(--theme-bg-end, #101c36) 48%, var(--epic-primary-dark, #172b54) 100% );
 }
 
 
@@ -340,8 +340,8 @@
 
 
     .epic-input-wrapper input:focus {
-        border-color: #0284c7;
-        box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.12);
+        border-color: var(--epic-primary, #0284c7);
+        box-shadow: 0 0 0 4px var(--epic-primary-soft, rgba(2, 132, 199, 0.12));
     }
 
 
@@ -401,7 +401,7 @@
     .epic-remember input {
         width: 15px;
         height: 15px;
-        accent-color: #0284c7;
+        accent-color: var(--epic-primary, #0284c7);
     }
 
 
@@ -424,20 +424,20 @@
     gap: 12px;
     border: 0;
     border-radius: 10px;
-    background: linear-gradient( 135deg, #0284c7, #0b3558 );
+    background: linear-gradient( 135deg, var(--epic-primary, #0284c7), var(--epic-primary-dark, #0b3558) );
     color: white;
     font-family: inherit;
     font-size: 14px;
     font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 8px 20px rgba(2, 132, 199, 0.25);
+    box-shadow: 0 8px 20px var(--epic-primary-glow, rgba(2, 132, 199, 0.25));
     transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
 }
 
 
     .epic-login-button:hover:not(:disabled) {
         transform: translateY(-1px);
-        box-shadow: 0 12px 25px rgba(2, 132, 199, 0.35);
+        box-shadow: 0 12px 25px var(--epic-primary-glow, rgba(2, 132, 199, 0.35));
     }
 
 
