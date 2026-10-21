@@ -750,6 +750,44 @@ static async Task SeedDatabaseAsync(
             services.GetRequiredService<
                 ApplicationDbContext>();
 
+        // --------------------------------------------------------
+        // INSTITUTION / CUSTOMER SEEDING & USER SYNC
+        // --------------------------------------------------------
+
+        if (!await context.Customers.AnyAsync())
+        {
+            var defaultCustomer = new Customer
+            {
+                ChurchName = "Mindanao Bible Seminary",
+                ContactPerson = "System Administrator",
+                Email = "admin@mbs.edu.ph",
+                Status = "Active",
+                CreatedDate = DateTime.UtcNow
+            };
+            context.Customers.Add(defaultCustomer);
+            await context.SaveChangesAsync();
+        }
+
+        var defaultCustId = await context.Customers
+            .OrderBy(c => c.CustomerId)
+            .Select(c => c.CustomerId)
+            .FirstOrDefaultAsync();
+
+        if (defaultCustId > 0)
+        {
+            var unassignedUsers = await context.Users
+                .Where(u => !u.CustomerId.HasValue || u.CustomerId.Value <= 0)
+                .ToListAsync();
+
+            if (unassignedUsers.Any())
+            {
+                foreach (var u in unassignedUsers)
+                {
+                    u.CustomerId = defaultCustId;
+                }
+                await context.SaveChangesAsync();
+            }
+        }
 
         // --------------------------------------------------------
         // CLIENT ROLES

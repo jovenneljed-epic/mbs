@@ -115,7 +115,7 @@ namespace School.Api.Controllers
         // =========================================================
 
         [HttpPost]
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = "ADMIN,ADMINISTRATOR,SYSTEM ADMINISTRATOR,SUPER ADMIN")]
         public async Task<IActionResult> CreateRole(
             CreateRoleRequest request)
         {
@@ -230,7 +230,7 @@ namespace School.Api.Controllers
         // =========================================================
 
         [HttpPut("{id:int}")]
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = "ADMIN,ADMINISTRATOR,SYSTEM ADMINISTRATOR,SUPER ADMIN")]
         public async Task<IActionResult> UpdateRole(
             int id,
             UpdateRoleRequest request)
@@ -249,7 +249,7 @@ namespace School.Api.Controllers
                 });
             }
 
-            if ((role.RoleId == 1 || role.RoleName == "ADMIN") && request != null && !request.IsActive)
+            if ((role.RoleId == 1 || role.RoleName.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) || role.RoleName.ToUpper().Contains("ADMIN")) && request != null && !request.IsActive)
             {
                 return BadRequest(new
                 {
@@ -325,7 +325,7 @@ namespace School.Api.Controllers
         // =========================================================
 
         [HttpDelete("{id:int}")]
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = "ADMIN,ADMINISTRATOR,SYSTEM ADMINISTRATOR,SUPER ADMIN")]
         public async Task<IActionResult> DeleteRole(
             int id)
         {
@@ -348,7 +348,7 @@ namespace School.Api.Controllers
             // PROTECT MASTER SYSTEM ADMINISTRATOR
             // -----------------------------------------------------
 
-            if (role.RoleId == 1 || role.RoleName == "ADMIN")
+            if (role.RoleId == 1 || role.RoleName.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) || role.RoleName.ToUpper().Contains("ADMIN"))
             {
                 return BadRequest(new
                 {
@@ -485,7 +485,7 @@ namespace School.Api.Controllers
             // RETURN COMPLETE PERMISSION LIST
             // -----------------------------------------------------
 
-            bool isAdminRole = role.RoleId == 1 || role.RoleName == "ADMIN";
+            bool isAdminRole = role.RoleId == 1 || role.RoleName.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) || role.RoleName.ToUpper().Contains("ADMIN");
 
             var permissions =
                 await _context.Permissions
@@ -540,7 +540,7 @@ namespace School.Api.Controllers
         // =========================================================
 
         [HttpPut("{id:int}/permissions")]
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = "ADMIN,ADMINISTRATOR,SYSTEM ADMINISTRATOR,SUPER ADMIN")]
         public async Task<IActionResult> UpdatePermissions(
             int id,
             List<PermissionUpdateRequest> requests)

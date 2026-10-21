@@ -133,11 +133,9 @@ namespace School.Api.Controllers
 
             if (member.CustomerId <= 0)
             {
-                return BadRequest(new
-                {
-                    message =
-                        "MEMBER IS NOT ASSIGNED TO A CUSTOMER."
-                });
+                var defaultCustId = await GetDefaultCustomerIdAsync();
+                member.CustomerId = defaultCustId;
+                await _context.SaveChangesAsync();
             }
 
             // --------------------------------------------------------
@@ -564,40 +562,36 @@ namespace School.Api.Controllers
             }
 
             // ========================================================
-            // CLIENT VALIDATION
+            // CUSTOMER RESOLUTION & ASSIGNMENT
+            //
+            // Mindanao Bible Seminary (MBS) is an educational institution.
+            // Portal users (administrators, staff, faculty, students)
+            // must never be blocked by legacy tenant CustomerId requirements.
+            // If missing or unassigned, auto-assign to the institution customer.
             // ========================================================
 
-            if (roleName == "CLIENT")
+            if (!user.CustomerId.HasValue || user.CustomerId.Value <= 0)
             {
-                if (!user.CustomerId.HasValue ||
-                    user.CustomerId.Value <= 0)
+                var defaultCustomerId = await GetDefaultCustomerIdAsync();
+                user.CustomerId = defaultCustomerId;
+
+                if (IsAdminRole(roleName))
                 {
-                    return Unauthorized(new
-                    {
-                        message =
-                            "CLIENT ACCOUNT IS NOT ASSIGNED " +
-                            "TO A CUSTOMER."
-                    });
+                    user.AccountType = "SYSTEM";
                 }
+                else if (string.IsNullOrWhiteSpace(user.AccountType) || user.AccountType == "CLIENT")
+                {
+                    user.AccountType = (roleName == "STUDENT" || roleName == "MEMBER") ? "MEMBER" : "STAFF";
+                }
+
+                await _context.SaveChangesAsync();
             }
 
-            // ========================================================
-            // CUSTOMER VALIDATION
-            //
-            // ADMIN accounts are allowed without CustomerId.
-            // Other accounts require a CustomerId.
-            // ========================================================
-
-            if (
-                roleName != "ADMIN" &&
-                (!user.CustomerId.HasValue ||
-                 user.CustomerId.Value <= 0))
+            // Ensure member record (if any) is also assigned to CustomerId
+            if (member != null && member.CustomerId <= 0 && user.CustomerId.HasValue)
             {
-                return Unauthorized(new
-                {
-                    message =
-                        "USER IS NOT ASSIGNED TO A CUSTOMER."
-                });
+                member.CustomerId = user.CustomerId.Value;
+                await _context.SaveChangesAsync();
             }
 
             // ========================================================
@@ -811,7 +805,7 @@ namespace School.Api.Controllers
             // ADMIN HAS FULL ACCESS
             // --------------------------------------------------------
 
-            if (roleName == "ADMIN")
+            if (IsAdminRole(roleName))
             {
                 return new List<object>
                 {
@@ -910,11 +904,14 @@ namespace School.Api.Controllers
 
             if (member.CustomerId <= 0)
             {
-                return Unauthorized(new
+                if (user.CustomerId.HasValue && user.CustomerId.Value > 0)
                 {
-                    message =
-                        "MEMBER IS NOT ASSIGNED TO A CUSTOMER."
-                });
+                    member.CustomerId = user.CustomerId.Value;
+                }
+                else
+                {
+                    member.CustomerId = 1;
+                }
             }
 
             return null;
@@ -1091,6 +1088,14 @@ namespace School.Api.Controllers
                         user.RoleId.ToString())
                 };
 
+            if (IsAdminRole(roleName) && !string.Equals(roleName, "ADMIN", StringComparison.OrdinalIgnoreCase))
+            {
+                claims.Add(
+                    new Claim(
+                        ClaimTypes.Role,
+                        "ADMIN"));
+            }
+
             if (user.MemberId.HasValue)
             {
                 claims.Add(
@@ -1198,6 +1203,64 @@ namespace School.Api.Controllers
             return roleName
                 .Trim()
                 .ToUpperInvariant();
+        }
+
+        // ============================================================
+        // ADMIN ROLE CHECK
+        // ============================================================
+
+        private static bool IsAdminRole(
+            string? roleName)
+        {
+            if (string.IsNullOrWhiteSpace(roleName))
+            {
+                return false;
+            }
+
+            var normalized = roleName.Trim().ToUpperInvariant();
+            return normalized == "ADMIN" ||
+                   normalized == "ADMINISTRATOR" ||
+                   normalized == "SYSTEM ADMINISTRATOR" ||
+                   normalized == "SUPER ADMIN" ||
+                   normalized == "SUPERADMIN" ||
+                   normalized.Contains("ADMIN");
+        }
+
+        // ============================================================
+        // DEFAULT CUSTOMER ID RESOLUTION
+        // ============================================================
+
+        private async Task<int> GetDefaultCustomerIdAsync()
+        {
+            var customerId = await _context.Customers
+                .OrderBy(c => c.CustomerId)
+                .Select(c => c.CustomerId)
+                .FirstOrDefaultAsync();
+
+            if (customerId > 0)
+            {
+                return customerId;
+            }
+
+            try
+            {
+                var defaultCustomer = new Customer
+                {
+                    ChurchName = "Mindanao Bible Seminary",
+                    ContactPerson = "System Administrator",
+                    Email = "admin@mbs.edu.ph",
+                    Status = "Active",
+                    CreatedDate = DateTime.UtcNow
+                };
+
+                _context.Customers.Add(defaultCustomer);
+                await _context.SaveChangesAsync();
+                return defaultCustomer.CustomerId;
+            }
+            catch
+            {
+                return 1;
+            }
         }
 
         // ============================================================

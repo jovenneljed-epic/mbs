@@ -1,4 +1,4 @@
-﻿using BCrypt.Net;
+using BCrypt.Net;
 using School.Api.Data;
 using School.Api.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -97,7 +97,7 @@ namespace School.Api.Controllers
         // =========================================================
 
         [HttpPost]
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = "ADMIN,ADMINISTRATOR,SYSTEM ADMINISTRATOR,SUPER ADMIN")]
         public async Task<IActionResult> CreateUser(
             CreateUserRequest request)
         {
@@ -188,6 +188,15 @@ namespace School.Api.Controllers
             // Create user
             // -----------------------------------------------------
 
+            var defaultCustomerId = await _context.Customers
+                .OrderBy(c => c.CustomerId)
+                .Select(c => c.CustomerId)
+                .FirstOrDefaultAsync();
+
+            var isRoleAdmin = role.RoleName != null &&
+                (role.RoleName.Trim().ToUpperInvariant() == "ADMIN" ||
+                 role.RoleName.Trim().ToUpperInvariant().Contains("ADMIN"));
+
             var user = new User
             {
                 Username = username,
@@ -199,6 +208,12 @@ namespace School.Api.Controllers
                 FullName = request.FullName.Trim(),
 
                 RoleId = role.RoleId,
+
+                CustomerId = defaultCustomerId > 0 ? defaultCustomerId : 1,
+
+                AccountType = isRoleAdmin ? "SYSTEM" : "STAFF",
+
+                ApprovalStatus = "APPROVED",
 
                 IsActive = true,
 
@@ -235,7 +250,7 @@ namespace School.Api.Controllers
         // =========================================================
 
         [HttpPut("{id:int}")]
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = "ADMIN,ADMINISTRATOR,SYSTEM ADMINISTRATOR,SUPER ADMIN")]
         public async Task<IActionResult> UpdateUser(
             int id,
             UpdateUserRequest request)
@@ -299,6 +314,28 @@ namespace School.Api.Controllers
                 user.IsActive = request.IsActive.Value;
             }
 
+            if (!user.CustomerId.HasValue || user.CustomerId.Value <= 0)
+            {
+                var defId = await _context.Customers
+                    .OrderBy(c => c.CustomerId)
+                    .Select(c => c.CustomerId)
+                    .FirstOrDefaultAsync();
+                user.CustomerId = defId > 0 ? defId : 1;
+            }
+
+            var isRoleAdmin = role.RoleName != null &&
+                (role.RoleName.Trim().ToUpperInvariant() == "ADMIN" ||
+                 role.RoleName.Trim().ToUpperInvariant().Contains("ADMIN"));
+
+            if (isRoleAdmin)
+            {
+                user.AccountType = "SYSTEM";
+            }
+            else if (string.IsNullOrWhiteSpace(user.AccountType) || user.AccountType == "CLIENT")
+            {
+                user.AccountType = "STAFF";
+            }
+
             await _context.SaveChangesAsync();
 
             return Ok(new
@@ -326,7 +363,7 @@ namespace School.Api.Controllers
         // =========================================================
 
         [HttpPut("{id:int}/password")]
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = "ADMIN,ADMINISTRATOR,SYSTEM ADMINISTRATOR,SUPER ADMIN")]
         public async Task<IActionResult> ChangePassword(
             int id,
             ChangePasswordRequest request)
@@ -394,7 +431,7 @@ namespace School.Api.Controllers
         // =========================================================
 
         [HttpPut("{id:int}/status")]
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = "ADMIN,ADMINISTRATOR,SYSTEM ADMINISTRATOR,SUPER ADMIN")]
         public async Task<IActionResult> UpdateStatus(
             int id,
             UpdateUserStatusRequest request)
@@ -458,7 +495,7 @@ namespace School.Api.Controllers
         // =========================================================
 
         [HttpDelete("{id:int}")]
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = "ADMIN,ADMINISTRATOR,SYSTEM ADMINISTRATOR,SUPER ADMIN")]
         public async Task<IActionResult> DeleteUser(int id)
         {
             // -----------------------------------------------------
@@ -502,15 +539,15 @@ namespace School.Api.Controllers
             // -----------------------------------------------------
 
             if (user.Role != null &&
-                user.Role.RoleName.Equals(
-                    "ADMIN",
-                    StringComparison.OrdinalIgnoreCase))
+                (user.Role.RoleName.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) ||
+                 user.Role.RoleName.ToUpper().Contains("ADMIN")))
             {
                 var adminCount = await _context.Users
                     .Include(u => u.Role)
                     .CountAsync(u =>
                         u.Role != null &&
-                        u.Role.RoleName.ToUpper() == "ADMIN");
+                        (u.Role.RoleName.ToUpper() == "ADMIN" ||
+                         u.Role.RoleName.ToUpper().Contains("ADMIN")));
 
                 if (adminCount <= 1)
                 {
