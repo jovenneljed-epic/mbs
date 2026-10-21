@@ -1,4 +1,3 @@
-
 import React, {
     useCallback,
     useEffect,
@@ -9,43 +8,51 @@ import React, {
 } from "react";
 import {
     Calendar,
-    CalendarDays,
-    CheckCircle2,
-    CheckCheck,
-    Search,
+    Clock,
     Plus,
-    AlertCircle
+    Search,
+    CheckCircle2,
+    AlertCircle,
+    BookOpen,
+    Users,
+    MapPin,
+    GraduationCap,
+    Trash2,
+    Edit3,
+    LayoutGrid,
+    List,
+    RefreshCw,
+    X,
+    Layers,
+    BookCheck,
+    CheckCheck,
+    CalendarDays
 } from "lucide-react";
 
 import { API_BASE_URL } from "../config";
+import "./ChurchServicesPage.css";
 
 // =========================================================
-// TYPES
+// ACADEMIC CLASS SCHEDULE INTERFACES
 // =========================================================
 
-interface ChurchService {
+export interface ClassSchedule {
     churchServiceId: number;
-
-    serviceName: string;
-    serviceType: string;
-
-    serviceDate: string;
-
-    startTime?: string | null;
-    endTime?: string | null;
-
-    location?: string | null;
-    serviceLeader?: string | null;
-    speaker?: string | null;
-    description?: string | null;
-
-    status: string;
-
+    serviceName: string;       // Subject / Class Name
+    serviceType: string;       // Class Format: LECTURE, LABORATORY, etc.
+    serviceDate: string;       // Class Date (YYYY-MM-DD)
+    startTime?: string | null; // Start Time (HH:mm)
+    endTime?: string | null;   // End Time (HH:mm)
+    location?: string | null;  // Classroom / Room / Venue
+    serviceLeader?: string | null; // Section / Batch / Grade Level
+    speaker?: string | null;   // Instructor / Professor / Teacher
+    description?: string | null; // Syllabus / Class Agenda / Notes
+    status: string;            // SCHEDULED, ONGOING, COMPLETED, CANCELLED
     createdDate?: string;
     updatedDate?: string | null;
 }
 
-interface ChurchServiceForm {
+interface ClassScheduleForm {
     serviceName: string;
     serviceType: string;
     serviceDate: string;
@@ -58,58 +65,77 @@ interface ChurchServiceForm {
     status: string;
 }
 
-type ServiceFilter =
-    | "ALL"
-    | "UPCOMING"
-    | "PAST";
+type TabFilter = "ALL" | "UPCOMING" | "PAST";
+type ViewMode = "cards" | "table";
 
 // =========================================================
-// API
-// =========================================================
-
-const API_BASE =
-    `${API_BASE_URL}/ChurchServices`;
-
-// =========================================================
-// CONSTANTS
+// CONSTANTS & ACADEMIC DICTIONARIES
 // =========================================================
 
 const MAX_DESCRIPTION_LENGTH = 500;
 
-const EMPTY_FORM: ChurchServiceForm = {
+export const CLASS_FORMATS: [string, string][] = [
+    ["LECTURE", "Lecture Period"],
+    ["LABORATORY", "Laboratory / Practical"],
+    ["SEMINAR", "Seminar & Discussion"],
+    ["ONLINE VIRTUAL", "Online Virtual Classroom (Zoom/Meet)"],
+    ["MODULAR", "Modular & Self-Paced"],
+    ["REVIEW", "Review & Tutorial Session"],
+    ["EXAMINATION", "Major Examination / Quiz"],
+    ["WORKSHOP", "Ministry Practicum / Workshop"],
+    ["OTHER", "Special Academic Session"],
+];
+
+export const CLASS_STATUSES: [string, string][] = [
+    ["SCHEDULED", "Scheduled"],
+    ["ONGOING", "In Session / Ongoing"],
+    ["COMPLETED", "Completed"],
+    ["POSTPONED", "Postponed"],
+    ["CANCELLED", "Cancelled / Suspended"],
+];
+
+const SUBJECT_SUGGESTIONS = [
+    "Old Testament Survey & Historical Books",
+    "Systematic Theology 1 - Doctrine of God",
+    "New Testament Greek & Syntax",
+    "Biblical Hermeneutics & Exegesis",
+    "Christian Ethics & Servant Leadership",
+    "Homiletics & Expository Preaching",
+    "Church History & Christian Thought",
+    "Evangelism & Global Missions Strategy",
+];
+
+const SECTION_SUGGESTIONS = [
+    "Section A - 1st Year",
+    "Section B - 2nd Year",
+    "Batch Alpha 2026",
+    "Evening Class Cohort",
+    "Senior High Department",
+];
+
+const ROOM_SUGGESTIONS = [
+    "Room 101 - Academic Wing",
+    "Room 204 - Theology Hall",
+    "Lecture Hall A (Main Campus)",
+    "Computer / Multimedia Lab",
+    "Online Zoom Room / Studio",
+];
+
+const EMPTY_FORM: ClassScheduleForm = {
     serviceName: "",
-    serviceType: "SUNDAY WORSHIP",
-    serviceDate: "",
-    startTime: "",
-    endTime: "",
-    location:
-        "Luke 4:18 Ministries – San Vicente Church",
-    serviceLeader: "",
+    serviceType: "LECTURE",
+    serviceDate: new Date().toISOString().split("T")[0],
+    startTime: "08:00",
+    endTime: "09:30",
+    location: "Room 101 - Academic Wing",
+    serviceLeader: "Section A - 1st Year",
     speaker: "",
     description: "",
     status: "SCHEDULED",
 };
 
-const SERVICE_TYPES: [string, string][] = [
-    ["SUNDAY WORSHIP", "Sunday Worship"],
-    ["MIDWEEK SERVICE", "Midweek Service"],
-    ["PRAYER MEETING", "Prayer Meeting"],
-    ["YOUTH FELLOWSHIP", "Youth Fellowship"],
-    ["BIBLE STUDY", "Bible Study"],
-    ["SPECIAL SERVICE", "Special Service"],
-    ["OUTREACH", "Outreach"],
-    ["OTHER", "Other"],
-];
-
-const SERVICE_STATUSES: [string, string][] = [
-    ["SCHEDULED", "Scheduled"],
-    ["COMPLETED", "Completed"],
-    ["POSTPONED", "Postponed"],
-    ["CANCELLED", "Cancelled"],
-];
-
 // =========================================================
-// AUTH
+// AUTH TOKEN HELPER
 // =========================================================
 
 const getToken = (): string => {
@@ -125,2213 +151,1203 @@ const getToken = (): string => {
 
 const getHeaders = (): HeadersInit => {
     const token = getToken();
-
     return {
         "Content-Type": "application/json",
         Accept: "application/json",
-
-        ...(token
-            ? {
-                Authorization: `Bearer ${token}`,
-            }
-            : {}),
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
     };
-};
-
-// =========================================================
-// HELPERS
-// =========================================================
-
-const normalizeString = (
-    value?: string | null
-): string => {
-    return value?.trim() || "";
-};
-
-const normalizeTimeForInput = (
-    value?: string | null
-): string => {
-    if (!value) {
-        return "";
-    }
-
-    /*
-     * API may return:
-     *
-     * 09:00
-     * 09:00:00
-     * 09:00:00.0000000
-     *
-     * HTML input[type=time] expects HH:mm.
-     */
-
-    const match = value.match(
-        /^(\d{2}):(\d{2})/
-    );
-
-    if (!match) {
-        return "";
-    }
-
-    return `${match[1]}:${match[2]}`;
-};
-
-const normalizeTimeForApi = (
-    value?: string
-): string | null => {
-    if (!value?.trim()) {
-        return null;
-    }
-
-    const cleanValue =
-        value.trim();
-
-    /*
-     * Convert:
-     *
-     * 09:00
-     *
-     * into:
-     *
-     * 09:00:00
-     */
-
-    if (
-        /^\d{2}:\d{2}$/.test(
-            cleanValue
-        )
-    ) {
-        return `${cleanValue}:00`;
-    }
-
-    /*
-     * Already HH:mm:ss
-     */
-
-    if (
-        /^\d{2}:\d{2}:\d{2}$/.test(
-            cleanValue
-        )
-    ) {
-        return cleanValue;
-    }
-
-    return null;
-};
-
-const formatDate = (
-    value?: string | null
-): string => {
-    if (!value) {
-        return "—";
-    }
-
-    const date =
-        new Date(value);
-
-    if (
-        Number.isNaN(
-            date.getTime()
-        )
-    ) {
-        return value;
-    }
-
-    return date.toLocaleDateString(
-        "en-US",
-        {
-            weekday: "short",
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-        }
-    );
-};
-
-const formatTime = (
-    value?: string | null
-): string => {
-    if (!value) {
-        return "";
-    }
-
-    const parts =
-        value.split(":");
-
-    if (parts.length < 2) {
-        return value;
-    }
-
-    const hour =
-        Number(parts[0]);
-
-    const minute =
-        parts[1];
-
-    if (
-        Number.isNaN(hour)
-    ) {
-        return value;
-    }
-
-    const suffix =
-        hour >= 12
-            ? "PM"
-            : "AM";
-
-    const displayHour =
-        hour % 12 || 12;
-
-    return `${displayHour}:${minute} ${suffix}`;
-};
-
-const isUpcoming = (
-    service: ChurchService
-): boolean => {
-    if (
-        !service.serviceDate
-    ) {
-        return false;
-    }
-
-    const today =
-        new Date();
-
-    today.setHours(
-        0,
-        0,
-        0,
-        0
-    );
-
-    const serviceDate =
-        new Date(
-            service.serviceDate
-        );
-
-    if (
-        Number.isNaN(
-            serviceDate.getTime()
-        )
-    ) {
-        return false;
-    }
-
-    serviceDate.setHours(
-        0,
-        0,
-        0,
-        0
-    );
-
-    return (
-        serviceDate >= today
-    );
-};
-
-const statusClass = (
-    status?: string | null
-): string => {
-    switch (
-        status?.toUpperCase()
-    ) {
-        case "COMPLETED":
-            return "epic-status-completed";
-
-        case "CANCELLED":
-            return "epic-status-cancelled";
-
-        case "POSTPONED":
-            return "epic-status-postponed";
-
-        default:
-            return "epic-status-scheduled";
-    }
-};
-
-// =========================================================
-// API ERROR HANDLER
-// =========================================================
-
-const getErrorMessage = async (
-    response: Response,
-    fallback: string
-): Promise<string> => {
-    const text =
-        await response.text();
-
-    if (!text) {
-        return `${fallback} (${response.status})`;
-    }
-
-    try {
-        const data =
-            JSON.parse(text);
-
-        console.error(
-            "API ERROR RESPONSE:",
-            data
-        );
-
-        /*
-         * ASP.NET Core validation:
-         *
-         * {
-         *   errors: {
-         *      Description: [
-         *          "The field Description must..."
-         *      ]
-         *   }
-         * }
-         */
-
-        if (data?.errors) {
-            const messages =
-                Object.entries(
-                    data.errors
-                ).flatMap(
-                    ([
-                        field,
-                        errors,
-                    ]) => {
-                        if (
-                            Array.isArray(
-                                errors
-                            )
-                        ) {
-                            return errors.map(
-                                (message) =>
-                                    `${field}: ${String(message)}`
-                            );
-                        }
-
-                        return [
-                            `${field}: ${String(errors)}`,
-                        ];
-                    }
-                );
-
-            if (
-                messages.length > 0
-            ) {
-                return messages.join(
-                    " | "
-                );
-            }
-        }
-
-        return (
-            data?.message ||
-            data?.title ||
-            data?.error ||
-            fallback
-        );
-    } catch {
-        return text;
-    }
 };
 
 // =========================================================
 // COMPONENT
 // =========================================================
 
-const ChurchServicesPage: React.FC =
-    () => {
-        // =====================================================
-        // STATE
-        // =====================================================
+export const ChurchServicesPage: React.FC = () => {
+    const [schedules, setSchedules] = useState<ClassSchedule[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [saving, setSaving] = useState<boolean>(false);
+    const [error, setError] = useState<string>("");
+    const [success, setSuccess] = useState<string>("");
 
-        const [
-            services,
-            setServices,
-        ] = useState<
-            ChurchService[]
-        >([]);
+    // Filters & Search
+    const [search, setSearch] = useState<string>("");
+    const [tabFilter, setTabFilter] = useState<TabFilter>("ALL");
+    const [formatFilter, setFormatFilter] = useState<string>("ALL");
+    const [statusFilter, setStatusFilter] = useState<string>("ALL");
+    const [viewMode, setViewMode] = useState<ViewMode>(() => {
+        return (localStorage.getItem("mbs_schedule_view") as ViewMode) || "cards";
+    });
 
-        const [
-            loading,
-            setLoading,
-        ] = useState(true);
+    // Modals
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    const [editingId, setEditingId] = useState<number | null>(null);
+    const [form, setForm] = useState<ClassScheduleForm>(EMPTY_FORM);
+    const [deleteSchedule, setDeleteSchedule] = useState<ClassSchedule | null>(null);
 
-        const [
-            saving,
-            setSaving,
-        ] = useState(false);
+    // Persist view mode preference
+    const handleSetViewMode = (mode: ViewMode) => {
+        setViewMode(mode);
+        try {
+            localStorage.setItem("mbs_schedule_view", mode);
+        } catch {
+            // ignore
+        }
+    };
 
-        const [
-            deleting,
-            setDeleting,
-        ] = useState(false);
+    // =====================================================
+    // LOAD CLASS SCHEDULES
+    // =====================================================
 
-        const [
-            error,
-            setError,
-        ] = useState("");
+    const loadSchedules = useCallback(async () => {
+        setLoading(true);
+        setError("");
 
-        const [
-            success,
-            setSuccess,
-        ] = useState("");
+        try {
+            const response = await fetch(`${API_BASE_URL}/ChurchServices`, {
+                method: "GET",
+                headers: getHeaders(),
+            });
 
-        const [
-            search,
-            setSearch,
-        ] = useState("");
+            if (!response.ok) {
+                const text = await response.text();
+                throw new Error(text || `Server returned HTTP ${response.status}`);
+            }
 
-        const [
-            filter,
-            setFilter,
-        ] = useState<ServiceFilter>(
-            "ALL"
-        );
+            const data = await response.json();
+            const list: ClassSchedule[] = Array.isArray(data)
+                ? data
+                : Array.isArray(data?.services)
+                    ? data.services
+                    : Array.isArray(data?.churchServices)
+                        ? data.churchServices
+                        : [];
 
-        const [
-            showModal,
-            setShowModal,
-        ] = useState(false);
+            setSchedules(list);
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "Unable to load class schedules.";
+            console.error("Error loading class schedules:", err);
+            setError(message);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
-        const [
-            editingId,
-            setEditingId,
-        ] = useState<number | null>(
-            null
-        );
+    useEffect(() => {
+        loadSchedules();
+    }, [loadSchedules]);
 
-        const [
-            deleteId,
-            setDeleteId,
-        ] = useState<number | null>(
-            null
-        );
+    // =====================================================
+    // FORM HANDLERS
+    // =====================================================
 
-        const [
-            form,
-            setForm,
-        ] = useState<ChurchServiceForm>(
-            EMPTY_FORM
-        );
+    const openAddModal = () => {
+        const currentUserFullName =
+            localStorage.getItem("currentFullName") ||
+            localStorage.getItem("fullName") ||
+            localStorage.getItem("currentUser") ||
+            "";
 
-        // =====================================================
-        // MESSAGES
-        // =====================================================
+        setForm({
+            ...EMPTY_FORM,
+            serviceDate: new Date().toISOString().split("T")[0],
+            speaker: currentUserFullName,
+        });
+        setEditingId(null);
+        setError("");
+        setIsModalOpen(true);
+    };
 
-        const clearMessages =
-            useCallback(() => {
-                setError("");
-                setSuccess("");
-            }, []);
+    const openEditModal = (schedule: ClassSchedule) => {
+        let cleanDate = "";
+        if (schedule.serviceDate) {
+            cleanDate = schedule.serviceDate.split("T")[0];
+        }
 
-        // =====================================================
-        // LOAD SERVICES
-        // =====================================================
-
-        const loadServices =
-            useCallback(
-                async () => {
-                    try {
-                        setLoading(
-                            true
-                        );
-
-                        setError("");
-
-                        const response =
-                            await fetch(
-                                API_BASE,
-                                {
-                                    method:
-                                        "GET",
-                                    headers:
-                                        getHeaders(),
-                                }
-                            );
-
-                        if (
-                            !response.ok
-                        ) {
-                            throw new Error(
-                                await getErrorMessage(
-                                    response,
-                                    "Unable to load church services."
-                                )
-                            );
-                        }
-
-                        const data =
-                            await response.json();
-
-                        if (
-                            Array.isArray(
-                                data
-                            )
-                        ) {
-                            setServices(
-                                data
-                            );
-                        } else {
-                            setServices(
-                                []
-                            );
-                        }
-                    } catch (
-                        err
-                    ) {
-                        console.error(
-                            "LOAD CHURCH SERVICES ERROR:",
-                            err
-                        );
-
-                        setError(
-                            err instanceof
-                                Error
-                                ? err.message
-                                : "Unable to load church services."
-                        );
-                    } finally {
-                        setLoading(
-                            false
-                        );
-                    }
-                },
-                []
-            );
-
-        // =====================================================
-        // INITIAL LOAD
-        // =====================================================
-
-        useEffect(() => {
-            loadServices();
-        }, [
-            loadServices,
-        ]);
-
-        // =====================================================
-        // FORM CHANGE
-        // =====================================================
-
-        const handleChange = (
-            event: ChangeEvent<
-                HTMLInputElement |
-                HTMLSelectElement |
-                HTMLTextAreaElement
-            >
-        ) => {
-            const {
-                name,
-                value,
-            } = event.target;
-
-            setForm(
-                (
-                    current
-                ) => ({
-                    ...current,
-                    [name]: value,
-                })
-            );
+        const normalizeTime = (val?: string | null) => {
+            if (!val) return "";
+            const match = val.match(/^(\d{2}:\d{2})/);
+            return match ? match[1] : val;
         };
 
-        // =====================================================
-        // OPEN ADD
-        // =====================================================
+        setForm({
+            serviceName: schedule.serviceName || "",
+            serviceType: schedule.serviceType || "LECTURE",
+            serviceDate: cleanDate,
+            startTime: normalizeTime(schedule.startTime),
+            endTime: normalizeTime(schedule.endTime),
+            location: schedule.location || "",
+            serviceLeader: schedule.serviceLeader || "",
+            speaker: schedule.speaker || "",
+            description: schedule.description || "",
+            status: schedule.status || "SCHEDULED",
+        });
+        setEditingId(schedule.churchServiceId);
+        setError("");
+        setIsModalOpen(true);
+    };
 
-        const openAddModal =
-            () => {
-                clearMessages();
+    const closeModal = () => {
+        if (saving) return;
+        setIsModalOpen(false);
+        setEditingId(null);
+        setForm(EMPTY_FORM);
+    };
 
-                setEditingId(
-                    null
-                );
+    const handleChange = (
+        e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    ) => {
+        const { name, value } = e.target;
+        setForm((prev) => ({
+            ...prev,
+            [name]: value,
+        }));
+    };
 
-                const today =
-                    new Date()
-                        .toISOString()
-                        .slice(
-                            0,
-                            10
-                        );
+    const handleSubmit = async (e: FormEvent) => {
+        e.preventDefault();
 
-                setForm({
-                    ...EMPTY_FORM,
-                    serviceDate:
-                        today,
-                });
+        if (!form.serviceName.trim()) {
+            setError("Subject / Class Name is required.");
+            return;
+        }
 
-                setShowModal(
-                    true
-                );
+        if (!form.serviceDate) {
+            setError("Schedule Date is required.");
+            return;
+        }
+
+        setSaving(true);
+        setError("");
+        setSuccess("");
+
+        const payload = {
+            churchServiceId: editingId ?? 0,
+            serviceName: form.serviceName.trim(),
+            serviceType: form.serviceType.trim() || "LECTURE",
+            serviceDate: form.serviceDate,
+            startTime: form.startTime.trim() ? `${form.startTime.trim()}:00` : "",
+            endTime: form.endTime.trim() ? `${form.endTime.trim()}:00` : "",
+            location: form.location.trim(),
+            serviceLeader: form.serviceLeader.trim(),
+            speaker: form.speaker.trim(),
+            description: form.description.trim(),
+            status: form.status.trim() || "SCHEDULED",
+        };
+
+        try {
+            const url = editingId
+                ? `${API_BASE_URL}/ChurchServices/${editingId}`
+                : `${API_BASE_URL}/ChurchServices`;
+            const method = editingId ? "PUT" : "POST";
+
+            const response = await fetch(url, {
+                method,
+                headers: getHeaders(),
+                body: JSON.stringify(payload),
+            });
+
+            if (!response.ok) {
+                const text = await response.text();
+                throw new Error(text || `Server returned HTTP ${response.status}`);
+            }
+
+            setSuccess(
+                editingId
+                    ? `Class "${payload.serviceName}" schedule updated successfully.`
+                    : `Class "${payload.serviceName}" scheduled successfully.`
+            );
+            closeModal();
+            await loadSchedules();
+            setTimeout(() => setSuccess(""), 5000);
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "Failed to save class schedule.";
+            console.error("Save schedule error:", err);
+            setError(message);
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    // Quick status toggle
+    const handleQuickStatusChange = async (scheduleId: number, newStatus: string) => {
+        const schedule = schedules.find((s) => s.churchServiceId === scheduleId);
+        if (!schedule) return;
+
+        try {
+            const payload = {
+                ...schedule,
+                status: newStatus,
             };
 
-        // =====================================================
-        // OPEN EDIT
-        // =====================================================
+            const response = await fetch(`${API_BASE_URL}/ChurchServices/${scheduleId}`, {
+                method: "PUT",
+                headers: getHeaders(),
+                body: JSON.stringify(payload),
+            });
 
-        const openEditModal =
-            (
-                service: ChurchService
-            ) => {
-                clearMessages();
-
-                setEditingId(
-                    service.churchServiceId
+            if (response.ok) {
+                setSchedules((prev) =>
+                    prev.map((s) => (s.churchServiceId === scheduleId ? { ...s, status: newStatus } : s))
                 );
+                setSuccess(`Class status changed to ${newStatus}.`);
+                setTimeout(() => setSuccess(""), 4000);
+            }
+        } catch (err) {
+            console.error("Failed to update status:", err);
+        }
+    };
 
-                setForm({
-                    serviceName:
-                        normalizeString(
-                            service.serviceName
-                        ),
+    // Delete schedule
+    const handleDelete = async () => {
+        if (!deleteSchedule) return;
 
-                    serviceType:
-                        normalizeString(
-                            service.serviceType
-                        ) ||
-                        "SUNDAY WORSHIP",
-
-                    serviceDate:
-                        service.serviceDate
-                            ? service.serviceDate.slice(
-                                0,
-                                10
-                            )
-                            : "",
-
-                    startTime:
-                        normalizeTimeForInput(
-                            service.startTime
-                        ),
-
-                    endTime:
-                        normalizeTimeForInput(
-                            service.endTime
-                        ),
-
-                    location:
-                        normalizeString(
-                            service.location
-                        ),
-
-                    serviceLeader:
-                        normalizeString(
-                            service.serviceLeader
-                        ),
-
-                    speaker:
-                        normalizeString(
-                            service.speaker
-                        ),
-
-                    description:
-                        normalizeString(
-                            service.description
-                        ).slice(
-                            0,
-                            MAX_DESCRIPTION_LENGTH
-                        ),
-
-                    status:
-                        normalizeString(
-                            service.status
-                        ) ||
-                        "SCHEDULED",
-                });
-
-                setShowModal(
-                    true
-                );
-            };
-
-        // =====================================================
-        // CLOSE MODAL
-        // =====================================================
-
-        const closeModal =
-            () => {
-                if (saving) {
-                    return;
+        setSaving(true);
+        try {
+            const response = await fetch(
+                `${API_BASE_URL}/ChurchServices/${deleteSchedule.churchServiceId}`,
+                {
+                    method: "DELETE",
+                    headers: getHeaders(),
                 }
-
-                setShowModal(
-                    false
-                );
-
-                setEditingId(
-                    null
-                );
-
-                setForm({
-                    ...EMPTY_FORM,
-                });
-            };
-
-        // =====================================================
-        // SUBMIT
-        // =====================================================
-
-        const handleSubmit =
-            async (
-                event: FormEvent<HTMLFormElement>
-            ) => {
-                event.preventDefault();
-
-                if (saving) {
-                    return;
-                }
-
-                clearMessages();
-
-                const serviceName =
-                    form.serviceName.trim();
-
-                const serviceDate =
-                    form.serviceDate.trim();
-
-                const description =
-                    form.description.trim();
-
-                // ---------------------------------------------
-                // VALIDATION
-                // ---------------------------------------------
-
-                if (!serviceName) {
-                    setError(
-                        "Service name is required."
-                    );
-                    return;
-                }
-
-                if (!serviceDate) {
-                    setError(
-                        "Service date is required."
-                    );
-                    return;
-                }
-
-                if (
-                    description.length >
-                    MAX_DESCRIPTION_LENGTH
-                ) {
-                    setError(
-                        `Description cannot exceed ${MAX_DESCRIPTION_LENGTH} characters.`
-                    );
-                    return;
-                }
-
-                // Validate time range
-                if (
-                    form.startTime &&
-                    form.endTime &&
-                    form.endTime <
-                    form.startTime
-                ) {
-                    setError(
-                        "End time cannot be earlier than start time."
-                    );
-                    return;
-                }
-
-                try {
-                    setSaving(
-                        true
-                    );
-
-                    // -----------------------------------------
-                    // PAYLOAD
-                    // -----------------------------------------
-
-                    const payload = {
-                        serviceName,
-
-                        serviceType:
-                            form.serviceType.trim() ||
-                            "SUNDAY WORSHIP",
-
-                        serviceDate,
-
-                        startTime:
-                            normalizeTimeForApi(
-                                form.startTime
-                            ),
-
-                        endTime:
-                            normalizeTimeForApi(
-                                form.endTime
-                            ),
-
-                        location:
-                            form.location.trim() ||
-                            null,
-
-                        serviceLeader:
-                            form.serviceLeader.trim() ||
-                            null,
-
-                        speaker:
-                            form.speaker.trim() ||
-                            null,
-
-                        description:
-                            description ||
-                            null,
-
-                        status:
-                            form.status.trim() ||
-                            "SCHEDULED",
-                    };
-
-                    console.log(
-                        "CHURCH SERVICE PAYLOAD:",
-                        payload
-                    );
-
-                    const editing =
-                        editingId !==
-                        null;
-
-                    const url =
-                        editing
-                            ? `${API_BASE}/${editingId}`
-                            : API_BASE;
-
-                    const response =
-                        await fetch(
-                            url,
-                            {
-                                method:
-                                    editing
-                                        ? "PUT"
-                                        : "POST",
-
-                                headers:
-                                    getHeaders(),
-
-                                body:
-                                    JSON.stringify(
-                                        payload
-                                    ),
-                            }
-                        );
-
-                    if (
-                        !response.ok
-                    ) {
-                        throw new Error(
-                            await getErrorMessage(
-                                response,
-                                editing
-                                    ? "Unable to update church service."
-                                    : "Unable to create church service."
-                            )
-                        );
-                    }
-
-                    // -----------------------------------------
-                    // SUCCESS
-                    // -----------------------------------------
-
-                    setShowModal(
-                        false
-                    );
-
-                    setEditingId(
-                        null
-                    );
-
-                    setForm({
-                        ...EMPTY_FORM,
-                    });
-
-                    setSuccess(
-                        editing
-                            ? "Church service updated successfully."
-                            : "Church service created successfully."
-                    );
-
-                    await loadServices();
-
-                    window.setTimeout(
-                        () => {
-                            setSuccess(
-                                ""
-                            );
-                        },
-                        4000
-                    );
-                } catch (
-                    err
-                ) {
-                    console.error(
-                        "SAVE CHURCH SERVICE ERROR:",
-                        err
-                    );
-
-                    setError(
-                        err instanceof
-                            Error
-                            ? err.message
-                            : "Unable to save church service."
-                    );
-                } finally {
-                    setSaving(
-                        false
-                    );
-                }
-            };
-
-        // =====================================================
-        // DELETE
-        // =====================================================
-
-        const handleDelete =
-            async (
-                id: number
-            ) => {
-                if (deleting) {
-                    return;
-                }
-
-                try {
-                    setDeleting(
-                        true
-                    );
-
-                    clearMessages();
-
-                    const response =
-                        await fetch(
-                            `${API_BASE}/${id}`,
-                            {
-                                method:
-                                    "DELETE",
-                                headers:
-                                    getHeaders(),
-                            }
-                        );
-
-                    if (
-                        !response.ok
-                    ) {
-                        throw new Error(
-                            await getErrorMessage(
-                                response,
-                                "Unable to delete church service."
-                            )
-                        );
-                    }
-
-                    setDeleteId(
-                        null
-                    );
-
-                    setSuccess(
-                        "Church service deleted successfully."
-                    );
-
-                    await loadServices();
-
-                    window.setTimeout(
-                        () => {
-                            setSuccess(
-                                ""
-                            );
-                        },
-                        4000
-                    );
-                } catch (
-                    err
-                ) {
-                    console.error(
-                        "DELETE CHURCH SERVICE ERROR:",
-                        err
-                    );
-
-                    setError(
-                        err instanceof
-                            Error
-                            ? err.message
-                            : "Unable to delete church service."
-                    );
-                } finally {
-                    setDeleting(
-                        false
-                    );
-                }
-            };
-
-        // =====================================================
-        // UPDATE STATUS
-        // =====================================================
-
-        const updateStatus =
-            async (
-                id: number,
-                status: string
-            ) => {
-                try {
-                    clearMessages();
-
-                    const response =
-                        await fetch(
-                            `${API_BASE}/${id}/status`,
-                            {
-                                method:
-                                    "PATCH",
-
-                                headers:
-                                    getHeaders(),
-
-                                body:
-                                    JSON.stringify(
-                                        {
-                                            status,
-                                        }
-                                    ),
-                            }
-                        );
-
-                    if (
-                        !response.ok
-                    ) {
-                        throw new Error(
-                            await getErrorMessage(
-                                response,
-                                "Unable to update status."
-                            )
-                        );
-                    }
-
-                    setSuccess(
-                        "Service status updated."
-                    );
-
-                    await loadServices();
-
-                    window.setTimeout(
-                        () => {
-                            setSuccess(
-                                ""
-                            );
-                        },
-                        3000
-                    );
-                } catch (
-                    err
-                ) {
-                    console.error(
-                        "STATUS UPDATE ERROR:",
-                        err
-                    );
-
-                    setError(
-                        err instanceof
-                            Error
-                            ? err.message
-                            : "Unable to update service status."
-                    );
-                }
-            };
-
-        // =====================================================
-        // FILTERED SERVICES
-        // =====================================================
-
-        const filteredServices =
-            useMemo(() => {
-                const keyword =
-                    search
-                        .trim()
-                        .toLowerCase();
-
-                return services.filter(
-                    (
-                        service
-                    ) => {
-                        const matchesSearch =
-                            !keyword ||
-                            normalizeString(
-                                service.serviceName
-                            )
-                                .toLowerCase()
-                                .includes(
-                                    keyword
-                                ) ||
-                            normalizeString(
-                                service.serviceType
-                            )
-                                .toLowerCase()
-                                .includes(
-                                    keyword
-                                ) ||
-                            normalizeString(
-                                service.location
-                            )
-                                .toLowerCase()
-                                .includes(
-                                    keyword
-                                ) ||
-                            normalizeString(
-                                service.serviceLeader
-                            )
-                                .toLowerCase()
-                                .includes(
-                                    keyword
-                                ) ||
-                            normalizeString(
-                                service.speaker
-                            )
-                                .toLowerCase()
-                                .includes(
-                                    keyword
-                                );
-
-                        const upcoming =
-                            isUpcoming(
-                                service
-                            );
-
-                        const matchesFilter =
-                            filter ===
-                            "ALL"
-                                ? true
-                                : filter ===
-                                    "UPCOMING"
-                                    ? upcoming
-                                    : !upcoming;
-
-                        return (
-                            matchesSearch &&
-                            matchesFilter
-                        );
-                    }
-                );
-            }, [
-                services,
-                search,
-                filter,
-            ]);
-
-        // =====================================================
-        // COUNTS
-        // =====================================================
-
-        const counts =
-            useMemo(
-                () => ({
-                    total:
-                        services.length,
-
-                    upcoming:
-                        services.filter(
-                            isUpcoming
-                        ).length,
-
-                    scheduled:
-                        services.filter(
-                            (
-                                service
-                            ) =>
-                                service.status
-                                    ?.toUpperCase() ===
-                                "SCHEDULED"
-                        ).length,
-
-                    completed:
-                        services.filter(
-                            (
-                                service
-                            ) =>
-                                service.status
-                                    ?.toUpperCase() ===
-                                "COMPLETED"
-                        ).length,
-                }),
-                [services]
             );
 
-        // =====================================================
-        // RENDER
-        // =====================================================
+            if (!response.ok) {
+                const text = await response.text();
+                throw new Error(text || `Failed to delete schedule.`);
+            }
 
-        return (
-            <div className="epic-services-page">
+            setSuccess(`Class schedule "${deleteSchedule.serviceName}" was deleted.`);
+            setDeleteSchedule(null);
+            await loadSchedules();
+            setTimeout(() => setSuccess(""), 5000);
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "Failed to delete class schedule.";
+            setError(message);
+        } finally {
+            setSaving(false);
+        }
+    };
 
-                {/* ============================================
-                    HEADER
-                ============================================ */}
+    // =====================================================
+    // METRICS & FILTERING
+    // =====================================================
 
-                <div className="epic-services-header">
+    const todayStr = useMemo(() => new Date().toISOString().split("T")[0], []);
 
-                    <div>
-                        <h1>
-                            Classes & Schedules
-                        </h1>
+    const counts = useMemo(() => {
+        const total = schedules.length;
+        const scheduled = schedules.filter(
+            (s) => s.status?.toUpperCase() === "SCHEDULED" || s.status?.toUpperCase() === "ONGOING"
+        ).length;
+        const upcoming = schedules.filter((s) => {
+            const d = s.serviceDate ? s.serviceDate.split("T")[0] : "";
+            return d >= todayStr && s.status?.toUpperCase() !== "CANCELLED";
+        }).length;
+        const completed = schedules.filter((s) => s.status?.toUpperCase() === "COMPLETED").length;
 
-                        <p>
-                            Schedule and manage classes, subject offerings, faculty assignments, and rooms.
-                        </p>
-                    </div>
+        return { total, scheduled, upcoming, completed };
+    }, [schedules, todayStr]);
+
+    const filteredSchedules = useMemo(() => {
+        return schedules.filter((item) => {
+            // Tab filter
+            const dateStr = item.serviceDate ? item.serviceDate.split("T")[0] : "";
+            if (tabFilter === "UPCOMING" && dateStr < todayStr) return false;
+            if (tabFilter === "PAST" && dateStr >= todayStr) return false;
+
+            // Format filter
+            if (formatFilter !== "ALL") {
+                if (item.serviceType?.toUpperCase() !== formatFilter) return false;
+            }
+
+            // Status filter
+            if (statusFilter !== "ALL") {
+                if (item.status?.toUpperCase() !== statusFilter) return false;
+            }
+
+            // Search query
+            if (search.trim()) {
+                const query = search.trim().toLowerCase();
+                const matchName = item.serviceName?.toLowerCase().includes(query);
+                const matchSection = item.serviceLeader?.toLowerCase().includes(query);
+                const matchTeacher = item.speaker?.toLowerCase().includes(query);
+                const matchRoom = item.location?.toLowerCase().includes(query);
+                const matchType = item.serviceType?.toLowerCase().includes(query);
+
+                if (!matchName && !matchSection && !matchTeacher && !matchRoom && !matchType) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+    }, [schedules, tabFilter, formatFilter, statusFilter, search, todayStr]);
+
+    // Formatters
+    const formatDate = (dateStr?: string | null): string => {
+        if (!dateStr) return "TBD";
+        try {
+            const clean = dateStr.split("T")[0];
+            const [y, m, d] = clean.split("-").map(Number);
+            const date = new Date(y, m - 1, d);
+            return date.toLocaleDateString("en-US", {
+                weekday: "short",
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+            });
+        } catch {
+            return dateStr;
+        }
+    };
+
+    const formatTime = (timeStr?: string | null): string => {
+        if (!timeStr) return "";
+        try {
+            const match = timeStr.match(/^(\d{1,2}):(\d{2})/);
+            if (!match) return timeStr;
+            let hours = parseInt(match[1], 10);
+            const minutes = match[2];
+            const ampm = hours >= 12 ? "PM" : "AM";
+            hours = hours % 12 || 12;
+            return `${hours}:${minutes} ${ampm}`;
+        } catch {
+            return timeStr;
+        }
+    };
+
+    const getFormatBadgeClass = (format?: string): string => {
+        const f = (format || "").toUpperCase();
+        if (f.includes("LAB")) return "badge-laboratory";
+        if (f.includes("SEMINAR")) return "badge-seminar";
+        if (f.includes("ONLINE") || f.includes("VIRTUAL")) return "badge-online";
+        if (f.includes("EXAM")) return "badge-exam";
+        if (f.includes("MODULAR")) return "badge-modular";
+        return "badge-lecture";
+    };
+
+    const getFormatCardClass = (format?: string): string => {
+        const f = (format || "").toUpperCase();
+        if (f.includes("LAB")) return "format-laboratory";
+        if (f.includes("SEMINAR")) return "format-seminar";
+        if (f.includes("ONLINE") || f.includes("VIRTUAL")) return "format-online";
+        if (f.includes("EXAM")) return "format-exam";
+        return "format-lecture";
+    };
+
+    const getStatusPillClass = (status?: string): string => {
+        const s = (status || "").toUpperCase();
+        if (s === "ONGOING") return "status-ongoing";
+        if (s === "COMPLETED") return "status-completed";
+        if (s === "CANCELLED") return "status-cancelled";
+        if (s === "POSTPONED") return "status-postponed";
+        return "status-scheduled";
+    };
+
+    // =====================================================
+    // RENDER
+    // =====================================================
+
+    return (
+        <div className="class-scheduler-page">
+            {/* =================================================
+                HEADER
+            ================================================= */}
+            <div className="scheduler-header">
+                <div className="scheduler-title-group">
+                    <span className="scheduler-eyebrow">
+                        <GraduationCap size={15} /> Academic Schedule Management
+                    </span>
+                    <h1>Classes & Schedules</h1>
+                    <p>
+                        Organize daily subject timetables, course lecture periods, faculty instructors, and classroom venues.
+                    </p>
+                </div>
+
+                <div className="scheduler-header-actions">
+                    <button
+                        type="button"
+                        className="btn-refresh-icon"
+                        title="Reload Schedules"
+                        onClick={loadSchedules}
+                        disabled={loading}
+                    >
+                        <RefreshCw size={17} className={loading ? "animate-spin" : ""} />
+                    </button>
 
                     <button
                         type="button"
-                        className="epic-primary-button"
-                        onClick={
-                            openAddModal
-                        }
+                        className="btn-schedule-class"
+                        onClick={openAddModal}
                     >
-                        <Plus size={16} />
-                        Add Class / Schedule
+                        <Plus size={18} strokeWidth={2.5} />
+                        <span>Schedule a Class</span>
                     </button>
+                </div>
+            </div>
 
+            {/* =================================================
+                ALERTS
+            ================================================= */}
+            {success && (
+                <div className="scheduler-alert scheduler-alert-success">
+                    <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+                        <CheckCircle2 size={18} />
+                        <span>{success}</span>
+                    </div>
+                    <button
+                        type="button"
+                        className="scheduler-alert-close"
+                        onClick={() => setSuccess("")}
+                    >
+                        ×
+                    </button>
+                </div>
+            )}
+
+            {error && (
+                <div className="scheduler-alert scheduler-alert-error">
+                    <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+                        <AlertCircle size={18} />
+                        <span>{error}</span>
+                    </div>
+                    <button
+                        type="button"
+                        className="scheduler-alert-close"
+                        onClick={() => setError("")}
+                    >
+                        ×
+                    </button>
+                </div>
+            )}
+
+            {/* =================================================
+                KPI METRICS
+            ================================================= */}
+            <div className="scheduler-kpi-grid">
+                <div className="scheduler-kpi-card kpi-total">
+                    <div className="kpi-icon-box">
+                        <BookOpen size={24} />
+                    </div>
+                    <div className="kpi-info">
+                        <span className="kpi-label">Total Classes</span>
+                        <strong className="kpi-value">{counts.total}</strong>
+                    </div>
                 </div>
 
-                {/* ============================================
-                    ALERTS
-                ============================================ */}
-
-                {success && (
-                    <div className="epic-alert epic-alert-success" style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <CheckCircle2 size={16} /> {success}
+                <div className="scheduler-kpi-card kpi-upcoming">
+                    <div className="kpi-icon-box">
+                        <CalendarDays size={24} />
                     </div>
-                )}
+                    <div className="kpi-info">
+                        <span className="kpi-label">Upcoming Sessions</span>
+                        <strong className="kpi-value">{counts.upcoming}</strong>
+                    </div>
+                </div>
 
-                {error && (
-                    <div className="epic-alert epic-alert-error">
+                <div className="scheduler-kpi-card kpi-scheduled">
+                    <div className="kpi-icon-box">
+                        <Clock size={24} />
+                    </div>
+                    <div className="kpi-info">
+                        <span className="kpi-label">Active / Scheduled</span>
+                        <strong className="kpi-value">{counts.scheduled}</strong>
+                    </div>
+                </div>
 
-                        <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                            <AlertCircle size={16} /> {error}
-                        </span>
+                <div className="scheduler-kpi-card kpi-completed">
+                    <div className="kpi-icon-box">
+                        <CheckCheck size={24} />
+                    </div>
+                    <div className="kpi-info">
+                        <span className="kpi-label">Completed</span>
+                        <strong className="kpi-value">{counts.completed}</strong>
+                    </div>
+                </div>
+            </div>
 
+            {/* =================================================
+                TOOLBAR & FILTERS
+            ================================================= */}
+            <div className="scheduler-toolbar-card">
+                <div className="toolbar-search-wrapper">
+                    <Search size={16} className="toolbar-search-icon" />
+                    <input
+                        type="text"
+                        className="toolbar-search-input"
+                        placeholder="Search by subject, section, instructor, or room..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
+                    {search && (
                         <button
                             type="button"
-                            onClick={() =>
-                                setError(
-                                    ""
-                                )
-                            }
+                            className="toolbar-search-clear"
+                            onClick={() => setSearch("")}
                         >
                             ×
                         </button>
-
-                    </div>
-                )}
-
-                {/* ============================================
-                    SUMMARY
-                ============================================ */}
-
-                <div className="epic-service-summary">
-
-                    <div className="epic-summary-card">
-
-                        <div className="epic-summary-icon">
-                            <Calendar size={22} />
-                        </div>
-
-                        <div>
-                            <span>
-                                Total Services
-                            </span>
-
-                            <strong>
-                                {
-                                    counts.total
-                                }
-                            </strong>
-                        </div>
-
-                    </div>
-
-                    <div className="epic-summary-card">
-
-                        <div className="epic-summary-icon">
-                            <CalendarDays size={22} />
-                        </div>
-
-                        <div>
-                            <span>
-                                Upcoming
-                            </span>
-
-                            <strong>
-                                {
-                                    counts.upcoming
-                                }
-                            </strong>
-                        </div>
-
-                    </div>
-
-                    <div className="epic-summary-card">
-
-                        <div className="epic-summary-icon">
-                            <CheckCircle2 size={22} />
-                        </div>
-
-                        <div>
-                            <span>
-                                Scheduled
-                            </span>
-
-                            <strong>
-                                {
-                                    counts.scheduled
-                                }
-                            </strong>
-                        </div>
-
-                    </div>
-
-                    <div className="epic-summary-card">
-
-                        <div className="epic-summary-icon">
-                            <CheckCheck size={22} />
-                        </div>
-
-                        <div>
-                            <span>
-                                Completed
-                            </span>
-
-                            <strong>
-                                {
-                                    counts.completed
-                                }
-                            </strong>
-                        </div>
-
-                    </div>
-
+                    )}
                 </div>
 
-                {/* ============================================
-                    TOOLBAR
-                ============================================ */}
-
-                <div className="epic-services-toolbar">
-
-                    <div className="epic-search-box">
-
-                        <span>
-                            <Search size={16} />
-                        </span>
-
-                        <input
-                            type="text"
-                            placeholder="Search services..."
-                            value={
-                                search
-                            }
-                            onChange={(
-                                event
-                            ) =>
-                                setSearch(
-                                    event
-                                        .target
-                                        .value
-                                )
-                            }
-                        />
-
-                        {search && (
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    setSearch(
-                                        ""
-                                    )
-                                }
-                            >
-                                ×
-                            </button>
-                        )}
-
-                    </div>
-
-                    <div className="epic-filter-buttons">
-
-                        {(
-                            [
-                                [
-                                    "ALL",
-                                    "All",
-                                ],
-                                [
-                                    "UPCOMING",
-                                    "Upcoming",
-                                ],
-                                [
-                                    "PAST",
-                                    "Past",
-                                ],
-                            ] as const
-                        ).map(
-                            ([
-                                value,
-                                label,
-                            ]) => (
-                                <button
-                                    key={
-                                        value
-                                    }
-                                    type="button"
-                                    className={
-                                        filter ===
-                                        value
-                                            ? "active"
-                                            : ""
-                                    }
-                                    onClick={() =>
-                                        setFilter(
-                                            value
-                                        )
-                                    }
-                                >
-                                    {label}
-                                </button>
-                            )
-                        )}
-
-                    </div>
-
-                </div>
-
-                {/* ============================================
-                    SERVICES CARD
-                ============================================ */}
-
-                <div className="epic-services-card">
-
-                    <div className="epic-card-header">
-
-                        <div>
-                            <h2>
-                                Class Schedule
-                            </h2>
-
-                            <p>
-                                {
-                                    filteredServices.length
-                                }{" "}
-                                class session
-                                {filteredServices.length !==
-                                1
-                                    ? "s"
-                                    : ""}{" "}
-                                displayed
-                            </p>
-                        </div>
-
+                <div className="toolbar-filters">
+                    <div className="filter-tab-pills">
                         <button
                             type="button"
-                            className="epic-refresh-button"
-                            onClick={
-                                loadServices
-                            }
-                            disabled={
-                                loading
-                            }
+                            className={`tab-pill ${tabFilter === "ALL" ? "active" : ""}`}
+                            onClick={() => setTabFilter("ALL")}
                         >
-                            ↻ Refresh
+                            All ({schedules.length})
                         </button>
-
+                        <button
+                            type="button"
+                            className={`tab-pill ${tabFilter === "UPCOMING" ? "active" : ""}`}
+                            onClick={() => setTabFilter("UPCOMING")}
+                        >
+                            Upcoming
+                        </button>
+                        <button
+                            type="button"
+                            className={`tab-pill ${tabFilter === "PAST" ? "active" : ""}`}
+                            onClick={() => setTabFilter("PAST")}
+                        >
+                            Past
+                        </button>
                     </div>
 
-                    {/* LOADING */}
-
-                    {loading ? (
-                        <div className="epic-empty-state">
-
-                            <div className="epic-loading-spinner">
-                                ⟳
-                            </div>
-
-                            <h3>
-                                Loading
-                                services...
-                            </h3>
-
-                        </div>
-                    ) : filteredServices.length ===
-                      0 ? (
-
-                        /* EMPTY */
-
-                        <div className="epic-empty-state">
-
-                            <div className="epic-empty-icon">
-                                <Calendar size={36} />
-                            </div>
-
-                            <h3>
-                                No classes or
-                                schedules
-                                found
-                            </h3>
-
-                            <p>
-                                Create your
-                                first class
-                                schedule.
-                            </p>
-
-                            <button
-                                type="button"
-                                className="epic-primary-button"
-                                onClick={
-                                    openAddModal
-                                }
-                            >
-                                <Plus size={16} />
-                                Add Class / Schedule
-                            </button>
-
-                        </div>
-                    ) : (
-
-                        /* TABLE */
-
-                        <div className="epic-table-wrapper">
-
-                            <table className="epic-services-table">
-
-                                <thead>
-
-                                    <tr>
-                                        <th>
-                                            SERVICE
-                                        </th>
-
-                                        <th>
-                                            DATE
-                                        </th>
-
-                                        <th>
-                                            TIME
-                                        </th>
-
-                                        <th>
-                                            LOCATION
-                                        </th>
-
-                                        <th>
-                                            LEADER /
-                                            SPEAKER
-                                        </th>
-
-                                        <th>
-                                            STATUS
-                                        </th>
-
-                                        <th>
-                                            ACTIONS
-                                        </th>
-                                    </tr>
-
-                                </thead>
-
-                                <tbody>
-
-                                    {filteredServices.map(
-                                        (
-                                            service
-                                        ) => (
-                                            <tr
-                                                key={
-                                                    service.churchServiceId
-                                                }
-                                            >
-
-                                                <td>
-
-                                                    <div className="epic-service-name">
-
-                                                        <strong>
-                                                            {
-                                                                service.serviceName
-                                                            }
-                                                        </strong>
-
-                                                        <span>
-                                                            {
-                                                                service.serviceType ||
-                                                                "Church Service"
-                                                            }
-                                                        </span>
-
-                                                    </div>
-
-                                                </td>
-
-                                                <td>
-
-                                                    <strong>
-                                                        {formatDate(
-                                                            service.serviceDate
-                                                        )}
-                                                    </strong>
-
-                                                </td>
-
-                                                <td>
-
-                                                    <div className="epic-service-time">
-
-                                                        {formatTime(
-                                                            service.startTime
-                                                        )}
-
-                                                        {service.endTime && (
-                                                            <>
-                                                                {" – "}
-
-                                                                {formatTime(
-                                                                    service.endTime
-                                                                )}
-                                                            </>
-                                                        )}
-
-                                                    </div>
-
-                                                </td>
-
-                                                <td>
-                                                    {
-                                                        service.location ||
-                                                        "—"
-                                                    }
-                                                </td>
-
-                                                <td>
-
-                                                    <div className="epic-leader-info">
-
-                                                        {service.serviceLeader && (
-                                                            <span>
-                                                                <b>
-                                                                    Leader:
-                                                                </b>{" "}
-                                                                {
-                                                                    service.serviceLeader
-                                                                }
-                                                            </span>
-                                                        )}
-
-                                                        {service.speaker && (
-                                                            <span>
-                                                                <b>
-                                                                    Speaker:
-                                                                </b>{" "}
-                                                                {
-                                                                    service.speaker
-                                                                }
-                                                            </span>
-                                                        )}
-
-                                                        {!service.serviceLeader &&
-                                                            !service.speaker && (
-                                                                <span>
-                                                                    —
-                                                                </span>
-                                                            )}
-
-                                                    </div>
-
-                                                </td>
-
-                                                <td>
-
-                                                    <select
-                                                        className={`epic-status-select ${statusClass(
-                                                            service.status
-                                                        )}`}
-                                                        value={
-                                                            service.status ||
-                                                            "SCHEDULED"
-                                                        }
-                                                        onChange={(
-                                                            event
-                                                        ) =>
-                                                            updateStatus(
-                                                                service.churchServiceId,
-                                                                event
-                                                                    .target
-                                                                    .value
-                                                            )
-                                                        }
-                                                    >
-
-                                                        {SERVICE_STATUSES.map(
-                                                            ([
-                                                                value,
-                                                                label,
-                                                            ]) => (
-                                                                <option
-                                                                    key={
-                                                                        value
-                                                                    }
-                                                                    value={
-                                                                        value
-                                                                    }
-                                                                >
-                                                                    {label.toUpperCase()}
-                                                                </option>
-                                                            )
-                                                        )}
-
-                                                    </select>
-
-                                                </td>
-
-                                                <td>
-
-                                                    <div className="epic-action-buttons">
-
-                                                        <button
-                                                            type="button"
-                                                            className="epic-edit-button"
-                                                            onClick={() =>
-                                                                openEditModal(
-                                                                    service
-                                                                )
-                                                            }
-                                                        >
-                                                            Edit
-                                                        </button>
-
-                                                        <button
-                                                            type="button"
-                                                            className="epic-delete-button"
-                                                            onClick={() =>
-                                                                setDeleteId(
-                                                                    service.churchServiceId
-                                                                )
-                                                            }
-                                                        >
-                                                            Delete
-                                                        </button>
-
-                                                    </div>
-
-                                                </td>
-
-                                            </tr>
-                                        )
-                                    )}
-
-                                </tbody>
-
-                            </table>
-
-                        </div>
-                    )}
-
-                </div>
-
-                {/* ============================================
-                    ADD / EDIT MODAL
-                ============================================ */}
-
-                {showModal && (
-                    <div
-                        className="epic-modal-overlay"
-                        onMouseDown={(
-                            event
-                        ) => {
-                            if (
-                                event.target ===
-                                    event.currentTarget &&
-                                !saving
-                            ) {
-                                closeModal();
-                            }
-                        }}
+                    <select
+                        className="select-filter"
+                        value={formatFilter}
+                        onChange={(e) => setFormatFilter(e.target.value)}
                     >
+                        <option value="ALL">All Class Formats</option>
+                        {CLASS_FORMATS.map(([val, label]) => (
+                            <option key={val} value={val}>
+                                {label}
+                            </option>
+                        ))}
+                    </select>
 
-                        <div className="epic-service-modal">
+                    <select
+                        className="select-filter"
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                    >
+                        <option value="ALL">All Statuses</option>
+                        {CLASS_STATUSES.map(([val, label]) => (
+                            <option key={val} value={val}>
+                                {label}
+                            </option>
+                        ))}
+                    </select>
 
-                            <div className="epic-modal-header">
+                    <div className="view-toggle-group">
+                        <button
+                            type="button"
+                            className={`btn-view-toggle ${viewMode === "cards" ? "active" : ""}`}
+                            title="Timetable Cards View"
+                            onClick={() => handleSetViewMode("cards")}
+                        >
+                            <LayoutGrid size={16} />
+                        </button>
+                        <button
+                            type="button"
+                            className={`btn-view-toggle ${viewMode === "table" ? "active" : ""}`}
+                            title="Table List View"
+                            onClick={() => handleSetViewMode("table")}
+                        >
+                            <List size={16} />
+                        </button>
+                    </div>
+                </div>
+            </div>
 
-                                <div>
+            {/* =================================================
+                MAIN CONTENT: CARDS OR TABLE
+            ================================================= */}
+            {loading ? (
+                <div className="scheduler-loading-state">
+                    <div className="loading-spinner-circle" />
+                    <p style={{ color: "#64748b", fontWeight: 600 }}>Loading academic schedules...</p>
+                </div>
+            ) : filteredSchedules.length === 0 ? (
+                <div className="scheduler-empty-state">
+                    <div className="empty-state-icon">
+                        <Calendar size={36} />
+                    </div>
+                    <h3>No Classes Found</h3>
+                    <p>
+                        {search || formatFilter !== "ALL" || statusFilter !== "ALL" || tabFilter !== "ALL"
+                            ? "No class schedule matches your current filters. Try resetting your search or filter options."
+                            : "No classes have been scheduled yet. Create your first subject timetable to get started."}
+                    </p>
+                    <button
+                        type="button"
+                        className="btn-schedule-class"
+                        onClick={openAddModal}
+                    >
+                        <Plus size={16} />
+                        <span>Schedule a Class</span>
+                    </button>
+                </div>
+            ) : viewMode === "cards" ? (
+                /* =============================================
+                   TIMETABLE CARDS VIEW
+                ============================================= */
+                <div className="scheduler-cards-grid">
+                    {filteredSchedules.map((item) => (
+                        <div
+                            key={item.churchServiceId}
+                            className={`class-card ${getFormatCardClass(item.serviceType)}`}
+                        >
+                            <div>
+                                <div className="class-card-top">
+                                    <span
+                                        className={`class-type-badge ${getFormatBadgeClass(
+                                            item.serviceType
+                                        )}`}
+                                    >
+                                        <Layers size={11} />
+                                        {item.serviceType || "LECTURE"}
+                                    </span>
 
-                                    <h2>
-                                        {editingId !==
-                                        null
-                                            ? "Edit Church Service"
-                                            : "Add Church Service"}
-                                    </h2>
-
-                                    <p>
-                                        Schedule a
-                                        church
-                                        service or
-                                        event.
-                                    </p>
-
+                                    <span
+                                        className={`class-status-pill ${getStatusPillClass(
+                                            item.status
+                                        )}`}
+                                    >
+                                        {item.status || "SCHEDULED"}
+                                    </span>
                                 </div>
 
-                                <button
-                                    type="button"
-                                    className="epic-modal-close"
-                                    onClick={
-                                        closeModal
-                                    }
-                                    disabled={
-                                        saving
-                                    }
-                                >
-                                    ×
-                                </button>
+                                <h3 className="class-subject-title">{item.serviceName}</h3>
 
-                            </div>
+                                <div className="class-section-tag">
+                                    {item.serviceLeader || "Regular Class Section"}
+                                </div>
 
-                            <form
-                                onSubmit={
-                                    handleSubmit
-                                }
-                            >
-
-                                <div className="epic-form-grid">
-
-                                    {/* SERVICE NAME */}
-
-                                    <div className="epic-form-group epic-form-full">
-
-                                        <label>
-                                            Service
-                                            Name
-                                            <span>
-                                                *
-                                            </span>
-                                        </label>
-
-                                        <input
-                                            name="serviceName"
-                                            type="text"
-                                            value={
-                                                form.serviceName
-                                            }
-                                            onChange={
-                                                handleChange
-                                            }
-                                            placeholder="e.g. Sunday Worship Service"
-                                            required
-                                            maxLength={
-                                                200
-                                            }
-                                        />
-
+                                <div className="class-details-list">
+                                    <div className="class-detail-item">
+                                        <Calendar size={15} />
+                                        <span>
+                                            Date: <strong>{formatDate(item.serviceDate)}</strong>
+                                        </span>
                                     </div>
 
-                                    {/* SERVICE TYPE */}
+                                    {(item.startTime || item.endTime) && (
+                                        <div className="class-detail-item">
+                                            <Clock size={15} />
+                                            <span>
+                                                Time:{" "}
+                                                <strong>
+                                                    {formatTime(item.startTime)}
+                                                    {item.endTime ? ` – ${formatTime(item.endTime)}` : ""}
+                                                </strong>
+                                            </span>
+                                        </div>
+                                    )}
 
-                                    <div className="epic-form-group">
+                                    {item.speaker && (
+                                        <div className="class-detail-item">
+                                            <Users size={15} />
+                                            <span>
+                                                Instructor: <strong>{item.speaker}</strong>
+                                            </span>
+                                        </div>
+                                    )}
 
-                                        <label>
-                                            Service
-                                            Type
-                                        </label>
+                                    {item.location && (
+                                        <div className="class-detail-item">
+                                            <MapPin size={15} />
+                                            <span>
+                                                Room: <strong>{item.location}</strong>
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
 
-                                        <select
-                                            name="serviceType"
-                                            value={
-                                                form.serviceType
-                                            }
-                                            onChange={
-                                                handleChange
-                                            }
-                                        >
-                                            {SERVICE_TYPES.map(
-                                                ([
-                                                    value,
-                                                    label,
-                                                ]) => (
-                                                    <option
-                                                        key={
-                                                            value
-                                                        }
-                                                        value={
-                                                            value
-                                                        }
-                                                    >
-                                                        {
-                                                            label
-                                                        }
+                                {item.description && (
+                                    <p className="class-description" title={item.description}>
+                                        {item.description}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="class-card-footer">
+                                <select
+                                    className="quick-status-select"
+                                    value={item.status || "SCHEDULED"}
+                                    onChange={(e) =>
+                                        handleQuickStatusChange(item.churchServiceId, e.target.value)
+                                    }
+                                >
+                                    {CLASS_STATUSES.map(([val, label]) => (
+                                        <option key={val} value={val}>
+                                            {label}
+                                        </option>
+                                    ))}
+                                </select>
+
+                                <div className="card-action-btns">
+                                    <button
+                                        type="button"
+                                        className="btn-card-edit"
+                                        title="Edit Class Schedule"
+                                        onClick={() => openEditModal(item)}
+                                    >
+                                        <Edit3 size={15} />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btn-card-delete"
+                                        title="Delete Class Schedule"
+                                        onClick={() => setDeleteSchedule(item)}
+                                    >
+                                        <Trash2 size={15} />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                /* =============================================
+                   COMPACT TABLE VIEW
+                ============================================= */
+                <div className="scheduler-table-card">
+                    <div className="table-responsive">
+                        <table className="scheduler-table">
+                            <thead>
+                                <tr>
+                                    <th>Subject & Section</th>
+                                    <th>Session Type</th>
+                                    <th>Schedule Date</th>
+                                    <th>Time Period</th>
+                                    <th>Classroom / Venue</th>
+                                    <th>Instructor</th>
+                                    <th>Status</th>
+                                    <th style={{ textAlign: "right" }}>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredSchedules.map((item) => (
+                                    <tr key={item.churchServiceId}>
+                                        <td>
+                                            <div className="table-subject-cell">
+                                                <strong>{item.serviceName}</strong>
+                                                <span className="table-section-tag">
+                                                    {item.serviceLeader || "General Section"}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span
+                                                className={`class-type-badge ${getFormatBadgeClass(
+                                                    item.serviceType
+                                                )}`}
+                                            >
+                                                {item.serviceType || "LECTURE"}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span className="table-date-cell">
+                                                {formatDate(item.serviceDate)}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span className="table-time-cell">
+                                                <Clock size={13} style={{ color: "#94a3b8" }} />
+                                                {formatTime(item.startTime)}
+                                                {item.endTime ? ` - ${formatTime(item.endTime)}` : ""}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span style={{ color: "#475569" }}>
+                                                {item.location || "—"}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <strong>{item.speaker || "—"}</strong>
+                                        </td>
+                                        <td>
+                                            <select
+                                                className="quick-status-select"
+                                                value={item.status || "SCHEDULED"}
+                                                onChange={(e) =>
+                                                    handleQuickStatusChange(
+                                                        item.churchServiceId,
+                                                        e.target.value
+                                                    )
+                                                }
+                                            >
+                                                {CLASS_STATUSES.map(([val, label]) => (
+                                                    <option key={val} value={val}>
+                                                        {label}
                                                     </option>
-                                                )
-                                            )}
-                                        </select>
+                                                ))}
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <div
+                                                className="table-actions"
+                                                style={{ justifyContent: "flex-end" }}
+                                            >
+                                                <button
+                                                    type="button"
+                                                    className="btn-card-edit"
+                                                    title="Edit Class Schedule"
+                                                    onClick={() => openEditModal(item)}
+                                                >
+                                                    <Edit3 size={15} />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="btn-card-delete"
+                                                    title="Delete Schedule"
+                                                    onClick={() => setDeleteSchedule(item)}
+                                                >
+                                                    <Trash2 size={15} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
 
+            {/* =================================================
+                SCHEDULE / EDIT CLASS MODAL
+            ================================================= */}
+            {isModalOpen && (
+                <div
+                    className="scheduler-modal-overlay"
+                    onClick={(e) => {
+                        if (e.target === e.currentTarget && !saving) closeModal();
+                    }}
+                >
+                    <div className="scheduler-modal">
+                        <div className="modal-header-section">
+                            <div>
+                                <span className="modal-badge">
+                                    <BookCheck size={13} style={{ verticalAlign: "-2px", marginRight: 4 }} />
+                                    {editingId !== null ? "Edit Timetable" : "New Class Schedule"}
+                                </span>
+                                <h2>{editingId !== null ? "Edit Class Schedule" : "Schedule a Class Session"}</h2>
+                                <p>
+                                    Configure course subject, class section, timetable hours, faculty instructor, and classroom room.
+                                </p>
+                            </div>
+                            <button
+                                type="button"
+                                className="btn-modal-close"
+                                onClick={closeModal}
+                                disabled={saving}
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+                            <div className="modal-body-scrollable">
+                                <div className="modal-form-grid">
+                                    {/* SUBJECT NAME */}
+                                    <div className="modal-form-group form-field-full">
+                                        <label htmlFor="modal-serviceName">
+                                            <span>Subject / Course Name</span>
+                                            <span className="required-mark">*</span>
+                                        </label>
+                                        <input
+                                            id="modal-serviceName"
+                                            name="serviceName"
+                                            type="text"
+                                            className="modal-input"
+                                            value={form.serviceName}
+                                            onChange={handleChange}
+                                            placeholder="e.g. Old Testament Survey & Historical Books"
+                                            required
+                                            maxLength={200}
+                                        />
+                                        <div className="quick-chip-container">
+                                            <span style={{ fontSize: 11, color: "#64748b", alignSelf: "center", marginRight: 4 }}>
+                                                Quick Suggestions:
+                                            </span>
+                                            {SUBJECT_SUGGESTIONS.slice(0, 4).map((sugg) => (
+                                                <button
+                                                    key={sugg}
+                                                    type="button"
+                                                    className="quick-chip-btn"
+                                                    onClick={() => setForm((p) => ({ ...p, serviceName: sugg }))}
+                                                >
+                                                    {sugg}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* SECTION / BATCH */}
+                                    <div className="modal-form-group">
+                                        <label htmlFor="modal-serviceLeader">
+                                            <span>Section / Batch / Grade</span>
+                                        </label>
+                                        <input
+                                            id="modal-serviceLeader"
+                                            name="serviceLeader"
+                                            type="text"
+                                            className="modal-input"
+                                            value={form.serviceLeader}
+                                            onChange={handleChange}
+                                            placeholder="e.g. Section A - 1st Year"
+                                            maxLength={150}
+                                        />
+                                        <div className="quick-chip-container">
+                                            {SECTION_SUGGESTIONS.slice(0, 3).map((sec) => (
+                                                <button
+                                                    key={sec}
+                                                    type="button"
+                                                    className="quick-chip-btn"
+                                                    onClick={() => setForm((p) => ({ ...p, serviceLeader: sec }))}
+                                                >
+                                                    {sec}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* CLASS FORMAT / TYPE */}
+                                    <div className="modal-form-group">
+                                        <label htmlFor="modal-serviceType">
+                                            <span>Session Format / Type</span>
+                                        </label>
+                                        <select
+                                            id="modal-serviceType"
+                                            name="serviceType"
+                                            className="modal-select"
+                                            value={form.serviceType}
+                                            onChange={handleChange}
+                                        >
+                                            {CLASS_FORMATS.map(([val, label]) => (
+                                                <option key={val} value={val}>
+                                                    {label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    {/* INSTRUCTOR / TEACHER */}
+                                    <div className="modal-form-group">
+                                        <label htmlFor="modal-speaker">
+                                            <span>Instructor / Faculty Teacher</span>
+                                        </label>
+                                        <input
+                                            id="modal-speaker"
+                                            name="speaker"
+                                            type="text"
+                                            className="modal-input"
+                                            value={form.speaker}
+                                            onChange={handleChange}
+                                            placeholder="e.g. Dr. Rhoderick De Vera, Prof. Santos"
+                                            maxLength={150}
+                                        />
+                                    </div>
+
+                                    {/* ROOM / VENUE */}
+                                    <div className="modal-form-group">
+                                        <label htmlFor="modal-location">
+                                            <span>Classroom / Room / Venue</span>
+                                        </label>
+                                        <input
+                                            id="modal-location"
+                                            name="location"
+                                            type="text"
+                                            className="modal-input"
+                                            value={form.location}
+                                            onChange={handleChange}
+                                            placeholder="e.g. Room 101 - Academic Wing, Zoom Link"
+                                            maxLength={200}
+                                        />
+                                        <div className="quick-chip-container">
+                                            {ROOM_SUGGESTIONS.slice(0, 3).map((rm) => (
+                                                <button
+                                                    key={rm}
+                                                    type="button"
+                                                    className="quick-chip-btn"
+                                                    onClick={() => setForm((p) => ({ ...p, location: rm }))}
+                                                >
+                                                    {rm}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* SCHEDULE DATE */}
+                                    <div className="modal-form-group">
+                                        <label htmlFor="modal-serviceDate">
+                                            <span>Schedule Date</span>
+                                            <span className="required-mark">*</span>
+                                        </label>
+                                        <input
+                                            id="modal-serviceDate"
+                                            name="serviceDate"
+                                            type="date"
+                                            className="modal-input"
+                                            value={form.serviceDate}
+                                            onChange={handleChange}
+                                            required
+                                        />
                                     </div>
 
                                     {/* STATUS */}
-
-                                    <div className="epic-form-group">
-
-                                        <label>
-                                            Status
+                                    <div className="modal-form-group">
+                                        <label htmlFor="modal-status">
+                                            <span>Session Status</span>
                                         </label>
-
                                         <select
+                                            id="modal-status"
                                             name="status"
-                                            value={
-                                                form.status
-                                            }
-                                            onChange={
-                                                handleChange
-                                            }
+                                            className="modal-select"
+                                            value={form.status}
+                                            onChange={handleChange}
                                         >
-                                            {SERVICE_STATUSES.map(
-                                                ([
-                                                    value,
-                                                    label,
-                                                ]) => (
-                                                    <option
-                                                        key={
-                                                            value
-                                                        }
-                                                        value={
-                                                            value
-                                                        }
-                                                    >
-                                                        {
-                                                            label
-                                                        }
-                                                    </option>
-                                                )
-                                            )}
+                                            {CLASS_STATUSES.map(([val, label]) => (
+                                                <option key={val} value={val}>
+                                                    {label}
+                                                </option>
+                                            ))}
                                         </select>
-
-                                    </div>
-
-                                    {/* DATE */}
-
-                                    <div className="epic-form-group">
-
-                                        <label>
-                                            Service
-                                            Date
-                                            <span>
-                                                *
-                                            </span>
-                                        </label>
-
-                                        <input
-                                            name="serviceDate"
-                                            type="date"
-                                            value={
-                                                form.serviceDate
-                                            }
-                                            onChange={
-                                                handleChange
-                                            }
-                                            required
-                                        />
-
                                     </div>
 
                                     {/* START TIME */}
-
-                                    <div className="epic-form-group">
-
-                                        <label>
-                                            Start Time
+                                    <div className="modal-form-group">
+                                        <label htmlFor="modal-startTime">
+                                            <span>Start Time</span>
                                         </label>
-
                                         <input
+                                            id="modal-startTime"
                                             name="startTime"
                                             type="time"
-                                            value={
-                                                form.startTime
-                                            }
-                                            onChange={
-                                                handleChange
-                                            }
+                                            className="modal-input"
+                                            value={form.startTime}
+                                            onChange={handleChange}
                                         />
-
                                     </div>
 
                                     {/* END TIME */}
-
-                                    <div className="epic-form-group">
-
-                                        <label>
-                                            End Time
+                                    <div className="modal-form-group">
+                                        <label htmlFor="modal-endTime">
+                                            <span>End Time</span>
                                         </label>
-
                                         <input
+                                            id="modal-endTime"
                                             name="endTime"
                                             type="time"
-                                            value={
-                                                form.endTime
-                                            }
-                                            onChange={
-                                                handleChange
-                                            }
+                                            className="modal-input"
+                                            value={form.endTime}
+                                            onChange={handleChange}
                                         />
-
                                     </div>
 
-                                    {/* LOCATION */}
-
-                                    <div className="epic-form-group epic-form-full">
-
-                                        <label>
-                                            Location
+                                    {/* SYLLABUS / NOTES */}
+                                    <div className="modal-form-group form-field-full">
+                                        <label htmlFor="modal-description">
+                                            <span>Syllabus Agenda / Class Instructions</span>
                                         </label>
-
-                                        <input
-                                            name="location"
-                                            type="text"
-                                            value={
-                                                form.location
-                                            }
-                                            onChange={
-                                                handleChange
-                                            }
-                                            placeholder="Church location"
-                                            maxLength={
-                                                250
-                                            }
-                                        />
-
-                                    </div>
-
-                                    {/* LEADER */}
-
-                                    <div className="epic-form-group">
-
-                                        <label>
-                                            Service
-                                            Leader
-                                        </label>
-
-                                        <input
-                                            name="serviceLeader"
-                                            type="text"
-                                            value={
-                                                form.serviceLeader
-                                            }
-                                            onChange={
-                                                handleChange
-                                            }
-                                            placeholder="Worship / Service Leader"
-                                            maxLength={
-                                                200
-                                            }
-                                        />
-
-                                    </div>
-
-                                    {/* SPEAKER */}
-
-                                    <div className="epic-form-group">
-
-                                        <label>
-                                            Speaker /
-                                            Preacher
-                                        </label>
-
-                                        <input
-                                            name="speaker"
-                                            type="text"
-                                            value={
-                                                form.speaker
-                                            }
-                                            onChange={
-                                                handleChange
-                                            }
-                                            placeholder="Speaker / Preacher"
-                                            maxLength={
-                                                200
-                                            }
-                                        />
-
-                                    </div>
-
-                                    {/* DESCRIPTION */}
-
-                                    <div className="epic-form-group epic-form-full">
-
-                                        <label>
-                                            Description /
-                                            Notes
-                                        </label>
-
                                         <textarea
+                                            id="modal-description"
                                             name="description"
-                                            value={
-                                                form.description
-                                            }
-                                            onChange={
-                                                handleChange
-                                            }
-                                            placeholder="Additional notes about this service..."
-                                            rows={
-                                                4
-                                            }
-                                            maxLength={
-                                                MAX_DESCRIPTION_LENGTH
-                                            }
+                                            className="modal-textarea"
+                                            rows={3}
+                                            value={form.description}
+                                            onChange={handleChange}
+                                            placeholder="Provide lecture topics, required readings, assignment reminders, or virtual classroom access link..."
+                                            maxLength={MAX_DESCRIPTION_LENGTH}
                                         />
-
-                                        <small
-                                            style={{
-                                                display:
-                                                    "block",
-                                                marginTop:
-                                                    "6px",
-                                                textAlign:
-                                                    "right",
-                                                opacity:
-                                                    0.7,
-                                            }}
-                                        >
-                                            {
-                                                form
-                                                    .description
-                                                    .length
-                                            }
-                                            /
-                                            {
-                                                MAX_DESCRIPTION_LENGTH
-                                            }
-                                        </small>
-
+                                        <div className="char-count">
+                                            {form.description.length} / {MAX_DESCRIPTION_LENGTH} characters
+                                        </div>
                                     </div>
-
                                 </div>
-
-                                {/* MODAL FOOTER */}
-
-                                <div className="epic-modal-footer">
-
-                                    <button
-                                        type="button"
-                                        className="epic-secondary-button"
-                                        onClick={
-                                            closeModal
-                                        }
-                                        disabled={
-                                            saving
-                                        }
-                                    >
-                                        Cancel
-                                    </button>
-
-                                    <button
-                                        type="submit"
-                                        className="epic-primary-button"
-                                        disabled={
-                                            saving
-                                        }
-                                    >
-                                        {saving
-                                            ? "Saving..."
-                                            : editingId !==
-                                                null
-                                                ? "Update Service"
-                                                : "Save Service"}
-                                    </button>
-
-                                </div>
-
-                            </form>
-
-                        </div>
-
-                    </div>
-                )}
-
-                {/* ============================================
-                    DELETE MODAL
-                ============================================ */}
-
-                {deleteId !==
-                    null && (
-                    <div
-                        className="epic-modal-overlay"
-                        onMouseDown={(
-                            event
-                        ) => {
-                            if (
-                                event.target ===
-                                    event.currentTarget &&
-                                !deleting
-                            ) {
-                                setDeleteId(
-                                    null
-                                );
-                            }
-                        }}
-                    >
-
-                        <div className="epic-delete-modal">
-
-                            <div className="epic-delete-icon">
-                                ⚠
                             </div>
 
-                            <h2>
-                                Delete Church
-                                Service?
-                            </h2>
-
-                            <p>
-                                This action
-                                cannot be
-                                undone. The
-                                service
-                                schedule
-                                will be
-                                permanently
-                                removed.
-                            </p>
-
-                            <div className="epic-modal-footer">
-
+                            <div className="modal-footer-actions">
                                 <button
                                     type="button"
-                                    className="epic-secondary-button"
-                                    onClick={() =>
-                                        setDeleteId(
-                                            null
-                                        )
-                                    }
-                                    disabled={
-                                        deleting
-                                    }
+                                    className="btn-modal-cancel"
+                                    onClick={closeModal}
+                                    disabled={saving}
                                 >
                                     Cancel
                                 </button>
-
                                 <button
-                                    type="button"
-                                    className="epic-danger-button"
-                                    onClick={() =>
-                                        handleDelete(
-                                            deleteId
-                                        )
-                                    }
-                                    disabled={
-                                        deleting
-                                    }
+                                    type="submit"
+                                    className="btn-modal-submit"
+                                    disabled={saving}
                                 >
-                                    {deleting
-                                        ? "Deleting..."
-                                        : "Delete Service"}
+                                    {saving ? (
+                                        <>
+                                            <RefreshCw size={15} className="animate-spin" /> Saving...
+                                        </>
+                                    ) : editingId !== null ? (
+                                        <>
+                                            <BookCheck size={16} /> Update Schedule
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Plus size={16} /> Schedule Class
+                                        </>
+                                    )}
                                 </button>
-
                             </div>
-
-                        </div>
-
+                        </form>
                     </div>
-                )}
+                </div>
+            )}
 
-            </div>
-        );
-    };
+            {/* =================================================
+                DELETE CONFIRMATION MODAL
+            ================================================= */}
+            {deleteSchedule && (
+                <div
+                    className="scheduler-modal-overlay"
+                    onClick={(e) => {
+                        if (e.target === e.currentTarget && !saving) setDeleteSchedule(null);
+                    }}
+                >
+                    <div className="delete-modal-box">
+                        <div className="delete-icon-wrapper">
+                            <Trash2 size={26} />
+                        </div>
+                        <h3>Remove Class Schedule</h3>
+                        <p>
+                            Are you sure you want to remove the schedule for{" "}
+                            <strong>"{deleteSchedule.serviceName}"</strong> on{" "}
+                            {formatDate(deleteSchedule.serviceDate)}? This cannot be undone.
+                        </p>
+                        <div className="delete-modal-actions">
+                            <button
+                                type="button"
+                                className="btn-modal-cancel"
+                                onClick={() => setDeleteSchedule(null)}
+                                disabled={saving}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                className="btn-confirm-delete"
+                                onClick={handleDelete}
+                                disabled={saving}
+                            >
+                                {saving ? "Removing..." : "Yes, Delete Schedule"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
 
 export default ChurchServicesPage;
-

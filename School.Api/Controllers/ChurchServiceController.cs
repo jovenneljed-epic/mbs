@@ -86,12 +86,21 @@ namespace School.Api.Controllers
                     CurrentRole.StartsWith("CLIENT_");
             }
         }
-        private bool IsInternalChurchRole
+        private bool IsInternalRole
         {
             get
             {
                 return
                     CurrentRole == "ADMIN" ||
+                    CurrentRole == "SCHOOL ADMIN" ||
+                    CurrentRole == "ADMINISTRATOR" ||
+                    CurrentRole == "SYSTEM ADMINISTRATOR" ||
+                    CurrentRole == "SUPER ADMIN" ||
+                    CurrentRole == "SUPERADMIN" ||
+                    CurrentRole == "STAFF" ||
+                    CurrentRole == "FACULTY" ||
+                    CurrentRole == "TEACHER" ||
+                    CurrentRole == "INSTRUCTOR" ||
                     CurrentRole == "EPIC ASSISTANT PASTOR" ||
                     CurrentRole == "EPIC HEAD PASTOR" ||
                     CurrentRole == "EPIC ASSISTANT HEAD PASTOR";
@@ -234,7 +243,7 @@ namespace School.Api.Controllers
             // INTERNAL EPIC CHURCH ROLES
             // =====================================================
 
-            if (IsInternalChurchRole)
+            if (IsInternalRole)
             {
                 var userId = CurrentUserId;
 
@@ -323,7 +332,7 @@ namespace School.Api.Controllers
             var role =
                 CurrentRole;
 
-            if (!IsInternalChurchRole &&
+            if (!IsInternalRole &&
       !IsClientRole)
             {
                 return (
