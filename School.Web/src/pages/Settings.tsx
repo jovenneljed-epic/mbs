@@ -91,8 +91,27 @@ type SettingsTab =
 
 
 // ============================================================
-// MODULES
+// MODULE METADATA
 // ============================================================
+
+const MODULE_METADATA: Record<string, { label: string; desc: string; icon: string }> = {
+    "Dashboard": { label: "System Dashboard", desc: "Overview, quick stats & recent campus activity", icon: "📊" },
+    "Members": { label: "Student Profiling & Records", desc: "Student directories, enrollment history & profiles", icon: "🎓" },
+    "Attendance": { label: "Daily Attendance Tracking", desc: "Log and monitor classroom & faculty attendance", icon: "📋" },
+    "Visitors": { label: "Admissions & Inquiries", desc: "Prospective student leads & inquiry follow-ups", icon: "👥" },
+    "Church Services": { label: "Academic Schedules & Chapel", desc: "Modular timetable, classes & chapel schedules", icon: "📅" },
+    "Events": { label: "Campus Events & Seminars", desc: "Theological forums, conferences & graduation rites", icon: "🎪" },
+    "Giving": { label: "Tuition & Fees Billing", desc: "Tuition collections, student ledgers & receipts", icon: "💳" },
+    "Income": { label: "School Revenue & Grants", desc: "Academic revenue, donor grants & endowments", icon: "📈" },
+    "Expenses": { label: "School Expenses & Payroll", desc: "Operating budgets, faculty payroll & supplies", icon: "📉" },
+    "Ministries": { label: "Teachers & Faculty Corner", desc: "Instructor profiles, teaching loads & rosters", icon: "👨‍🏫" },
+    "Reports": { label: "Academic & Financial Reports", desc: "Grade reports, attendance audits & balance sheets", icon: "📑" },
+    "Settings": { label: "School & System Settings", desc: "Master configuration, roles & user controls", icon: "⚙️" },
+    "Demo Requests": { label: "Admissions Inquiry Requests", desc: "Online application requests and campus inquiries", icon: "✨" },
+    "Subscriptions": { label: "Campus Licensing & Subscriptions", desc: "Institution portal licensing and renewals", icon: "🏷️" },
+    "Website Analytics": { label: "Website & Traffic Analytics", desc: "Portal web traffic, page views & conversions", icon: "🌐" },
+    "EPIC Learning": { label: "E-Learning & Lesson Studio", desc: "Syllabi, course modules, video lessons & quizzes", icon: "📚" }
+};
 
 // ============================================================
 // TOKEN
@@ -535,6 +554,11 @@ const Settings: React.FC = () => {
 
         }
 
+        if (selectedUser.username?.toLowerCase() === "admin" && !editUserForm.isActive) {
+            setError("The primary Master Administrator account cannot be deactivated.");
+            return;
+        }
+
         try {
 
             setProcessing(true);
@@ -838,6 +862,13 @@ const Settings: React.FC = () => {
 
         }
 
+        if ((selectedRole.roleName.toUpperCase() === "ADMIN" || selectedRole.roleId === 1) && !roleForm.isActive) {
+            setError(
+                "The Master System Administrator role cannot be deactivated."
+            );
+            return;
+        }
+
         try {
 
             setProcessing(true);
@@ -893,6 +924,13 @@ const Settings: React.FC = () => {
     ) => {
 
         clearNotifications();
+
+        if (role.roleName.toUpperCase() === "ADMIN" || role.roleId === 1) {
+            setError(
+                "The Master System Administrator role cannot be deactivated or deleted."
+            );
+            return;
+        }
 
         if (!role.isActive) {
 
@@ -961,6 +999,7 @@ const Settings: React.FC = () => {
             );
 
             const existing = result.permissions || [];
+            const isAdminRole = role.roleName?.trim().toUpperCase() === "ADMIN" || role.roleId === 1;
 
             const normalized: Permission[] =
                 EPIC_PERMISSION_MODULES.map((module) => {
@@ -976,11 +1015,11 @@ const Settings: React.FC = () => {
                             ...found,
                             roleId: role.roleId,
                             module,
-                            canView: Boolean(found.canView),
-                            canCreate: Boolean(found.canCreate),
-                            canEdit: Boolean(found.canEdit),
-                            canDelete: Boolean(found.canDelete),
-                            canExport: Boolean(found.canExport)
+                            canView: isAdminRole ? true : Boolean(found.canView),
+                            canCreate: isAdminRole ? true : Boolean(found.canCreate),
+                            canEdit: isAdminRole ? true : Boolean(found.canEdit),
+                            canDelete: isAdminRole ? true : Boolean(found.canDelete),
+                            canExport: isAdminRole ? true : Boolean(found.canExport)
                         };
                     }
 
@@ -988,11 +1027,11 @@ const Settings: React.FC = () => {
                         permissionId: undefined,
                         roleId: role.roleId,
                         module,
-                        canView: false,
-                        canCreate: false,
-                        canEdit: false,
-                        canDelete: false,
-                        canExport: false
+                        canView: isAdminRole ? true : false,
+                        canCreate: isAdminRole ? true : false,
+                        canEdit: isAdminRole ? true : false,
+                        canDelete: isAdminRole ? true : false,
+                        canExport: isAdminRole ? true : false
                     };
                 });
 
@@ -1072,6 +1111,49 @@ const Settings: React.FC = () => {
             }))
         );
 
+    };
+
+    const grantAllPermissions = () => {
+        setPermissions(prev =>
+            prev.map(p => ({
+                ...p,
+                canView: true,
+                canCreate: true,
+                canEdit: true,
+                canDelete: true,
+                canExport: true
+            }))
+        );
+    };
+
+    const revokeAllPermissions = () => {
+        setPermissions(prev =>
+            prev.map(p => ({
+                ...p,
+                canView: false,
+                canCreate: false,
+                canEdit: false,
+                canDelete: false,
+                canExport: false
+            }))
+        );
+    };
+
+    const toggleModuleRow = (index: number) => {
+        setPermissions(prev => {
+            const next = [...prev];
+            const p = next[index];
+            const allActive = p.canView && p.canCreate && p.canEdit && p.canDelete && p.canExport;
+            next[index] = {
+                ...p,
+                canView: !allActive,
+                canCreate: !allActive,
+                canEdit: !allActive,
+                canDelete: !allActive,
+                canExport: !allActive
+            };
+            return next;
+        });
     };
 
 
@@ -1746,11 +1828,9 @@ const Settings: React.FC = () => {
                 </div>
             )}
 
-
-
-            // ============================================================
-            // USERS
-            // ============================================================
+            {/* ========================================================
+                USERS TAB
+            ======================================================== */}
 
             {activeTab === "users" && (
 
@@ -2285,7 +2365,7 @@ const Settings: React.FC = () => {
 
                                         {/* DEACTIVATE */}
 
-                                        {role.isActive && (
+                                        {role.isActive && role.roleName?.toUpperCase() !== "ADMIN" && role.roleId !== 1 && (
 
                                             <button
                                                 type="button"
@@ -2295,6 +2375,7 @@ const Settings: React.FC = () => {
                                                         role
                                                     )
                                                 }
+                                                title={`Deactivate ${role.roleName}`}
                                             >
                                                 ◉ Deactivate
                                             </button>
@@ -2465,6 +2546,50 @@ const Settings: React.FC = () => {
 
                             </div>
 
+                            {selectedRole && (selectedRole.roleName.toUpperCase() === "ADMIN" || selectedRole.roleId === 1) ? (
+                                <div className="admin-control-banner">
+                                    <div className="admin-control-banner-text">
+                                        <strong>
+                                            <span>🛡️</span> SYSTEM ADMINISTRATOR (Full Master System Authority)
+                                        </strong>
+                                        <p>
+                                            As the System Administrator, this role possesses unrestricted master control across all 16 academic, financial, learning, and configuration modules.
+                                        </p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        className="quick-grant-btn"
+                                        onClick={grantAllPermissions}
+                                        title="Ensure full permissions across all modules"
+                                    >
+                                        ⚡ Grant All Permissions (Full Access)
+                                    </button>
+                                </div>
+                            ) : selectedRole ? (
+                                <div className="role-control-toolbar">
+                                    <div className="role-control-info">
+                                        <span>Configuring custom access levels for <strong>{selectedRole.roleName}</strong>. Permissions strictly determine what this role can see and do in the portal.</span>
+                                    </div>
+                                    <div className="role-control-btns">
+                                        <button
+                                            type="button"
+                                            className="role-quick-btn grant"
+                                            onClick={grantAllPermissions}
+                                            title="Grant all modules for this role"
+                                        >
+                                            ✓ Grant All
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="role-quick-btn revoke"
+                                            onClick={revokeAllPermissions}
+                                            title="Revoke all modules for this role"
+                                        >
+                                            ✕ Revoke All
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : null}
 
                             <div className="permission-table-container">
 
@@ -2475,7 +2600,7 @@ const Settings: React.FC = () => {
                                         <tr>
 
                                             <th>
-                                                MODULE
+                                                MODULE & ACCESS SCOPE
                                             </th>
 
                                             <th>
@@ -2544,125 +2669,77 @@ const Settings: React.FC = () => {
 
                                     <tbody>
 
-                                        {permissions.map(
-                                            (
-                                                permission,
-                                                index
-                                            ) => (
+                                        {permissions.map((permission, index) => {
+                                            const meta = MODULE_METADATA[permission.module] || {
+                                                label: permission.module,
+                                                desc: "Module operations & academic records",
+                                                icon: "◈"
+                                            };
 
-                                                <tr
-                                                    key={
-                                                        permission.module
-                                                    }
-                                                >
-
+                                            return (
+                                                <tr key={permission.module}>
                                                     <td>
-
                                                         <div className="permission-module">
-
-                                                            <div>
-                                                                ◈
+                                                            <div className="permission-module-icon">
+                                                                {meta.icon}
                                                             </div>
-
-                                                            <strong>
-                                                                {
-                                                                    permission.module
-                                                                }
-                                                            </strong>
-
+                                                            <div className="permission-module-info">
+                                                                <strong>{meta.label}</strong>
+                                                                <small>{meta.desc}</small>
+                                                            </div>
+                                                            <button
+                                                                type="button"
+                                                                className="permission-row-toggle-btn"
+                                                                onClick={() => toggleModuleRow(index)}
+                                                                title={`Quick toggle all 5 permissions for ${meta.label}`}
+                                                            >
+                                                                Toggle
+                                                            </button>
                                                         </div>
-
                                                     </td>
-
 
                                                     <td>
                                                         <PermissionToggle
-                                                            checked={
-                                                                permission.canView
-                                                            }
-                                                            onChange={
-                                                                value =>
-                                                                    updatePermission(
-                                                                        index,
-                                                                        "canView",
-                                                                        value
-                                                                    )
-                                                            }
+                                                            checked={permission.canView}
+                                                            onChange={value => updatePermission(index, "canView", value)}
+                                                            title={`Toggle VIEW for ${meta.label}`}
                                                         />
                                                     </td>
-
 
                                                     <td>
                                                         <PermissionToggle
-                                                            checked={
-                                                                permission.canCreate
-                                                            }
-                                                            onChange={
-                                                                value =>
-                                                                    updatePermission(
-                                                                        index,
-                                                                        "canCreate",
-                                                                        value
-                                                                    )
-                                                            }
+                                                            checked={permission.canCreate}
+                                                            onChange={value => updatePermission(index, "canCreate", value)}
+                                                            title={`Toggle CREATE for ${meta.label}`}
                                                         />
                                                     </td>
-
 
                                                     <td>
                                                         <PermissionToggle
-                                                            checked={
-                                                                permission.canEdit
-                                                            }
-                                                            onChange={
-                                                                value =>
-                                                                    updatePermission(
-                                                                        index,
-                                                                        "canEdit",
-                                                                        value
-                                                                    )
-                                                            }
+                                                            checked={permission.canEdit}
+                                                            onChange={value => updatePermission(index, "canEdit", value)}
+                                                            title={`Toggle EDIT for ${meta.label}`}
                                                         />
                                                     </td>
-
 
                                                     <td>
                                                         <PermissionToggle
-                                                            checked={
-                                                                permission.canDelete
-                                                            }
-                                                            onChange={
-                                                                value =>
-                                                                    updatePermission(
-                                                                        index,
-                                                                        "canDelete",
-                                                                        value
-                                                                    )
-                                                            }
+                                                            checked={permission.canDelete}
+                                                            onChange={value => updatePermission(index, "canDelete", value)}
+                                                            title={`Toggle DELETE for ${meta.label}`}
                                                         />
                                                     </td>
-
 
                                                     <td>
                                                         <PermissionToggle
-                                                            checked={
-                                                                permission.canExport
-                                                            }
-                                                            onChange={
-                                                                value =>
-                                                                    updatePermission(
-                                                                        index,
-                                                                        "canExport",
-                                                                        value
-                                                                    )
-                                                            }
+                                                            checked={permission.canExport}
+                                                            onChange={value => updatePermission(index, "canExport", value)}
+                                                            title={`Toggle EXPORT for ${meta.label}`}
                                                         />
                                                     </td>
-
                                                 </tr>
-
-                                            )
-                                        )}
+                                            );
+                                        })}
 
                                     </tbody>
 
@@ -3367,6 +3444,7 @@ const PermissionHeader: React.FC<
 interface PermissionToggleProps {
     checked: boolean;
     onChange: (value: boolean) => void;
+    title?: string;
 }
 
 const PermissionToggle: React.FC<
@@ -3374,19 +3452,20 @@ const PermissionToggle: React.FC<
 > = ({
     checked,
     onChange,
+    title,
 }) => {
 
         return (
             <button
                 type="button"
                 className={
-                    `permission-toggle ${checked ? "checked" : ""
-                    }`
+                    `permission-toggle ${checked ? "checked" : ""}`
                 }
                 onClick={() =>
                     onChange(!checked)
                 }
                 aria-pressed={checked}
+                title={title || (checked ? "Granted (Click to revoke)" : "Revoked (Click to grant)")}
             >
 
                 <span>
@@ -4281,18 +4360,37 @@ code {
     font-size: 10px;
 }
 
+.epic-settings .permission-table tbody td,
+.epic-settings .epic-table tbody td {
+    background: rgba(11, 23, 40, 0.75) !important;
+    color: #e2e8f0 !important;
+    border-bottom: 1px solid rgba(124, 154, 200, 0.12) !important;
+}
+
+.epic-settings .permission-table tbody tr:hover td,
+.epic-settings .epic-table tbody tr:hover td {
+    background: rgba(20, 38, 64, 0.95) !important;
+}
+
+.epic-settings .permission-table thead th,
+.epic-settings .epic-table thead th {
+    background: rgba(8, 17, 30, 0.95) !important;
+    color: #94a3b8 !important;
+    border-bottom: 1px solid rgba(124, 154, 200, 0.18) !important;
+}
+
 .permission-table-container {
     overflow-x: auto;
     margin: 0 22px 22px;
 }
 
 .permission-table {
-    min-width: 750px;
+    min-width: 780px;
 }
 
 .permission-table th,
 .permission-table td {
-    border-bottom: 1px solid rgba(124,154,200,.07);
+    border-bottom: 1px solid rgba(124,154,200,.09);
 }
 
 .permission-table td {
@@ -4308,55 +4406,238 @@ code {
 .permission-module {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
 }
 
-.permission-module > div {
-    color: #54dfff;
+.permission-module-icon {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: rgba(16, 185, 129, 0.12);
+    color: var(--epic-primary, #10b981);
+    font-size: 16px;
+    flex-shrink: 0;
+    border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
-.permission-module strong {
-    color: #c7d5e6;
+.permission-module-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.permission-module-info strong {
+    color: #f1f5f9;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.permission-module-info small {
+    color: #8291aa;
     font-size: 11px;
+    line-height: 1.3;
+}
+
+.permission-row-toggle-btn {
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    border-radius: 5px;
+    background: rgba(15, 28, 46, 0.6);
+    color: #94a3b8;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 7px;
+    margin-left: auto;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.permission-row-toggle-btn:hover {
+    color: var(--epic-primary, #10b981);
+    border-color: var(--epic-primary, #10b981);
+    background: rgba(16, 185, 129, 0.15);
+}
+
+.admin-control-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 15px 20px;
+    margin: 16px 22px;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(6, 182, 212, 0.08));
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    border-radius: 12px;
+}
+
+.admin-control-banner-text strong {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--epic-primary, #10b981);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+}
+
+.admin-control-banner-text p {
+    margin: 4px 0 0;
+    color: #cbd5e1;
+    font-size: 12px;
+}
+
+.quick-grant-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: var(--epic-primary, #10b981);
+    color: #ffffff;
+    border: 0;
+    border-radius: 8px;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 12px var(--epic-primary-glow, rgba(16, 185, 129, 0.3));
+    transition: all 0.15s ease;
+    white-space: nowrap;
+}
+
+.quick-grant-btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.1);
+}
+
+.role-control-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 18px;
+    margin: 14px 22px;
+    background: rgba(15, 28, 46, 0.6);
+    border: 1px solid rgba(124, 154, 200, 0.16);
+    border-radius: 10px;
+}
+
+.role-control-info {
+    color: #cbd5e1;
+    font-size: 12px;
+}
+
+.role-control-info strong {
+    color: var(--epic-primary, #10b981);
+}
+
+.role-control-btns {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.role-quick-btn {
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.15s ease;
+}
+
+.role-quick-btn.grant {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--epic-primary, #10b981);
+    border-color: rgba(16, 185, 129, 0.35);
+}
+
+.role-quick-btn.grant:hover {
+    background: var(--epic-primary, #10b981);
+    color: #ffffff;
+}
+
+.role-quick-btn.revoke {
+    background: rgba(239, 68, 68, 0.12);
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.role-quick-btn.revoke:hover {
+    background: #ef4444;
+    color: #ffffff;
 }
 
 .permission-header {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 5px;
+    gap: 6px;
+}
+
+.permission-header span {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
 }
 
 .permission-header button {
-    border: 0;
-    color: #4fdcff;
-    background: transparent;
-    font-size: 7px;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    border-radius: 4px;
+    color: var(--epic-primary, #10b981);
+    background: rgba(16, 185, 129, 0.12);
+    font-size: 9.5px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    padding: 2px 7px;
     cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.permission-header button:hover {
+    background: var(--epic-primary, #10b981);
+    color: #ffffff;
+    border-color: var(--epic-primary, #10b981);
 }
 
 .permission-toggle {
-    display: inline-grid;
-    place-items: center;
-    width: 27px;
-    height: 27px;
-    border: 1px solid rgba(124,154,200,.18);
-    border-radius: 7px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1.5px solid rgba(148, 163, 184, 0.35);
+    border-radius: 8px;
+    background: rgba(15, 28, 46, 0.7);
     color: transparent;
-    background: #0b1726;
     cursor: pointer;
+    transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+    user-select: none;
+    padding: 0;
+}
+
+.permission-toggle:hover {
+    border-color: var(--epic-primary, #10b981);
+    background: rgba(16, 185, 129, 0.12);
+    transform: scale(1.08);
+    box-shadow: 0 0 10px var(--epic-primary-glow, rgba(16, 185, 129, 0.25));
 }
 
 .permission-toggle.checked {
-    border-color: rgba(74,219,255,.4);
-    color: #03121b;
-    background: #55dcff;
-    box-shadow: 0 0 12px rgba(75,218,255,.15);
+    border-color: var(--epic-primary, #10b981);
+    background: var(--epic-primary, #10b981);
+    color: #ffffff !important;
+    box-shadow: 0 0 14px var(--epic-primary-glow, rgba(16, 185, 129, 0.4));
 }
 
 .permission-toggle span {
-    font-size: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
     font-weight: 900;
+    line-height: 1;
 }
 
 

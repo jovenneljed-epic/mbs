@@ -115,6 +115,7 @@ namespace School.Api.Controllers
         // =========================================================
 
         [HttpPost]
+        [Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> CreateRole(
             CreateRoleRequest request)
         {
@@ -229,6 +230,7 @@ namespace School.Api.Controllers
         // =========================================================
 
         [HttpPut("{id:int}")]
+        [Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> UpdateRole(
             int id,
             UpdateRoleRequest request)
@@ -244,6 +246,14 @@ namespace School.Api.Controllers
                 {
                     message =
                         "Role not found."
+                });
+            }
+
+            if ((role.RoleId == 1 || role.RoleName == "ADMIN") && request != null && !request.IsActive)
+            {
+                return BadRequest(new
+                {
+                    message = "The Master System Administrator role cannot be deactivated."
                 });
             }
 
@@ -315,6 +325,7 @@ namespace School.Api.Controllers
         // =========================================================
 
         [HttpDelete("{id:int}")]
+        [Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> DeleteRole(
             int id)
         {
@@ -330,6 +341,19 @@ namespace School.Api.Controllers
                 {
                     message =
                         "Role not found."
+                });
+            }
+
+            // -----------------------------------------------------
+            // PROTECT MASTER SYSTEM ADMINISTRATOR
+            // -----------------------------------------------------
+
+            if (role.RoleId == 1 || role.RoleName == "ADMIN")
+            {
+                return BadRequest(new
+                {
+                    message =
+                        "The Master System Administrator role cannot be deactivated or deleted."
                 });
             }
 
@@ -461,6 +485,8 @@ namespace School.Api.Controllers
             // RETURN COMPLETE PERMISSION LIST
             // -----------------------------------------------------
 
+            bool isAdminRole = role.RoleId == 1 || role.RoleName == "ADMIN";
+
             var permissions =
                 await _context.Permissions
                     .AsNoTracking()
@@ -480,19 +506,19 @@ namespace School.Api.Controllers
                             p.Module,
 
                         canView =
-                            p.CanView,
+                            isAdminRole ? true : p.CanView,
 
                         canCreate =
-                            p.CanCreate,
+                            isAdminRole ? true : p.CanCreate,
 
                         canEdit =
-                            p.CanEdit,
+                            isAdminRole ? true : p.CanEdit,
 
                         canDelete =
-                            p.CanDelete,
+                            isAdminRole ? true : p.CanDelete,
 
                         canExport =
-                            p.CanExport
+                            isAdminRole ? true : p.CanExport
                     })
                     .ToListAsync();
 
@@ -514,6 +540,7 @@ namespace School.Api.Controllers
         // =========================================================
 
         [HttpPut("{id:int}/permissions")]
+        [Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> UpdatePermissions(
             int id,
             List<PermissionUpdateRequest> requests)
