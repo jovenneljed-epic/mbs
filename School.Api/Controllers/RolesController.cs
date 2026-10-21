@@ -249,7 +249,7 @@ namespace School.Api.Controllers
                 });
             }
 
-            if ((role.RoleId == 1 || role.RoleName.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) || role.RoleName.ToUpper().Contains("ADMIN")) && request != null && !request.IsActive)
+            if (IsMasterAdminRole(role.RoleId, role.RoleName) && request != null && !request.IsActive)
             {
                 return BadRequest(new
                 {
@@ -348,7 +348,7 @@ namespace School.Api.Controllers
             // PROTECT MASTER SYSTEM ADMINISTRATOR
             // -----------------------------------------------------
 
-            if (role.RoleId == 1 || role.RoleName.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) || role.RoleName.ToUpper().Contains("ADMIN"))
+            if (IsMasterAdminRole(role.RoleId, role.RoleName))
             {
                 return BadRequest(new
                 {
@@ -485,7 +485,7 @@ namespace School.Api.Controllers
             // RETURN COMPLETE PERMISSION LIST
             // -----------------------------------------------------
 
-            bool isAdminRole = role.RoleId == 1 || role.RoleName.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) || role.RoleName.ToUpper().Contains("ADMIN");
+            bool isAdminRole = IsMasterAdminRole(role.RoleId, role.RoleName);
 
             var permissions =
                 await _context.Permissions
@@ -661,6 +661,33 @@ namespace School.Api.Controllers
                 roleId =
                     id
             });
+        }
+
+        // =========================================================
+        // MASTER ADMIN CHECK
+        // =========================================================
+
+        private static bool IsMasterAdminRole(
+            int roleId,
+            string? roleName)
+        {
+            if (roleId == 1)
+            {
+                return true;
+            }
+
+            if (string.IsNullOrWhiteSpace(roleName))
+            {
+                return false;
+            }
+
+            var normalized = roleName.Trim().ToUpperInvariant();
+
+            return normalized == "ADMIN" ||
+                   normalized == "ADMINISTRATOR" ||
+                   normalized == "SYSTEM ADMINISTRATOR" ||
+                   normalized == "SUPER ADMIN" ||
+                   normalized == "SUPERADMIN";
         }
 
         // =========================================================

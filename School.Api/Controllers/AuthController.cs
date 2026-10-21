@@ -575,7 +575,7 @@ namespace School.Api.Controllers
                 var defaultCustomerId = await GetDefaultCustomerIdAsync();
                 user.CustomerId = defaultCustomerId;
 
-                if (IsAdminRole(roleName))
+                if (IsMasterAdminRole(roleName))
                 {
                     user.AccountType = "SYSTEM";
                 }
@@ -802,24 +802,41 @@ namespace School.Api.Controllers
                 string roleName)
         {
             // --------------------------------------------------------
-            // ADMIN HAS FULL ACCESS
+            // MASTER SYSTEM ADMINISTRATOR HAS FULL ACCESS
             // --------------------------------------------------------
 
-            if (IsAdminRole(roleName))
+            if (roleId == 1 || IsMasterAdminRole(roleName))
             {
-                return new List<object>
+                var allModules = new[]
                 {
-                    new
-                    {
-                        module = "*",
-                        canView = true,
-                        canCreate = true,
-                        canEdit = true,
-                        canDelete = true,
-                        canExport = true,
-                        canManage = true
-                    }
+                    "*",
+                    "Dashboard",
+                    "Members",
+                    "Attendance",
+                    "Visitors",
+                    "Church Services",
+                    "Giving",
+                    "Income",
+                    "Expenses",
+                    "Ministries",
+                    "Events",
+                    "Reports",
+                    "Settings",
+                    "Demo Requests",
+                    "Subscriptions",
+                    "EPIC Learning"
                 };
+
+                return allModules.Select(m => (object)new
+                {
+                    module = m,
+                    canView = true,
+                    canCreate = true,
+                    canEdit = true,
+                    canDelete = true,
+                    canExport = true,
+                    canManage = true
+                }).ToList();
             }
 
             // --------------------------------------------------------
@@ -1088,7 +1105,7 @@ namespace School.Api.Controllers
                         user.RoleId.ToString())
                 };
 
-            if (IsAdminRole(roleName) && !string.Equals(roleName, "ADMIN", StringComparison.OrdinalIgnoreCase))
+            if (IsMasterAdminRole(roleName) && !string.Equals(roleName, "ADMIN", StringComparison.OrdinalIgnoreCase))
             {
                 claims.Add(
                     new Claim(
@@ -1206,10 +1223,14 @@ namespace School.Api.Controllers
         }
 
         // ============================================================
-        // ADMIN ROLE CHECK
+        // MASTER ADMIN ROLE CHECK
+        //
+        // Only Master System Administrators have full wildcard access.
+        // Other roles (e.g. SCHOOL ADMIN, STAFF, FACULTY) must follow
+        // their permissions configured in the Permissions table.
         // ============================================================
 
-        private static bool IsAdminRole(
+        private static bool IsMasterAdminRole(
             string? roleName)
         {
             if (string.IsNullOrWhiteSpace(roleName))
@@ -1222,8 +1243,7 @@ namespace School.Api.Controllers
                    normalized == "ADMINISTRATOR" ||
                    normalized == "SYSTEM ADMINISTRATOR" ||
                    normalized == "SUPER ADMIN" ||
-                   normalized == "SUPERADMIN" ||
-                   normalized.Contains("ADMIN");
+                   normalized == "SUPERADMIN";
         }
 
         // ============================================================

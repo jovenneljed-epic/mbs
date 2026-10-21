@@ -700,6 +700,29 @@ class PermissionService {
                     "subscription",
                     "subscription management"
                 ],
+
+                "blog management": [
+                    "blog",
+                    "events",
+                    "dashboard",
+                    "news & announcements"
+                ],
+
+                "blog": [
+                    "blog management",
+                    "events",
+                    "dashboard"
+                ],
+
+                "course-manager": [
+                    "members",
+                    "courses & curriculum"
+                ],
+
+                "member-attendance-report": [
+                    "attendance",
+                    "reports"
+                ],
             };
 
         const requestedAliases =
@@ -723,6 +746,30 @@ class PermissionService {
             if (match) {
                 return match;
             }
+        }
+
+        /*
+         * Wildcard module match: if role has "*" module granted
+         */
+
+        const wildcard =
+            permissions.find(
+                permission =>
+                    permission.module === "*" ||
+                    this.normalizeModule(
+                        permission.module
+                    ) === "*"
+            );
+
+        if (wildcard) {
+            return {
+                module,
+                view: wildcard.view,
+                create: wildcard.create,
+                edit: wildcard.edit,
+                delete: wildcard.delete,
+                export: wildcard.export,
+            };
         }
 
         return null;

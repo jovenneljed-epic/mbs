@@ -193,9 +193,7 @@ namespace School.Api.Controllers
                 .Select(c => c.CustomerId)
                 .FirstOrDefaultAsync();
 
-            var isRoleAdmin = role.RoleName != null &&
-                (role.RoleName.Trim().ToUpperInvariant() == "ADMIN" ||
-                 role.RoleName.Trim().ToUpperInvariant().Contains("ADMIN"));
+            var isRoleAdmin = IsMasterAdminRole(role.RoleName);
 
             var user = new User
             {
@@ -323,9 +321,7 @@ namespace School.Api.Controllers
                 user.CustomerId = defId > 0 ? defId : 1;
             }
 
-            var isRoleAdmin = role.RoleName != null &&
-                (role.RoleName.Trim().ToUpperInvariant() == "ADMIN" ||
-                 role.RoleName.Trim().ToUpperInvariant().Contains("ADMIN"));
+            var isRoleAdmin = IsMasterAdminRole(role.RoleName);
 
             if (isRoleAdmin)
             {
@@ -538,16 +534,17 @@ namespace School.Api.Controllers
             // Prevent deleting the last administrator
             // -----------------------------------------------------
 
-            if (user.Role != null &&
-                (user.Role.RoleName.Equals("ADMIN", StringComparison.OrdinalIgnoreCase) ||
-                 user.Role.RoleName.ToUpper().Contains("ADMIN")))
+            if (user.Role != null && IsMasterAdminRole(user.Role.RoleName))
             {
                 var adminCount = await _context.Users
                     .Include(u => u.Role)
                     .CountAsync(u =>
                         u.Role != null &&
-                        (u.Role.RoleName.ToUpper() == "ADMIN" ||
-                         u.Role.RoleName.ToUpper().Contains("ADMIN")));
+                        (u.Role.RoleName == "ADMIN" ||
+                         u.Role.RoleName == "ADMINISTRATOR" ||
+                         u.Role.RoleName == "SYSTEM ADMINISTRATOR" ||
+                         u.Role.RoleName == "SUPER ADMIN" ||
+                         u.Role.RoleName == "SUPERADMIN"));
 
                 if (adminCount <= 1)
                 {
@@ -588,6 +585,26 @@ namespace School.Api.Controllers
 
                 fullName = user.FullName
             });
+        }
+
+        // =========================================================
+        // MASTER ADMIN ROLE CHECK
+        // =========================================================
+
+        private static bool IsMasterAdminRole(string? roleName)
+        {
+            if (string.IsNullOrWhiteSpace(roleName))
+            {
+                return false;
+            }
+
+            var normalized = roleName.Trim().ToUpperInvariant();
+
+            return normalized == "ADMIN" ||
+                   normalized == "ADMINISTRATOR" ||
+                   normalized == "SYSTEM ADMINISTRATOR" ||
+                   normalized == "SUPER ADMIN" ||
+                   normalized == "SUPERADMIN";
         }
 
         // =========================================================
