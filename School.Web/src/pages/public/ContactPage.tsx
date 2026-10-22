@@ -12,6 +12,7 @@ interface ContactFormData {
     name: string;
     email: string;
     phone: string;
+    organization?: string;
     subject: string;
     message: string;
 }
@@ -23,6 +24,7 @@ const ContactPage: React.FC<ContactPageProps> = ({
         name: "",
         email: "",
         phone: "",
+        organization: "",
         subject: "",
         message: "",
     });
@@ -85,10 +87,8 @@ const ContactPage: React.FC<ContactPageProps> = ({
             const payload = {
                 fullName: form.name.trim(),
 
-                // Contact inquiries do not provide
-                // a church name, so we identify them
-                // clearly in the existing Demo Requests system.
-                churchName: "Website Contact Inquiry",
+                // Organization or affiliation, default to Website Contact Visitor
+                churchName: form.organization?.trim() || "Website Contact Visitor",
 
                 email: form.email.trim().toLowerCase(),
 
@@ -135,6 +135,7 @@ const ContactPage: React.FC<ContactPageProps> = ({
                 name: "",
                 email: "",
                 phone: "",
+                organization: "",
                 subject: "",
                 message: "",
             });
@@ -403,22 +404,22 @@ const ContactPage: React.FC<ContactPageProps> = ({
 
                                 <div>
                                     <span>✓</span>
-                                    Church inquiries
+                                    Admissions & Enrollment Inquiries
                                 </div>
 
                                 <div>
                                     <span>✓</span>
-                                    EPIC System questions
+                                    Academic Programs & Curricula
                                 </div>
 
                                 <div>
                                     <span>✓</span>
-                                    Demo requests
+                                    Campus Tours & Consultations
                                 </div>
 
                                 <div>
                                     <span>✓</span>
-                                    Ministry connections
+                                    School System Demonstrations
                                 </div>
 
                             </div>
@@ -441,10 +442,7 @@ const ContactPage: React.FC<ContactPageProps> = ({
                                     className="epic-contact-success"
                                     role="alert"
                                 >
-                                    ✓ Thank you for contacting
-                                    School. Your message has been
-                                    received successfully. Our
-                                    team will contact you soon.
+                                    ✓ Thank you for contacting our institution! Your inquiry has been received directly by our admissions & administration office. Our team will contact you shortly.
                                 </div>
                             )}
 
@@ -506,6 +504,25 @@ const ContactPage: React.FC<ContactPageProps> = ({
                             </div>
 
                             {/* =================================================
+                                ORGANIZATION / AFFILIATION
+                            ================================================= */}
+
+                            <div className="epic-contact-field" style={{ marginBottom: "16px" }}>
+                                <label htmlFor="organization">
+                                    School / Church / Affiliation (Optional)
+                                </label>
+                                <input
+                                    id="organization"
+                                    type="text"
+                                    name="organization"
+                                    placeholder="e.g. Grace Christian Academy, Local Church, or Independent"
+                                    value={form.organization || ""}
+                                    onChange={handleChange}
+                                    maxLength={200}
+                                />
+                            </div>
+
+                            {/* =================================================
                                 PHONE + POSITION / INQUIRY TYPE
                             ================================================= */}
 
@@ -544,31 +561,39 @@ const ContactPage: React.FC<ContactPageProps> = ({
                                     >
 
                                         <option value="">
-                                            Select inquiry type
+                                            Select inquiry category
                                         </option>
 
-                                        <option value="EPIC Church">
-                                            EPIC Church
+                                        <option value="Admissions & Enrollment">
+                                            Admissions & Enrollment
                                         </option>
 
-                                        <option value="EPIC Church Management System">
-                                            EPIC Church Management System
+                                        <option value="Academic Programs & Curriculum">
+                                            Academic Programs & Curriculum
                                         </option>
 
-                                        <option value="EPIC Learning">
-                                            EPIC Learning
+                                        <option value="Tuition, Units & Fees">
+                                            Tuition, Units & Fees
                                         </option>
 
-                                        <option value="Request a Demo">
-                                            Request a Demo
+                                        <option value="Campus Tour & Visit Request">
+                                            Campus Tour & Visit Request
                                         </option>
 
-                                        <option value="Partnership">
-                                            Partnership
+                                        <option value="System Demonstration Request">
+                                            System Demonstration Request
                                         </option>
 
-                                        <option value="Other">
-                                            Other
+                                        <option value="Student Records & Credentials">
+                                            Student Records & Credentials
+                                        </option>
+
+                                        <option value="Partnership & Collaboration">
+                                            Partnership & Collaboration
+                                        </option>
+
+                                        <option value="General Inquiries">
+                                            General Inquiries
                                         </option>
 
                                     </select>

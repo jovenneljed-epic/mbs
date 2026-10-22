@@ -20,7 +20,6 @@ import {
     Receipt,
     TrendingUp,
     TrendingDown,
-    Sparkles,
     Settings as SettingsIcon,
     FileEdit,
     LogOut,
@@ -28,6 +27,7 @@ import {
     School,
     Bell,
     MessageSquare,
+    Mail,
     BookOpen,
     BookOpenCheck,
     Users
@@ -288,7 +288,7 @@ const PAGE_TITLES: Record<Page, string> = {
         "Attendance by Date",
 
     "demo-requests":
-        "Demo Requests",
+        "Inquiries & Contact Messages",
 
     "subscription-dashboard":
         "Subscription Dashboard",
@@ -372,7 +372,7 @@ const PAGE_SUBTITLES: Record<Page, string> = {
         "View attendance records by selected date or date range",
 
     "demo-requests":
-        "Manage institutions requesting a system demonstration",
+        "Manage website inquiries, contact submissions, and consultation requests", 
 
     "subscription-dashboard":
         "Monitor institutional plans, revenue and enrollment performance",
@@ -1262,8 +1262,8 @@ const NAVIGATION_SECTIONS: NavigationSection[] = [
             },
             {
                 page: "demo-requests",
-                label: "Demo Requests",
-                icon: <Sparkles size={18} strokeWidth={2} />,
+                label: "Inquiries & Messages",
+                icon: <Mail size={18} strokeWidth={2} />,
                 permission: "Demo Requests",
             },
         ],
@@ -3847,7 +3847,7 @@ if(
                             type="button"
                             className="fb-circle-action-btn"
                             title="Campus Inquiries & Messages"
-                            onClick={() => navigate("visitors")}
+                            onClick={() => navigate("demo-requests")}
                         >
                             <MessageSquare size={18} strokeWidth={2.2} />
                         </button>
