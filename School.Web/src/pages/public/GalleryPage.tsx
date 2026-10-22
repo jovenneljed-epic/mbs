@@ -1,6 +1,8 @@
 
 import React, { useState } from "react";
+import PublicHeader from "../../components/PublicHeader";
 import "./GalleryPage.css";
+import "./PublicUnisonTheme.css";
 
 interface GalleryItem {
     id: number;
@@ -147,6 +149,7 @@ const GalleryPage: React.FC<GalleryPageProps> = ({
 
     return (
         <div className="epic-public-page epic-public-gallery">
+            <PublicHeader onNavigate={onNavigate} />
 
             {/* =====================================================
                 HERO

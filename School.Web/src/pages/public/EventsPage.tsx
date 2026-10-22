@@ -1,6 +1,8 @@
 
 import React from "react";
+import PublicHeader from "../../components/PublicHeader";
 import "./EventsPage.css";
+import "./PublicUnisonTheme.css";
 
 interface EventsPageProps {
     onNavigate?: (page: string) => void;
@@ -17,6 +19,7 @@ const EventsPage: React.FC<EventsPageProps> = ({
 
     return (
         <div className="epic-public-events">
+            <PublicHeader onNavigate={onNavigate} />
 
             {/* =====================================================
                 HERO

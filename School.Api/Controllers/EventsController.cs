@@ -1,4 +1,4 @@
-﻿
+
 using School.Api.Data;
 using School.Api.Models;
 
@@ -101,6 +101,51 @@ namespace School.Api.Controllers
             return status
                 .Trim()
                 .ToUpperInvariant();
+        }
+
+        // =========================================================
+        // GET: api/Events/public (PUBLIC ACCESS FOR WEBSITE & MAIN CAMPUS DROPDOWN)
+        // =========================================================
+
+        [HttpGet("public")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetPublicEvents()
+        {
+            try
+            {
+                var events = await _context.Events
+                    .AsNoTracking()
+                    .OrderBy(e => e.EventDate)
+                    .Take(15)
+                    .Select(e => new
+                    {
+                        id = e.EventId,
+                        eventId = e.EventId,
+                        title = e.Title,
+                        eventType = e.EventType,
+                        eventDate = e.EventDate,
+                        startDate = e.EventDate.ToString("yyyy-MM-dd"),
+                        startTime = e.StartTime.ToString(@"hh\:mm"),
+                        endTime = e.EndTime.HasValue ? e.EndTime.Value.ToString(@"hh\:mm") : "",
+                        location = e.Venue ?? "Main Seminary Campus",
+                        venue = e.Venue ?? "Main Seminary Campus",
+                        speaker = e.Speaker ?? "Faculty / Guest Lecturer",
+                        ministry = e.Ministry ?? "Seminary & Ministry",
+                        status = e.Status,
+                        description = e.Description ?? ""
+                    })
+                    .ToListAsync();
+
+                return Ok(events);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "ERROR LOADING PUBLIC EVENTS",
+                    error = ex.Message
+                });
+            }
         }
 
         // =========================================================

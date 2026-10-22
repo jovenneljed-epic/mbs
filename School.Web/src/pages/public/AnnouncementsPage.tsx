@@ -1,6 +1,8 @@
 
 import React from "react";
+import PublicHeader from "../../components/PublicHeader";
 import "./AnnouncementsPage.css";
+import "./PublicUnisonTheme.css";
 
 interface Announcement {
     id: number;
@@ -85,6 +87,7 @@ const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({
 
     return (
         <div className="epic-public-page epic-public-announcements">
+            <PublicHeader onNavigate={onNavigate} />
 
             {/* =====================================================
                 HERO

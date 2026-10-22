@@ -15,8 +15,17 @@ import {
 } from "../services/landingPageContent";
 import { PromoVideoPlayer } from "../components/PromoVideoPlayer";
 import {
+    getPublicSchoolEvents,
+    getPublicSchoolAnnouncements,
+    DEFAULT_SCHOOL_EVENTS,
+    DEFAULT_SCHOOL_ANNOUNCEMENTS,
+    type SchoolEventItem,
+    type SchoolAnnouncementItem
+} from "../services/schoolPublicDataService";
+import {
     GraduationCap,
     ChevronRight,
+    ChevronDown,
     ArrowRight,
     Search,
     User,
@@ -29,7 +38,13 @@ import {
     Building2,
     Compass,
     BookOpen,
-    Calendar
+    Calendar,
+    Clock,
+    MapPin,
+    Image as ImageIcon,
+    Bell,
+    Sparkles,
+    Phone
 } from "lucide-react";
 
 interface SalesLandingPageProps {
@@ -126,6 +141,74 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
     // Search query state
     const [searchQuery, setSearchQuery] = useState("");
 
+    // ============================================================
+    // Apple-Style Main Campus Dropdown & Live SMS Data State
+    // ============================================================
+    const [isCampusMenuOpen, setIsCampusMenuOpen] = useState(false);
+    const closeTimeoutRef = useRef<any>(null);
+    const [schoolEvents, setSchoolEvents] = useState<SchoolEventItem[]>(DEFAULT_SCHOOL_EVENTS);
+    const [schoolAnnouncements, setSchoolAnnouncements] = useState<SchoolAnnouncementItem[]>(DEFAULT_SCHOOL_ANNOUNCEMENTS);
+    const [isLoadingEvents, setIsLoadingEvents] = useState(false);
+    const [selectedEvent, setSelectedEvent] = useState<SchoolEventItem | null>(null);
+    const [selectedAnnouncement, setSelectedAnnouncement] = useState<SchoolAnnouncementItem | null>(null);
+
+    // Fetch live SMS events & announcements
+    useEffect(() => {
+        let mounted = true;
+        setIsLoadingEvents(true);
+        getPublicSchoolEvents().then(events => {
+            if (mounted && events && events.length > 0) {
+                setSchoolEvents(events);
+            }
+        }).finally(() => {
+            if (mounted) setIsLoadingEvents(false);
+        });
+
+        getPublicSchoolAnnouncements().then(announcements => {
+            if (mounted && announcements && announcements.length > 0) {
+                setSchoolAnnouncements(announcements);
+            }
+        });
+
+        return () => {
+            mounted = false;
+        };
+    }, []);
+
+    // Graceful Apple-style hover delay handlers
+    const handleMouseEnterCampus = () => {
+        if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+        setIsCampusMenuOpen(true);
+    };
+
+    const handleMouseLeaveCampus = () => {
+        closeTimeoutRef.current = setTimeout(() => {
+            setIsCampusMenuOpen(false);
+        }, 220);
+    };
+
+    const toggleCampusMenu = () => {
+        setIsCampusMenuOpen(prev => !prev);
+    };
+
+    const closeCampusMenu = () => {
+        if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+        setIsCampusMenuOpen(false);
+    };
+
+    // Close menu & modals on Escape key
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                setIsCampusMenuOpen(false);
+                setSelectedEvent(null);
+                setSelectedAnnouncement(null);
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, []);
+
     // Admissions Modal State
     const [isAdmissionOpen, setIsAdmissionOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -193,6 +276,30 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
         if (clean === "about") {
             if (onNavigate) onNavigate("about");
             else window.location.href = "/about";
+            return;
+        }
+
+        if (clean === "events") {
+            if (onNavigate) onNavigate("events");
+            else window.location.href = "/events";
+            return;
+        }
+
+        if (clean === "announcements") {
+            if (onNavigate) onNavigate("announcements");
+            else window.location.href = "/announcements";
+            return;
+        }
+
+        if (clean === "gallery") {
+            if (onNavigate) onNavigate("gallery");
+            else window.location.href = "/gallery";
+            return;
+        }
+
+        if (clean === "ministries") {
+            if (onNavigate) onNavigate("ministries");
+            else window.location.href = "/ministries";
             return;
         }
 
@@ -527,16 +634,22 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
 
                     {/* Nav Middle Links */}
                     <nav className="ub-nav-links">
-                        <a
-                            href="#campuses"
-                            className="ub-nav-link"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                document.getElementById("campuses")?.scrollIntoView({ behavior: "smooth" });
-                            }}
+                        <div
+                            className="ub-campus-trigger-wrapper"
+                            onMouseEnter={handleMouseEnterCampus}
+                            onMouseLeave={handleMouseLeaveCampus}
                         >
-                            MAIN CAMPUS
-                        </a>
+                            <button
+                                type="button"
+                                className={`ub-nav-link-campus ${isCampusMenuOpen ? "active" : ""}`}
+                                onClick={toggleCampusMenu}
+                                aria-expanded={isCampusMenuOpen}
+                                aria-haspopup="true"
+                            >
+                                <span>MAIN CAMPUS</span>
+                                <ChevronDown size={13} className={`ub-campus-chevron ${isCampusMenuOpen ? "rotated" : ""}`} />
+                            </button>
+                        </div>
                         <a
                             href="#learning"
                             className="ub-nav-link"
@@ -593,6 +706,300 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                     </div>
                 </div>
             </header>
+
+            {/* ============================================================ */}
+            {/* APPLE-STYLE MAIN CAMPUS MEGA-MENU DROPDOWN                   */}
+            {/* ============================================================ */}
+            <div
+                className={`apple-mega-menu ${isCampusMenuOpen ? "open" : ""}`}
+                onMouseEnter={handleMouseEnterCampus}
+                onMouseLeave={handleMouseLeaveCampus}
+            >
+                <div className="apple-mega-container">
+                    <div className="apple-mega-grid">
+                        {/* COLUMN 1: Explore Main Campus / About */}
+                        <div className="apple-mega-col">
+                            <div className="apple-mega-label">
+                                <Building2 size={13} color="#F59E0B" />
+                                <span>Explore Campus</span>
+                            </div>
+
+                            <div
+                                className="apple-hero-card"
+                                onClick={() => {
+                                    closeCampusMenu();
+                                    navigateTo("about");
+                                }}
+                                title="Learn about Mobile Bible School Seminary"
+                            >
+                                <span className="apple-hero-badge">ABOUT MBS</span>
+                                <h4 className="apple-hero-title">
+                                    <span>Mobile Bible School</span>
+                                    <ArrowRight size={14} color="#F59E0B" />
+                                </h4>
+                                <p className="apple-hero-subtitle">
+                                    Rooted in biblical inerrancy, sound theological scholarship, and pastoral ministry since 1986.
+                                </p>
+                            </div>
+
+                            <div className="apple-link-list">
+                                <button
+                                    type="button"
+                                    className="apple-link-item"
+                                    onClick={() => {
+                                        closeCampusMenu();
+                                        navigateTo("about");
+                                    }}
+                                >
+                                    <BookOpen size={13} className="apple-link-item-icon" />
+                                    <span>Statement of Faith &amp; Doctrine</span>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    className="apple-link-item"
+                                    onClick={() => {
+                                        closeCampusMenu();
+                                        navigateTo("about");
+                                    }}
+                                >
+                                    <Award size={13} className="apple-link-item-icon" />
+                                    <span>Seminary Faculty &amp; Deans</span>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    className="apple-link-item"
+                                    onClick={() => {
+                                        closeCampusMenu();
+                                        navigateTo("about");
+                                    }}
+                                >
+                                    <ShieldCheck size={13} className="apple-link-item-icon" />
+                                    <span>ACTS &amp; CCHE Accreditations</span>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    className="apple-link-item"
+                                    onClick={() => {
+                                        closeCampusMenu();
+                                        document.getElementById("campuses")?.scrollIntoView({ behavior: "smooth" });
+                                    }}
+                                >
+                                    <MapPin size={13} className="apple-link-item-icon" />
+                                    <span>Campus Locations &amp; Facilities</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* COLUMN 2: School Events & Calendar (Connected to SMS) */}
+                        <div className="apple-mega-col">
+                            <div className="apple-mega-label">
+                                <Calendar size={13} color="#F59E0B" />
+                                <span>School Events</span>
+                                <span className="apple-live-pulse">
+                                    <span className="apple-live-dot" />
+                                    LIVE SMS
+                                </span>
+                            </div>
+
+                            <div className="apple-events-stack">
+                                {isLoadingEvents ? (
+                                    <div style={{ color: "#94A3B8", fontSize: "0.78rem", padding: "10px 0" }}>
+                                        Loading campus events...
+                                    </div>
+                                ) : (
+                                    schoolEvents.slice(0, 3).map(evt => (
+                                        <div
+                                            key={evt.id}
+                                            className="apple-event-card"
+                                            onClick={() => {
+                                                closeCampusMenu();
+                                                setSelectedEvent(evt);
+                                            }}
+                                            title="Click to view event details & register"
+                                        >
+                                            <div className="apple-event-date-box">
+                                                <span className="apple-event-month">{evt.dayMonth.month}</span>
+                                                <span className="apple-event-day">{evt.dayMonth.day}</span>
+                                            </div>
+                                            <div className="apple-event-details">
+                                                <div className="apple-event-tag">{evt.eventType}</div>
+                                                <h5 className="apple-event-title">{evt.title}</h5>
+                                                <div className="apple-event-meta">
+                                                    <span>{evt.location}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+
+                                <button
+                                    type="button"
+                                    className="apple-view-all-link"
+                                    onClick={() => {
+                                        closeCampusMenu();
+                                        navigateTo("events");
+                                    }}
+                                >
+                                    <span>View All School Events &amp; Calendar</span>
+                                    <ArrowRight size={12} />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* COLUMN 3: Announcements & Bulletins (Connected to SMS) */}
+                        <div className="apple-mega-col">
+                            <div className="apple-mega-label">
+                                <Bell size={13} color="#F59E0B" />
+                                <span>Announcements</span>
+                                <span className="apple-live-pulse" style={{ background: "rgba(245, 158, 11, 0.15)", color: "#F59E0B", borderColor: "rgba(245, 158, 11, 0.3)" }}>
+                                    SMS BULLETINS
+                                </span>
+                            </div>
+
+                            <div className="apple-announcements-stack">
+                                {schoolAnnouncements.slice(0, 3).map(ann => (
+                                    <div
+                                        key={ann.id}
+                                        className="apple-announcement-card"
+                                        onClick={() => {
+                                            closeCampusMenu();
+                                            setSelectedAnnouncement(ann);
+                                        }}
+                                        title="Click to read full bulletin"
+                                    >
+                                        <div className="apple-announcement-header">
+                                            <span className="apple-announcement-pill">{ann.category}</span>
+                                            <span className="apple-announcement-date">{ann.formattedDate}</span>
+                                        </div>
+                                        <h5 className="apple-announcement-title">{ann.title}</h5>
+                                        <p className="apple-announcement-snippet">{ann.content}</p>
+                                    </div>
+                                ))}
+
+                                <button
+                                    type="button"
+                                    className="apple-view-all-link"
+                                    onClick={() => {
+                                        closeCampusMenu();
+                                        navigateTo("announcements");
+                                    }}
+                                >
+                                    <span>Browse All Announcements</span>
+                                    <ArrowRight size={12} />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* COLUMN 4: School Gallery & Campus Life */}
+                        <div className="apple-mega-col">
+                            <div className="apple-mega-label">
+                                <Sparkles size={13} color="#F59E0B" />
+                                <span>School Gallery &amp; Life</span>
+                            </div>
+
+                            <div
+                                className="apple-gallery-card"
+                                onClick={() => {
+                                    closeCampusMenu();
+                                    navigateTo("gallery");
+                                }}
+                                title="Open School Photo Gallery"
+                            >
+                                <h5 className="apple-gallery-title">
+                                    <ImageIcon size={15} color="#F59E0B" />
+                                    <span>School Photo Gallery</span>
+                                </h5>
+                                <p className="apple-gallery-desc">
+                                    Modular class sessions, pastoral ordinations, campus chapel, and fellowship.
+                                </p>
+                            </div>
+
+                            <div className="apple-link-list">
+                                <button
+                                    type="button"
+                                    className="apple-link-item"
+                                    onClick={() => {
+                                        closeCampusMenu();
+                                        navigateTo("ministries");
+                                    }}
+                                >
+                                    <Compass size={13} className="apple-link-item-icon" />
+                                    <span>Student Field Ministries</span>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    className="apple-link-item"
+                                    onClick={() => {
+                                        closeCampusMenu();
+                                        navigateTo("learning");
+                                    }}
+                                >
+                                    <BookOpen size={13} className="apple-link-item-icon" />
+                                    <span>Theological LMS Portal</span>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    className="apple-link-item"
+                                    onClick={() => {
+                                        closeCampusMenu();
+                                        openAdmissionWithProgram("Bachelor of Theology (B.Th.)");
+                                    }}
+                                >
+                                    <GraduationCap size={13} className="apple-link-item-icon" />
+                                    <span>Online Admissions Desk</span>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    className="apple-link-item"
+                                    onClick={() => {
+                                        closeCampusMenu();
+                                        navigateTo("contact");
+                                    }}
+                                >
+                                    <Mail size={13} className="apple-link-item-icon" />
+                                    <span>Contact Campus Registrar</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Bottom Utility Bar */}
+                    <div className="apple-mega-bottom-bar">
+                        <div className="apple-mega-quick-info">
+                            <span className="apple-mega-quick-item">
+                                <MapPin size={13} color="#F59E0B" />
+                                <span><strong>Main Campus:</strong> Metro Manila, Philippines</span>
+                            </span>
+                            <span className="apple-mega-quick-item">
+                                <Phone size={13} color="#F59E0B" />
+                                <span><strong>Admissions Hotline:</strong> +63 (02) 8800-BIBLE</span>
+                            </span>
+                            <span className="apple-mega-quick-item">
+                                <Phone size={13} color="#F59E0B" />
+                                <span><strong>Mobile:</strong> +63 917 123 4567</span>
+                            </span>
+                        </div>
+
+                        <button
+                            type="button"
+                            className="apple-mega-cta-btn"
+                            onClick={() => {
+                                closeCampusMenu();
+                                openAdmissionWithProgram("Bachelor of Theology (B.Th.)");
+                            }}
+                        >
+                            <GraduationCap size={14} />
+                            <span>Apply for Admission →</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
             </div>
 
             {/* ============================================================ */}
@@ -1227,6 +1634,142 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                                 onClick={() => setActiveArticle(null)}
                             >
                                 Close Dispatch
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ============================================================ */}
+            {/* FULLSCREEN DIMMED BACKDROP FOR APPLE DROPDOWN                */}
+            {/* ============================================================ */}
+            <div
+                className={`apple-nav-backdrop ${isCampusMenuOpen ? "active" : ""}`}
+                onClick={closeCampusMenu}
+                aria-hidden="true"
+            />
+
+            {/* ============================================================ */}
+            {/* EVENT DETAILS MODAL (CONNECTED TO SMS EVENT DATA)            */}
+            {/* ============================================================ */}
+            {selectedEvent && (
+                <div className="ub-modal-overlay" onClick={() => setSelectedEvent(null)}>
+                    <div className="ub-event-modal" onClick={e => e.stopPropagation()}>
+                        <button
+                            className="ub-modal-close"
+                            onClick={() => setSelectedEvent(null)}
+                            aria-label="Close Event Modal"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+
+                        <span className="ub-event-modal-badge">{selectedEvent.eventType}</span>
+                        <h2 className="ub-event-modal-title">{selectedEvent.title}</h2>
+
+                        <div className="ub-event-modal-meta-grid">
+                            <div className="ub-event-meta-cell">
+                                <Calendar size={16} className="ub-event-meta-icon" />
+                                <div>
+                                    <p className="ub-event-meta-label">Event Date</p>
+                                    <p className="ub-event-meta-val">{selectedEvent.formattedDate}</p>
+                                </div>
+                            </div>
+
+                            <div className="ub-event-meta-cell">
+                                <Clock size={16} className="ub-event-meta-icon" />
+                                <div>
+                                    <p className="ub-event-meta-label">Schedule &amp; Time</p>
+                                    <p className="ub-event-meta-val">{selectedEvent.time}</p>
+                                </div>
+                            </div>
+
+                            <div className="ub-event-meta-cell">
+                                <MapPin size={16} className="ub-event-meta-icon" />
+                                <div>
+                                    <p className="ub-event-meta-label">Location / Hub</p>
+                                    <p className="ub-event-meta-val">{selectedEvent.location}</p>
+                                </div>
+                            </div>
+
+                            <div className="ub-event-meta-cell">
+                                <User size={16} className="ub-event-meta-icon" />
+                                <div>
+                                    <p className="ub-event-meta-label">Speaker / Department</p>
+                                    <p className="ub-event-meta-val">{selectedEvent.speaker || selectedEvent.ministry || "Seminary Faculty"}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p className="ub-event-modal-desc">{selectedEvent.description}</p>
+
+                        <div className="ub-event-modal-actions">
+                            <button
+                                type="button"
+                                className="ub-btn-hero-primary"
+                                onClick={() => {
+                                    const eventTitle = selectedEvent.title;
+                                    setSelectedEvent(null);
+                                    openAdmissionWithProgram(`Event Inquiry: ${eventTitle}`);
+                                }}
+                            >
+                                Register / Inquire for Event
+                            </button>
+                            <button
+                                type="button"
+                                className="ub-btn-cancel"
+                                onClick={() => setSelectedEvent(null)}
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ============================================================ */}
+            {/* ANNOUNCEMENT READER MODAL (CONNECTED TO SMS ANNOUNCEMENTS)   */}
+            {/* ============================================================ */}
+            {selectedAnnouncement && (
+                <div className="ub-modal-overlay" onClick={() => setSelectedAnnouncement(null)}>
+                    <div className="ub-modal-content ub-article-modal-content" onClick={e => e.stopPropagation()}>
+                        <button
+                            className="ub-modal-close"
+                            onClick={() => setSelectedAnnouncement(null)}
+                            aria-label="Close Announcement"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+
+                        <div className="ub-article-modal-header">
+                            <span className="ub-article-modal-tag">{selectedAnnouncement.category}</span>
+                            <div className="ub-article-modal-date">
+                                <Calendar className="w-4 h-4 mr-1 text-amber-600 inline" />
+                                {selectedAnnouncement.formattedDate}
+                            </div>
+                            <h2 className="ub-article-modal-title">{selectedAnnouncement.title}</h2>
+                        </div>
+
+                        <div className="ub-article-modal-body">
+                            <p className="ub-article-paragraph" style={{ fontSize: "1.05rem", lineHeight: 1.6, color: "#334155" }}>
+                                {selectedAnnouncement.content}
+                            </p>
+                        </div>
+
+                        <div className="ub-article-modal-footer">
+                            <button
+                                className="ub-btn-hero-primary"
+                                onClick={() => {
+                                    setSelectedAnnouncement(null);
+                                    openAdmissionWithProgram("Bachelor of Theology (B.Th.)");
+                                }}
+                            >
+                                Inquire with Admissions
+                            </button>
+                            <button
+                                className="ub-btn-cancel"
+                                onClick={() => setSelectedAnnouncement(null)}
+                            >
+                                Close Bulletin
                             </button>
                         </div>
                     </div>

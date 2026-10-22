@@ -44,6 +44,9 @@ import LandingPage from "./pages/LandingPage";
 import AboutPage from "./pages/public/AboutPage";
 import ContactPage from "./pages/public/ContactPage";
 import MinistriesPage from "./pages/public/MinistriesPage";
+import EventsPage from "./pages/public/EventsPage";
+import AnnouncementsPage from "./pages/public/AnnouncementsPage";
+import GalleryPage from "./pages/public/GalleryPage";
 import EpicSystemPage from "./pages/public/EpicSystemPage";
 import EpicLearningPage from "./pages/public/EpicLearningPage";
 import EPICBusinessHomePage from "./pages/public/EPICBusinessHomePage";
@@ -169,6 +172,9 @@ type PublicPage =
     | "about"
     | "blog"
     | "ministries"
+    | "events"
+    | "announcements"
+    | "gallery"
     | "epic-system"
     | "learning"
     | "contact"
@@ -254,6 +260,9 @@ const PUBLIC_ROUTES: Record<PublicPage, string> = {
     home: "/home",
     about: "/about",
     ministries: "/ministries",
+    events: "/events",
+    announcements: "/announcements",
+    gallery: "/gallery",
     "epic-system": "/epic-system",
     learning: "/learning",
     contact: "/contact",
@@ -1056,6 +1065,12 @@ const isPublicPath = (
 
         PUBLIC_ROUTES.ministries,
 
+        PUBLIC_ROUTES.events,
+
+        PUBLIC_ROUTES.announcements,
+
+        PUBLIC_ROUTES.gallery,
+
         PUBLIC_ROUTES["epic-system"],
 
         PUBLIC_ROUTES.learning,
@@ -1508,6 +1523,18 @@ const App: React.FC = () => {
     const isContactPage =
         normalizedPath ===
         PUBLIC_ROUTES.contact;
+
+    const isEventsPublicPage =
+        normalizedPath ===
+        PUBLIC_ROUTES.events;
+
+    const isAnnouncementsPublicPage =
+        normalizedPath ===
+        PUBLIC_ROUTES.announcements;
+
+    const isGalleryPublicPage =
+        normalizedPath ===
+        PUBLIC_ROUTES.gallery;
 
     const isClientPaymentPage =
         normalizedPath ===
@@ -2053,6 +2080,18 @@ useCallback(
 
             case "contact":
                 navigatePublic("contact");
+                break;
+
+            case "events":
+                navigatePublic("events");
+                break;
+
+            case "announcements":
+                navigatePublic("announcements");
+                break;
+
+            case "gallery":
+                navigatePublic("gallery");
                 break;
 
             case "academy":
@@ -3396,6 +3435,42 @@ if (isThankYouPage) {
                 onNavigate={
                     handlePublicNavigate
                 }
+            />
+        );
+    }
+
+    // =====================================================
+    // PUBLIC EVENTS
+    // =====================================================
+
+    if (isEventsPublicPage) {
+        return (
+            <EventsPage
+                onNavigate={handlePublicNavigate}
+            />
+        );
+    }
+
+    // =====================================================
+    // PUBLIC ANNOUNCEMENTS
+    // =====================================================
+
+    if (isAnnouncementsPublicPage) {
+        return (
+            <AnnouncementsPage
+                onNavigate={handlePublicNavigate}
+            />
+        );
+    }
+
+    // =====================================================
+    // PUBLIC GALLERY
+    // =====================================================
+
+    if (isGalleryPublicPage) {
+        return (
+            <GalleryPage
+                onNavigate={handlePublicNavigate}
             />
         );
     }
