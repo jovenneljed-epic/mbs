@@ -1,7 +1,7 @@
 // ============================================================
 // PromoVideoPlayer.tsx -> MODERN STYLISH AUTOMATIC VIDEO FRAME
 // Auto-plays when scrolled into view • Pauses when scrolled away
-// Sleek compact glass chassis • Resilient fallback & poster
+// Official Mobile Bible School AVP • Sleek compact glass chassis
 // ============================================================
 
 import React, { useState, useEffect, useRef } from "react";
@@ -38,7 +38,7 @@ function getEmbedUrl(rawUrl: string, autoPlay: boolean = true, isMuted: boolean 
         const videoId = ytMatch[1];
         const ap = autoPlay ? "1" : "0";
         const mute = isMuted ? "1" : "0";
-        return `https://www.youtube.com/embed/${videoId}?autoplay=${ap}&mute=${mute}&loop=1&playlist=${videoId}&playsinline=1&rel=0&modestbranding=1`;
+        return `https://www.youtube.com/embed/${videoId}?autoplay=${ap}&mute=${mute}&loop=1&playlist=${videoId}&playsinline=1&rel=0&modestbranding=1&enablejsapi=1`;
     }
 
     // Vimeo: https://vimeo.com/ID
@@ -54,45 +54,57 @@ function getEmbedUrl(rawUrl: string, autoPlay: boolean = true, isMuted: boolean 
     return url;
 }
 
-// High reliability fallback (hosted locally in public/videos)
-const DEFAULT_FALLBACK_VIDEO = "/videos/promo.mp4";
-const DEFAULT_POSTER = "/images/announcements/sunday-worship.jpg";
+// Official Mobile Bible School Audio-Visual Presentation
+const DEFAULT_FALLBACK_VIDEO = "https://www.youtube.com/watch?v=dvnPYsaePIA";
+const DEFAULT_POSTER = "/images/mbs-promo-poster.jpg";
 
 export const PromoVideoPlayer: React.FC<PromoVideoPlayerProps> = ({
     settings,
     onApplyClick,
     onEditClick
 }) => {
-    const [uploadedUrl, setUploadedUrl] = useState<string | null>(settings.uploadedVideoUrl || null);
-    const [isPlaying, setIsPlaying] = useState(false);
+    const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
+    const [isPlaying, setIsPlaying] = useState(true);
     const [isMuted, setIsMuted] = useState(settings.muted ?? true);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
 
     const videoRef = useRef<HTMLVideoElement>(null);
+    const iframeRef = useRef<HTMLIFrameElement>(null);
     const chassisRef = useRef<HTMLDivElement>(null);
     const userManuallyPausedRef = useRef<boolean>(false);
 
-    // Sync uploaded video from IndexedDB
+    // Retrieve fresh streamable Object URL from IndexedDB
     useEffect(() => {
         let isMounted = true;
-        if (settings.uploadedVideoUrl) {
-            setUploadedUrl(settings.uploadedVideoUrl);
-        } else {
-            getVideoMediaUrl("promo_main").then(url => {
-                if (isMounted && url) {
-                    setUploadedUrl(url);
-                }
-            }).catch(() => {});
-        }
 
-        const handleMediaUpdate = () => {
-            getVideoMediaUrl("promo_main").then(url => {
-                if (isMounted && url) {
-                    setUploadedUrl(url);
+        getVideoMediaUrl("promo_main")
+            .then(freshUrl => {
+                if (isMounted) {
+                    if (freshUrl) {
+                        setUploadedUrl(freshUrl);
+                    } else if (settings.uploadedVideoUrl && !settings.uploadedVideoUrl.startsWith("blob:")) {
+                        setUploadedUrl(settings.uploadedVideoUrl);
+                    } else {
+                        setUploadedUrl(null);
+                    }
                 }
-            }).catch(() => {});
+            })
+            .catch(() => {
+                if (isMounted) setUploadedUrl(null);
+            });
+
+        const handleMediaUpdate = (e: any) => {
+            if (isMounted) {
+                if (e.detail?.url) {
+                    setUploadedUrl(e.detail.url);
+                } else {
+                    getVideoMediaUrl("promo_main").then(url => {
+                        if (isMounted) setUploadedUrl(url);
+                    }).catch(() => {});
+                }
+            }
         };
 
         window.addEventListener(VIDEO_MEDIA_EVENT, handleMediaUpdate);
@@ -102,9 +114,14 @@ export const PromoVideoPlayer: React.FC<PromoVideoPlayerProps> = ({
         };
     }, [settings.uploadedVideoUrl]);
 
-    // Active source resolution (guaranteed not to point to blocked Google sample)
+    // Active source resolution (guaranteed not to point to blocked Google sample or expired blob)
     let rawSource = uploadedUrl || settings.videoUrl;
-    if (!rawSource || rawSource.includes("commondatastorage.googleapis.com")) {
+    if (
+        !rawSource ||
+        rawSource.includes("commondatastorage.googleapis.com") ||
+        rawSource === "/videos/promo.mp4" ||
+        rawSource.startsWith("blob:")
+    ) {
         rawSource = DEFAULT_FALLBACK_VIDEO;
     }
 
@@ -112,7 +129,28 @@ export const PromoVideoPlayer: React.FC<PromoVideoPlayerProps> = ({
     const isVimeo = /vimeo\.com/i.test(rawSource);
     const isEmbed = isYouTube || isVimeo;
     const embedSrc = isEmbed ? getEmbedUrl(rawSource, settings.autoPlay ?? true, isMuted) : null;
-    const activePoster = settings.posterUrl || DEFAULT_POSTER;
+    let activePoster = settings.posterUrl || DEFAULT_POSTER;
+    if (activePoster.includes("sunday-worship.jpg")) {
+        activePoster = DEFAULT_POSTER;
+    }
+
+    // Helper to send postMessage commands to YouTube IFrame API
+    const sendEmbedCommand = (command: string, args: any = "") => {
+        try {
+            if (iframeRef.current && iframeRef.current.contentWindow) {
+                iframeRef.current.contentWindow.postMessage(
+                    JSON.stringify({
+                        event: "command",
+                        func: command,
+                        args: args
+                    }),
+                    "*"
+                );
+            }
+        } catch {
+            // cross-origin security
+        }
+    };
 
     // ============================================================
     // AUTOMATIC PLAY WHEN SCROLLED INTO VIEW (IntersectionObserver)
@@ -128,41 +166,42 @@ export const PromoVideoPlayer: React.FC<PromoVideoPlayerProps> = ({
 
                 if (entry.isIntersecting) {
                     // Element is visible in viewport!
-                    // If user previously manually paused on this section, don't override,
-                    // but if it's the normal scroll into view, trigger autoplay
-                    if (!userManuallyPausedRef.current && videoRef.current) {
-                        videoRef.current.muted = isMuted;
-                        const playPromise = videoRef.current.play();
-                        if (playPromise !== undefined) {
-                            playPromise
-                                .then(() => {
-                                    setIsPlaying(true);
-                                })
-                                .catch(() => {
-                                    // Browser policy blocked unmuted autoplay: force mute & retry
-                                    if (videoRef.current) {
-                                        videoRef.current.muted = true;
-                                        setIsMuted(true);
-                                        videoRef.current.play()
-                                            .then(() => setIsPlaying(true))
-                                            .catch(() => setIsPlaying(false));
-                                    }
-                                });
+                    if (!userManuallyPausedRef.current) {
+                        if (isEmbed) {
+                            sendEmbedCommand("playVideo");
+                            setIsPlaying(true);
+                        } else if (videoRef.current) {
+                            videoRef.current.muted = isMuted;
+                            const playPromise = videoRef.current.play();
+                            if (playPromise !== undefined) {
+                                playPromise
+                                    .then(() => setIsPlaying(true))
+                                    .catch(() => {
+                                        // Browser policy blocked unmuted autoplay: force mute & retry
+                                        if (videoRef.current) {
+                                            videoRef.current.muted = true;
+                                            setIsMuted(true);
+                                            videoRef.current.play()
+                                                .then(() => setIsPlaying(true))
+                                                .catch(() => setIsPlaying(false));
+                                        }
+                                    });
+                            }
                         }
                     }
                 } else {
-                    // Scrolled out of view: pause to conserve memory & bandwidth
-                    if (videoRef.current && !videoRef.current.paused) {
+                    // Scrolled out of view: pause
+                    if (isEmbed) {
+                        sendEmbedCommand("pauseVideo");
+                        setIsPlaying(false);
+                    } else if (videoRef.current && !videoRef.current.paused) {
                         videoRef.current.pause();
                         setIsPlaying(false);
                     }
-                    // Reset user manual pause flag once they scroll completely away,
-                    // so when they scroll back it auto-plays afresh
                     userManuallyPausedRef.current = false;
                 }
             },
             {
-                // Trigger when 30% of the chassis is visible on screen
                 threshold: [0.15, 0.35],
                 rootMargin: "0px 0px -40px 0px"
             }
@@ -172,25 +211,38 @@ export const PromoVideoPlayer: React.FC<PromoVideoPlayerProps> = ({
         return () => {
             observer.disconnect();
         };
-    }, [isMuted, rawSource]);
+    }, [isEmbed, isMuted, rawSource]);
 
-    // Handle HTML5 video events
+    // Handle user controls
     const togglePlay = () => {
-        if (!videoRef.current) return;
-        if (videoRef.current.paused) {
-            userManuallyPausedRef.current = false;
-            videoRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
-        } else {
-            userManuallyPausedRef.current = true;
-            videoRef.current.pause();
-            setIsPlaying(false);
+        if (isEmbed) {
+            if (isPlaying) {
+                userManuallyPausedRef.current = true;
+                sendEmbedCommand("pauseVideo");
+                setIsPlaying(false);
+            } else {
+                userManuallyPausedRef.current = false;
+                sendEmbedCommand("playVideo");
+                setIsPlaying(true);
+            }
+        } else if (videoRef.current) {
+            if (videoRef.current.paused) {
+                userManuallyPausedRef.current = false;
+                videoRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
+            } else {
+                userManuallyPausedRef.current = true;
+                videoRef.current.pause();
+                setIsPlaying(false);
+            }
         }
     };
 
     const toggleMute = () => {
         const nextMute = !isMuted;
         setIsMuted(nextMute);
-        if (videoRef.current) {
+        if (isEmbed) {
+            sendEmbedCommand(nextMute ? "mute" : "unMute");
+        } else if (videoRef.current) {
             videoRef.current.muted = nextMute;
         }
     };
@@ -207,8 +259,12 @@ export const PromoVideoPlayer: React.FC<PromoVideoPlayerProps> = ({
     };
 
     const handleRestart = () => {
-        if (videoRef.current) {
-            userManuallyPausedRef.current = false;
+        userManuallyPausedRef.current = false;
+        if (isEmbed) {
+            sendEmbedCommand("seekTo", [0, true]);
+            sendEmbedCommand("playVideo");
+            setIsPlaying(true);
+        } else if (videoRef.current) {
             videoRef.current.currentTime = 0;
             videoRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
         }
@@ -237,7 +293,7 @@ export const PromoVideoPlayer: React.FC<PromoVideoPlayerProps> = ({
                 <div className="promo-player-meta-strip">
                     <span className={`promo-badge-pill ${isPlaying ? "status-playing" : ""}`}>
                         <span className="pulse-indicator" />
-                        {isPlaying ? "AUTO-PLAYING" : (settings.badgeText || "PROMOTIONAL VIDEO")}
+                        {isPlaying ? "AUTO-PLAYING" : (settings.badgeText || "OFFICIAL MBS AVP")}
                     </span>
                     {onEditClick && (
                         <button
@@ -258,12 +314,46 @@ export const PromoVideoPlayer: React.FC<PromoVideoPlayerProps> = ({
                 {isEmbed && embedSrc ? (
                     <div className="promo-iframe-wrapper">
                         <iframe
+                            ref={iframeRef}
                             src={embedSrc}
-                            title={settings.videoTitle || "Promotional Video"}
+                            title={settings.videoTitle || "Mobile Bible School AVP"}
                             className="promo-iframe"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                             allowFullScreen
                         />
+
+                        {/* SLEEK FLOATING UNMUTE / SOUND CONTROLS OVERLAY */}
+                        <div className="promo-floating-controls">
+                            <button
+                                type="button"
+                                className={`promo-btn-floating btn-audio-toggle ${isMuted ? "btn-muted-active" : "btn-unmuted"}`}
+                                onClick={toggleMute}
+                                title={isMuted ? "Click to Unmute Audio" : "Mute Sound"}
+                            >
+                                {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+                                <span className="floating-mute-label">
+                                    {isMuted ? "Click to Unmute" : "Sound On"}
+                                </span>
+                            </button>
+
+                            <button
+                                type="button"
+                                className="promo-btn-floating btn-icon-only"
+                                onClick={handleRestart}
+                                title="Replay Video from Beginning"
+                            >
+                                <RotateCcw size={15} />
+                            </button>
+
+                            <button
+                                type="button"
+                                className="promo-btn-floating btn-icon-only"
+                                onClick={toggleFullscreen}
+                                title={isFullscreen ? "Exit Fullscreen" : "Fullscreen View"}
+                            >
+                                {isFullscreen ? <Minimize size={15} /> : <Maximize size={15} />}
+                            </button>
+                        </div>
                     </div>
                 ) : (
                     <div className="promo-native-video-wrapper">
@@ -346,10 +436,10 @@ export const PromoVideoPlayer: React.FC<PromoVideoPlayerProps> = ({
             <div className="promo-player-bottom-bar">
                 <div className="promo-bottom-info">
                     <h3 className="promo-bottom-title">
-                        {settings.videoTitle || "Mobile Bible School: Life, Doctrine & Ministry"}
+                        {settings.videoTitle || "Mobile Bible School: The Vision & Movement"}
                     </h3>
                     <p className="promo-bottom-desc">
-                        {settings.videoTagline || "Equipping pastors and servants of the Word worldwide with sound doctrine."}
+                        {settings.videoTagline || "Watch how our mobile modular curriculum brings accredited theological training directly into remote churches and communities."}
                     </p>
                 </div>
 
@@ -359,7 +449,7 @@ export const PromoVideoPlayer: React.FC<PromoVideoPlayerProps> = ({
                         className="promo-btn-apply-cta"
                         onClick={onApplyClick}
                     >
-                        <span>{settings.ctaText || "Apply for Admission"}</span>
+                        <span>{settings.ctaText || "Apply for Next Cohort"}</span>
                         <ArrowRight size={15} />
                     </button>
                 )}

@@ -741,12 +741,9 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                 <section className="ub-promo-video-section">
                     <div className="ub-portals-container">
                         <div className="ub-section-header">
-                            <span className="ub-section-tag">FEATURED VIDEO SHOWCASE</span>
-                            <h2 className="ub-section-title">{content.promoVideo.videoTitle || "Seminary Video Showcase"}</h2>
+                            <span className="ub-section-tag">OFFICIAL VIDEO SHOWCASE</span>
+                            <h2 className="ub-section-title">Experience Mobile Bible School in Action</h2>
                             <div className="ub-title-line" />
-                            {content.promoVideo.videoTagline && (
-                                <p className="ub-section-lead">{content.promoVideo.videoTagline}</p>
-                            )}
                         </div>
                         <div className="ub-promo-player-wrapper">
                             <PromoVideoPlayer

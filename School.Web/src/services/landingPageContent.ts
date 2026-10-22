@@ -281,13 +281,13 @@ export const DEFAULT_LANDING_CONTENT: LandingPageContent = {
     ],
     promoVideo: {
         mode: "embed",
-        videoUrl: "/videos/promo.mp4",
-        posterUrl: "/images/announcements/sunday-worship.jpg",
-        badgeText: "AUTO-PLAY ON SCROLL • MBS OFFICIAL",
-        videoTitle: "Mobile Bible School: Life, Doctrine & Ministry",
-        videoTagline: "Watch how our accredited theological curriculum equips pastors and servants of the Word worldwide.",
-        durationLabel: "03:45",
-        ctaText: "Apply for Admission",
+        videoUrl: "https://www.youtube.com/watch?v=dvnPYsaePIA",
+        posterUrl: "/images/mbs-promo-poster.jpg",
+        badgeText: "OFFICIAL 2026 PROMO • HD",
+        videoTitle: "Mobile Bible School: The Vision & Movement",
+        videoTagline: "Watch how our mobile modular curriculum brings accredited theological training directly into remote churches and communities.",
+        durationLabel: "04:15",
+        ctaText: "Apply for Next Cohort",
         showCaptions: false,
         autoPlay: true,
         loop: true,
@@ -306,11 +306,22 @@ export const getLandingPageContent = (): LandingPageContent => {
         if (stored) {
             const parsed = JSON.parse(stored);
             const promo = parsed.promoVideo || {};
-            if (!promo.videoUrl || promo.videoUrl.includes("commondatastorage.googleapis.com")) {
-                promo.videoUrl = "/videos/promo.mp4";
+            // Auto-heal cached settings from older sessions
+            if (
+                !promo.videoUrl ||
+                promo.videoUrl.includes("commondatastorage.googleapis.com") ||
+                promo.videoUrl === "/videos/promo.mp4"
+            ) {
+                promo.videoUrl = "https://www.youtube.com/watch?v=dvnPYsaePIA";
             }
-            if (!promo.posterUrl) {
-                promo.posterUrl = "/images/announcements/sunday-worship.jpg";
+            if (
+                !promo.posterUrl ||
+                promo.posterUrl.includes("sunday-worship.jpg")
+            ) {
+                promo.posterUrl = "/images/mbs-promo-poster.jpg";
+            }
+            if (promo.uploadedVideoUrl && promo.uploadedVideoUrl.startsWith("blob:")) {
+                delete promo.uploadedVideoUrl;
             }
             const mergedScenes: PromoScene[] = Array.isArray(promo.scenes) ? promo.scenes : [];
 
