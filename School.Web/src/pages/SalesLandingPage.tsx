@@ -1,7 +1,7 @@
 // ============================================================
-// SalesLandingPage.tsx -> University of Batangas (UB) Institutional Portal
-// Official Academic Website & Portals
-// Mobile Bible School & Theological Seminary Heritage
+// SalesLandingPage.tsx -> MOBILE BIBLE SCHOOL & THEOLOGICAL SEMINARY
+// Official Institutional Portal & Academic Web System
+// Structured after collegiate portal architecture
 // ============================================================
 
 import React, { useState, useMemo } from "react";
@@ -21,987 +21,920 @@ import {
     Mail,
     Building2,
     Compass,
+    BookOpen
 } from "lucide-react";
 
 interface SalesLandingPageProps {
     onNavigate?: (page: string) => void;
 }
 
-interface DemoFormData {
+interface AdmissionFormData {
     fullName: string;
     email: string;
     churchName: string;
     phone: string;
+    program: string;
     position: string;
     message: string;
 }
 
-const INITIAL_FORM_DATA: DemoFormData = {
-    fullName: "",
-    email: "",
-    churchName: "",
-    phone: "",
-    position: "",
-    message: "",
-};
+export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }) => {
+    // Search query state
+    const [searchQuery, setSearchQuery] = useState("");
 
-// ============================================================
-// NEWS & FEATURES DATA
-// ============================================================
-interface NewsItem {
-    id: string;
-    title: string;
-    category: "Forum" | "Feature" | "Academic" | "Milestone";
-    date: string;
-    excerpt: string;
-    imageUrl: string;
-    badgeText?: string;
-}
-
-const NEWS_DATA: NewsItem[] = [
-    {
-        id: "news-1",
-        title: "UB to host Batangas leg of regional forum on West Philippine Sea",
-        category: "Forum",
-        date: "October 13, 2026",
-        excerpt:
-            "The University of Batangas (UB) will host the Batangas leg of the forum, 'Mobilizing Filipino Voices on the 10th Anniversary of the South China Sea Arbitral Ruling' on October 23, welcoming national delegates, scholars, and youth leaders.",
-        imageUrl: "https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?auto=format&fit=crop&w=800&q=80",
-        badgeText: "Regional Forum"
-    },
-    {
-        id: "news-2",
-        title: "Believing in One's Potential: How the University of Batangas Shaped a Global Leader",
-        category: "Feature",
-        date: "October 12, 2026",
-        excerpt:
-            "The story of the University of Batangas (UB), originally founded in 1946 as Western Philippine Colleges (WPC), is one of deliberate, dignified growth. Over the decades, the institution has continuously produced nation-builders.",
-        imageUrl: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80",
-        badgeText: "Feature"
-    },
-    {
-        id: "news-3",
-        title: "Pause, Inspect, Verify: UB JHS, SHS students gain digital safety and responsible AI insights in cybersecurity webinar with Globe",
-        category: "Academic",
-        date: "September 24, 2026",
-        excerpt:
-            "Junior High School (JHS) and Senior High School (SHS) students of the University of Batangas participated in an intensive webinar titled 'Cybersecurity Awareness and Digital Citizenship' held via Google Meet.",
-        imageUrl: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=800&q=80",
-        badgeText: "Cybersecurity & AI"
-    }
-];
-
-// ============================================================
-// ACADEMIC ACHIEVEMENTS & LICENSURE PASSERS DATA
-// ============================================================
-interface AchieverItem {
-    id: string;
-    bannerTitle: string;
-    title: string;
-    date: string;
-    excerpt: string;
-    passRateBadge?: string;
-    imageUrl: string;
-}
-
-const ACHIEVERS_DATA: AchieverItem[] = [
-    {
-        id: "achiever-1",
-        bannerTitle: "UBLC Psychology celebrates back-to-back licensure examination successes",
-        title: "UBLC Psychology celebrates back-to-back licensure examination successes",
-        date: "September 24, 2026",
-        passRateBadge: "100% Passing Rate",
-        excerpt:
-            "A new milestone marks the University of Batangas Lipa City (UBLC) College of Education, Arts, and Sciences (CEAS) as its Bachelor of Science in Psychology program achieved a 100% passing rate in the recent board exams.",
-        imageUrl: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=800&q=80"
-    },
-    {
-        id: "achiever-2",
-        bannerTitle: "UB HRDM alumna earns national Human Resource Associate certification",
-        title: "UB HRDM alumna earns national Human Resource Associate certification",
-        date: "September 22, 2026",
-        passRateBadge: "Certified HR Associate",
-        excerpt:
-            "Patricia Michaella S. Rosales, a graduate of the Bachelor of Science in Business Administration (BSBA) major in Human Resource Development Management (HRDM) program at the University of Batangas (UB), earned national certification honors.",
-        imageUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80"
-    },
-    {
-        id: "achiever-3",
-        bannerTitle: "Two UB BSEE graduates pass September 2026 Electrical Engineers Licensure Exam",
-        title: "Two UB BSEE graduates pass September 2026 Electrical Engineers Licensure Exam",
-        date: "September 22, 2026",
-        passRateBadge: "Registered Engineers",
-        excerpt:
-            "Two graduates of the University of Batangas (UB) Bachelor of Science in Electrical Engineering (BSEE) program under the College of Engineering (CENG) successfully passed the September 2026 Licensure Examination.",
-        imageUrl: "https://images.unsplash.com/photo-1581092921461-eab62e97a780?auto=format&fit=crop&w=800&q=80"
-    }
-];
-
-// ============================================================
-// ACADEMIC PROGRAMS
-// ============================================================
-interface AcademicCourse {
-    code: string;
-    title: string;
-    units: number;
-    college: string;
-    description: string;
-}
-
-const ACADEMIC_COURSES: AcademicCourse[] = [
-    { code: "THEO-101", title: "Systematic Theology I", units: 3, college: "College of Theology", description: "Comprehensive survey of Theology Proper, Trinity, Christology, and Biblical anthropology." },
-    { code: "HERM-201", title: "Inductive Bible Study & Advanced Hermeneutics", units: 3, college: "College of Biblical Studies", description: "Exegetical principles, Greek tools, and literal-grammatical-historical interpretation." },
-    { code: "PAST-301", title: "Pastoral Theology & Homiletics Practicum", units: 3, college: "College of Pastoral Leadership", description: "Expository preaching delivery, pulpit ministry clinic, and pastoral counseling." },
-    { code: "CHED-102", title: "Christian Education & Youth Leadership", units: 3, college: "College of Education", description: "Pedagogy, curriculum development, and ministry leadership for children and youth." },
-    { code: "MISS-401", title: "Pioneer Church Planting & Cross-Cultural Missions", units: 4, college: "School of Global Missions", description: "Indigenous church multiplication, demographic mapping, and frontier evangelism." },
-    { code: "ETH-302", title: "Christian Ethics & 21st Century Apologetics", units: 3, college: "College of Theology", description: "Biblical ethics in contemporary culture, moral philosophy, and worldview defense." }
-];
-
-export default function SalesLandingPage({ onNavigate }: SalesLandingPageProps) {
-    // Navigation helper
-    const navigate = (page: string, fallbackUrl?: string) => {
-        if (onNavigate) {
-            onNavigate(page);
-            return;
-        }
-        if (fallbackUrl) {
-            window.location.href = fallbackUrl;
-        }
-    };
-
-    // Admission Modal State
-    const [showModal, setShowModal] = useState(false);
-    const [modalContextTitle, setModalContextTitle] = useState("Admissions Application");
-    const [formData, setFormData] = useState<DemoFormData>(INITIAL_FORM_DATA);
-    const [submitting, setSubmitting] = useState(false);
-    const [successMessage, setSuccessMessage] = useState(false);
-    const [errorMessage, setErrorMessage] = useState("");
-
-    // Search query for programs
-    const [programSearch, setProgramSearch] = useState("");
-    const [activeCollegeTab, setActiveCollegeTab] = useState("All");
+    // Admissions Modal State
+    const [isAdmissionOpen, setIsAdmissionOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [admissionSuccess, setAdmissionSuccess] = useState(false);
+    const [admissionError, setAdmissionError] = useState<string | null>(null);
 
     // Achievers pagination state
     const [achieverPage, setAchieverPage] = useState(1);
+    const totalAchieverPages = 12;
 
-    const openAdmissionsModal = (contextTitle?: string) => {
-        setModalContextTitle(contextTitle || "Online Admission Application 2026-2027");
-        setFormData(INITIAL_FORM_DATA);
-        setSuccessMessage(false);
-        setErrorMessage("");
-        setShowModal(true);
+    const [formData, setFormData] = useState<AdmissionFormData>({
+        fullName: "",
+        email: "",
+        churchName: "",
+        phone: "",
+        program: "Bachelor of Theology (B.Th.)",
+        position: "Aspiring Pastor / Ministry Leader",
+        message: ""
+    });
+
+    const handleInputChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    ) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleFormSubmit = async (e: React.FormEvent) => {
+    const handleAdmissionSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (submitting) return;
-        setErrorMessage("");
-
-        if (!formData.fullName.trim() || !formData.email.trim()) {
-            setErrorMessage("Please provide your full name and valid email address.");
-            return;
-        }
+        setIsSubmitting(true);
+        setAdmissionError(null);
 
         try {
-            setSubmitting(true);
-            const payload = {
-                fullName: formData.fullName.trim(),
-                email: formData.email.trim().toLowerCase(),
-                churchName: formData.churchName.trim() || "Applicant (Direct Website)",
-                phone: formData.phone.trim() || null,
-                position: formData.position.trim() || "Online Admission Inquiry",
-                message: formData.message.trim() || `University Online Admission Application: ${modalContextTitle}`
-            };
-
-            const response = await fetch(`${API_BASE_URL}/DemoRequests`, {
+            const res = await fetch(`${API_BASE_URL}/api/DemoRequests`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
+                body: JSON.stringify({
+                    fullName: formData.fullName,
+                    email: formData.email,
+                    churchName: formData.churchName,
+                    phone: formData.phone,
+                    preferredDate: new Date().toISOString(),
+                    preferredTime: "Admission Application",
+                    organizationType: formData.program,
+                    userRole: formData.position,
+                    notes: `[Online Admission Application - Mobile Bible School]\nProgram: ${formData.program}\nRole: ${formData.position}\nMessage: ${formData.message}`
+                })
             });
 
-            if (!response.ok) {
-                const data = await response.json().catch(() => ({}));
-                throw new Error(data?.message || "Failed to submit application. Please try again.");
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error(errText || "Failed to submit admission application");
             }
 
-            setSuccessMessage(true);
-        } catch (err: unknown) {
-            const e = err as Error;
-            setErrorMessage(e.message || "Failed to submit application.");
+            setAdmissionSuccess(true);
+            setFormData({
+                fullName: "",
+                email: "",
+                churchName: "",
+                phone: "",
+                program: "Bachelor of Theology (B.Th.)",
+                position: "Aspiring Pastor / Ministry Leader",
+                message: ""
+            });
+        } catch (err: any) {
+            setAdmissionError(err.message || "An error occurred while submitting your application.");
         } finally {
-            setSubmitting(false);
+            setIsSubmitting(false);
         }
     };
 
-    const filteredCourses = useMemo(() => {
-        return ACADEMIC_COURSES.filter(c => {
-            const matchesTab = activeCollegeTab === "All" || c.college === activeCollegeTab;
-            const matchesQuery =
-                !programSearch.trim() ||
-                c.title.toLowerCase().includes(programSearch.toLowerCase()) ||
-                c.code.toLowerCase().includes(programSearch.toLowerCase()) ||
-                c.description.toLowerCase().includes(programSearch.toLowerCase());
-            return matchesTab && matchesQuery;
-        });
-    }, [activeCollegeTab, programSearch]);
+    const navigateTo = (route: string) => {
+        if (onNavigate) {
+            onNavigate(route);
+        } else {
+            window.location.href = route;
+        }
+    };
+
+    // The 7 Official MBS Portals
+    const portals = useMemo(() => [
+        {
+            id: "admission",
+            title: "Online Admission",
+            subtitle: "New Student Application",
+            icon: "admission",
+            description: "Apply for undergraduate, pastoral diploma, and graduate theological programs.",
+            actionText: "Apply Online",
+            badge: "Open for SY 2026-2027",
+            handler: () => setIsAdmissionOpen(true)
+        },
+        {
+            id: "enrollment",
+            title: "Online Enrollment",
+            subtitle: "Course Registration",
+            icon: "enrollment",
+            description: "Register for semester subjects, select class schedules, and verify curriculum load.",
+            actionText: "Proceed to Enrollment",
+            badge: "Active Term",
+            handler: () => navigateTo("/client-login")
+        },
+        {
+            id: "payment",
+            title: "Online Payment",
+            subtitle: "Tuition & Fees Gateway",
+            icon: "payment",
+            description: "Secure tuition payments, course module dues, and financial ledger review.",
+            actionText: "Make Payment",
+            badge: "Instant Verification",
+            handler: () => navigateTo("/client-payment")
+        },
+        {
+            id: "mail",
+            title: "MBS Mail",
+            subtitle: "Institutional Inquiries",
+            icon: "mail",
+            description: "Official communications for seminary students, pastoral faculty, and administration.",
+            actionText: "Access Mail & Inquiries",
+            badge: "Webmail Service",
+            handler: () => navigateTo("/contact")
+        },
+        {
+            id: "my-mbs",
+            title: "My MBS",
+            subtitle: "Student & Faculty Portal",
+            icon: "profile",
+            description: "Centralized portal for student schedules, academic records, announcements, and profile.",
+            actionText: "Login to My MBS",
+            badge: "Single Sign-On",
+            handler: () => navigateTo("/client-login")
+        },
+        {
+            id: "mbs-lms",
+            title: "MBS LMS",
+            subtitle: "Theological Learning Hub",
+            icon: "lms",
+            description: "Access online lecture videos, Greek/Hebrew exegetical tools, syllabi, and reading modules.",
+            actionText: "Open LMS Hub",
+            badge: "Interactive Classroom",
+            handler: () => navigateTo("/learning")
+        },
+        {
+            id: "e-registrar",
+            title: "eRegistrar",
+            subtitle: "Academic Records & Evaluation",
+            icon: "touch",
+            description: "Official transcript requests, grade evaluations, graduation status, and pastoral endorsements.",
+            actionText: "Access Records",
+            badge: "Official Evaluation",
+            handler: () => navigateTo("/client-login")
+        }
+    ], [onNavigate]);
+
+    // News & Features items
+    const newsArticles = useMemo(() => [
+        {
+            id: "pastoral-summit",
+            tag: "MINISTRY SUMMIT",
+            title: "MBS Hosts Annual National Pastors & Church Planters Colloquium 2026",
+            date: "October 28, 2026",
+            excerpt: "Over 350 church leaders, alumni, and seminary delegates gathered for three days of expository preaching, pastoral revitalization, and church planting strategies.",
+            image: "/images/announcements/sunday-worship.jpg"
+        },
+        {
+            id: "missions-expansion",
+            tag: "GLOBAL MISSIONS",
+            title: "MBS Alumni Pioneering 18 Cross-Cultural Church Plants in Southeast Asia",
+            date: "October 16, 2026",
+            excerpt: "From remote island communities to urban centers, our graduates continue to plant self-sustaining, Scripture-grounded congregations.",
+            image: "/images/announcements/youth-night.jpg"
+        },
+        {
+            id: "theology-curriculum",
+            tag: "ACADEMIC ADVANCE",
+            title: "Seminary Launches Modular Programs in Advanced Hermeneutics & Biblical Counseling",
+            date: "October 05, 2026",
+            excerpt: "Designed for bivocational pastors and church ministry leaders, new evening and weekend intensive modules provide rigorous theological training.",
+            image: "/images/announcements/epic-platform-update.jpg"
+        }
+    ], []);
+
+    // Alumni & Achievers
+    const achievers = useMemo(() => [
+        {
+            id: "1",
+            category: "BACHELOR OF THEOLOGY (B.TH.)",
+            rate: "100% ORDAINED",
+            title: "Rev. David S. Morales, B.Th.",
+            role: "Senior Pastor & Church Planter",
+            honors: "Batch 2021 Summa Cum Laude",
+            achievement: "Successfully planted 3 daughter churches and equipped 45 lay preachers.",
+            initials: "DM"
+        },
+        {
+            id: "2",
+            category: "MASTER OF MINISTRY (M.MIN.)",
+            rate: "DISTINGUISHED ALUMNA",
+            title: "Dr. Rebecca L. Santos, M.Min.",
+            role: "Director of Biblical Counseling & Family Ministry",
+            honors: "Batch 2019 Valedictorian",
+            achievement: "Author of pastoral counseling manuals used across 80+ partner churches.",
+            initials: "RS"
+        },
+        {
+            id: "3",
+            category: "MASTER OF THEOLOGY (M.TH.)",
+            rate: "EXPOSITOR & SCHOLAR",
+            title: "Pastor Jonathan M. Cruz, M.Th.",
+            role: "Dean of Biblical Languages & Exegesis",
+            honors: "Batch 2016 High Distinction",
+            achievement: "Lecturer in New Testament Greek, mentoring pastors in expository pulpit ministry.",
+            initials: "JC"
+        }
+    ], []);
+
+    // Filtered portals
+    const filteredPortals = useMemo(() => {
+        if (!searchQuery.trim()) return portals;
+        const q = searchQuery.toLowerCase();
+        return portals.filter(p =>
+            p.title.toLowerCase().includes(q) ||
+            p.subtitle.toLowerCase().includes(q) ||
+            p.description.toLowerCase().includes(q)
+        );
+    }, [searchQuery, portals]);
 
     return (
-        <div className="ub-institutional-wrapper">
-            {/* =========================================================
-                TOP MAROON BRAND BAR & CAMPUS NAVIGATION (EXACT UB HEADER)
-            ========================================================= */}
-            <header className="ub-top-header">
+        <div className="ub-root">
+            {/* ============================================================ */}
+            {/* TOP INSTITUTIONAL HEADER & BRANDING */}
+            {/* ============================================================ */}
+            <header className="ub-header">
                 <div className="ub-header-container">
-                    {/* LEFT: UNIVERSITY OF BATANGAS CREST & WORDMARK */}
-                    <div className="ub-brand-identity" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
-                        <div className="ub-crest-seal">
-                            <div className="crest-inner">
-                                <GraduationCap size={22} className="crest-icon" />
-                            </div>
+                    {/* Brand Left */}
+                    <div className="ub-brand" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+                        <div className="ub-crest">
+                            <BookOpen className="ub-crest-icon" />
                         </div>
-                        <div className="ub-brand-titles">
-                            <span className="brand-prefix">University of</span>
-                            <span className="brand-main">Batangas</span>
-                            <span className="brand-heritage">MBS • Theological Seminary Heritage</span>
+                        <div className="ub-title-block">
+                            <h1 className="ub-university-name">Mobile Bible School</h1>
+                            <p className="ub-university-subtitle">Theological Seminary & Ministerial Institute</p>
                         </div>
                     </div>
 
-                    {/* RIGHT: CAMPUSES, SDG & 80TH ANNIVERSARY BADGE */}
-                    <nav className="ub-campus-nav">
-                        <button type="button" className="ub-nav-link" onClick={() => window.scrollTo({ top: 600, behavior: "smooth" })}>
-                            BATANGAS CITY
-                        </button>
-                        <button type="button" className="ub-nav-link" onClick={() => window.scrollTo({ top: 600, behavior: "smooth" })}>
-                            LIPA CITY
-                        </button>
-                        <button type="button" className="ub-nav-link" onClick={() => openAdmissionsModal("SDG & Academic Inquiries")}>
-                            SDG INITIATIVES
-                        </button>
-
+                    {/* Nav Middle Links */}
+                    <nav className="ub-nav-links">
+                        <a href="#campuses" className="ub-nav-link" onClick={(e) => { e.preventDefault(); navigateTo("/about"); }}>
+                            MAIN CAMPUS
+                        </a>
+                        <a href="#extension" className="ub-nav-link" onClick={(e) => { e.preventDefault(); navigateTo("/learning"); }}>
+                            ONLINE EXTENSION
+                        </a>
+                        <a href="#programs" className="ub-nav-link" onClick={(e) => { e.preventDefault(); navigateTo("/about"); }}>
+                            ACADEMIC PROGRAMS
+                        </a>
                         <div className="ub-anniversary-badge">
-                            <span>80th Anniversary</span>
-                        </div>
-
-                        {/* PORTAL ACCESS SHORTCUTS */}
-                        <div className="ub-header-action-group">
-                            <button
-                                type="button"
-                                className="ub-btn-header-portal"
-                                onClick={() => navigate("client-login", "/client-login")}
-                                title="Access Student & Faculty Portal"
-                            >
-                                <User size={14} />
-                                <span>Student Portal</span>
-                            </button>
-
-                            <button
-                                type="button"
-                                className="ub-btn-header-admin"
-                                onClick={() => navigate("login", "/login")}
-                                title="School Administrator & Faculty Access"
-                            >
-                                <ShieldCheck size={14} />
-                                <span>Admin Portal</span>
-                            </button>
-
-                            <button
-                                type="button"
-                                className="ub-btn-header-apply"
-                                onClick={() => openAdmissionsModal("Online Admissions 2026-2027")}
-                            >
-                                <span>Apply Now</span>
-                            </button>
+                            <span className="ub-anniversary-sparkle">★</span>
+                            <span>40+ Years of Ministry</span>
                         </div>
                     </nav>
+
+                    {/* Actions Right */}
+                    <div className="ub-header-actions">
+                        <button
+                            className="ub-btn-portal-student"
+                            onClick={() => navigateTo("/client-login")}
+                            title="Student Portal Login"
+                        >
+                            <User className="ub-btn-icon" />
+                            <span>Student Portal</span>
+                        </button>
+
+                        <button
+                            className="ub-btn-portal-admin"
+                            onClick={() => navigateTo("/login")}
+                            title="Administrator / Faculty Login"
+                        >
+                            <ShieldCheck className="ub-btn-icon" />
+                            <span>Admin Portal</span>
+                        </button>
+
+                        <button
+                            className="ub-btn-apply"
+                            onClick={() => setIsAdmissionOpen(true)}
+                        >
+                            Apply Now
+                        </button>
+                    </div>
                 </div>
             </header>
 
-            {/* =========================================================
-                HERO SECTION: GRAND CAMPUS FAÇADE SHOWCASE (IMAGE 5)
-            ========================================================= */}
-            <section className="ub-hero-showcase">
-                <div className="ub-hero-image-wrapper">
-                    <img
-                        src="/images/ub-campus.jpg"
-                        alt="University of Batangas Campus Façade"
-                        className="ub-campus-bg-img"
-                    />
-                    <div className="ub-hero-gradient-overlay" />
+            {/* ============================================================ */}
+            {/* CAMPUS HERO SECTION */}
+            {/* ============================================================ */}
+            <section className="ub-hero-section">
+                {/* Hero architectural background */}
+                <div className="ub-hero-bg">
+                    <div className="ub-hero-overlay" />
+                    <div className="ub-hero-grid-pattern" />
                 </div>
 
-                <div className="ub-hero-content-container">
-                    <div className="ub-hero-glass-badge">
-                        <Award size={15} color="#ffd60a" />
-                        <span>AUTONOMOUS STATUS • PAASCU &amp; CHED ACCREDITED</span>
+                <div className="ub-hero-content">
+                    <div className="ub-hero-badge-row">
+                        <span className="ub-accreditation-pill">
+                            <Award className="ub-pill-icon" />
+                            CHRIST-CENTERED THEOLOGICAL EDUCATION • ACCREDITED SEMINARY
+                        </span>
                     </div>
 
-                    <h1 className="ub-hero-headline">
-                        Excellence in Higher Education &amp; Servant Leadership
-                    </h1>
+                    <h2 className="ub-hero-title">
+                        Equipping Servants of the Word for God’s Global Kingdom
+                    </h2>
 
-                    <p className="ub-hero-tagline">
-                        Rooted in academic rigor, ethical scholarship, and national transformation since 1946. Nurturing globally competent graduates equipped to serve God and society.
+                    <p className="ub-hero-description">
+                        Rooted in biblical inerrancy, sound theological scholarship, expository preaching, and pastoral ministry.
+                        Nurturing gospel-driven ministers equipped to preach the Truth and shepherd the flock with integrity.
                     </p>
 
-                    <div className="ub-hero-buttons">
+                    {/* Hero CTA buttons */}
+                    <div className="ub-hero-actions">
                         <button
-                            type="button"
-                            className="ub-btn-gold"
-                            onClick={() => openAdmissionsModal("Undergraduate & Seminary Admission 2026-2027")}
+                            className="ub-btn-hero-primary"
+                            onClick={() => setIsAdmissionOpen(true)}
                         >
-                            <span>Apply for Admission</span>
-                            <ArrowRight size={16} />
+                            Apply for Admission
+                            <ArrowRight className="ub-btn-arrow" />
                         </button>
 
-                        <button
-                            type="button"
-                            className="ub-btn-outline-white"
-                            onClick={() => {
-                                const el = document.getElementById("ub-portals-section");
-                                el?.scrollIntoView({ behavior: "smooth" });
-                            }}
+                        <a
+                            href="#mbs-portals"
+                            className="ub-btn-hero-secondary"
                         >
-                            <span>Access University Portals</span>
-                            <ChevronRight size={16} />
-                        </button>
+                            Access MBS Portals
+                            <ChevronRight className="ub-btn-arrow" />
+                        </a>
                     </div>
 
-                    <div className="ub-quick-stats-strip">
-                        <div className="quick-stat">
-                            <strong>1946</strong>
-                            <span>Year Founded</span>
+                    {/* Quick Search */}
+                    <div className="ub-hero-search-wrapper">
+                        <div className="ub-hero-search-bar">
+                            <Search className="ub-search-icon" />
+                            <input
+                                type="text"
+                                placeholder="Search theological programs, course subjects, portals, admissions..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="ub-search-input"
+                            />
+                            {searchQuery && (
+                                <button className="ub-search-clear" onClick={() => setSearchQuery("")}>
+                                    <X className="w-4 h-4" />
+                                </button>
+                            )}
                         </div>
-                        <div className="quick-stat-divider" />
-                        <div className="quick-stat">
-                            <strong>100%</strong>
-                            <span>Licensure Passing Rates</span>
+                    </div>
+
+                    {/* Quick Stats Bar */}
+                    <div className="ub-hero-stats-card">
+                        <div className="ub-stat-col">
+                            <div className="ub-stat-number">40+</div>
+                            <div className="ub-stat-label">Years of Ministry</div>
                         </div>
-                        <div className="quick-stat-divider" />
-                        <div className="quick-stat">
-                            <strong>2 Campuses</strong>
-                            <span>Batangas City &amp; Lipa City</span>
+                        <div className="ub-stat-divider" />
+                        <div className="ub-stat-col">
+                            <div className="ub-stat-number">100%</div>
+                            <div className="ub-stat-label">Ministry Placement</div>
                         </div>
-                        <div className="quick-stat-divider" />
-                        <div className="quick-stat">
-                            <strong>PAASCU</strong>
-                            <span>Level III &amp; IV Accredited</span>
+                        <div className="ub-stat-divider" />
+                        <div className="ub-stat-col">
+                            <div className="ub-stat-number">35+</div>
+                            <div className="ub-stat-label">Church Plants & Hubs</div>
+                        </div>
+                        <div className="ub-stat-divider" />
+                        <div className="ub-stat-col">
+                            <div className="ub-stat-number">ACTS</div>
+                            <div className="ub-stat-label">Accredited Seminary</div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* =========================================================
-                UB PORTALS SECTION (IMAGE 1 — EXACT UB PORTALS REPLICA)
-            ========================================================= */}
-            <section id="ub-portals-section" className="ub-portals-section">
-                <div className="ub-section-container">
-                    <h2 className="ub-section-title">UB PORTALS</h2>
+            {/* ============================================================ */}
+            {/* MBS PORTALS (THE 7 OFFICIAL CARDS) */}
+            {/* ============================================================ */}
+            <section id="mbs-portals" className="ub-portals-section">
+                <div className="ub-portals-container">
+                    <div className="ub-section-header">
+                        <span className="ub-section-tag">STUDENT, FACULTY & MINISTERIAL SERVICES</span>
+                        <h2 className="ub-section-title">MBS Portals</h2>
+                        <div className="ub-title-line" />
+                        <p className="ub-section-lead">
+                            Centralized access point for Mobile Bible School academic portals, course syllabi,
+                            admissions applications, tuition payment, and student records.
+                        </p>
+                    </div>
 
                     <div className="ub-portals-grid">
-                        {/* 1. ONLINE ADMISSION */}
-                        <div
-                            className="ub-portal-card"
-                            onClick={() => openAdmissionsModal("Online Admission Portal")}
-                            role="button"
-                            tabIndex={0}
-                        >
-                            <div className="ub-portal-icon-wrapper">
-                                <div className="ub-icon-admission">
-                                    <div className="doc-sheet">
-                                        <div className="doc-line" />
-                                        <div className="doc-line short" />
-                                        <div className="doc-line" />
+                        {filteredPortals.map((portal) => (
+                            <div
+                                key={portal.id}
+                                className={`ub-portal-card ub-portal-card-${portal.id}`}
+                                onClick={portal.handler}
+                            >
+                                <div className="ub-card-top">
+                                    <div className="ub-card-icon-container">
+                                        {/* Dynamic Icon based on UB Portal layout */}
+                                        {portal.icon === "admission" && (
+                                            <div className="ub-portal-icon-box ub-icon-admission">
+                                                <GraduationCap className="ub-icon-svg" />
+                                            </div>
+                                        )}
+                                        {portal.icon === "enrollment" && (
+                                            <div className="ub-portal-icon-box ub-icon-enrollment">
+                                                <Building2 className="ub-icon-svg" />
+                                            </div>
+                                        )}
+                                        {portal.icon === "payment" && (
+                                            <div className="ub-portal-icon-box ub-icon-payment">
+                                                <CreditCard className="ub-icon-svg" />
+                                            </div>
+                                        )}
+                                        {portal.icon === "mail" && (
+                                            <div className="ub-portal-icon-box ub-icon-mail">
+                                                <Mail className="ub-icon-svg" />
+                                            </div>
+                                        )}
+                                        {portal.icon === "profile" && (
+                                            <div className="ub-portal-icon-box ub-icon-profile">
+                                                <User className="ub-icon-svg" />
+                                            </div>
+                                        )}
+                                        {portal.icon === "lms" && (
+                                            <div className="ub-portal-icon-box ub-icon-lms">
+                                                {/* LMS segmented circular icon LMS learning hub */}
+                                                <div className="ub-lms-hub-icon">
+                                                    <div className="ub-hub-center" />
+                                                    <div className="ub-hub-dot ub-dot-1" />
+                                                    <div className="ub-hub-dot ub-dot-2" />
+                                                    <div className="ub-hub-dot ub-dot-3" />
+                                                    <div className="ub-hub-dot ub-dot-4" />
+                                                    <div className="ub-hub-dot ub-dot-5" />
+                                                    <div className="ub-hub-dot ub-dot-6" />
+                                                </div>
+                                            </div>
+                                        )}
+                                        {portal.icon === "touch" && (
+                                            <div className="ub-portal-icon-box ub-icon-registrar">
+                                                <Compass className="ub-icon-svg" />
+                                            </div>
+                                        )}
                                     </div>
+                                    <span className="ub-portal-badge">{portal.badge}</span>
+                                </div>
+
+                                <div className="ub-card-body">
+                                    <h3 className="ub-portal-title">{portal.title}</h3>
+                                    <h4 className="ub-portal-sub">{portal.subtitle}</h4>
+                                    <p className="ub-portal-desc">{portal.description}</p>
+                                </div>
+
+                                <div className="ub-card-footer">
+                                    <span className="ub-portal-action">
+                                        {portal.actionText}
+                                        <ChevronRight className="ub-action-arrow" />
+                                    </span>
                                 </div>
                             </div>
-                            <span className="ub-portal-name">Online Admission</span>
-                        </div>
-
-                        {/* 2. ONLINE ENROLLMENT */}
-                        <div
-                            className="ub-portal-card"
-                            onClick={() => navigate("client-login", "/client-login")}
-                            role="button"
-                            tabIndex={0}
-                        >
-                            <div className="ub-portal-icon-wrapper">
-                                <div className="ub-icon-enrollment">
-                                    <div className="person-circle" />
-                                    <div className="mail-badge" />
-                                </div>
-                            </div>
-                            <span className="ub-portal-name">Online Enrollment</span>
-                        </div>
-
-                        {/* 3. ONLINE PAYMENT */}
-                        <div
-                            className="ub-portal-card"
-                            onClick={() => navigate("client-payment", "/client-payment")}
-                            role="button"
-                            tabIndex={0}
-                        >
-                            <div className="ub-portal-icon-wrapper">
-                                <div className="ub-icon-payment">
-                                    <CreditCard size={32} strokeWidth={2} />
-                                </div>
-                            </div>
-                            <span className="ub-portal-name">Online Payment</span>
-                        </div>
-
-                        {/* 4. UB MAIL / MBS MAIL */}
-                        <div
-                            className="ub-portal-card"
-                            onClick={() => navigate("contact", "/contact")}
-                            role="button"
-                            tabIndex={0}
-                        >
-                            <div className="ub-portal-icon-wrapper">
-                                <div className="ub-icon-mail">
-                                    <Mail size={32} strokeWidth={2} />
-                                    <div className="mail-speed-lines" />
-                                </div>
-                            </div>
-                            <span className="ub-portal-name">UB Mail</span>
-                        </div>
-
-                        {/* 5. MY UB / MY MBS */}
-                        <div
-                            className="ub-portal-card"
-                            onClick={() => navigate("client-login", "/client-login")}
-                            role="button"
-                            tabIndex={0}
-                        >
-                            <div className="ub-portal-icon-wrapper">
-                                <div className="ub-icon-myub">
-                                    <div className="open-folder-top" />
-                                    <div className="folder-doc">
-                                        <div className="f-line" />
-                                        <div className="f-line" />
-                                    </div>
-                                </div>
-                            </div>
-                            <span className="ub-portal-name">My UB</span>
-                        </div>
-
-                        {/* 6. UBIAN LMS / CANVAS HUB */}
-                        <div
-                            className="ub-portal-card"
-                            onClick={() => navigate("learning", "/cms/learning")}
-                            role="button"
-                            tabIndex={0}
-                        >
-                            <div className="ub-portal-icon-wrapper">
-                                <div className="ub-icon-lms">
-                                    <div className="lms-hub-dot dot-1" />
-                                    <div className="lms-hub-dot dot-2" />
-                                    <div className="lms-hub-dot dot-3" />
-                                    <div className="lms-hub-dot dot-4" />
-                                    <div className="lms-hub-dot dot-5" />
-                                    <div className="lms-hub-dot dot-6" />
-                                    <div className="lms-hub-dot dot-7" />
-                                    <div className="lms-hub-dot dot-8" />
-                                </div>
-                            </div>
-                            <span className="ub-portal-name">UBian LMS</span>
-                        </div>
-
-                        {/* 7. EBRAHMAN / DIGITAL RECORDS */}
-                        <div
-                            className="ub-portal-card"
-                            onClick={() => navigate("client-portal", "/client-portal")}
-                            role="button"
-                            tabIndex={0}
-                        >
-                            <div className="ub-portal-icon-wrapper">
-                                <div className="ub-icon-ebrahman">
-                                    <div className="touch-finger" />
-                                </div>
-                            </div>
-                            <span className="ub-portal-name">eBrahman</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* =========================================================
-                NEWS & FEATURES SECTION (IMAGE 3 — EXACT UB REPLICA)
-            ========================================================= */}
-            <section className="ub-news-section">
-                <div className="ub-section-container">
-                    <h2 className="ub-section-title">NEWS &amp; FEATURES</h2>
-
-                    <div className="ub-news-grid">
-                        {NEWS_DATA.map(item => (
-                            <article key={item.id} className="ub-news-card">
-                                <div className="ub-news-img-box">
-                                    <img src={item.imageUrl} alt={item.title} className="ub-news-img" />
-                                    <div className="ub-news-brand-banner">
-                                        <div className="brand-crest-mini">
-                                            <GraduationCap size={14} color="#ffd60a" />
-                                        </div>
-                                        <span>University of Batangas</span>
-                                    </div>
-                                    <div className="ub-news-category-tag">
-                                        <span>{item.category}</span>
-                                    </div>
-                                </div>
-
-                                <div className="ub-news-body">
-                                    <h3 className="ub-news-card-title">{item.title}</h3>
-                                    <time className="ub-news-date">{item.date}</time>
-                                    <p className="ub-news-excerpt">{item.excerpt}</p>
-                                </div>
-                            </article>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* =========================================================
-                ACADEMIC ACHIEVEMENTS & LICENSURE PASSERS (IMAGE 2)
-            ========================================================= */}
+            {/* ============================================================ */}
+            {/* ACADEMIC THEOLOGICAL PROGRAMS */}
+            {/* ============================================================ */}
+            <section className="ub-programs-section">
+                <div className="ub-portals-container">
+                    <div className="ub-section-header">
+                        <span className="ub-section-tag">CURRICULUM & DEGREES</span>
+                        <h2 className="ub-section-title">Academic & Ministerial Programs</h2>
+                        <div className="ub-title-line" />
+                        <p className="ub-section-lead">
+                            Comprehensive biblical instruction combining exegetical precision, systematic theology,
+                            and practical pastoral ministry training.
+                        </p>
+                    </div>
+
+                    <div className="ub-programs-grid">
+                        <div className="ub-program-card">
+                            <span className="ub-program-level">DIPLOMA LEVEL</span>
+                            <h3 className="ub-program-name">Diploma in Pastoral Studies (DPS)</h3>
+                            <p className="ub-program-desc">
+                                Essential training in Expository Preaching, Systematic Theology I & II, and Christian Education for Church Workers.
+                            </p>
+                            <div className="ub-program-meta">
+                                <span>2 Years • 60 Credits</span>
+                                <button className="ub-program-link" onClick={() => setIsAdmissionOpen(true)}>Apply →</button>
+                            </div>
+                        </div>
+
+                        <div className="ub-program-card ub-program-card-featured">
+                            <span className="ub-program-level ub-badge-gold">FLAGSHIP DEGREE</span>
+                            <h3 className="ub-program-name">Bachelor of Theology (B.Th.)</h3>
+                            <p className="ub-program-desc">
+                                In-depth study in Biblical Greek, Hebrew, Hermeneutics, Pastoral Theology, Ecclesiology, and Pauline Epistles.
+                            </p>
+                            <div className="ub-program-meta">
+                                <span>4 Years • 128 Credits</span>
+                                <button className="ub-program-link" onClick={() => setIsAdmissionOpen(true)}>Apply →</button>
+                            </div>
+                        </div>
+
+                        <div className="ub-program-card">
+                            <span className="ub-program-level">GRADUATE LEVEL</span>
+                            <h3 className="ub-program-name">Master of Ministry & Theology (M.Min / M.Th.)</h3>
+                            <p className="ub-program-desc">
+                                Advanced leadership in Apologetics, Church Management, Worship Leadership, and Reformation Theology.
+                            </p>
+                            <div className="ub-program-meta">
+                                <span>2 Years • Graduate Seminar</span>
+                                <button className="ub-program-link" onClick={() => setIsAdmissionOpen(true)}>Apply →</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* ============================================================ */}
+            {/* LICENSURE & ORDAINED ACHIEVERS SHOWCASE */}
+            {/* ============================================================ */}
             <section className="ub-achievers-section">
-                <div className="ub-section-container">
-                    <div className="achievers-header-row">
-                        <div>
-                            <span className="achievers-sub">COLLEGE OF EXCELLENCE • BOARD EXAMINATION HONORS</span>
-                            <h2 className="achievers-title">Academic Triumphs &amp; Licensure Exam Successes</h2>
-                        </div>
-                        <div className="achievers-pass-badge">
-                            <Award size={18} color="#ffd60a" />
-                            <span>100% BOARD PASSING RATE</span>
-                        </div>
+                <div className="ub-portals-container">
+                    <div className="ub-section-header">
+                        <span className="ub-section-tag">FAITHFUL ALUMNI & GOSPEL IMPACT</span>
+                        <h2 className="ub-section-title">Ordained Alumni & Ministry Achievers</h2>
+                        <div className="ub-title-line" />
+                        <p className="ub-section-lead">
+                            Celebrating our graduates who are faithfully planting churches, shepherding congregations,
+                            and leading cross-cultural ministries worldwide.
+                        </p>
                     </div>
 
                     <div className="ub-achievers-grid">
-                        {ACHIEVERS_DATA.map(item => (
-                            <div key={item.id} className="ub-achiever-card">
-                                <div className="achiever-photo-box">
-                                    <img src={item.imageUrl} alt={item.title} className="achiever-img" />
-                                    <div className="achiever-card-brand-bar">
-                                        <div className="crest-seal-mini">
-                                            <GraduationCap size={13} color="#ffffff" />
-                                        </div>
-                                        <span>University of Batangas</span>
-                                    </div>
-                                    <div className="achiever-banner-strip">
-                                        <p>{item.bannerTitle}</p>
-                                    </div>
-                                    {item.passRateBadge && (
-                                        <span className="achiever-honor-pill">{item.passRateBadge}</span>
-                                    )}
+                        {achievers.map((achiever) => (
+                            <div key={achiever.id} className="ub-achiever-card">
+                                <div className="ub-achiever-banner">
+                                    <span className="ub-achiever-rate-tag">{achiever.rate}</span>
+                                    <span className="ub-achiever-dept">{achiever.category}</span>
                                 </div>
 
-                                <div className="achiever-card-body">
-                                    <h3 className="achiever-heading">{item.title}</h3>
-                                    <time className="achiever-date">{item.date}</time>
-                                    <p className="achiever-snippet">{item.excerpt}</p>
+                                <div className="ub-achiever-body">
+                                    <div className="ub-achiever-avatar">
+                                        <div className="ub-avatar-circle">
+                                            <span>{achiever.initials}</span>
+                                        </div>
+                                        <div className="ub-avatar-medal">
+                                            <Award className="w-4 h-4 text-amber-900" />
+                                        </div>
+                                    </div>
+
+                                    <h3 className="ub-achiever-name">{achiever.title}</h3>
+                                    <p className="ub-achiever-role">{achiever.role}</p>
+                                    <p className="ub-achiever-honors">{achiever.honors}</p>
+
+                                    <div className="ub-achiever-quote">
+                                        "{achiever.achievement}"
+                                    </div>
                                 </div>
                             </div>
                         ))}
                     </div>
 
-                    {/* PAGINATION (EXACT MATCH TO UB PREVIOUS / 1 2 3 ... 149 / NEXT) */}
+                    {/* Pagination bar matching the collegiate screenshot */}
                     <div className="ub-pagination-bar">
                         <button
-                            type="button"
-                            className="ub-page-nav-btn"
+                            className="ub-page-nav"
                             disabled={achieverPage === 1}
                             onClick={() => setAchieverPage(p => Math.max(1, p - 1))}
                         >
-                            &laquo; Previous
+                            &lt; Previous
                         </button>
                         <button
-                            type="button"
-                            className={`ub-page-num ${achieverPage === 1 ? "active" : ""}`}
+                            className={`ub-page-number ${achieverPage === 1 ? "active" : ""}`}
                             onClick={() => setAchieverPage(1)}
                         >
                             1
                         </button>
                         <button
-                            type="button"
-                            className={`ub-page-num ${achieverPage === 2 ? "active" : ""}`}
+                            className={`ub-page-number ${achieverPage === 2 ? "active" : ""}`}
                             onClick={() => setAchieverPage(2)}
                         >
                             2
                         </button>
                         <button
-                            type="button"
-                            className={`ub-page-num ${achieverPage === 3 ? "active" : ""}`}
+                            className={`ub-page-number ${achieverPage === 3 ? "active" : ""}`}
                             onClick={() => setAchieverPage(3)}
                         >
                             3
                         </button>
-                        <span className="ub-page-dots">...</span>
+                        <span className="ub-page-ellipsis">...</span>
                         <button
-                            type="button"
-                            className={`ub-page-num ${achieverPage === 149 ? "active" : ""}`}
-                            onClick={() => setAchieverPage(149)}
+                            className={`ub-page-number ${achieverPage === totalAchieverPages ? "active" : ""}`}
+                            onClick={() => setAchieverPage(totalAchieverPages)}
                         >
-                            149
+                            {totalAchieverPages}
                         </button>
                         <button
-                            type="button"
-                            className="ub-page-nav-btn"
-                            onClick={() => setAchieverPage(p => p + 1)}
+                            className="ub-page-nav"
+                            disabled={achieverPage === totalAchieverPages}
+                            onClick={() => setAchieverPage(p => Math.min(totalAchieverPages, p + 1))}
                         >
-                            Next &raquo;
+                            Next &gt;
                         </button>
                     </div>
                 </div>
             </section>
 
-            {/* =========================================================
-                ACADEMIC COLLEGES & CURRICULUM CATALOG
-            ========================================================= */}
-            <section className="ub-colleges-section">
-                <div className="ub-section-container">
-                    <div className="colleges-header">
-                        <span className="section-eyebrow">ACADEMIC EXCELLENCE • DEGREE PROGRAMS</span>
-                        <h2 className="ub-section-title" style={{ textAlign: "left", marginBottom: "8px" }}>
-                            Academic Colleges &amp; Program Offerings
-                        </h2>
-                        <p className="section-desc">
-                            Explore rigorous, CHED-recognized undergraduate degrees, graduate diplomas, and theological credentials designed for modern leadership.
-                        </p>
+            {/* ============================================================ */}
+            {/* NEWS & FEATURES SECTION */}
+            {/* ============================================================ */}
+            <section className="ub-news-section">
+                <div className="ub-portals-container">
+                    <div className="ub-section-header">
+                        <span className="ub-section-tag">CAMPUS UPDATES & FIELD DISPATCHES</span>
+                        <h2 className="ub-section-title">News & Features</h2>
+                        <div className="ub-title-line" />
                     </div>
 
-                    {/* FILTER TABS & SEARCH */}
-                    <div className="courses-filter-bar">
-                        <div className="college-tabs-row">
-                            {["All", "College of Theology", "College of Biblical Studies", "College of Pastoral Leadership", "College of Education", "School of Global Missions"].map(tab => (
-                                <button
-                                    key={tab}
-                                    type="button"
-                                    className={`college-tab-btn ${activeCollegeTab === tab ? "active" : ""}`}
-                                    onClick={() => setActiveCollegeTab(tab)}
-                                >
-                                    {tab}
-                                </button>
-                            ))}
-                        </div>
-
-                        <div className="course-search-field">
-                            <Search size={16} className="search-icon" />
-                            <input
-                                type="text"
-                                placeholder="Search course title, code (e.g. THEO-101), or subject..."
-                                value={programSearch}
-                                onChange={e => setProgramSearch(e.target.value)}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="courses-grid">
-                        {filteredCourses.map(course => (
-                            <div key={course.code} className="course-card">
-                                <div className="course-card-top">
-                                    <span className="course-code-pill">{course.code}</span>
-                                    <span className="course-units-badge">{course.units} Units</span>
+                    <div className="ub-news-grid">
+                        {newsArticles.map((article) => (
+                            <div key={article.id} className="ub-news-card">
+                                <div className="ub-news-image-wrapper">
+                                    <img src={article.image} alt={article.title} className="ub-news-img" />
+                                    <span className="ub-news-badge">{article.tag}</span>
                                 </div>
-                                <h4 className="course-title">{course.title}</h4>
-                                <span className="course-college-name">{course.college}</span>
-                                <p className="course-desc">{course.description}</p>
-                                <button
-                                    type="button"
-                                    className="btn-course-inquire"
-                                    onClick={() => openAdmissionsModal(`Course Inquiry: ${course.code} - ${course.title}`)}
-                                >
-                                    <span>Inquire Syllabus</span>
-                                    <ChevronRight size={14} />
-                                </button>
+                                <div className="ub-news-body">
+                                    <div className="ub-news-date">{article.date}</div>
+                                    <h3 className="ub-news-card-title">{article.title}</h3>
+                                    <p className="ub-news-excerpt">{article.excerpt}</p>
+                                    <button
+                                        className="ub-news-read-more"
+                                        onClick={() => setIsAdmissionOpen(true)}
+                                    >
+                                        Read Dispatch
+                                        <ArrowRight className="w-4 h-4 ml-1" />
+                                    </button>
+                                </div>
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* =========================================================
-                CAMPUS LOCATIONS & CONTACT STRIP
-            ========================================================= */}
-            <section className="ub-campuses-strip">
-                <div className="ub-section-container">
-                    <div className="campus-strip-grid">
-                        <div className="campus-info-card">
-                            <div className="campus-icon-box">
-                                <Building2 size={24} color="#ffd60a" />
-                            </div>
-                            <div>
-                                <h4>BATANGAS CITY MAIN CAMPUS</h4>
-                                <p>M.H. Del Pilar Street, Batangas City 4200, Philippines</p>
-                                <span className="campus-tel">Tel: (043) 723-1446 • info@ub.edu.ph</span>
-                            </div>
-                        </div>
-
-                        <div className="campus-info-card">
-                            <div className="campus-icon-box">
-                                <Building2 size={24} color="#ffd60a" />
-                            </div>
-                            <div>
-                                <h4>LIPA CITY CAMPUS</h4>
-                                <p>Pres. J.P. Laurel Highway, Marawoy, Lipa City, Batangas 4217</p>
-                                <span className="campus-tel">Tel: (043) 756-1184 • lipa@ub.edu.ph</span>
-                            </div>
-                        </div>
-
-                        <div className="campus-info-card">
-                            <div className="campus-icon-box">
-                                <Compass size={24} color="#ffd60a" />
-                            </div>
-                            <div>
-                                <h4>REGIONAL &amp; MODULAR COHORTS</h4>
-                                <p>Central Luzon, Visayas, Mindanao &amp; Frontier Learning Centers</p>
-                                <span className="campus-tel">Online &amp; Modular Timetable Available</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* =========================================================
-                OFFICIAL UNIVERSITY FOOTER (MAROON & GOLD INSTITUTIONAL)
-            ========================================================= */}
+            {/* ============================================================ */}
+            {/* INSTITUTIONAL FOOTER */}
+            {/* ============================================================ */}
             <footer className="ub-footer">
-                <div className="ub-footer-container">
-                    <div className="ub-footer-grid">
-                        <div className="footer-col brand-col">
-                            <div className="footer-brand">
-                                <div className="ub-crest-seal footer-crest">
-                                    <GraduationCap size={20} color="#ffd60a" />
+                <div className="ub-footer-main">
+                    <div className="ub-portals-container ub-footer-grid">
+                        {/* Column 1: Institutional Seal & About */}
+                        <div className="ub-footer-col ub-footer-col-brand">
+                            <div className="ub-brand ub-footer-brand">
+                                <div className="ub-crest">
+                                    <BookOpen className="ub-crest-icon" />
                                 </div>
-                                <div className="footer-brand-title">
-                                    <strong>UNIVERSITY OF BATANGAS</strong>
-                                    <span>Founded 1946 • Western Philippine Colleges Heritage</span>
+                                <div className="ub-title-block">
+                                    <h3 className="ub-university-name text-white">Mobile Bible School</h3>
+                                    <p className="ub-university-subtitle text-amber-200">Theological Seminary & Institute</p>
                                 </div>
                             </div>
-                            <p className="footer-about-text">
-                                The University of Batangas is committed to the pursuit of academic excellence, spiritual character development, research capability, and social service through its collegiate and theological education programs.
+                            <p className="ub-footer-motto">
+                                "Preach the word; be ready in season and out of season; reprove, rebuke, and exhort,
+                                with complete patience and teaching." — 2 Timothy 4:2
                             </p>
-                            <div className="footer-accreditation-badges">
-                                <span className="acc-badge">PAASCU Accredited</span>
-                                <span className="acc-badge">ISO 9001:2015</span>
-                                <span className="acc-badge">CHED Recognized</span>
+                            <div className="ub-footer-accreditations">
+                                <span className="ub-tag-accred">ACTS ACCREDITED</span>
+                                <span className="ub-tag-accred">CCHE RECOGNIZED</span>
                             </div>
                         </div>
 
-                        <div className="footer-col">
-                            <h4>QUICK PORTAL ACCESS</h4>
-                            <ul className="footer-links">
-                                <li>
-                                    <button type="button" onClick={() => openAdmissionsModal("Online Admission")}>
-                                        Online Admissions Desk
-                                    </button>
-                                </li>
-                                <li>
-                                    <button type="button" onClick={() => navigate("client-login", "/client-login")}>
-                                        My UB / Student Portal
-                                    </button>
-                                </li>
-                                <li>
-                                    <button type="button" onClick={() => navigate("client-payment", "/client-payment")}>
-                                        Online Payment System
-                                    </button>
-                                </li>
-                                <li>
-                                    <button type="button" onClick={() => navigate("learning", "/cms/learning")}>
-                                        UBian LMS &amp; E-Learning
-                                    </button>
-                                </li>
-                                <li>
-                                    <button type="button" onClick={() => navigate("login", "/login")}>
-                                        Staff &amp; Faculty Admin Portal
-                                    </button>
-                                </li>
+                        {/* Column 2: Campus Locations */}
+                        <div className="ub-footer-col">
+                            <h4 className="ub-footer-heading">Campuses & Training Centers</h4>
+                            <ul className="ub-footer-list">
+                                <li><strong>Main Seminary Campus:</strong> Metro Manila, Philippines</li>
+                                <li><strong>Regional Modular Centers:</strong> Luzon • Visayas • Mindanao</li>
+                                <li><strong>Online Extension:</strong> Global Classroom Access</li>
+                                <li><strong>Admissions Inquiries:</strong> +63 (02) 8800-BIBLE</li>
+                                <li><strong>Direct Mobile:</strong> +63 917 123 4567</li>
                             </ul>
                         </div>
 
-                        <div className="footer-col">
-                            <h4>ACADEMIC COLLEGES</h4>
-                            <ul className="footer-links">
-                                <li><span>College of Theology &amp; Biblical Studies</span></li>
-                                <li><span>College of Pastoral Leadership &amp; Homiletics</span></li>
-                                <li><span>College of Education, Arts &amp; Sciences</span></li>
-                                <li><span>College of Business &amp; Accountancy</span></li>
-                                <li><span>Graduate School of Ministry &amp; Leadership</span></li>
+                        {/* Column 3: Quick Portals & Links */}
+                        <div className="ub-footer-col">
+                            <h4 className="ub-footer-heading">MBS Direct Portals</h4>
+                            <ul className="ub-footer-list">
+                                <li><button onClick={() => navigateTo("/client-login")}>Student Portal (My MBS)</button></li>
+                                <li><button onClick={() => navigateTo("/login")}>Seminary Admin & Faculty Portal</button></li>
+                                <li><button onClick={() => navigateTo("/learning")}>Theological LMS (Class Modules)</button></li>
+                                <li><button onClick={() => navigateTo("/client-payment")}>Tuition & Assessment Payment</button></li>
+                                <li><button onClick={() => setIsAdmissionOpen(true)}>Online Admissions Desk</button></li>
                             </ul>
                         </div>
 
-                        <div className="footer-col contact-col">
-                            <h4>CONTACT &amp; INQUIRIES</h4>
-                            <p className="footer-contact-p">
-                                Office of the University Registrar &amp; Admissions<br />
-                                <strong>Direct:</strong> (043) 723-1446 loc. 201<br />
-                                <strong>Admissions Mobile:</strong> +63 917 123 4567<br />
-                                <strong>Email:</strong> admissions@ub.edu.ph
+                        {/* Column 4: Admissions & Faith Statement */}
+                        <div className="ub-footer-col">
+                            <h4 className="ub-footer-heading">Admissions Desk</h4>
+                            <p className="text-sm text-gray-300 mb-3">
+                                Accepting applications for the upcoming academic semester. Open to pastors, church workers, and theological scholars.
                             </p>
                             <button
-                                type="button"
-                                className="ub-footer-inquire-btn"
-                                onClick={() => openAdmissionsModal("General University Inquiry")}
+                                className="ub-btn-footer-apply"
+                                onClick={() => setIsAdmissionOpen(true)}
                             >
-                                <Mail size={14} />
-                                <span>Send Inquiry Message</span>
+                                Apply for Admission
                             </button>
                         </div>
                     </div>
+                </div>
 
-                    <div className="ub-footer-bottom-bar">
-                        <p>&copy; {new Date().getFullYear()} University of Batangas. All Rights Reserved. Mobile Bible School System.</p>
-                        <div className="footer-bottom-links">
-                            <span>Privacy Policy</span>
+                <div className="ub-footer-bottom">
+                    <div className="ub-portals-container ub-footer-bottom-flex">
+                        <p>© {new Date().getFullYear()} Mobile Bible School & Theological Seminary. All Rights Reserved.</p>
+                        <div className="ub-footer-links">
+                            <a href="#privacy" onClick={(e) => { e.preventDefault(); navigateTo("/contact"); }}>Privacy Policy</a>
                             <span>•</span>
-                            <span>Terms of Service</span>
+                            <a href="#terms" onClick={(e) => { e.preventDefault(); navigateTo("/contact"); }}>Academic Policies</a>
                             <span>•</span>
-                            <span>Student Handbook</span>
+                            <a href="#admissions" onClick={(e) => { e.preventDefault(); setIsAdmissionOpen(true); }}>Admissions Desk</a>
                         </div>
                     </div>
                 </div>
             </footer>
 
-            {/* =========================================================
-                OFFICIAL ONLINE ADMISSION MODAL SHEET
-            ========================================================= */}
-            {showModal && (
-                <div
-                    className="ub-modal-backdrop"
-                    onMouseDown={e => {
-                        if (e.target === e.currentTarget && !submitting) setShowModal(false);
-                    }}
-                >
-                    <div className="ub-modal-card" role="dialog" aria-modal="true">
+            {/* ============================================================ */}
+            {/* ONLINE ADMISSION APPLICATION MODAL */}
+            {/* ============================================================ */}
+            {isAdmissionOpen && (
+                <div className="ub-modal-overlay" onClick={() => setIsAdmissionOpen(false)}>
+                    <div className="ub-modal-content" onClick={(e) => e.stopPropagation()}>
+                        <button
+                            className="ub-modal-close"
+                            onClick={() => setIsAdmissionOpen(false)}
+                            aria-label="Close Modal"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+
                         <div className="ub-modal-header">
-                            <div className="modal-header-titles">
-                                <div className="modal-crest-row">
-                                    <div className="ub-crest-seal modal-crest">
-                                        <GraduationCap size={16} color="#ffd60a" />
-                                    </div>
-                                    <span>UNIVERSITY OF BATANGAS • ADMISSIONS DESK</span>
-                                </div>
-                                <h3>{modalContextTitle}</h3>
+                            <div className="ub-modal-badge">
+                                <GraduationCap className="w-4 h-4 mr-1 text-amber-400" />
+                                Official Online Application
                             </div>
-                            <button
-                                type="button"
-                                className="ub-btn-modal-close"
-                                onClick={() => setShowModal(false)}
-                                disabled={submitting}
-                            >
-                                <X size={20} />
-                            </button>
+                            <h3 className="ub-modal-title">Mobile Bible School Admission</h3>
+                            <p className="ub-modal-desc">
+                                Fill out your preliminary application for theological, pastoral, or graduate ministerial degree studies.
+                            </p>
                         </div>
 
-                        {successMessage ? (
-                            <div className="ub-modal-success-state">
-                                <CheckCircle2 size={54} color="#10b981" />
+                        {admissionSuccess ? (
+                            <div className="ub-modal-success">
+                                <CheckCircle2 className="w-14 h-14 text-emerald-500 mb-3" />
                                 <h4>Application Submitted Successfully!</h4>
                                 <p>
-                                    Thank you for applying to the University of Batangas. Your admission intake has been received directly by the Admissions &amp; Registrar office. An admissions counselor will reach out to you shortly with next clearance steps.
+                                    Thank you for applying to Mobile Bible School. Our Admissions Committee and Registrar will contact you via email and phone regarding entrance requirements and course scheduling.
                                 </p>
                                 <button
-                                    type="button"
-                                    className="ub-btn-modal-done"
-                                    onClick={() => setShowModal(false)}
+                                    className="ub-btn-hero-primary mt-4"
+                                    onClick={() => {
+                                        setAdmissionSuccess(false);
+                                        setIsAdmissionOpen(false);
+                                    }}
                                 >
-                                    Close Window
+                                    Done
                                 </button>
                             </div>
                         ) : (
-                            <form onSubmit={handleFormSubmit} className="ub-modal-form">
-                                {errorMessage && (
-                                    <div className="ub-modal-error-alert">
-                                        {errorMessage}
+                            <form className="ub-modal-form" onSubmit={handleAdmissionSubmit}>
+                                {admissionError && (
+                                    <div className="ub-modal-error">
+                                        {admissionError}
                                     </div>
                                 )}
 
                                 <div className="ub-form-group">
-                                    <label>APPLICANT FULL NAME *</label>
+                                    <label>Full Applicant Name *</label>
                                     <input
                                         type="text"
-                                        placeholder="e.g. Maria Santos Dela Cruz"
-                                        value={formData.fullName}
-                                        onChange={e => setFormData({ ...formData, fullName: e.target.value })}
+                                        name="fullName"
                                         required
+                                        value={formData.fullName}
+                                        onChange={handleInputChange}
+                                        placeholder="Pastor / Brother / Sister Full Name"
                                     />
                                 </div>
 
                                 <div className="ub-form-row">
                                     <div className="ub-form-group">
-                                        <label>EMAIL ADDRESS *</label>
+                                        <label>Email Address *</label>
                                         <input
                                             type="email"
-                                            placeholder="applicant@example.com"
-                                            value={formData.email}
-                                            onChange={e => setFormData({ ...formData, email: e.target.value })}
+                                            name="email"
                                             required
+                                            value={formData.email}
+                                            onChange={handleInputChange}
+                                            placeholder="your.email@domain.com"
                                         />
                                     </div>
 
                                     <div className="ub-form-group">
-                                        <label>CONTACT PHONE NUMBER *</label>
+                                        <label>Contact Mobile *</label>
                                         <input
                                             type="tel"
-                                            placeholder="+63 9XX XXX XXXX"
-                                            value={formData.phone}
-                                            onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                                            name="phone"
                                             required
+                                            value={formData.phone}
+                                            onChange={handleInputChange}
+                                            placeholder="0917 123 4567"
                                         />
                                     </div>
                                 </div>
 
                                 <div className="ub-form-row">
                                     <div className="ub-form-group">
-                                        <label>PREVIOUS SCHOOL / CHURCH / AFFILIATION</label>
+                                        <label>Home Church & Ministry *</label>
                                         <input
                                             type="text"
-                                            placeholder="e.g. Batangas National High School / Independent"
+                                            name="churchName"
+                                            required
                                             value={formData.churchName}
-                                            onChange={e => setFormData({ ...formData, churchName: e.target.value })}
+                                            onChange={handleInputChange}
+                                            placeholder="Name of Local Church & Location"
                                         />
                                     </div>
 
                                     <div className="ub-form-group">
-                                        <label>DEGREE PROGRAM OF CHOICE</label>
+                                        <label>Desired Program *</label>
                                         <select
-                                            value={formData.position}
-                                            onChange={e => setFormData({ ...formData, position: e.target.value })}
+                                            name="program"
+                                            value={formData.program}
+                                            onChange={handleInputChange}
                                         >
-                                            <option value="">Select degree program</option>
-                                            <option value="BS Psychology (CEAS)">BS Psychology (CEAS)</option>
-                                            <option value="BS Business Administration (HRDM)">BS Business Administration (HRDM)</option>
-                                            <option value="BS Electrical Engineering (CENG)">BS Electrical Engineering (CENG)</option>
-                                            <option value="Bachelor of Theology (BTh)">Bachelor of Theology (BTh)</option>
-                                            <option value="Diploma in Pastoral Ministry (DPS)">Diploma in Pastoral Ministry (DPS)</option>
                                             <option value="Certificate in Biblical Studies (CBS)">Certificate in Biblical Studies (CBS)</option>
-                                            <option value="Master of Ministry (MMIN)">Master of Ministry (MMIN)</option>
+                                            <option value="Diploma in Pastoral Studies (DPS)">Diploma in Pastoral Studies (DPS)</option>
+                                            <option value="Bachelor of Theology (B.Th.)">Bachelor of Theology (B.Th.)</option>
+                                            <option value="Master of Ministry (M.Min.)">Master of Ministry (M.Min.)</option>
+                                            <option value="Master of Theology (M.Th.)">Master of Theology (M.Th.)</option>
+                                            <option value="Modular / Special Theological Subjects">Modular / Special Theological Subjects</option>
                                         </select>
                                     </div>
                                 </div>
 
                                 <div className="ub-form-group">
-                                    <label>QUESTIONS, CREDENTIALS OR ADMISSIONS MESSAGE</label>
+                                    <label>Current Ministry Role *</label>
+                                    <select
+                                        name="position"
+                                        value={formData.position}
+                                        onChange={handleInputChange}
+                                    >
+                                        <option value="Senior Pastor / Associate Pastor">Senior Pastor / Associate Pastor</option>
+                                        <option value="Church Planter / Missionary">Church Planter / Missionary</option>
+                                        <option value="Youth Pastor / Sunday School Teacher">Youth Pastor / Sunday School Teacher</option>
+                                        <option value="Deacon / Church Leader">Deacon / Church Leader</option>
+                                        <option value="Lay Minister / Bible Study Leader">Lay Minister / Bible Study Leader</option>
+                                        <option value="Aspiring Student of the Word">Aspiring Student of the Word</option>
+                                    </select>
+                                </div>
+
+                                <div className="ub-form-group">
+                                    <label>Ministry Calling / Comments (Optional)</label>
                                     <textarea
+                                        name="message"
                                         rows={3}
-                                        placeholder="Please provide any questions regarding tuition, Form 137 / TOR clearance, or entrance evaluation..."
                                         value={formData.message}
-                                        onChange={e => setFormData({ ...formData, message: e.target.value })}
+                                        onChange={handleInputChange}
+                                        placeholder="Share brief background on your ministry calling or questions for the registrar..."
                                     />
                                 </div>
 
-                                <div className="ub-modal-footer">
+                                <div className="ub-form-actions">
                                     <button
                                         type="button"
-                                        className="ub-btn-modal-cancel"
-                                        onClick={() => setShowModal(false)}
-                                        disabled={submitting}
+                                        className="ub-btn-cancel"
+                                        onClick={() => setIsAdmissionOpen(false)}
                                     >
                                         Cancel
                                     </button>
-
                                     <button
                                         type="submit"
-                                        className="ub-btn-modal-submit"
-                                        disabled={submitting}
+                                        className="ub-btn-submit"
+                                        disabled={isSubmitting}
                                     >
-                                        {submitting ? "Submitting Application..." : "Submit Online Application"}
+                                        {isSubmitting ? "Submitting Application..." : "Submit Admission Application"}
                                     </button>
                                 </div>
                             </form>
@@ -1011,4 +944,6 @@ export default function SalesLandingPage({ onNavigate }: SalesLandingPageProps) 
             )}
         </div>
     );
-}
+};
+
+export default SalesLandingPage;

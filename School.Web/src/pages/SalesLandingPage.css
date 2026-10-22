@@ -1,1579 +1,1415 @@
-/* ============================================================
-   SalesLandingPage.css -> University of Batangas (UB) Design System
-   Institutional Maroon (#7A1526) & Academic Gold (#F59E0B)
-   Clean White / Light Surface Layout with Official Portals Grid
-   ============================================================ */
+/* ============================================================ */
+/* SalesLandingPage.css -> MOBILE BIBLE SCHOOL PORTAL THEME    */
+/* Rich Collegiate Maroon, Gold & Ivory Academic Styling         */
+/* ============================================================ */
 
 :root {
-    --ub-maroon: #7A1526;
-    --ub-maroon-dark: #620f1e;
-    --ub-maroon-light: #941b30;
-    --ub-gold: #F59E0B;
-    --ub-gold-dark: #D97706;
-    --ub-gold-light: #FCD34D;
-    --ub-gold-soft: #FEF3C7;
-    
-    --ub-white: #FFFFFF;
-    --ub-bg-light: #F8FAFC;
-    --ub-text-main: #1E293B;
-    --ub-text-muted: #64748B;
-    --ub-border-subtle: #E2E8F0;
-    --ub-border-card: #CBD5E1;
-
-    --ub-font-serif: "Cinzel", "Playfair Display", Georgia, "Times New Roman", serif;
-    --ub-font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mbs-maroon: #7A1526;
+    --mbs-maroon-dark: #580d1b;
+    --mbs-maroon-deep: #3c0812;
+    --mbs-maroon-light: #941e32;
+    --mbs-gold: #F59E0B;
+    --mbs-gold-dark: #D97706;
+    --mbs-gold-light: #FDE68A;
+    --mbs-cream: #FAF9F6;
+    --mbs-slate-900: #0F172A;
+    --mbs-slate-800: #1E293B;
+    --mbs-slate-700: #334155;
+    --mbs-slate-600: #475569;
+    --mbs-border: #E2E8F0;
+    --mbs-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --mbs-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --mbs-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --mbs-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
-.ub-institutional-wrapper {
+.ub-root {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--mbs-slate-800);
+    background-color: #F8FAFC;
     min-height: 100vh;
-    background-color: var(--ub-white);
-    color: var(--ub-text-main);
-    font-family: var(--ub-font-sans);
-    line-height: 1.5;
-    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
-/* ============================================================
-   TOP MAROON BRAND BAR & NAVBAR
-   ============================================================ */
-.ub-top-header {
-    background-color: var(--ub-maroon);
-    color: var(--ub-white);
-    padding: 12px 0;
+/* ============================================================ */
+/* HEADER & NAVIGATION                                         */
+/* ============================================================ */
+
+.ub-header {
+    background: linear-gradient(135deg, var(--mbs-maroon) 0%, var(--mbs-maroon-dark) 100%);
+    border-bottom: 3px solid var(--mbs-gold);
+    color: #FFFFFF;
     position: sticky;
     top: 0;
-    z-index: 1000;
-    box-shadow: 0 4px 16px rgba(122, 21, 38, 0.25);
-    border-bottom: 2px solid var(--ub-gold);
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .ub-header-container {
-    max-width: 1240px;
+    max-width: 1360px;
     margin: 0 auto;
-    padding: 0 24px;
+    padding: 10px 24px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
     gap: 20px;
 }
 
-.ub-brand-identity {
+.ub-brand {
     display: flex;
     align-items: center;
     gap: 14px;
     cursor: pointer;
-    user-select: none;
+    text-decoration: none;
 }
 
-.ub-crest-seal {
+.ub-crest {
     width: 48px;
     height: 48px;
+    background: linear-gradient(135deg, var(--mbs-gold) 0%, var(--mbs-gold-dark) 100%);
     border-radius: 50%;
-    background: radial-gradient(circle, #f59e0b 0%, #b45309 100%);
-    border: 2px solid var(--ub-white);
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    border: 2px solid #FFFFFF;
     flex-shrink: 0;
 }
 
-.crest-inner {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #ffffff;
+.ub-crest-icon {
+    width: 26px;
+    height: 26px;
+    color: #450A0A;
 }
 
-.ub-brand-titles {
+.ub-title-block {
     display: flex;
     flex-direction: column;
 }
 
-.brand-prefix {
-    font-size: 13px;
-    font-family: var(--ub-font-serif);
-    letter-spacing: 0.05em;
-    color: #fde68a;
-    line-height: 1.1;
-}
-
-.brand-main {
-    font-size: 22px;
-    font-family: var(--ub-font-serif);
+.ub-university-name {
+    font-size: 1.45rem;
     font-weight: 800;
-    letter-spacing: -0.01em;
-    line-height: 1.1;
-    color: #ffffff;
+    letter-spacing: -0.02em;
+    font-family: "Georgia", "Times New Roman", serif;
+    color: #FFFFFF;
+    margin: 0;
+    line-height: 1.15;
 }
 
-.brand-heritage {
-    font-size: 10px;
-    letter-spacing: 0.04em;
-    color: rgba(255, 255, 255, 0.75);
-    margin-top: 1px;
+.ub-university-subtitle {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--mbs-gold-light);
+    margin: 2px 0 0 0;
 }
 
-.ub-campus-nav {
+.ub-nav-links {
     display: flex;
     align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
+    gap: 20px;
 }
 
 .ub-nav-link {
-    background: transparent;
-    border: none;
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 12px;
+    color: #F1F5F9;
+    font-size: 0.8rem;
     font-weight: 700;
-    letter-spacing: 0.05em;
-    cursor: pointer;
-    padding: 6px 10px;
-    border-radius: 6px;
-    transition: all 0.2s ease;
+    letter-spacing: 0.06em;
+    text-decoration: none;
+    transition: color 0.15s ease;
+    padding: 6px 4px;
 }
 
 .ub-nav-link:hover {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.12);
+    color: var(--mbs-gold);
 }
 
 .ub-anniversary-badge {
-    background: var(--ub-gold);
-    color: #78350f;
-    font-size: 12px;
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+    color: #450A0A;
+    font-size: 0.75rem;
     font-weight: 800;
-    padding: 6px 14px;
-    border-radius: 20px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-    border: 1px solid #fde68a;
-    letter-spacing: 0.02em;
+    padding: 5px 12px;
+    border-radius: 9999px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    border: 1px solid #FEF3C7;
 }
 
-.ub-header-action-group {
+.ub-anniversary-sparkle {
+    font-size: 0.85rem;
+}
+
+.ub-header-actions {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-left: 8px;
 }
 
-.ub-btn-header-portal,
-.ub-btn-header-admin {
+.ub-btn-portal-student,
+.ub-btn-portal-admin {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: #ffffff;
-    font-size: 12px;
-    font-weight: 600;
-    padding: 6px 12px;
-    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 7px 14px;
+    border-radius: 6px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.18s ease;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.1);
+    color: #FFFFFF;
 }
 
-.ub-btn-header-portal:hover,
-.ub-btn-header-admin:hover {
-    background: rgba(255, 255, 255, 0.25);
+.ub-btn-portal-student:hover,
+.ub-btn-portal-admin:hover {
+    background: rgba(255, 255, 255, 0.22);
+    border-color: #FFFFFF;
 }
 
-.ub-btn-header-apply {
-    background: #ffffff;
-    color: var(--ub-maroon);
-    border: none;
-    font-size: 12px;
+.ub-btn-icon {
+    width: 15px;
+    height: 15px;
+}
+
+.ub-btn-apply {
+    background: #FFFFFF;
+    color: var(--mbs-maroon);
+    font-size: 0.82rem;
     font-weight: 800;
-    padding: 7px 16px;
-    border-radius: 8px;
+    padding: 8px 18px;
+    border-radius: 6px;
+    border: none;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    transition: all 0.18s ease;
 }
 
-.ub-btn-header-apply:hover {
-    background: #fde68a;
+.ub-btn-apply:hover {
+    background: var(--mbs-gold-light);
+    color: #450A0A;
     transform: translateY(-1px);
 }
 
-/* ============================================================
-   HERO SHOWCASE SECTION (IMAGE 5 — GRAND CAMPUS FAÇADE)
-   ============================================================ */
-.ub-hero-showcase {
+/* ============================================================ */
+/* HERO SECTION                                                */
+/* ============================================================ */
+
+.ub-hero-section {
     position: relative;
-    min-height: 540px;
+    min-height: 480px;
     display: flex;
     align-items: center;
-    color: #ffffff;
-    padding: 60px 0;
-}
-
-.ub-hero-image-wrapper {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 1;
+    justify-content: center;
+    color: #FFFFFF;
+    padding: 60px 24px 50px 24px;
     overflow: hidden;
 }
 
-.ub-campus-bg-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-}
-
-.ub-hero-gradient-overlay {
+.ub-hero-bg {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(
-        90deg,
-        rgba(122, 21, 38, 0.94) 0%,
-        rgba(122, 21, 38, 0.85) 45%,
-        rgba(15, 23, 42, 0.75) 100%
-    );
+    inset: 0;
+    background: radial-gradient(circle at 80% 20%, #831828 0%, #580d1b 45%, #2a050d 100%);
+    z-index: 1;
 }
 
-.ub-hero-content-container {
-    max-width: 1240px;
-    margin: 0 auto;
-    padding: 0 24px;
+.ub-hero-grid-pattern {
+    position: absolute;
+    inset: 0;
+    background-image: 
+        radial-gradient(rgba(245, 158, 11, 0.12) 1px, transparent 1px),
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 24px 24px, 48px 48px;
+    opacity: 0.8;
+}
+
+.ub-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(30, 4, 9, 0.4) 0%, rgba(30, 4, 9, 0.75) 100%);
+}
+
+.ub-hero-content {
     position: relative;
     z-index: 2;
-    max-width: 800px;
-}
-
-.ub-hero-glass-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(255, 255, 255, 0.18);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    color: #fde68a;
-    margin-bottom: 18px;
-    backdrop-filter: blur(6px);
-}
-
-.ub-hero-headline {
-    font-family: var(--ub-font-serif);
-    font-size: 44px;
-    font-weight: 800;
-    line-height: 1.15;
-    margin: 0 0 16px 0;
-    letter-spacing: -0.01em;
-    color: #ffffff;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-}
-
-.ub-hero-tagline {
-    font-size: 16px;
-    color: rgba(255, 255, 255, 0.9);
-    line-height: 1.6;
-    margin: 0 0 28px 0;
-    max-width: 680px;
-}
-
-.ub-hero-buttons {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-    margin-bottom: 40px;
-}
-
-.ub-btn-gold {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: linear-gradient(135deg, #f59e0b, #d97706);
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 700;
-    padding: 12px 24px;
-    border-radius: 10px;
-    border: none;
-    cursor: pointer;
-    box-shadow: 0 4px 14px rgba(217, 119, 6, 0.4);
-    transition: all 0.2s ease;
-}
-
-.ub-btn-gold:hover {
-    background: linear-gradient(135deg, #fbbf24, #f59e0b);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(217, 119, 6, 0.5);
-}
-
-.ub-btn-outline-white {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(255, 255, 255, 0.15);
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 600;
-    padding: 12px 22px;
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    cursor: pointer;
-    backdrop-filter: blur(6px);
-    transition: all 0.2s ease;
-}
-
-.ub-btn-outline-white:hover {
-    background: rgba(255, 255, 255, 0.25);
-    transform: translateY(-2px);
-}
-
-.ub-quick-stats-strip {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    background: rgba(0, 0, 0, 0.35);
-    backdrop-filter: blur(8px);
-    padding: 14px 24px;
-    border-radius: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    width: fit-content;
-}
-
-.quick-stat {
+    max-width: 1040px;
+    margin: 0 auto;
+    text-align: center;
     display: flex;
     flex-direction: column;
+    align-items: center;
 }
 
-.quick-stat strong {
-    font-size: 18px;
+.ub-hero-badge-row {
+    margin-bottom: 16px;
+}
+
+.ub-accreditation-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.5);
+    color: var(--mbs-gold-light);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 6px 16px;
+    border-radius: 9999px;
+    backdrop-filter: blur(8px);
+}
+
+.ub-pill-icon {
+    width: 15px;
+    height: 15px;
+    color: var(--mbs-gold);
+}
+
+.ub-hero-title {
+    font-size: 2.85rem;
     font-weight: 800;
-    color: #ffd60a;
+    font-family: "Georgia", "Times New Roman", serif;
+    line-height: 1.15;
+    color: #FFFFFF;
+    margin: 0 0 16px 0;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
 }
 
-.quick-stat span {
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.8);
+.ub-hero-description {
+    font-size: 1.08rem;
+    line-height: 1.6;
+    color: #F1F5F9;
+    max-width: 780px;
+    margin: 0 0 28px 0;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
 
-.quick-stat-divider {
-    width: 1px;
-    height: 32px;
+.ub-hero-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.ub-btn-hero-primary {
+    background: linear-gradient(135deg, var(--mbs-gold) 0%, var(--mbs-gold-dark) 100%);
+    color: #450A0A;
+    font-size: 0.95rem;
+    font-weight: 800;
+    padding: 12px 28px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.ub-btn-hero-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(245, 158, 11, 0.55);
+}
+
+.ub-btn-hero-secondary {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: #FFFFFF;
+    font-size: 0.95rem;
+    font-weight: 700;
+    padding: 12px 26px;
+    border-radius: 8px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(4px);
+}
+
+.ub-btn-hero-secondary:hover {
     background: rgba(255, 255, 255, 0.25);
+    border-color: #FFFFFF;
+    color: #FFFFFF;
+    transform: translateY(-2px);
 }
 
-/* ============================================================
-   UB PORTALS SECTION (IMAGE 1 — EXACT UB PORTALS REPLICA)
-   ============================================================ */
+.ub-btn-arrow {
+    width: 17px;
+    height: 17px;
+}
+
+/* Quick Search Bar */
+.ub-hero-search-wrapper {
+    width: 100%;
+    max-width: 620px;
+    margin-bottom: 36px;
+}
+
+.ub-hero-search-bar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.96);
+    border-radius: 50px;
+    padding: 6px 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+}
+
+.ub-search-icon {
+    width: 20px;
+    height: 20px;
+    color: var(--mbs-maroon);
+    flex-shrink: 0;
+    margin-right: 10px;
+}
+
+.ub-search-input {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 0.92rem;
+    color: var(--mbs-slate-900);
+    background: transparent;
+    padding: 8px 0;
+}
+
+.ub-search-clear {
+    background: transparent;
+    border: none;
+    color: var(--mbs-slate-600);
+    cursor: pointer;
+    padding: 4px;
+}
+
+/* Stats Card Row */
+.ub-hero-stats-card {
+    background: rgba(30, 4, 9, 0.72);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 14px;
+    padding: 16px 36px;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.ub-stat-col {
+    text-align: center;
+}
+
+.ub-stat-number {
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: var(--mbs-gold);
+    line-height: 1.1;
+    font-family: "Georgia", serif;
+}
+
+.ub-stat-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: #E2E8F0;
+    text-transform: uppercase;
+    margin-top: 4px;
+}
+
+.ub-stat-divider {
+    width: 1px;
+    height: 34px;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* ============================================================ */
+/* SECTION HEADINGS                                            */
+/* ============================================================ */
+
 .ub-portals-section {
-    background-color: var(--ub-white);
-    padding: 60px 0 70px 0;
-    border-bottom: 1px solid var(--ub-border-subtle);
+    padding: 64px 24px;
+    background: #FFFFFF;
 }
 
-.ub-section-container {
-    max-width: 1240px;
+.ub-portals-container {
+    max-width: 1320px;
     margin: 0 auto;
-    padding: 0 24px;
+}
+
+.ub-section-header {
+    text-align: center;
+    margin-bottom: 44px;
+}
+
+.ub-section-tag {
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    color: var(--mbs-maroon);
+    text-transform: uppercase;
+    display: inline-block;
+    margin-bottom: 8px;
 }
 
 .ub-section-title {
-    font-family: var(--ub-font-serif);
-    font-size: 32px;
+    font-size: 2.25rem;
     font-weight: 800;
-    color: var(--ub-maroon);
-    text-align: center;
-    margin: 0 0 45px 0;
-    letter-spacing: 0.05em;
-    position: relative;
+    font-family: "Georgia", "Times New Roman", serif;
+    color: var(--mbs-maroon);
+    margin: 0 0 12px 0;
 }
 
-.ub-section-title::after {
-    content: "";
-    display: block;
-    width: 50px;
-    height: 3px;
-    background: var(--ub-gold);
-    margin: 12px auto 0 auto;
+.ub-title-line {
+    width: 64px;
+    height: 4px;
+    background: var(--mbs-gold);
+    margin: 0 auto 16px auto;
     border-radius: 2px;
 }
 
+.ub-section-lead {
+    font-size: 1rem;
+    color: var(--mbs-slate-600);
+    max-width: 720px;
+    margin: 0 auto;
+    line-height: 1.55;
+}
+
+/* ============================================================ */
+/* THE 7 PORTAL CARDS (UB GRID REPLICA)                         */
+/* ============================================================ */
+
 .ub-portals-grid {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 24px;
-}
-
-@media (max-width: 1100px) {
-    .ub-portals-grid {
-        grid-template-columns: repeat(4, 1fr);
-    }
-}
-
-@media (max-width: 640px) {
-    .ub-portals-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 22px;
 }
 
 .ub-portal-card {
+    background: #FFFFFF;
+    border: 1px solid var(--mbs-border);
+    border-top: 4px solid var(--mbs-maroon);
+    border-radius: 12px;
+    padding: 24px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 14px;
+    justify-content: space-between;
+    box-shadow: var(--mbs-shadow-md);
     cursor: pointer;
-    transition: all 0.25s ease;
-    padding: 12px 6px;
-    border-radius: 12px;
+    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
 }
 
 .ub-portal-card:hover {
-    transform: translateY(-6px);
+    transform: translateY(-5px);
+    box-shadow: var(--mbs-shadow-xl);
+    border-top-color: var(--mbs-gold);
 }
 
-.ub-portal-icon-wrapper {
-    width: 90px;
-    height: 75px;
+.ub-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.ub-portal-icon-box {
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: transform 0.2s ease;
 }
 
-.ub-portal-card:hover .ub-portal-icon-wrapper {
+.ub-portal-card:hover .ub-portal-icon-box {
     transform: scale(1.08);
 }
 
-.ub-portal-name {
-    font-size: 14.5px;
-    font-weight: 700;
-    color: #1e293b;
-    line-height: 1.25;
-}
-
-.ub-portal-card:hover .ub-portal-name {
-    color: var(--ub-maroon);
-}
-
-/* Custom UB Portals Iconography (Shapes in UB Maroon) */
-.ub-icon-admission {
-    width: 66px;
-    height: 56px;
-    background: var(--ub-maroon);
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 12px rgba(122, 21, 38, 0.25);
-}
-
-.doc-sheet {
-    width: 32px;
-    height: 36px;
-    background: #ffffff;
-    border-radius: 4px;
-    padding: 6px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    box-sizing: border-box;
-}
-
-.doc-line {
-    height: 3px;
-    background: var(--ub-maroon);
-    border-radius: 2px;
-    width: 100%;
-}
-
-.doc-line.short {
-    width: 65%;
-}
-
-.ub-icon-enrollment {
-    width: 68px;
-    height: 56px;
-    background: var(--ub-maroon);
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    padding: 0 10px;
-    box-sizing: border-box;
-    box-shadow: 0 4px 12px rgba(122, 21, 38, 0.25);
-}
-
-.person-circle {
-    width: 20px;
-    height: 20px;
-    background: #ffffff;
-    border-radius: 50%;
-}
-
-.mail-badge {
-    width: 22px;
-    height: 16px;
-    background: #ffffff;
-    border-radius: 3px;
-}
-
-.ub-icon-payment {
-    width: 72px;
-    height: 56px;
-    background: var(--ub-maroon);
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #ffffff;
-    box-shadow: 0 4px 12px rgba(122, 21, 38, 0.25);
-}
-
-.ub-icon-mail {
-    width: 68px;
-    height: 56px;
-    background: var(--ub-maroon);
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #ffffff;
-    position: relative;
-    box-shadow: 0 4px 12px rgba(122, 21, 38, 0.25);
-}
-
-.ub-icon-myub {
-    width: 68px;
-    height: 56px;
-    background: var(--ub-maroon);
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    box-shadow: 0 4px 12px rgba(122, 21, 38, 0.25);
-}
-
-.folder-doc {
-    width: 32px;
-    height: 34px;
-    background: #ffffff;
-    border-radius: 4px;
-    padding: 6px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    box-sizing: border-box;
-}
-
-.f-line {
-    height: 3px;
-    background: var(--ub-maroon);
-    border-radius: 2px;
-    width: 100%;
-}
-
-/* Canvas-style LMS segmented hub */
-.ub-icon-lms {
-    width: 64px;
-    height: 64px;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.lms-hub-dot {
-    position: absolute;
-    width: 14px;
-    height: 14px;
-    background: var(--ub-maroon);
-    border-radius: 50%;
-}
-
-.dot-1 { top: 0; left: 25px; }
-.dot-2 { top: 7px; right: 7px; }
-.dot-3 { top: 25px; right: 0; }
-.dot-4 { bottom: 7px; right: 7px; }
-.dot-5 { bottom: 0; left: 25px; }
-.dot-6 { bottom: 7px; left: 7px; }
-.dot-7 { top: 25px; left: 0; }
-.dot-8 { top: 7px; left: 7px; }
-
-/* eBrahman touch pointer icon */
-.ub-icon-ebrahman {
-    width: 64px;
-    height: 64px;
-    background: var(--ub-maroon);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 12px rgba(122, 21, 38, 0.25);
-    position: relative;
-}
-
-.touch-finger {
-    width: 18px;
+.ub-icon-svg {
+    width: 28px;
     height: 28px;
-    border: 3px solid #ffffff;
-    border-radius: 12px 12px 4px 4px;
-    position: relative;
 }
 
-.touch-finger::after {
-    content: "";
+/* Iconic Theme Colors for Portals */
+.ub-icon-admission {
+    background: #FEF2F2;
+    color: #DC2626;
+}
+.ub-icon-enrollment {
+    background: #FFFBEB;
+    color: #D97706;
+}
+.ub-icon-payment {
+    background: #ECFDF5;
+    color: #059669;
+}
+.ub-icon-mail {
+    background: #EFF6FF;
+    color: #2563EB;
+}
+.ub-icon-profile {
+    background: #F5F3FF;
+    color: #7C3AED;
+}
+.ub-icon-lms {
+    background: #FFF7ED;
+    color: #EA580C;
+}
+.ub-icon-registrar {
+    background: #FEF2F2;
+    color: var(--mbs-maroon);
+}
+
+/* MBS LMS Canvas-Style Segmented Wheel */
+.ub-lms-hub-icon {
+    position: relative;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ub-hub-center {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #EA580C;
+}
+
+.ub-hub-dot {
     position: absolute;
-    top: -8px;
-    left: 50%;
-    transform: translateX(-50%);
     width: 6px;
     height: 6px;
-    background: #ffffff;
     border-radius: 50%;
+    background: #EA580C;
 }
 
-/* ============================================================
-   NEWS & FEATURES SECTION (IMAGE 3)
-   ============================================================ */
+.ub-dot-1 { top: 0; left: 13px; }
+.ub-dot-2 { top: 6px; right: 2px; }
+.ub-dot-3 { bottom: 6px; right: 2px; }
+.ub-dot-4 { bottom: 0; left: 13px; }
+.ub-dot-5 { bottom: 6px; left: 2px; }
+.ub-dot-6 { top: 6px; left: 2px; }
+
+.ub-portal-badge {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: #F1F5F9;
+    color: var(--mbs-slate-700);
+    padding: 3px 8px;
+    border-radius: 4px;
+}
+
+.ub-card-body {
+    flex-grow: 1;
+    margin-bottom: 18px;
+}
+
+.ub-portal-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--mbs-maroon);
+    margin: 0 0 2px 0;
+    font-family: "Georgia", serif;
+}
+
+.ub-portal-sub {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--mbs-gold-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 0 0 8px 0;
+}
+
+.ub-portal-desc {
+    font-size: 0.88rem;
+    color: var(--mbs-slate-600);
+    line-height: 1.5;
+    margin: 0;
+}
+
+.ub-card-footer {
+    border-top: 1px solid #F1F5F9;
+    padding-top: 14px;
+}
+
+.ub-portal-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: var(--mbs-maroon);
+    transition: gap 0.2s ease;
+}
+
+.ub-portal-card:hover .ub-portal-action {
+    gap: 8px;
+    color: var(--mbs-gold-dark);
+}
+
+.ub-action-arrow {
+    width: 15px;
+    height: 15px;
+}
+
+/* ============================================================ */
+/* ACADEMIC PROGRAMS SECTION                                    */
+/* ============================================================ */
+
+.ub-programs-section {
+    padding: 64px 24px;
+    background: #F8FAFC;
+    border-top: 1px solid #E2E8F0;
+}
+
+.ub-programs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+}
+
+.ub-program-card {
+    background: #FFFFFF;
+    border: 1px solid var(--mbs-border);
+    border-radius: 12px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: var(--mbs-shadow-sm);
+    transition: all 0.2s ease;
+}
+
+.ub-program-card:hover {
+    box-shadow: var(--mbs-shadow-lg);
+    transform: translateY(-3px);
+}
+
+.ub-program-card-featured {
+    border: 2px solid var(--mbs-gold);
+    background: linear-gradient(180deg, #FFFDF8 0%, #FFFFFF 100%);
+    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.15);
+}
+
+.ub-program-level {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: var(--mbs-slate-600);
+    margin-bottom: 8px;
+    display: inline-block;
+}
+
+.ub-badge-gold {
+    color: #92400E;
+    background: #FEF3C7;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.ub-program-name {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--mbs-maroon);
+    margin: 0 0 10px 0;
+    font-family: "Georgia", serif;
+}
+
+.ub-program-desc {
+    font-size: 0.88rem;
+    color: var(--mbs-slate-600);
+    line-height: 1.55;
+    margin: 0 0 20px 0;
+}
+
+.ub-program-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 16px;
+    border-top: 1px solid #F1F5F9;
+    font-size: 0.82rem;
+    color: var(--mbs-slate-600);
+    font-weight: 600;
+}
+
+.ub-program-link {
+    background: transparent;
+    border: none;
+    color: var(--mbs-maroon);
+    font-weight: 800;
+    cursor: pointer;
+    font-size: 0.85rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background 0.15s ease;
+}
+
+.ub-program-link:hover {
+    background: #FEF2F2;
+}
+
+/* ============================================================ */
+/* ACHIEVERS & ALUMNI SECTION                                  */
+/* ============================================================ */
+
+.ub-achievers-section {
+    padding: 64px 24px;
+    background: #FFFFFF;
+    border-top: 1px solid #E2E8F0;
+}
+
+.ub-achievers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+    margin-bottom: 36px;
+}
+
+.ub-achiever-card {
+    background: #FFFFFF;
+    border: 1px solid var(--mbs-border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--mbs-shadow-md);
+    transition: all 0.2s ease;
+}
+
+.ub-achiever-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--mbs-shadow-lg);
+}
+
+.ub-achiever-banner {
+    background: linear-gradient(135deg, var(--mbs-maroon) 0%, var(--mbs-maroon-dark) 100%);
+    color: #FFFFFF;
+    padding: 10px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.ub-achiever-rate-tag {
+    font-size: 0.72rem;
+    font-weight: 800;
+    background: var(--mbs-gold);
+    color: #450A0A;
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+}
+
+.ub-achiever-dept {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #FDE68A;
+    letter-spacing: 0.05em;
+}
+
+.ub-achiever-body {
+    padding: 24px;
+    text-align: center;
+}
+
+.ub-achiever-avatar {
+    position: relative;
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 14px auto;
+}
+
+.ub-avatar-circle {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+    border: 3px solid var(--mbs-maroon);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--mbs-maroon);
+    font-family: "Georgia", serif;
+}
+
+.ub-avatar-medal {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    background: var(--mbs-gold);
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #FFFFFF;
+}
+
+.ub-achiever-name {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--mbs-maroon);
+    margin: 0 0 4px 0;
+    font-family: "Georgia", serif;
+}
+
+.ub-achiever-role {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--mbs-slate-700);
+    margin: 0 0 2px 0;
+}
+
+.ub-achiever-honors {
+    font-size: 0.75rem;
+    color: var(--mbs-gold-dark);
+    font-weight: 700;
+    margin: 0 0 12px 0;
+}
+
+.ub-achiever-quote {
+    font-size: 0.82rem;
+    color: var(--mbs-slate-600);
+    font-style: italic;
+    line-height: 1.45;
+    background: #F8FAFC;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border-left: 3px solid var(--mbs-maroon);
+}
+
+/* Pagination matching UB Achievers */
+.ub-pagination-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 16px;
+}
+
+.ub-page-nav,
+.ub-page-number {
+    background: #FFFFFF;
+    border: 1px solid var(--mbs-border);
+    color: var(--mbs-slate-700);
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.ub-page-nav:hover:not(:disabled),
+.ub-page-number:hover {
+    border-color: var(--mbs-maroon);
+    color: var(--mbs-maroon);
+}
+
+.ub-page-number.active {
+    background: var(--mbs-maroon);
+    color: #FFFFFF;
+    border-color: var(--mbs-maroon);
+}
+
+.ub-page-nav:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.ub-page-ellipsis {
+    color: var(--mbs-slate-600);
+    padding: 0 4px;
+}
+
+/* ============================================================ */
+/* NEWS & FEATURES SECTION                                     */
+/* ============================================================ */
+
 .ub-news-section {
-    background-color: var(--ub-bg-light);
-    padding: 70px 0;
+    padding: 64px 24px;
+    background: #F8FAFC;
+    border-top: 1px solid #E2E8F0;
 }
 
 .ub-news-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 30px;
-}
-
-@media (max-width: 900px) {
-    .ub-news-grid {
-        grid-template-columns: 1fr;
-    }
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
 }
 
 .ub-news-card {
-    background: #ffffff;
+    background: #FFFFFF;
     border-radius: 12px;
-    border: 1px solid var(--ub-border-subtle);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--mbs-border);
     overflow: hidden;
+    box-shadow: var(--mbs-shadow-md);
     display: flex;
     flex-direction: column;
-    transition: all 0.25s ease;
+    transition: all 0.22s ease;
 }
 
 .ub-news-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+    box-shadow: var(--mbs-shadow-lg);
 }
 
-.ub-news-img-box {
+.ub-news-image-wrapper {
     position: relative;
-    height: 200px;
+    height: 190px;
     overflow: hidden;
-    background: #0f172a;
 }
 
 .ub-news-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.3s ease;
+    transition: transform 0.35s ease;
 }
 
 .ub-news-card:hover .ub-news-img {
     transform: scale(1.05);
 }
 
-.ub-news-brand-banner {
+.ub-news-badge {
     position: absolute;
-    top: 10px;
-    right: 12px;
-    background: rgba(122, 21, 38, 0.9);
-    padding: 4px 10px;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: #ffffff;
-    font-size: 10.5px;
-    font-weight: 700;
-    backdrop-filter: blur(4px);
-}
-
-.ub-news-category-tag {
-    position: absolute;
-    bottom: 10px;
+    top: 12px;
     left: 12px;
-    background: var(--ub-maroon);
-    color: #ffffff;
-    padding: 4px 12px;
+    background: var(--mbs-maroon);
+    color: #FFFFFF;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    padding: 4px 10px;
     border-radius: 4px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 
 .ub-news-body {
     padding: 22px;
     display: flex;
     flex-direction: column;
-    flex: 1;
-}
-
-.ub-news-card-title {
-    font-family: var(--ub-font-serif);
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--ub-maroon);
-    margin: 0 0 8px 0;
-    line-height: 1.35;
+    flex-grow: 1;
 }
 
 .ub-news-date {
-    font-size: 12px;
-    color: var(--ub-text-muted);
-    margin-bottom: 12px;
-    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--mbs-slate-600);
+    margin-bottom: 6px;
+}
+
+.ub-news-card-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--mbs-maroon);
+    margin: 0 0 10px 0;
+    line-height: 1.35;
+    font-family: "Georgia", serif;
 }
 
 .ub-news-excerpt {
-    font-size: 13.5px;
-    color: #334155;
-    line-height: 1.55;
-    margin: 0;
-    display: -webkit-box;
-    -webkit-line-clamp: 4;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-/* ============================================================
-   ACHIEVEMENTS & LICENSURE PASSERS (IMAGE 2)
-   ============================================================ */
-.ub-achievers-section {
-    background-color: var(--ub-white);
-    padding: 70px 0;
-    border-bottom: 1px solid var(--ub-border-subtle);
-}
-
-.achievers-header-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-end;
-    margin-bottom: 35px;
-    flex-wrap: wrap;
-    gap: 16px;
-}
-
-.achievers-sub {
-    font-size: 11px;
-    font-weight: 800;
-    color: var(--ub-gold-dark);
-    letter-spacing: 0.08em;
-    display: block;
-    margin-bottom: 4px;
-}
-
-.achievers-title {
-    font-family: var(--ub-font-serif);
-    font-size: 28px;
-    font-weight: 800;
-    color: var(--ub-maroon);
-    margin: 0;
-}
-
-.achievers-pass-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: #fef3c7;
-    border: 1px solid #fde68a;
-    color: #78350f;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 0.04em;
-}
-
-.ub-achievers-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 30px;
-    margin-bottom: 35px;
-}
-
-@media (max-width: 900px) {
-    .ub-achievers-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-.ub-achiever-card {
-    background: #ffffff;
-    border-radius: 12px;
-    border: 1px solid var(--ub-border-subtle);
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-}
-
-.achiever-photo-box {
-    position: relative;
-    height: 220px;
-    background: #1e293b;
-    overflow: hidden;
-}
-
-.achiever-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.achiever-card-brand-bar {
-    position: absolute;
-    top: 8px;
-    right: 10px;
-    background: rgba(122, 21, 38, 0.9);
-    padding: 4px 8px;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    color: #ffffff;
-    font-size: 10px;
-    font-weight: 700;
-}
-
-.achiever-banner-strip {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: rgba(122, 21, 38, 0.95);
-    color: #ffffff;
-    padding: 8px 12px;
-}
-
-.achiever-banner-strip p {
-    margin: 0;
-    font-size: 11px;
-    font-weight: 700;
-    line-height: 1.3;
-}
-
-.achiever-honor-pill {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background: var(--ub-gold);
-    color: #78350f;
-    font-size: 10.5px;
-    font-weight: 800;
-    padding: 3px 8px;
-    border-radius: 4px;
-}
-
-.achiever-card-body {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-}
-
-.achiever-heading {
-    font-family: var(--ub-font-serif);
-    font-size: 17px;
-    font-weight: 700;
-    color: var(--ub-maroon);
-    margin: 0 0 6px 0;
-    line-height: 1.35;
-}
-
-.achiever-date {
-    font-size: 11.5px;
-    color: var(--ub-text-muted);
-    margin-bottom: 10px;
-    display: block;
-}
-
-.achiever-snippet {
-    font-size: 13px;
-    color: #334155;
-    line-height: 1.5;
-    margin: 0;
-}
-
-/* Pagination */
-.ub-pagination-bar {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 6px;
-    margin-top: 10px;
-}
-
-.ub-page-nav-btn {
-    background: #0f172a;
-    color: #ffffff;
-    border: none;
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.ub-page-nav-btn:hover:not(:disabled) {
-    background: var(--ub-maroon);
-}
-
-.ub-page-nav-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-
-.ub-page-num {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    border: 1px solid var(--ub-border-subtle);
-    background: #ffffff;
-    color: #1e293b;
-    font-size: 12px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-}
-
-.ub-page-num.active {
-    background: var(--ub-maroon);
-    color: #ffffff;
-    border-color: var(--ub-maroon);
-}
-
-.ub-page-dots {
-    color: #64748b;
-    font-size: 12px;
-    padding: 0 4px;
-}
-
-/* ============================================================
-   COLLEGES & DEGREE PROGRAMS
-   ============================================================ */
-.ub-colleges-section {
-    background-color: var(--ub-bg-light);
-    padding: 70px 0;
-}
-
-.section-eyebrow {
-    font-size: 11px;
-    font-weight: 800;
-    color: var(--ub-maroon);
-    letter-spacing: 0.08em;
-    display: block;
-    margin-bottom: 4px;
-}
-
-.section-desc {
-    font-size: 15px;
-    color: var(--ub-text-muted);
-    margin: 0 0 28px 0;
-    max-width: 680px;
-}
-
-.courses-filter-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 30px;
-    flex-wrap: wrap;
-}
-
-.college-tabs-row {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.college-tab-btn {
-    background: #ffffff;
-    border: 1px solid var(--ub-border-card);
-    color: #334155;
-    font-size: 12.5px;
-    font-weight: 600;
-    padding: 7px 14px;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.college-tab-btn.active {
-    background: var(--ub-maroon);
-    color: #ffffff;
-    border-color: var(--ub-maroon);
-}
-
-.course-search-field {
-    position: relative;
-    min-width: 280px;
-}
-
-.course-search-field .search-icon {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #94a3b8;
-}
-
-.course-search-field input {
-    width: 100%;
-    padding: 8px 14px 8px 36px;
-    border: 1px solid var(--ub-border-card);
-    border-radius: 20px;
-    font-size: 13px;
-    outline: none;
-    box-sizing: border-box;
-}
-
-.courses-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 22px;
-}
-
-@media (max-width: 900px) {
-    .courses-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-.course-card {
-    background: #ffffff;
-    border-radius: 12px;
-    border: 1px solid var(--ub-border-subtle);
-    padding: 22px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
-}
-
-.course-card:hover {
-    border-color: var(--ub-maroon);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 18px rgba(122, 21, 38, 0.08);
-}
-
-.course-card-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-}
-
-.course-code-pill {
-    background: #fee2e2;
-    color: var(--ub-maroon);
-    font-size: 11px;
-    font-weight: 800;
-    padding: 3px 8px;
-    border-radius: 4px;
-}
-
-.course-units-badge {
-    font-size: 11.5px;
-    font-weight: 700;
-    color: var(--ub-gold-dark);
-}
-
-.course-title {
-    font-size: 16px;
-    font-weight: 800;
-    color: #0f172a;
-    margin: 0 0 4px 0;
-    line-height: 1.35;
-}
-
-.course-college-name {
-    font-size: 11.5px;
-    color: var(--ub-maroon);
-    font-weight: 700;
-    display: block;
-    margin-bottom: 10px;
-}
-
-.course-desc {
-    font-size: 13px;
-    color: #475569;
+    font-size: 0.85rem;
+    color: var(--mbs-slate-600);
     line-height: 1.5;
     margin: 0 0 16px 0;
+    flex-grow: 1;
 }
 
-.btn-course-inquire {
+.ub-news-read-more {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
     background: transparent;
     border: none;
-    color: var(--ub-maroon);
-    font-size: 12.5px;
-    font-weight: 700;
+    color: var(--mbs-maroon);
+    font-size: 0.82rem;
+    font-weight: 800;
     cursor: pointer;
     padding: 0;
+    transition: color 0.15s ease;
 }
 
-.btn-course-inquire:hover {
-    text-decoration: underline;
+.ub-news-read-more:hover {
+    color: var(--mbs-gold-dark);
 }
 
-/* ============================================================
-   CAMPUSES STRIP
-   ============================================================ */
-.ub-campuses-strip {
-    background-color: var(--ub-white);
-    padding: 50px 0;
-    border-top: 1px solid var(--ub-border-subtle);
-    border-bottom: 1px solid var(--ub-border-subtle);
-}
+/* ============================================================ */
+/* FOOTER                                                      */
+/* ============================================================ */
 
-.campus-strip-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-}
-
-@media (max-width: 800px) {
-    .campus-strip-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-.campus-info-card {
-    background: var(--ub-bg-light);
-    border: 1px solid var(--ub-border-subtle);
-    border-radius: 12px;
-    padding: 20px;
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
-}
-
-.campus-icon-box {
-    width: 44px;
-    height: 44px;
-    border-radius: 10px;
-    background: var(--ub-maroon);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.campus-info-card h4 {
-    margin: 0 0 4px 0;
-    font-size: 14px;
-    font-weight: 800;
-    color: var(--ub-maroon);
-}
-
-.campus-info-card p {
-    margin: 0 0 6px 0;
-    font-size: 12.5px;
-    color: #334155;
-    line-height: 1.4;
-}
-
-.campus-tel {
-    font-size: 11px;
-    color: var(--ub-text-muted);
-    font-weight: 600;
-}
-
-/* ============================================================
-   OFFICIAL UNIVERSITY FOOTER
-   ============================================================ */
 .ub-footer {
-    background-color: var(--ub-maroon);
-    color: #ffffff;
-    padding: 60px 0 30px 0;
-    border-top: 4px solid var(--ub-gold);
+    background: #24050b;
+    color: #FFFFFF;
+    border-top: 4px solid var(--mbs-gold);
+    margin-top: auto;
 }
 
-.ub-footer-container {
-    max-width: 1240px;
-    margin: 0 auto;
-    padding: 0 24px;
+.ub-footer-main {
+    padding: 60px 24px 40px 24px;
 }
 
 .ub-footer-grid {
     display: grid;
-    grid-template-columns: 1.5fr 1fr 1fr 1.2fr;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
     gap: 36px;
-    margin-bottom: 45px;
 }
 
-@media (max-width: 900px) {
-    .ub-footer-grid {
-        grid-template-columns: 1fr 1fr;
-    }
-}
-
-@media (max-width: 600px) {
-    .ub-footer-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-.footer-brand {
-    display: flex;
-    align-items: center;
-    gap: 14px;
+.ub-footer-brand {
     margin-bottom: 14px;
 }
 
-.footer-brand-title strong {
-    display: block;
-    font-family: var(--ub-font-serif);
-    font-size: 17px;
-    color: #ffffff;
-}
-
-.footer-brand-title span {
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.7);
-}
-
-.footer-about-text {
-    font-size: 12.5px;
-    color: rgba(255, 255, 255, 0.8);
+.ub-footer-motto {
+    font-size: 0.85rem;
+    color: #CBD5E1;
     line-height: 1.6;
-    margin: 0 0 16px 0;
+    font-style: italic;
+    margin-bottom: 16px;
 }
 
-.footer-accreditation-badges {
+.ub-footer-accreditations {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
 }
 
-.acc-badge {
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: #ffd60a;
-    font-size: 10px;
-    font-weight: 700;
+.ub-tag-accred {
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid var(--mbs-gold);
+    color: var(--mbs-gold-light);
+    font-size: 0.68rem;
+    font-weight: 800;
     padding: 3px 8px;
     border-radius: 4px;
 }
 
-.footer-col h4 {
-    color: #ffd60a;
-    font-size: 13px;
+.ub-footer-heading {
+    font-size: 0.95rem;
     font-weight: 800;
-    letter-spacing: 0.06em;
+    color: var(--mbs-gold);
     margin: 0 0 16px 0;
+    letter-spacing: 0.04em;
+    font-family: "Georgia", serif;
 }
 
-.footer-links {
+.ub-footer-list {
     list-style: none;
     padding: 0;
     margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 9px;
+    font-size: 0.82rem;
+    color: #94A3B8;
+    line-height: 1.8;
 }
 
-.footer-links button {
+.ub-footer-list li strong {
+    color: #F1F5F9;
+}
+
+.ub-footer-list button {
     background: transparent;
     border: none;
-    color: rgba(255, 255, 255, 0.85);
-    font-size: 12.5px;
+    color: #CBD5E1;
+    font-size: 0.82rem;
     cursor: pointer;
     padding: 0;
-    text-align: left;
     transition: color 0.15s ease;
+    text-align: left;
 }
 
-.footer-links button:hover {
-    color: #ffd60a;
+.ub-footer-list button:hover {
+    color: var(--mbs-gold);
     text-decoration: underline;
 }
 
-.footer-links span {
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 12.5px;
-}
-
-.footer-contact-p {
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.85);
-    line-height: 1.6;
-    margin: 0 0 16px 0;
-}
-
-.ub-footer-inquire-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--ub-gold);
-    color: #78350f;
-    border: none;
-    padding: 9px 16px;
-    border-radius: 8px;
-    font-size: 12px;
+.ub-btn-footer-apply {
+    background: linear-gradient(135deg, var(--mbs-gold) 0%, var(--mbs-gold-dark) 100%);
+    color: #450A0A;
+    font-size: 0.82rem;
     font-weight: 800;
+    padding: 10px 18px;
+    border-radius: 6px;
+    border: none;
     cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
-.ub-footer-inquire-btn:hover {
-    background: #fde68a;
+.ub-footer-bottom {
+    background: #140206;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 18px 24px;
 }
 
-.ub-footer-bottom-bar {
-    border-top: 1px solid rgba(255, 255, 255, 0.18);
-    padding-top: 20px;
+.ub-footer-bottom-flex {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    font-size: 11.5px;
-    color: rgba(255, 255, 255, 0.7);
+    justify-content: space-between;
+    font-size: 0.78rem;
+    color: #94A3B8;
     flex-wrap: wrap;
     gap: 12px;
 }
 
-.footer-bottom-links {
+.ub-footer-links {
     display: flex;
-    gap: 8px;
+    align-items: center;
+    gap: 12px;
 }
 
-/* ============================================================
-   ADMISSION MODAL SHEET
-   ============================================================ */
-.ub-modal-backdrop {
+.ub-footer-links a {
+    color: #CBD5E1;
+    text-decoration: none;
+}
+
+.ub-footer-links a:hover {
+    color: var(--mbs-gold);
+}
+
+/* ============================================================ */
+/* ADMISSION MODAL                                             */
+/* ============================================================ */
+
+.ub-modal-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(15, 23, 42, 0.65);
+    inset: 0;
+    background: rgba(15, 23, 42, 0.7);
     backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 9999;
+    z-index: 1000;
     padding: 20px;
 }
 
-.ub-modal-card {
-    background: #ffffff;
+.ub-modal-content {
+    background: #FFFFFF;
     border-radius: 16px;
+    max-width: 620px;
     width: 100%;
-    max-width: 640px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
-    overflow: hidden;
-    animation: modal-pop 0.25s ease-out;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    padding: 32px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+    border-top: 5px solid var(--mbs-maroon);
 }
 
-@keyframes modal-pop {
-    from { opacity: 0; transform: scale(0.96) translateY(12px); }
-    to { opacity: 1; transform: scale(1) translateY(0); }
+.ub-modal-close {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    background: #F1F5F9;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--mbs-slate-700);
 }
 
 .ub-modal-header {
-    background: var(--ub-maroon);
-    color: #ffffff;
-    padding: 20px 24px;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    border-bottom: 3px solid var(--ub-gold);
+    margin-bottom: 22px;
 }
 
-.modal-crest-row {
-    display: flex;
+.ub-modal-badge {
+    display: inline-flex;
     align-items: center;
-    gap: 8px;
-    font-size: 11px;
-    font-weight: 700;
-    color: #fde68a;
-    letter-spacing: 0.05em;
-    margin-bottom: 4px;
-}
-
-.modal-crest {
-    width: 24px;
-    height: 24px;
-}
-
-.modal-header-titles h3 {
-    margin: 0;
-    font-family: var(--ub-font-serif);
-    font-size: 19px;
+    background: #FEF2F2;
+    color: var(--mbs-maroon);
+    font-size: 0.75rem;
     font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 9999px;
+    margin-bottom: 8px;
 }
 
-.ub-btn-modal-close {
-    background: transparent;
-    border: none;
-    color: rgba(255, 255, 255, 0.8);
-    cursor: pointer;
-    padding: 4px;
+.ub-modal-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--mbs-maroon);
+    margin: 0 0 6px 0;
+    font-family: "Georgia", serif;
 }
 
-.ub-btn-modal-close:hover {
-    color: #ffffff;
+.ub-modal-desc {
+    font-size: 0.85rem;
+    color: var(--mbs-slate-600);
+    margin: 0;
+    line-height: 1.5;
 }
 
 .ub-modal-form {
-    padding: 24px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
 }
 
 .ub-form-group {
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 6px;
 }
 
 .ub-form-group label {
-    font-size: 11px;
+    font-size: 0.8rem;
     font-weight: 700;
-    color: #475569;
-    letter-spacing: 0.04em;
+    color: var(--mbs-slate-700);
 }
 
 .ub-form-group input,
 .ub-form-group select,
 .ub-form-group textarea {
-    padding: 10px 14px;
-    border: 1px solid var(--ub-border-card);
-    border-radius: 8px;
-    font-size: 13.5px;
+    padding: 9px 12px;
+    border: 1px solid var(--mbs-border);
+    border-radius: 6px;
+    font-size: 0.88rem;
+    color: var(--mbs-slate-900);
     outline: none;
-    font-family: inherit;
+    transition: border-color 0.15s ease;
 }
 
 .ub-form-group input:focus,
 .ub-form-group select:focus,
 .ub-form-group textarea:focus {
-    border-color: var(--ub-maroon);
-    box-shadow: 0 0 0 3px rgba(122, 21, 38, 0.12);
+    border-color: var(--mbs-maroon);
+    box-shadow: 0 0 0 2px rgba(122, 21, 38, 0.15);
 }
 
 .ub-form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 14px;
+    gap: 12px;
 }
 
-@media (max-width: 600px) {
-    .ub-form-row {
-        grid-template-columns: 1fr;
-    }
-}
-
-.ub-modal-footer {
+.ub-form-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 10px;
+    gap: 12px;
     margin-top: 10px;
-    padding-top: 14px;
-    border-top: 1px solid var(--ub-border-subtle);
 }
 
-.ub-btn-modal-cancel {
-    background: #f1f5f9;
-    border: 1px solid var(--ub-border-card);
-    color: #334155;
-    padding: 10px 18px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.ub-btn-modal-submit {
-    background: var(--ub-maroon);
+.ub-btn-cancel {
+    background: #F1F5F9;
     border: none;
-    color: #ffffff;
-    padding: 10px 22px;
-    border-radius: 8px;
-    font-size: 13px;
+    color: var(--mbs-slate-700);
+    font-size: 0.85rem;
     font-weight: 700;
+    padding: 10px 18px;
+    border-radius: 6px;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(122, 21, 38, 0.25);
 }
 
-.ub-btn-modal-submit:hover:not(:disabled) {
-    background: var(--ub-maroon-dark);
+.ub-btn-submit {
+    background: var(--mbs-maroon);
+    border: none;
+    color: #FFFFFF;
+    font-size: 0.85rem;
+    font-weight: 800;
+    padding: 10px 22px;
+    border-radius: 6px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(122, 21, 38, 0.3);
 }
 
-.ub-btn-modal-submit:disabled {
+.ub-btn-submit:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }
 
-.ub-modal-success-state {
-    padding: 45px 24px;
+.ub-modal-error {
+    background: #FEF2F2;
+    color: #991B1B;
+    border: 1px solid #FCA5A5;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+}
+
+.ub-modal-success {
     text-align: center;
+    padding: 24px 12px;
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-.ub-modal-success-state h4 {
-    font-family: var(--ub-font-serif);
-    font-size: 20px;
-    color: var(--ub-maroon);
-    margin: 16px 0 8px 0;
+.ub-modal-success h4 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--mbs-maroon);
+    margin: 0 0 8px 0;
+    font-family: "Georgia", serif;
 }
 
-.ub-modal-success-state p {
-    font-size: 13.5px;
-    color: #475569;
+.ub-modal-success p {
+    font-size: 0.88rem;
+    color: var(--mbs-slate-600);
     max-width: 440px;
-    line-height: 1.55;
-    margin: 0 0 24px 0;
+    line-height: 1.5;
+    margin: 0;
 }
 
-.ub-btn-modal-done {
-    background: var(--ub-maroon);
-    color: #ffffff;
-    border: none;
-    padding: 10px 24px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
+/* ============================================================ */
+/* RESPONSIVE BREAKPOINTS                                      */
+/* ============================================================ */
+
+@media (max-width: 1024px) {
+    .ub-footer-grid {
+        grid-template-columns: 1fr 1fr;
+    }
 }
 
-.ub-modal-error-alert {
-    background: #fee2e2;
-    border: 1px solid #fecaca;
-    color: #991b1b;
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-size: 13px;
+@media (max-width: 768px) {
+    .ub-header-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .ub-nav-links {
+        display: none;
+    }
+
+    .ub-hero-title {
+        font-size: 2.1rem;
+    }
+
+    .ub-hero-stats-card {
+        flex-direction: column;
+        gap: 14px;
+        padding: 18px 24px;
+        width: 100%;
+    }
+
+    .ub-stat-divider {
+        display: none;
+    }
+
+    .ub-form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .ub-footer-grid {
+        grid-template-columns: 1fr;
+    }
 }
