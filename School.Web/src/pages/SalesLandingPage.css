@@ -33,53 +33,66 @@
 }
 
 /* ============================================================ */
-/* HEADER & NAVIGATION                                         */
+/* HEADER & NAVIGATION (COMPENSATED COMPACT & AUTO-HIDE)        */
 /* ============================================================ */
+
+.ub-top-nav-wrapper {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform;
+}
+
+.ub-top-nav-wrapper.ub-nav-hidden {
+    transform: translateY(-100%);
+}
 
 .ub-header {
     background: linear-gradient(135deg, var(--mbs-maroon) 0%, var(--mbs-maroon-dark) 100%);
-    border-bottom: 3px solid var(--mbs-gold);
+    border-bottom: 2px solid var(--mbs-gold);
     color: #FFFFFF;
-    position: sticky;
-    top: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+    position: relative;
     z-index: 100;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .ub-header-container {
-    max-width: 1360px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 10px 24px;
+    padding: 6px 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 20px;
+    gap: 16px;
+    box-sizing: border-box;
 }
 
 .ub-brand {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 10px;
     cursor: pointer;
     text-decoration: none;
+    flex-shrink: 0;
 }
 
 .ub-crest {
-    width: 48px;
-    height: 48px;
+    width: 36px;
+    height: 36px;
     background: linear-gradient(135deg, var(--mbs-gold) 0%, var(--mbs-gold-dark) 100%);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
-    border: 2px solid #FFFFFF;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    border: 1.5px solid #FFFFFF;
     flex-shrink: 0;
 }
 
 .ub-crest-icon {
-    width: 26px;
-    height: 26px;
+    width: 20px;
+    height: 20px;
     color: #450A0A;
 }
 
@@ -89,38 +102,42 @@
 }
 
 .ub-university-name {
-    font-size: 1.45rem;
+    font-size: 1.12rem;
     font-weight: 800;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.01em;
     font-family: "Georgia", "Times New Roman", serif;
     color: #FFFFFF;
     margin: 0;
-    line-height: 1.15;
+    line-height: 1.1;
+    white-space: nowrap;
 }
 
 .ub-university-subtitle {
-    font-size: 0.72rem;
+    font-size: 0.62rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     color: var(--mbs-gold-light);
-    margin: 2px 0 0 0;
+    margin: 1px 0 0 0;
+    white-space: nowrap;
 }
 
 .ub-nav-links {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 14px;
+    flex-shrink: 1;
 }
 
 .ub-nav-link {
     color: #F1F5F9;
-    font-size: 0.8rem;
+    font-size: 0.74rem;
     font-weight: 700;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.05em;
     text-decoration: none;
     transition: color 0.15s ease;
-    padding: 6px 4px;
+    padding: 4px 6px;
+    white-space: nowrap;
 }
 
 .ub-nav-link:hover {
@@ -130,41 +147,44 @@
 .ub-anniversary-badge {
     background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
     color: #450A0A;
-    font-size: 0.75rem;
+    font-size: 0.68rem;
     font-weight: 800;
-    padding: 5px 12px;
+    padding: 3px 9px;
     border-radius: 9999px;
     display: flex;
     align-items: center;
-    gap: 6px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    gap: 4px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
     border: 1px solid #FEF3C7;
+    white-space: nowrap;
 }
 
 .ub-anniversary-sparkle {
-    font-size: 0.85rem;
+    font-size: 0.75rem;
 }
 
 .ub-header-actions {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    flex-shrink: 0;
 }
 
 .ub-btn-portal-student,
 .ub-btn-portal-admin {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    font-size: 0.82rem;
+    gap: 5px;
+    font-size: 0.75rem;
     font-weight: 700;
-    padding: 7px 14px;
+    padding: 5px 11px;
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.18s ease;
     border: 1px solid rgba(255, 255, 255, 0.25);
     background: rgba(255, 255, 255, 0.1);
     color: #FFFFFF;
+    white-space: nowrap;
 }
 
 .ub-btn-portal-student:hover,
@@ -174,21 +194,22 @@
 }
 
 .ub-btn-icon {
-    width: 15px;
-    height: 15px;
+    width: 13px;
+    height: 13px;
 }
 
 .ub-btn-apply {
     background: #FFFFFF;
     color: var(--mbs-maroon);
-    font-size: 0.82rem;
+    font-size: 0.76rem;
     font-weight: 800;
-    padding: 8px 18px;
+    padding: 6px 14px;
     border-radius: 6px;
     border: none;
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
     transition: all 0.18s ease;
+    white-space: nowrap;
 }
 
 .ub-btn-apply:hover {
@@ -653,7 +674,7 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    font-size: 0.82rem;
+    font-size: 0.75rem;
     font-weight: 800;
     color: var(--mbs-maroon);
     transition: gap 0.2s ease;
@@ -745,7 +766,7 @@
     justify-content: space-between;
     padding-top: 16px;
     border-top: 1px solid #F1F5F9;
-    font-size: 0.82rem;
+    font-size: 0.75rem;
     color: var(--mbs-slate-600);
     font-weight: 600;
 }
@@ -887,7 +908,7 @@
 }
 
 .ub-achiever-quote {
-    font-size: 0.82rem;
+    font-size: 0.75rem;
     color: var(--mbs-slate-600);
     font-style: italic;
     line-height: 1.45;
@@ -911,7 +932,7 @@
     background: #FFFFFF;
     border: 1px solid var(--mbs-border);
     color: var(--mbs-slate-700);
-    font-size: 0.82rem;
+    font-size: 0.75rem;
     font-weight: 700;
     padding: 6px 12px;
     border-radius: 6px;
@@ -1041,7 +1062,7 @@
     background: transparent;
     border: none;
     color: var(--mbs-maroon);
-    font-size: 0.82rem;
+    font-size: 0.75rem;
     font-weight: 800;
     cursor: pointer;
     padding: 0;
@@ -1114,7 +1135,7 @@
     list-style: none;
     padding: 0;
     margin: 0;
-    font-size: 0.82rem;
+    font-size: 0.75rem;
     color: #94A3B8;
     line-height: 1.8;
 }
@@ -1127,7 +1148,7 @@
     background: transparent;
     border: none;
     color: #CBD5E1;
-    font-size: 0.82rem;
+    font-size: 0.75rem;
     cursor: pointer;
     padding: 0;
     transition: color 0.15s ease;
@@ -1142,7 +1163,7 @@
 .ub-btn-footer-apply {
     background: linear-gradient(135deg, var(--mbs-gold) 0%, var(--mbs-gold-dark) 100%);
     color: #450A0A;
-    font-size: 0.82rem;
+    font-size: 0.75rem;
     font-weight: 800;
     padding: 10px 18px;
     border-radius: 6px;
@@ -1342,7 +1363,7 @@
     border: 1px solid #FCA5A5;
     padding: 10px 14px;
     border-radius: 6px;
-    font-size: 0.82rem;
+    font-size: 0.75rem;
 }
 
 .ub-modal-success {
@@ -1621,8 +1642,8 @@
     background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
     color: #FFFFFF;
     border-bottom: 2px solid var(--mbs-gold);
-    padding: 9px 24px;
-    font-size: 0.82rem;
+    padding: 5px 20px;
+    font-size: 0.75rem;
     position: relative;
     z-index: 101;
 }

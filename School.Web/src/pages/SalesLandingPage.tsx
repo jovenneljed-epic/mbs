@@ -4,7 +4,7 @@
 // Fully connected to Landing Page Editor (CMS) & Real-time Content
 // ============================================================
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import "./SalesLandingPage.css";
 import { API_BASE_URL } from "../config";
 import {
@@ -88,6 +88,39 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
         return () => {
             window.removeEventListener(LANDING_CONTENT_EVENT, handleContentUpdate);
         };
+    }, []);
+
+    // ------------------------------------------------------------
+    // Auto-hiding header state on scroll down
+    // ------------------------------------------------------------
+    const [isHeaderHidden, setIsHeaderHidden] = useState(false);
+    const lastScrollY = useRef(0);
+
+    useEffect(() => {
+        let ticking = false;
+
+        const handleScroll = () => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    const currentScrollY = window.scrollY;
+                    if (currentScrollY <= 60) {
+                        setIsHeaderHidden(false);
+                    } else if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
+                        // Scrolling down -> hide header
+                        setIsHeaderHidden(true);
+                    } else if (currentScrollY < lastScrollY.current) {
+                        // Scrolling up -> show header
+                        setIsHeaderHidden(false);
+                    }
+                    lastScrollY.current = currentScrollY;
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        };
+
+        window.addEventListener("scroll", handleScroll, { passive: true });
+        return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
     // Search query state
@@ -455,7 +488,8 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
 
     return (
         <div className="ub-root">
-            {/* ============================================================ */}
+            <div className={`ub-top-nav-wrapper ${isHeaderHidden ? "ub-nav-hidden" : ""}`}>
+                {/* ============================================================ */}
             {/* ANNOUNCEMENT RIBBON (EDITABLE FROM CMS)                       */}
             {/* ============================================================ */}
             {content.ribbonText && (
@@ -559,6 +593,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                     </div>
                 </div>
             </header>
+            </div>
 
             {/* ============================================================ */}
             {/* CAMPUS HERO SECTION (CUSTOMIZED FROM CMS)                    */}
