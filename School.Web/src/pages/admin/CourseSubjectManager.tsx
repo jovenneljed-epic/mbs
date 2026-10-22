@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
     BookOpen,
     Plus,
@@ -19,14 +19,28 @@ import {
     AlertCircle,
     X,
     Save,
-    ArrowLeft
+    ArrowLeft,
+    Check,
+    ChevronDown,
+    BookMarked,
+    Users,
+    CheckSquare,
+    Square,
+    Sparkles
 } from "lucide-react";
-import { courseCurriculumService } from "../../services/courseCurriculumService";
+import {
+    courseCurriculumService,
+    PRESCRIBED_THEOLOGICAL_SUBJECTS,
+    getSystemFacultyList
+} from "../../services/courseCurriculumService";
 import type {
     CourseProgram,
     CourseSubject,
-    ModeOfLearningType
+    ModeOfLearningType,
+    PrescribedSubject,
+    FacultyInstructorOption
 } from "../../services/courseCurriculumService";
+import { apiClient } from "../../services/apiClient";
 import "./CourseSubjectManager.css";
 
 const LEARNING_MODES: { label: string; value: ModeOfLearningType; desc: string }[] = [
@@ -120,6 +134,116 @@ export const CourseSubjectManager: React.FC<CourseSubjectManagerProps> = ({ onBa
         prerequisite: "",
         yearLevel: "1st Year"
     });
+
+    // Faculty & Instructor Searchable Combobox State
+    const [facultyList, setFacultyList] = useState<FacultyInstructorOption[]>([]);
+    const [facultySearch, setFacultySearch] = useState<string>("");
+    const [isFacultyDropdownOpen, setIsFacultyDropdownOpen] = useState(false);
+    const [isCustomInstructor, setIsCustomInstructor] = useState(false);
+    const facultyComboboxRef = useRef<HTMLDivElement>(null);
+
+    // Prescribed Subject Catalog Selector State (Add/Edit Modal)
+    const [catalogSearchQuery, setCatalogSearchQuery] = useState<string>("");
+    const [selectedCatalogCode, setSelectedCatalogCode] = useState<string>("");
+
+    // Batch Add Prescribed Subjects Modal State
+    const [isBatchModalOpen, setIsBatchModalOpen] = useState(false);
+    const [batchSelectedCodes, setBatchSelectedCodes] = useState<string[]>([]);
+    const [batchCategoryFilter, setBatchCategoryFilter] = useState<string>("ALL");
+    const [batchSearchQuery, setBatchSearchQuery] = useState<string>("");
+    const [batchInstructor, setBatchInstructor] = useState<string>("");
+    const [batchRoom, setBatchRoom] = useState<string>("Field Hub • Room 101");
+    const [batchSchedule, setBatchSchedule] = useState<string>("Fri-Sun 8:00 AM - 12:00 PM (Modular)");
+
+    // Close faculty dropdown on click outside
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (facultyComboboxRef.current && !facultyComboboxRef.current.contains(e.target as Node)) {
+                setIsFacultyDropdownOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    // Load faculties from local catalog + API users
+    useEffect(() => {
+        const initial = getSystemFacultyList();
+        setFacultyList(initial);
+
+        apiClient
+            .get("/Users")
+            .then(res => {
+                if (Array.isArray(res.data)) {
+                    const apiUsers: FacultyInstructorOption[] = res.data
+                        .filter((u: any) => u.isActive !== false && u.fullName)
+                        .map((u: any) => ({
+                            fullName: u.fullName.trim(),
+                            academicRank: u.role || "Faculty Instructor",
+                            department: "School of Theology & Biblical Studies",
+                            email: u.username?.includes("@") ? u.username : undefined
+                        }));
+
+                    setFacultyList(prev => {
+                        const seen = new Set(prev.map(f => f.fullName.toLowerCase()));
+                        const merged = [...prev];
+                        apiUsers.forEach(u => {
+                            if (!seen.has(u.fullName.toLowerCase())) {
+                                seen.add(u.fullName.toLowerCase());
+                                merged.push(u);
+                            }
+                        });
+                        return merged;
+                    });
+                }
+            })
+            .catch(() => {
+                // Ignore API failure; local catalog is active
+            });
+    }, []);
+
+    // Filtered faculties for searchable dropdown
+    const filteredFaculties = useMemo(() => {
+        const q = facultySearch.trim().toLowerCase();
+        if (!q) return facultyList;
+        return facultyList.filter(
+            f =>
+                f.fullName.toLowerCase().includes(q) ||
+                (f.academicRank && f.academicRank.toLowerCase().includes(q)) ||
+                (f.department && f.department.toLowerCase().includes(q)) ||
+                (f.email && f.email.toLowerCase().includes(q))
+        );
+    }, [facultyList, facultySearch]);
+
+    // Grouped prescribed subjects for catalog picker
+    const groupedPrescribedSubjects = useMemo(() => {
+        const query = catalogSearchQuery.trim().toLowerCase();
+        const map = new Map<string, PrescribedSubject[]>();
+
+        PRESCRIBED_THEOLOGICAL_SUBJECTS.forEach(sub => {
+            const matches =
+                !query ||
+                sub.code.toLowerCase().includes(query) ||
+                sub.title.toLowerCase().includes(query) ||
+                sub.category.toLowerCase().includes(query) ||
+                sub.yearLevel.toLowerCase().includes(query);
+
+            if (matches) {
+                const list = map.get(sub.category) || [];
+                list.push(sub);
+                map.set(sub.category, list);
+            }
+        });
+
+        return Array.from(map.entries()).map(([category, subjects]) => ({
+            category,
+            subjects
+        }));
+    }, [catalogSearchQuery]);
+
+    const totalFilteredPrescribed = useMemo(() => {
+        return groupedPrescribedSubjects.reduce((sum, g) => sum + g.subjects.length, 0);
+    }, [groupedPrescribedSubjects]);
 
     // Refresh courses list
     const refreshCourses = () => {
@@ -269,10 +393,38 @@ export const CourseSubjectManager: React.FC<CourseSubjectManagerProps> = ({ onBa
         showFeedback("success", `Course '${course.name}' deleted.`);
     };
 
+    // Handler: Pick Prescribed Subject from Catalog
+    const handleSelectPrescribedSubject = (code: string) => {
+        setSelectedCatalogCode(code);
+        if (!code) return;
+        const match = PRESCRIBED_THEOLOGICAL_SUBJECTS.find(s => s.code.toUpperCase() === code.toUpperCase());
+        if (!match) return;
+
+        setSubjectForm(prev => ({
+            ...prev,
+            code: match.code,
+            title: match.title,
+            units: match.units,
+            yearLevel: match.yearLevel || prev.yearLevel || "1st Year",
+            lectureHours: match.units,
+            labHours: 0
+        }));
+    };
+
     // Open Modal for New Subject
     const handleOpenAddSubject = () => {
         if (!selectedCourse) return;
         setEditingSubject(null);
+        setSelectedCatalogCode("");
+        setCatalogSearchQuery("");
+        setIsCustomInstructor(false);
+        setIsFacultyDropdownOpen(false);
+
+        const defaultInstructor =
+            selectedCourse.deanOrHead ||
+            (facultyList.length > 0 ? facultyList[0].fullName : "Dr. Samuel Vance, Th.D.");
+        setFacultySearch(defaultInstructor);
+
         setSubjectForm({
             code: "",
             title: "",
@@ -281,7 +433,7 @@ export const CourseSubjectManager: React.FC<CourseSubjectManagerProps> = ({ onBa
             labHours: 0,
             schedule: "Fri-Sun 8:00 AM - 12:00 PM (Modular)",
             room: "Field Hub • Room 101",
-            instructor: selectedCourse.deanOrHead || "Dr. Samuel Vance",
+            instructor: defaultInstructor,
             modeOfLearning: selectedCourse.modeOfLearning || "Modular Field Cohort",
             prerequisite: "",
             yearLevel: "1st Year"
@@ -292,9 +444,113 @@ export const CourseSubjectManager: React.FC<CourseSubjectManagerProps> = ({ onBa
     // Open Modal for Editing Subject
     const handleOpenEditSubject = (subject: CourseSubject) => {
         setEditingSubject(subject);
+        setSelectedCatalogCode(subject.code);
+        setCatalogSearchQuery("");
+        setFacultySearch(subject.instructor || "");
+        setIsFacultyDropdownOpen(false);
+
+        const matchesKnownFaculty = facultyList.some(
+            f => f.fullName.toLowerCase() === (subject.instructor || "").toLowerCase()
+        );
+        setIsCustomInstructor(!matchesKnownFaculty && !!subject.instructor);
+
         setSubjectForm({ ...subject });
         setIsSubjectModalOpen(true);
     };
+
+    // Open Batch Import Prescribed Subjects Modal
+    const handleOpenBatchModal = () => {
+        if (!selectedCourse) return;
+        setBatchSelectedCodes([]);
+        setBatchCategoryFilter("ALL");
+        setBatchSearchQuery("");
+        const defaultInstructor =
+            selectedCourse.deanOrHead ||
+            (facultyList.length > 0 ? facultyList[0].fullName : "Dr. Samuel Vance, Th.D.");
+        setBatchInstructor(defaultInstructor);
+        setBatchRoom("Field Hub • Room 101");
+        setBatchSchedule("Fri-Sun 8:00 AM - 12:00 PM (Modular)");
+        setIsBatchModalOpen(true);
+    };
+
+    // Toggle single subject selection in batch modal
+    const handleToggleBatchSubject = (code: string) => {
+        setBatchSelectedCodes(prev =>
+            prev.includes(code) ? prev.filter(c => c !== code) : [...prev, code]
+        );
+    };
+
+    // Toggle Select All filtered in batch modal
+    const handleSelectAllBatch = (subjectsToSelect: PrescribedSubject[]) => {
+        const codesToSelect = subjectsToSelect.map(s => s.code);
+        const allAlreadySelected = codesToSelect.every(c => batchSelectedCodes.includes(c));
+
+        if (allAlreadySelected) {
+            setBatchSelectedCodes(prev => prev.filter(c => !codesToSelect.includes(c)));
+        } else {
+            setBatchSelectedCodes(prev => Array.from(new Set([...prev, ...codesToSelect])));
+        }
+    };
+
+    // Save batch selected subjects
+    const handleSaveBatchSubjects = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!selectedCourse) return;
+        if (batchSelectedCodes.length === 0) {
+            showFeedback("error", "Please select at least one prescribed subject to add.");
+            return;
+        }
+
+        let addedCount = 0;
+        try {
+            batchSelectedCodes.forEach(code => {
+                const prescribed = PRESCRIBED_THEOLOGICAL_SUBJECTS.find(s => s.code === code);
+                if (prescribed) {
+                    const newSub: CourseSubject = {
+                        code: prescribed.code,
+                        title: prescribed.title,
+                        units: prescribed.units,
+                        lectureHours: prescribed.units,
+                        labHours: 0,
+                        schedule: batchSchedule.trim() || "Fri-Sun 8:00 AM - 12:00 PM (Modular)",
+                        room: batchRoom.trim() || "Field Hub • Room 101",
+                        instructor: batchInstructor.trim() || selectedCourse.deanOrHead || "Dr. Samuel Vance, Th.D.",
+                        modeOfLearning: selectedCourse.modeOfLearning,
+                        yearLevel: prescribed.yearLevel
+                    };
+                    courseCurriculumService.addSubjectToCourse(selectedCourse.code, newSub);
+                    addedCount++;
+                }
+            });
+
+            setIsBatchModalOpen(false);
+            refreshCourses();
+            showFeedback(
+                "success",
+                `Successfully added ${addedCount} prescribed theological subject(s) to ${selectedCourse.name}.`
+            );
+        } catch (err: unknown) {
+            const error = err as Error;
+            showFeedback("error", error.message || "Failed to batch add subjects.");
+        }
+    };
+
+    // Filtered Prescribed Subjects for Batch Modal
+    const filteredBatchSubjects = useMemo(() => {
+        const q = batchSearchQuery.trim().toLowerCase();
+        return PRESCRIBED_THEOLOGICAL_SUBJECTS.filter(s => {
+            const matchesCat =
+                batchCategoryFilter === "ALL" ||
+                s.category.includes(batchCategoryFilter) ||
+                s.code.startsWith(batchCategoryFilter);
+            const matchesQuery =
+                !q ||
+                s.code.toLowerCase().includes(q) ||
+                s.title.toLowerCase().includes(q) ||
+                s.category.toLowerCase().includes(q);
+            return matchesCat && matchesQuery;
+        });
+    }, [batchCategoryFilter, batchSearchQuery]);
 
     // Save Subject
     const handleSaveSubject = (e: React.FormEvent) => {
@@ -662,6 +918,16 @@ export const CourseSubjectManager: React.FC<CourseSubjectManagerProps> = ({ onBa
 
                                         <button
                                             type="button"
+                                            className="course-mgr-btn btn-secondary btn-sm"
+                                            onClick={handleOpenBatchModal}
+                                            title="Batch pick and add multiple subjects from the 35 prescribed curriculum list"
+                                        >
+                                            <BookMarked size={14} />
+                                            <span>Batch Prescribed Catalog</span>
+                                        </button>
+
+                                        <button
+                                            type="button"
                                             className="course-mgr-btn btn-primary btn-sm"
                                             onClick={handleOpenAddSubject}
                                         >
@@ -1014,6 +1280,120 @@ export const CourseSubjectManager: React.FC<CourseSubjectManagerProps> = ({ onBa
 
                         <form onSubmit={handleSaveSubject}>
                             <div className="modal-card-body">
+                                {/* PRESCRIBED SUBJECT CATALOG PICKER (35 OFFICIAL SUBJECTS) */}
+                                <div className="prescribed-subject-picker-card">
+                                    <div className="picker-header">
+                                        <div className="picker-title-row">
+                                            <div className="picker-icon-badge">
+                                                <BookMarked size={16} />
+                                            </div>
+                                            <div>
+                                                <h4 className="picker-title">Official Prescribed Theological Subjects (35 Subjects)</h4>
+                                                <p className="picker-desc">
+                                                    Select a prescribed subject below to automatically populate the code, descriptive title, credit units, and year level.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="picker-body">
+                                        <div className="picker-controls-grid">
+                                            <div className="picker-search-field-wrapper">
+                                                <label className="picker-field-label">SEARCH CATALOG</label>
+                                                <div className="picker-search-box">
+                                                    <Search size={14} className="picker-search-icon" />
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Search code or keywords (e.g. 'Greek', 'Ethics', 'CBS', 'Pastoral')..."
+                                                        value={catalogSearchQuery}
+                                                        onChange={e => setCatalogSearchQuery(e.target.value)}
+                                                        className="picker-search-input"
+                                                    />
+                                                    {catalogSearchQuery && (
+                                                        <button
+                                                            type="button"
+                                                            className="picker-clear-search-btn"
+                                                            onClick={() => setCatalogSearchQuery("")}
+                                                        >
+                                                            <X size={12} />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="picker-select-wrapper">
+                                                <label className="picker-field-label">
+                                                    CHOOSE FROM CATALOG ({totalFilteredPrescribed} Available)
+                                                </label>
+                                                <select
+                                                    value={selectedCatalogCode}
+                                                    onChange={e => handleSelectPrescribedSubject(e.target.value)}
+                                                    className="picker-dropdown-select"
+                                                >
+                                                    <option value="">-- Select a Prescribed Subject to Auto-Fill --</option>
+                                                    {groupedPrescribedSubjects.map(cat => (
+                                                        <optgroup key={cat.category} label={cat.category}>
+                                                            {cat.subjects.map(s => (
+                                                                <option key={s.code} value={s.code}>
+                                                                    {s.code} · {s.title} ({s.yearLevel} • {s.units} units)
+                                                                </option>
+                                                            ))}
+                                                        </optgroup>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        {/* Applied Subject Indicator */}
+                                        {selectedCatalogCode && (
+                                            <div className="picker-applied-banner">
+                                                <div className="applied-banner-content">
+                                                    <CheckCircle2 size={15} className="applied-icon" />
+                                                    <span>
+                                                        Selected from Catalog: <strong>{selectedCatalogCode} · {subjectForm.title}</strong>
+                                                    </span>
+                                                    <span className="applied-pill">{subjectForm.units} Units</span>
+                                                    <span className="applied-pill">{subjectForm.yearLevel}</span>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    className="applied-clear-btn"
+                                                    onClick={() => {
+                                                        setSelectedCatalogCode("");
+                                                        setSubjectForm(prev => ({ ...prev, code: "", title: "" }));
+                                                    }}
+                                                >
+                                                    Reset
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {/* Quick Filter Series Chips */}
+                                        <div className="picker-quick-series">
+                                            <span className="quick-series-label">Quick Series:</span>
+                                            {["ALL", "CBS 100", "DPS 200", "AML 300", "BTH 400", "MTH 500", "MMIN 600", "DTH 700"].map(
+                                                series => {
+                                                    const prefix = series === "ALL" ? "" : series.split(" ")[0];
+                                                    const isActive =
+                                                        series === "ALL"
+                                                            ? !catalogSearchQuery
+                                                            : catalogSearchQuery.toUpperCase() === prefix;
+                                                    return (
+                                                        <button
+                                                            key={series}
+                                                            type="button"
+                                                            className={`quick-series-chip ${isActive ? "active" : ""}`}
+                                                            onClick={() => setCatalogSearchQuery(prefix)}
+                                                        >
+                                                            {series}
+                                                        </button>
+                                                    );
+                                                }
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div className="form-grid-3">
                                     <div className="modal-form-group">
                                         <label>SUBJECT CODE *</label>
@@ -1021,8 +1401,10 @@ export const CourseSubjectManager: React.FC<CourseSubjectManagerProps> = ({ onBa
                                             type="text"
                                             required
                                             value={subjectForm.code}
-                                            onChange={e => setSubjectForm({ ...subjectForm, code: e.target.value.toUpperCase() })}
-                                            placeholder="e.g. HERM-101"
+                                            onChange={e =>
+                                                setSubjectForm({ ...subjectForm, code: e.target.value.toUpperCase() })
+                                            }
+                                            placeholder="e.g. AML 301"
                                         />
                                     </div>
 
@@ -1066,7 +1448,7 @@ export const CourseSubjectManager: React.FC<CourseSubjectManagerProps> = ({ onBa
                                         required
                                         value={subjectForm.title}
                                         onChange={e => setSubjectForm({ ...subjectForm, title: e.target.value })}
-                                        placeholder="e.g. Inductive Bible Study & Biblical Hermeneutics"
+                                        placeholder="e.g. Christian Ethics"
                                     />
                                 </div>
 
@@ -1114,15 +1496,166 @@ export const CourseSubjectManager: React.FC<CourseSubjectManagerProps> = ({ onBa
                                         />
                                     </div>
 
-                                    <div className="modal-form-group">
-                                        <label>INSTRUCTOR / PROFESSOR *</label>
-                                        <input
-                                            type="text"
-                                            required
-                                            value={subjectForm.instructor}
-                                            onChange={e => setSubjectForm({ ...subjectForm, instructor: e.target.value })}
-                                            placeholder="e.g. Dr. Samuel Vance"
-                                        />
+                                    {/* SEARCHABLE FACULTY / INSTRUCTOR COMBOBOX */}
+                                    <div className="modal-form-group faculty-picker-form-group">
+                                        <div className="flex-label">
+                                            <label>INSTRUCTOR / PROFESSOR *</label>
+                                            <button
+                                                type="button"
+                                                className="faculty-mode-toggle"
+                                                onClick={() => {
+                                                    const nextCustom = !isCustomInstructor;
+                                                    setIsCustomInstructor(nextCustom);
+                                                    setIsFacultyDropdownOpen(false);
+                                                }}
+                                            >
+                                                {isCustomInstructor
+                                                    ? "← Pick from Faculty Roster"
+                                                    : "✏️ Custom / Visiting Lecturer"}
+                                            </button>
+                                        </div>
+
+                                        {isCustomInstructor ? (
+                                            <input
+                                                type="text"
+                                                required
+                                                value={subjectForm.instructor}
+                                                onChange={e =>
+                                                    setSubjectForm({ ...subjectForm, instructor: e.target.value })
+                                                }
+                                                placeholder="Type custom or visiting lecturer name..."
+                                            />
+                                        ) : (
+                                            <div className="faculty-combobox-container" ref={facultyComboboxRef}>
+                                                <div className="faculty-search-input-wrap">
+                                                    <Search size={14} className="faculty-search-icon" />
+                                                    <input
+                                                        type="text"
+                                                        required
+                                                        value={facultySearch}
+                                                        onFocus={() => setIsFacultyDropdownOpen(true)}
+                                                        onChange={e => {
+                                                            setFacultySearch(e.target.value);
+                                                            setSubjectForm(prev => ({
+                                                                ...prev,
+                                                                instructor: e.target.value
+                                                            }));
+                                                            setIsFacultyDropdownOpen(true);
+                                                        }}
+                                                        placeholder="Search faculty by name, department or rank..."
+                                                        className="faculty-input-field"
+                                                    />
+                                                    {facultySearch && (
+                                                        <button
+                                                            type="button"
+                                                            className="faculty-clear-btn"
+                                                            onClick={() => {
+                                                                setFacultySearch("");
+                                                                setSubjectForm(prev => ({ ...prev, instructor: "" }));
+                                                                setIsFacultyDropdownOpen(true);
+                                                            }}
+                                                        >
+                                                            <X size={12} />
+                                                        </button>
+                                                    )}
+                                                    <button
+                                                        type="button"
+                                                        className="faculty-arrow-toggle"
+                                                        onClick={() => setIsFacultyDropdownOpen(!isFacultyDropdownOpen)}
+                                                    >
+                                                        <ChevronDown size={14} />
+                                                    </button>
+                                                </div>
+
+                                                {/* Dropdown Options List */}
+                                                {isFacultyDropdownOpen && (
+                                                    <div className="faculty-dropdown-list-menu">
+                                                        <div className="faculty-menu-header">
+                                                            <Users size={13} />
+                                                            <span>
+                                                                Accredited Faculties & Instructors ({filteredFaculties.length})
+                                                            </span>
+                                                        </div>
+
+                                                        <div className="faculty-menu-items">
+                                                            {filteredFaculties.length === 0 ? (
+                                                                <div className="faculty-empty-result">
+                                                                    <p>No faculty matching "{facultySearch}"</p>
+                                                                    <button
+                                                                        type="button"
+                                                                        className="use-custom-name-action"
+                                                                        onClick={() => {
+                                                                            setSubjectForm(prev => ({
+                                                                                ...prev,
+                                                                                instructor: facultySearch
+                                                                            }));
+                                                                            setIsFacultyDropdownOpen(false);
+                                                                        }}
+                                                                    >
+                                                                        Use "{facultySearch}" as Instructor
+                                                                    </button>
+                                                                </div>
+                                                            ) : (
+                                                                filteredFaculties.map((fac, idx) => {
+                                                                    const isSelected =
+                                                                        subjectForm.instructor.toLowerCase() ===
+                                                                        fac.fullName.toLowerCase();
+                                                                    return (
+                                                                        <div
+                                                                            key={idx}
+                                                                            className={`faculty-menu-item ${isSelected ? "selected" : ""}`}
+                                                                            onClick={() => {
+                                                                                setSubjectForm(prev => ({
+                                                                                    ...prev,
+                                                                                    instructor: fac.fullName
+                                                                                }));
+                                                                                setFacultySearch(fac.fullName);
+                                                                                setIsFacultyDropdownOpen(false);
+                                                                            }}
+                                                                        >
+                                                                            <div className="faculty-avatar-circle">
+                                                                                <User size={13} />
+                                                                            </div>
+                                                                            <div className="faculty-item-text">
+                                                                                <div className="faculty-name-row">
+                                                                                    <strong className="faculty-name">
+                                                                                        {fac.fullName}
+                                                                                    </strong>
+                                                                                    {isSelected && (
+                                                                                        <span className="selected-tag">
+                                                                                            <Check size={11} /> Selected
+                                                                                        </span>
+                                                                                    )}
+                                                                                </div>
+                                                                                {fac.academicRank && (
+                                                                                    <span className="faculty-rank">
+                                                                                        {fac.academicRank}
+                                                                                    </span>
+                                                                                )}
+                                                                                {fac.department && (
+                                                                                    <span className="faculty-dept">
+                                                                                        {fac.department}
+                                                                                    </span>
+                                                                                )}
+                                                                            </div>
+                                                                        </div>
+                                                                    );
+                                                                })
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                )}
+
+                                                {/* Selected Faculty Indicator Pill */}
+                                                {subjectForm.instructor && (
+                                                    <div className="selected-faculty-pill">
+                                                        <CheckCircle2 size={13} className="pill-check" />
+                                                        <span className="pill-label">Assigned:</span>
+                                                        <strong className="pill-name">{subjectForm.instructor}</strong>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 
@@ -1164,6 +1697,214 @@ export const CourseSubjectManager: React.FC<CourseSubjectManagerProps> = ({ onBa
                                 <button type="submit" className="course-mgr-btn btn-primary">
                                     <Save size={16} />
                                     <span>{editingSubject ? "Update Subject" : "Add Subject"}</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* MODAL 3: BATCH ADD PRESCRIBED THEOLOGICAL SUBJECTS */}
+            {isBatchModalOpen && (
+                <div className="course-mgr-modal-overlay" onClick={() => setIsBatchModalOpen(false)}>
+                    <div className="course-mgr-modal-card modal-lg batch-subjects-modal" onClick={e => e.stopPropagation()}>
+                        <div className="modal-card-header">
+                            <div className="modal-header-title">
+                                <BookMarked size={20} />
+                                <div>
+                                    <h3>Batch Import Prescribed Subjects</h3>
+                                    <span className="modal-subtitle">
+                                        Target Course: <strong>{selectedCourse?.name} ({selectedCourse?.code})</strong>
+                                    </span>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                className="modal-close-btn"
+                                onClick={() => setIsBatchModalOpen(false)}
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleSaveBatchSubjects}>
+                            <div className="modal-card-body">
+                                <div className="batch-intro-box">
+                                    <Sparkles size={18} className="intro-icon" />
+                                    <p>
+                                        Select any number of official curriculum subjects below to instantly add them to{" "}
+                                        <strong>{selectedCourse?.name}</strong> without having to type each one manually.
+                                    </p>
+                                </div>
+
+                                {/* Filters and Select All toolbar */}
+                                <div className="batch-toolbar">
+                                    <div className="batch-search-box">
+                                        <Search size={14} className="search-icon" />
+                                        <input
+                                            type="text"
+                                            placeholder="Search by subject code, title or series..."
+                                            value={batchSearchQuery}
+                                            onChange={e => setBatchSearchQuery(e.target.value)}
+                                        />
+                                        {batchSearchQuery && (
+                                            <button
+                                                type="button"
+                                                className="clear-search-btn"
+                                                onClick={() => setBatchSearchQuery("")}
+                                            >
+                                                <X size={12} />
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    <div className="batch-actions-row">
+                                        <button
+                                            type="button"
+                                            className="batch-select-all-btn"
+                                            onClick={() => handleSelectAllBatch(filteredBatchSubjects)}
+                                        >
+                                            {filteredBatchSubjects.length > 0 &&
+                                            filteredBatchSubjects.every(s => batchSelectedCodes.includes(s.code)) ? (
+                                                <>
+                                                    <CheckSquare size={15} />
+                                                    <span>Deselect All Filtered</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Square size={15} />
+                                                    <span>Select All Filtered ({filteredBatchSubjects.length})</span>
+                                                </>
+                                            )}
+                                        </button>
+
+                                        <span className="batch-counter-badge">
+                                            {batchSelectedCodes.length} Subjects Selected
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Series category pills */}
+                                <div className="batch-category-chips">
+                                    {[
+                                        { key: "ALL", label: "All 35 Subjects" },
+                                        { key: "CBS", label: "CBS 100 Series" },
+                                        { key: "DPS", label: "DPS 200 Series" },
+                                        { key: "AML", label: "AML 300 Series" },
+                                        { key: "BTH", label: "BTH 400 Series" },
+                                        { key: "MTH", label: "MTH 500 Series" },
+                                        { key: "MMIN", label: "MMIN 600 Series" },
+                                        { key: "DTH", label: "DTH 700 Series" }
+                                    ].map(cat => (
+                                        <button
+                                            key={cat.key}
+                                            type="button"
+                                            className={`batch-chip ${batchCategoryFilter === cat.key ? "active" : ""}`}
+                                            onClick={() => setBatchCategoryFilter(cat.key)}
+                                        >
+                                            {cat.label}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Subjects Selection Grid */}
+                                <div className="batch-subjects-grid">
+                                    {filteredBatchSubjects.map(sub => {
+                                        const isSelected = batchSelectedCodes.includes(sub.code);
+                                        const alreadyInCourse = (selectedCourse?.subjects || []).some(
+                                            s => s.code.toUpperCase() === sub.code.toUpperCase()
+                                        );
+
+                                        return (
+                                            <div
+                                                key={sub.code}
+                                                className={`batch-subject-card ${isSelected ? "selected" : ""} ${alreadyInCourse ? "already-exists" : ""}`}
+                                                onClick={() => handleToggleBatchSubject(sub.code)}
+                                            >
+                                                <div className="card-checkbox">
+                                                    {isSelected ? (
+                                                        <CheckSquare size={18} className="checkbox-checked" />
+                                                    ) : (
+                                                        <Square size={18} className="checkbox-empty" />
+                                                    )}
+                                                </div>
+                                                <div className="card-body-content">
+                                                    <div className="card-top-row">
+                                                        <span className="subject-code-tag">{sub.code}</span>
+                                                        <span className="subject-units-tag">{sub.units} Units</span>
+                                                        <span className="subject-level-tag">{sub.yearLevel}</span>
+                                                        {alreadyInCourse && (
+                                                            <span className="already-tag">Already in Course</span>
+                                                        )}
+                                                    </div>
+                                                    <h5 className="subject-card-title">{sub.title}</h5>
+                                                    <span className="subject-category-tag">{sub.category}</span>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+
+                                {/* Shared Assignment Defaults */}
+                                <div className="batch-settings-card">
+                                    <h5 className="settings-title">Default Assignment Settings for Selected Subjects:</h5>
+                                    <div className="form-grid-3">
+                                        <div className="modal-form-group">
+                                            <label>ASSIGNED INSTRUCTOR / PROFESSOR</label>
+                                            <select
+                                                value={batchInstructor}
+                                                onChange={e => setBatchInstructor(e.target.value)}
+                                            >
+                                                {facultyList.map((f, idx) => (
+                                                    <option key={idx} value={f.fullName}>
+                                                        {f.fullName}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+
+                                        <div className="modal-form-group">
+                                            <label>DEFAULT CLASS SCHEDULE</label>
+                                            <input
+                                                type="text"
+                                                value={batchSchedule}
+                                                onChange={e => setBatchSchedule(e.target.value)}
+                                                placeholder="e.g. Fri-Sun 8:00 AM - 12:00 PM"
+                                            />
+                                        </div>
+
+                                        <div className="modal-form-group">
+                                            <label>ROOM / VENUE</label>
+                                            <input
+                                                type="text"
+                                                value={batchRoom}
+                                                onChange={e => setBatchRoom(e.target.value)}
+                                                placeholder="e.g. Field Hub • Rm 101"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="modal-card-footer">
+                                <button
+                                    type="button"
+                                    className="course-mgr-btn btn-secondary"
+                                    onClick={() => setIsBatchModalOpen(false)}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="course-mgr-btn btn-primary"
+                                    disabled={batchSelectedCodes.length === 0}
+                                >
+                                    <Plus size={16} />
+                                    <span>
+                                        {batchSelectedCodes.length > 0
+                                            ? `Add Selected (${batchSelectedCodes.length}) Subjects`
+                                            : "Select Subjects to Add"}
+                                    </span>
                                 </button>
                             </div>
                         </form>

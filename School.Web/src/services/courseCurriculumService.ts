@@ -27,6 +27,125 @@ export interface CourseSubject {
     yearLevel?: string;
 }
 
+/* =========================================================
+   OFFICIAL PRESCRIBED THEOLOGICAL SUBJECTS CATALOG (35 SUBJECTS)
+========================================================= */
+
+export interface PrescribedSubject {
+    code: string;
+    title: string;
+    units: number;
+    yearLevel: string;
+    category: string;
+}
+
+export const PRESCRIBED_THEOLOGICAL_SUBJECTS: PrescribedSubject[] = [
+    // CBS 100 Series (Certificate in Biblical Studies / 1st Year)
+    { code: "CBS 101", title: "Life of Christ", units: 3, yearLevel: "1st Year", category: "Certificate in Biblical Studies (CBS)" },
+    { code: "CBS 102", title: "Old Testament Survey", units: 3, yearLevel: "1st Year", category: "Certificate in Biblical Studies (CBS)" },
+    { code: "CBS 103", title: "New Testament Survey", units: 3, yearLevel: "1st Year", category: "Certificate in Biblical Studies (CBS)" },
+    { code: "CBS 104", title: "Hermeneutics", units: 3, yearLevel: "1st Year", category: "Certificate in Biblical Studies (CBS)" },
+    { code: "CBS 105", title: "Homiletics", units: 3, yearLevel: "1st Year", category: "Certificate in Biblical Studies (CBS)" },
+
+    // DPS 200 Series (Diploma in Pastoral Studies / 2nd Year)
+    { code: "DPS 201", title: "Systematic Theology I", units: 3, yearLevel: "2nd Year", category: "Diploma in Pastoral Studies (DPS)" },
+    { code: "DPS 202", title: "Systematic Theology II", units: 3, yearLevel: "2nd Year", category: "Diploma in Pastoral Studies (DPS)" },
+    { code: "DPS 203", title: "Christian Education I (Children Ministry)", units: 3, yearLevel: "2nd Year", category: "Diploma in Pastoral Studies (DPS)" },
+    { code: "DPS 204", title: "Christian Education II (Youth Ministry)", units: 3, yearLevel: "2nd Year", category: "Diploma in Pastoral Studies (DPS)" },
+    { code: "DPS 205", title: "Expository Preaching", units: 3, yearLevel: "2nd Year", category: "Diploma in Pastoral Studies (DPS)" },
+
+    // AML 300 Series (Applied Ministry & Leadership / 3rd Year)
+    { code: "AML 301", title: "Christian Ethics", units: 3, yearLevel: "3rd Year", category: "Applied Ministry & Leadership (AML)" },
+    { code: "AML 302", title: "Theology of Music", units: 3, yearLevel: "3rd Year", category: "Applied Ministry & Leadership (AML)" },
+    { code: "AML 303", title: "Biblical Counseling", units: 3, yearLevel: "3rd Year", category: "Applied Ministry & Leadership (AML)" },
+    { code: "AML 304", title: "Church Planting", units: 3, yearLevel: "3rd Year", category: "Applied Ministry & Leadership (AML)" },
+    { code: "AML 305", title: "Eschatology", units: 3, yearLevel: "3rd Year", category: "Applied Ministry & Leadership (AML)" },
+
+    // BTH 400 Series (Bachelor of Theology / 4th Year)
+    { code: "BTH 401", title: "Pastoral Theology", units: 3, yearLevel: "4th Year", category: "Bachelor of Theology (BTH)" },
+    { code: "BTH 402", title: "Ecclesiology", units: 3, yearLevel: "4th Year", category: "Bachelor of Theology (BTH)" },
+    { code: "BTH 403", title: "Pauline Epistles", units: 3, yearLevel: "4th Year", category: "Bachelor of Theology (BTH)" },
+    { code: "BTH 404", title: "John-in-Depth", units: 3, yearLevel: "4th Year", category: "Bachelor of Theology (BTH)" },
+    { code: "BTH 405", title: "Introduction to Mission", units: 3, yearLevel: "4th Year", category: "Bachelor of Theology (BTH)" },
+
+    // MTH 500 Series (Master of Theology & Languages / 500)
+    { code: "MTH 501", title: "Greek I", units: 3, yearLevel: "General / All", category: "Master of Theology & Languages (MTH)" },
+    { code: "MTH 502", title: "Hebrew I", units: 3, yearLevel: "General / All", category: "Master of Theology & Languages (MTH)" },
+    { code: "MTH 503", title: "Advanced Hermeneutics", units: 3, yearLevel: "General / All", category: "Master of Theology & Languages (MTH)" },
+    { code: "MTH 504", title: "Reformation Theology", units: 3, yearLevel: "General / All", category: "Master of Theology & Languages (MTH)" },
+    { code: "MTH 505", title: "Theology and Psychology", units: 3, yearLevel: "General / All", category: "Master of Theology & Languages (MTH)" },
+
+    // MMIN 600 Series (Master of Ministry & Church Management / 600)
+    { code: "MMIN 601", title: "Apologetics", units: 3, yearLevel: "General / All", category: "Master of Ministry (MMIN)" },
+    { code: "MMIN 602", title: "Church Management I", units: 3, yearLevel: "General / All", category: "Master of Ministry (MMIN)" },
+    { code: "MMIN 603", title: "Church Management II", units: 3, yearLevel: "General / All", category: "Master of Ministry (MMIN)" },
+    { code: "MMIN 604", title: "Worship Leadership", units: 3, yearLevel: "General / All", category: "Master of Ministry (MMIN)" },
+    { code: "MMIN 605", title: "Music Directing and Management", units: 3, yearLevel: "General / All", category: "Master of Ministry (MMIN)" },
+
+    // DTH 700 Series (Doctor of Theology / 700)
+    { code: "DTH 701", title: "Parallel Study of the Book of Revelation", units: 3, yearLevel: "General / All", category: "Doctor of Theology (DTH)" },
+    { code: "DTH 702", title: "Theological Study of the Trinity", units: 3, yearLevel: "General / All", category: "Doctor of Theology (DTH)" },
+    { code: "DTH 703", title: "Genesis 1–11", units: 3, yearLevel: "General / All", category: "Doctor of Theology (DTH)" },
+    { code: "DTH 704", title: "Dispensational and Covenant Theology", units: 3, yearLevel: "General / All", category: "Doctor of Theology (DTH)" },
+    { code: "DTH 705", title: "21st Century Christian Ethics", units: 3, yearLevel: "General / All", category: "Doctor of Theology (DTH)" },
+];
+
+/* =========================================================
+   FACULTY INSTRUCTOR ROSTER HELPER
+========================================================= */
+
+export interface FacultyInstructorOption {
+    fullName: string;
+    academicRank?: string;
+    department?: string;
+    email?: string;
+}
+
+export function getSystemFacultyList(): FacultyInstructorOption[] {
+    const list: FacultyInstructorOption[] = [];
+    const seen = new Set<string>();
+
+    const add = (name: string, rank?: string, dept?: string, email?: string) => {
+        const clean = name.trim();
+        if (!clean || seen.has(clean.toLowerCase())) return;
+        seen.add(clean.toLowerCase());
+        list.push({ fullName: clean, academicRank: rank, department: dept, email });
+    };
+
+    // 1. Load active roster from Teachers & Faculty Corner in localStorage
+    try {
+        const raw = localStorage.getItem("mbs_faculty_staff_catalog_v2");
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+                parsed.forEach((f: any) => {
+                    const honorific = f.honorific ? `${f.honorific} ` : "";
+                    const suffix = f.suffix ? `, ${f.suffix}` : "";
+                    const full = `${honorific}${f.firstName || ""} ${f.lastName || ""}${suffix}`.trim();
+                    add(full, f.academicRank || f.specialization, f.department, f.email);
+                });
+            }
+        }
+    } catch {}
+
+    // 2. Default faculty professors & instructors
+    add("Dr. Samuel Vance, Th.D.", "Dean of Academic Affairs & Professor of Systematic Theology", "School of Theology & Biblical Studies");
+    add("Prof. Nathan Cole, M.Div.", "Associate Professor of Old Testament Literature", "School of Theology & Biblical Studies");
+    add("Dr. Elizabeth Warren, Ph.D.", "Professor of New Testament Exegesis & Koine Greek", "School of Theology & Biblical Studies");
+    add("Pastor David Morales, D.Min.", "Senior Lecturer in Pastoral Care & Church Planting", "Department of Pastoral Ministry & Missions");
+    add("Dr. Arthur Pink, Ph.D.", "Dean of Graduate Seminary & Historical Theology", "Graduate Seminary & Leadership Institute");
+    add("Bishop Marcus Reed, D.Min.", "Director of Practical Ministry & Homiletics", "Department of Practical Ministry & Church Planting");
+    add("Prof. Aaron Levi, M.A.", "Lecturer in Biblical Hebrew & Semitic Syntax", "Biblical Languages Hub");
+    add("Dr. Constantine Palmer, Ph.D.", "Professor of Greek Grammar & Hermeneutics", "Biblical Languages Hub");
+    add("Rev. Timothy Hudson, D.Miss.", "Senior Lecturer in Asian Missions & Church Planting", "Global Missions Hub");
+    add("Dr. Deborah Vance, Ph.D.", "Professor of Biblical Counseling & Pastoral Care", "Pastoral Counseling Hub");
+    add("Pastor Caleb Thorne, M.Div.", "Lecturer in Personal Evangelism & Discipleship", "Department of Practical Ministry");
+    add("Rev. Jonathan Edwards, Th.M.", "Lecturer in Systematic Theology & Historical Doctrine", "School of Theology & Biblical Studies");
+    add("Dr. Elizabeth Grace, Ph.D.", "Lecturer in Apostolic Epistles & Church History", "School of Theology & Biblical Studies");
+
+    return list;
+}
+
 export interface CourseProgram {
     id: string;
     code: string;
@@ -490,6 +609,21 @@ class CourseCurriculumService {
         for (const c of courses) {
             const found = c.subjects.find(s => s.code.toUpperCase() === clean);
             if (found) return found;
+        }
+        const prescribed = PRESCRIBED_THEOLOGICAL_SUBJECTS.find(p => p.code.toUpperCase() === clean);
+        if (prescribed) {
+            return {
+                code: prescribed.code,
+                title: prescribed.title,
+                units: prescribed.units,
+                lectureHours: prescribed.units,
+                labHours: 0,
+                schedule: "Fri-Sun 8:00 AM - 12:00 PM (Modular)",
+                room: "Theology Hall • Room 101",
+                instructor: "Faculty Roster",
+                modeOfLearning: "Modular Field Cohort",
+                yearLevel: prescribed.yearLevel
+            };
         }
         return undefined;
     }
