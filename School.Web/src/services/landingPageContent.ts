@@ -52,7 +52,9 @@ export interface PromoVideoSettings {
     ctaText: string;
     showCaptions: boolean;
     autoPlay: boolean;
-    scenes: PromoScene[];
+    loop?: boolean;
+    muted?: boolean;
+    scenes?: PromoScene[];
 }
 
 export interface ColorThemeSettings {
@@ -277,81 +279,18 @@ export const DEFAULT_LANDING_CONTENT: LandingPageContent = {
         },
     ],
     promoVideo: {
-        mode: "cinematic",
-        videoUrl: "",
-        badgeText: "OFFICIAL 2026 PROMO • 4K HDR",
-        videoTitle: "Mobile Bible School: The Vision & Movement",
-        videoTagline: "Watch how our mobile modular curriculum brings accredited theological training directly into remote churches and communities.",
+        mode: "embed",
+        videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+        badgeText: "OFFICIAL PROMOTIONAL VIDEO • 4K",
+        videoTitle: "Mobile Bible School: Life, Doctrine & Ministry",
+        videoTagline: "Watch how our accredited theological curriculum equips pastors and servants of the Word worldwide.",
         durationLabel: "03:45",
-        ctaText: "Apply for Next Cohort",
-        showCaptions: true,
-        autoPlay: false,
-        scenes: [
-            {
-                id: "scene-1",
-                chapterNumber: "01",
-                chapterLabel: "THE VISION",
-                title: "The Seminary Comes to Your City",
-                subtitle: "No pastor should have to abandon their congregation to receive rigorous theological training. We bring the seminary directly to the frontier.",
-                quoteGreek: "ἀποστελλόμενοι εἰς τὸν κόσμον",
-                quoteEnglish: "“Sent into the harvest fields with uncompromising theological bedrock.”",
-                locationBadge: "REGIONAL MISSION HUBS",
-                durationSeconds: 6,
-                bgGradient: "linear-gradient(135deg, #090e17 0%, #0d1e38 50%, #15294a 100%)",
-                imageUrl: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1600&q=80",
-                eventBadge: "ANNUAL SCHOOL CONVOCATION • THEOLOGICAL SUMMIT",
-                eventDate: "November 14–16, 2026 • Metro Manila Campus & Regional Hubs",
-                eventDescription: "3-day campus gathering with master-class expository lectures, faculty panels, and praise."
-            },
-            {
-                id: "scene-2",
-                chapterNumber: "02",
-                chapterLabel: "GREEK & EXEGESIS",
-                title: "The Grammar of Grace: Pauline Epistles in Context",
-                subtitle: "Observing the textual syntax of Ephesians 2:1–10. Examining causative participles and theological implications for local pastoral preaching.",
-                quoteGreek: "χάριτί ἐστε σεσῳσμένοι διὰ πίστεως",
-                quoteEnglish: "“By grace you have been saved through faith” — Ephesians 2:8",
-                locationBadge: "HERMENEUTICS LAB • 3.0 UNITS",
-                durationSeconds: 7,
-                bgGradient: "linear-gradient(135deg, #0f1712 0%, #132b1e 50%, #1b3d2b 100%)",
-                imageUrl: "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=1600&q=80",
-                eventBadge: "CAMPUS WORKSHOP • GREEK EXEGESIS & INDUCTIVE STUDY",
-                eventDate: "December 04–06, 2026 • North Luzon Regional Hub",
-                eventDescription: "Hands-on syntax diagramming and original language analysis for biblical sermon drafting."
-            },
-            {
-                id: "scene-3",
-                chapterNumber: "03",
-                chapterLabel: "OFFLINE FIELD TECH",
-                title: "Zero Internet? Offline Field Satellite Technology",
-                subtitle: "Our rugged solar-powered mobile servers deliver thousands of hours of master-level commentaries and digital libraries to remote islands.",
-                quoteGreek: "κηρύξατε τὸ εὐαγγέλιον πάσῃ τῇ κτίσει",
-                quoteEnglish: "“Preach the gospel to all creation” — Mark 16:15",
-                locationBadge: "MBS OFFLINE CLOUD CAMPUS",
-                durationSeconds: 6,
-                bgGradient: "linear-gradient(135deg, #170d1e 0%, #2a133b 50%, #3e1b54 100%)",
-                imageUrl: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=1600&q=80",
-                eventBadge: "MISSION OUTREACH • PROVINCIAL FIELD PRACTICUM",
-                eventDate: "January 15–17, 2027 • Visayas & Mindanao Mission Frontiers",
-                eventDescription: "Field cohort deployment for community evangelism, pastoral counseling, and leadership clinics."
-            },
-            {
-                id: "scene-4",
-                chapterNumber: "04",
-                chapterLabel: "ORDINATION & HARVEST",
-                title: "Commissioning Faithful Servants of the Word",
-                subtitle: "Over 1,200 pastors ordained and 340 indigenous churches planted worldwide. Your ministry journey starts where God called you today.",
-                quoteGreek: "σπούδασον σεαυτὸν δόκιμον παραστῆσαι τῷ Θεῷ",
-                quoteEnglish: "“Present yourself approved to God, rightly handling the word of truth” — 2 Tim 2:15",
-                locationBadge: "GRADUATION & PASTORAL ORDINATION",
-                durationSeconds: 7,
-                bgGradient: "linear-gradient(135deg, #1a1608 0%, #33260c 50%, #4a3814 100%)",
-                imageUrl: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1600&q=80",
-                eventBadge: "COMMENCEMENT • BACCALAUREATE & PASTORAL ORDINATION",
-                eventDate: "February 19–21, 2027 • Main Seminary Auditorium",
-                eventDescription: "Celebrating graduating cohorts receiving theological degrees and laying on of hands for pastoral ministry."
-            },
-        ],
+        ctaText: "Apply for Admission",
+        showCaptions: false,
+        autoPlay: true,
+        loop: true,
+        muted: true,
+        scenes: [],
     },
     colorTheme: DEFAULT_COLOR_THEME,
 };
@@ -365,23 +304,7 @@ export const getLandingPageContent = (): LandingPageContent => {
         if (stored) {
             const parsed = JSON.parse(stored);
             const promo = parsed.promoVideo || {};
-            const parsedScenes = Array.isArray(promo.scenes) && promo.scenes.length > 0 ? promo.scenes : DEFAULT_LANDING_CONTENT.promoVideo.scenes;
-            const mergedScenes = parsedScenes.map((s: any, idx: number) => {
-                const def = DEFAULT_LANDING_CONTENT.promoVideo.scenes[idx] || DEFAULT_LANDING_CONTENT.promoVideo.scenes[0];
-                return {
-                    ...def,
-                    ...s,
-                    imageUrl: s.imageUrl !== undefined ? s.imageUrl : def.imageUrl,
-                    imageName: s.imageName,
-                    videoUrl: s.videoUrl,
-                    videoName: s.videoName,
-                    videoSize: s.videoSize,
-                    mediaType: s.mediaType,
-                    eventBadge: s.eventBadge || def.eventBadge,
-                    eventDate: s.eventDate || def.eventDate,
-                    eventDescription: s.eventDescription || def.eventDescription,
-                };
-            });
+            const mergedScenes: PromoScene[] = Array.isArray(promo.scenes) ? promo.scenes : [];
 
             const parsedTheme = parsed.colorTheme || {};
             const resolvedTheme: ColorThemeSettings = {

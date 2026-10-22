@@ -9,7 +9,6 @@ import {
     type LandingPageContent,
     type FieldModuleItem,
     type PromoVideoSettings,
-    type PromoScene,
     type ColorThemeSettings
 } from "../../services/landingPageContent";
 import { PromoVideoPlayer } from "../../components/PromoVideoPlayer";
@@ -39,14 +38,6 @@ import {
 interface LandingPageEditorProps {
     onNavigateToSite?: () => void;
 }
-
-const GRADIENT_PRESETS = [
-    { name: "Deep Navy Blue", value: "linear-gradient(135deg, #090e17 0%, #0d1e38 50%, #15294a 100%)" },
-    { name: "Emerald Forest", value: "linear-gradient(135deg, #0f1712 0%, #132b1e 50%, #1b3d2b 100%)" },
-    { name: "Royal Amethyst", value: "linear-gradient(135deg, #170d1e 0%, #2a133b 50%, #3e1b54 100%)" },
-    { name: "Golden Harvest", value: "linear-gradient(135deg, #1a1608 0%, #33260c 50%, #4a3814 100%)" },
-    { name: "Obsidian Ruby", value: "linear-gradient(135deg, #1c0a0a 0%, #331313 50%, #471a1a 100%)" },
-];
 
 export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({ onNavigateToSite }) => {
     const [content, setContent] = useState<LandingPageContent>(getLandingPageContent);
@@ -101,115 +92,6 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({ onNavigate
                 [field]: value,
             },
         }));
-    };
-
-    const handleSceneChange = (index: number, field: keyof PromoScene, value: any) => {
-        setContent(prev => {
-            const scenes = [...prev.promoVideo.scenes];
-            scenes[index] = {
-                ...scenes[index],
-                [field]: value,
-            };
-            return {
-                ...prev,
-                promoVideo: {
-                    ...prev.promoVideo,
-                    scenes,
-                },
-            };
-        });
-    };
-
-    const processSceneMediaFile = async (index: number, file: File) => {
-        const scene = content.promoVideo.scenes[index];
-        const key = `scene_media_${scene.id || index}`;
-
-        try {
-            if (file.type.startsWith("video/")) {
-                const res = await saveVideoMedia(key, file);
-                setContent(prev => {
-                    const scenes = [...prev.promoVideo.scenes];
-                    scenes[index] = {
-                        ...scenes[index],
-                        mediaType: "video",
-                        videoUrl: res.url,
-                        videoName: res.name,
-                        videoSize: res.size,
-                    };
-                    return {
-                        ...prev,
-                        promoVideo: {
-                            ...prev.promoVideo,
-                            scenes,
-                        },
-                    };
-                });
-            } else {
-                // Photo / Image file: Read as Base64 Data URL for instant rendering & persistence
-                const reader = new FileReader();
-                reader.onload = async (uploadEvt) => {
-                    const dataUrl = uploadEvt.target?.result as string;
-                    await saveVideoMedia(key, file);
-                    setContent(prev => {
-                        const scenes = [...prev.promoVideo.scenes];
-                        scenes[index] = {
-                            ...scenes[index],
-                            mediaType: "image",
-                            imageUrl: dataUrl,
-                            imageName: file.name,
-                            videoUrl: undefined,
-                            videoName: undefined,
-                            videoSize: undefined,
-                        };
-                        return {
-                            ...prev,
-                            promoVideo: {
-                                ...prev.promoVideo,
-                                scenes,
-                            },
-                        };
-                    });
-                };
-                reader.readAsDataURL(file);
-            }
-            setSavedNotification(true);
-            setTimeout(() => setSavedNotification(false), 3000);
-        } catch (err) {
-            console.error("Error processing scene media:", err);
-            alert("Failed to upload media file. Please check file format.");
-        }
-    };
-
-    const handleSceneMediaUpload = async (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        await processSceneMediaFile(index, file);
-    };
-
-    const handleSceneMediaRemove = async (index: number) => {
-        const scene = content.promoVideo.scenes[index];
-        const key = `scene_media_${scene.id || index}`;
-        await deleteVideoMedia(key);
-
-        setContent(prev => {
-            const scenes = [...prev.promoVideo.scenes];
-            scenes[index] = {
-                ...scenes[index],
-                imageUrl: "",
-                imageName: undefined,
-                videoUrl: undefined,
-                videoName: undefined,
-                videoSize: undefined,
-                mediaType: undefined,
-            };
-            return {
-                ...prev,
-                promoVideo: {
-                    ...prev.promoVideo,
-                    scenes,
-                },
-            };
-        });
     };
 
     const handleModuleChange = (index: number, field: keyof FieldModuleItem, value: any) => {
@@ -829,16 +711,16 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({ onNavigate
                 <div className="editor-card">
                     <h3>
                         <Film size={18} color="#1877f2" />
-                        Promotional Video Showcase &amp; Reel
+                        Automatic Promotional Video Showcase
                     </h3>
                     <p style={{ margin: "4px 0 16px", color: "#65676b", fontSize: "13px" }}>
-                        Configure the promotional video displayed in the Apple Studio Display frame on your public homepage.
-                        Choose between an animated cinematic multi-scene reel or embed a custom video stream from YouTube, Vimeo, or direct MP4.
+                        Configure the promotional video that automatically plays on your public landing page.
+                        Upload an institutional video file (MP4/WebM) or embed a video stream from YouTube, Vimeo, or direct MP4.
                     </p>
 
                     {/* PLAYBACK MODE SELECTOR */}
                     <label style={{ fontSize: "12px", fontWeight: 700, color: "#050505", display: "block", marginBottom: 8 }}>
-                        Video Presentation Mode
+                        Video Presentation Source
                     </label>
                     <div className="editor-mode-toggle-group">
                         <button
@@ -852,20 +734,11 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({ onNavigate
 
                         <button
                             type="button"
-                            className={`editor-mode-btn ${content.promoVideo.mode === "cinematic" ? "active" : ""}`}
-                            onClick={() => handleVideoSettingChange("mode", "cinematic")}
-                        >
-                            <Film size={16} />
-                            <span>🎬 Cinematic Animated Reel</span>
-                        </button>
-
-                        <button
-                            type="button"
-                            className={`editor-mode-btn ${content.promoVideo.mode === "embed" ? "active" : ""}`}
+                            className={`editor-mode-btn ${content.promoVideo.mode === "embed" || content.promoVideo.mode === "cinematic" ? "active" : ""}`}
                             onClick={() => handleVideoSettingChange("mode", "embed")}
                         >
                             <Tv size={16} />
-                            <span>📺 External Stream (YouTube/Link)</span>
+                            <span>📺 External Stream URL (YouTube / Vimeo / MP4 Link)</span>
                         </button>
                     </div>
 
@@ -879,7 +752,7 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({ onNavigate
                                         {content.promoVideo.uploadedVideoName || "Custom Promotional Video"}
                                     </div>
                                     <div style={{ fontSize: 11, color: "#65676b" }}>
-                                        Size: {formatFileSize(content.promoVideo.uploadedVideoSize)} • Stored locally for instant playback
+                                        Size: {formatFileSize(content.promoVideo.uploadedVideoSize)} • Stored locally for instant automatic playback
                                     </div>
                                 </div>
                             </div>
@@ -921,33 +794,45 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({ onNavigate
                                 Click or Drag &amp; Drop to Upload Promotional Video
                             </div>
                             <div className="video-upload-text-sub">
-                                Supports MP4, WebM, MOV files up to 500MB • Stored directly in browser IndexedDB
+                                Supports MP4, WebM, MOV files up to 500MB • Stored directly in browser for instant playback
                             </div>
                         </label>
                     )}
 
                     {/* GENERAL VIDEO METADATA */}
                     <div className="editor-form-grid">
+                        <div className="editor-field-group editor-form-full">
+                            <label>External Stream Video URL (YouTube, Vimeo, or direct .mp4)</label>
+                            <input
+                                type="text"
+                                value={content.promoVideo.videoUrl}
+                                onChange={e => handleVideoSettingChange("videoUrl", e.target.value)}
+                                placeholder="e.g. https://www.youtube.com/watch?v=... or https://vimeo.com/... or https://domain.com/video.mp4"
+                            />
+                            <span className="editor-field-hint">
+                                Paste any YouTube link, Vimeo link, or direct MP4 URL. If empty, the system automatically uses the official seminary showcase.
+                            </span>
+                        </div>
+
                         <div className="editor-field-group">
                             <label>Video Badge Tag</label>
                             <input
                                 type="text"
                                 value={content.promoVideo.badgeText}
                                 onChange={e => handleVideoSettingChange("badgeText", e.target.value)}
-                                placeholder="e.g. OFFICIAL 2026 PROMO • 4K HDR"
+                                placeholder="e.g. OFFICIAL PROMOTIONAL VIDEO • 4K"
                             />
                             <span className="editor-field-hint">Top right badge on video frame</span>
                         </div>
 
                         <div className="editor-field-group">
-                            <label>Display Duration</label>
+                            <label>Video Overlay CTA Button Label</label>
                             <input
                                 type="text"
-                                value={content.promoVideo.durationLabel}
-                                onChange={e => handleVideoSettingChange("durationLabel", e.target.value)}
-                                placeholder="e.g. 03:45"
+                                value={content.promoVideo.ctaText}
+                                onChange={e => handleVideoSettingChange("ctaText", e.target.value)}
+                                placeholder="e.g. Apply for Admission"
                             />
-                            <span className="editor-field-hint">Shown in playback scrubber</span>
                         </div>
 
                         <div className="editor-field-group editor-form-full">
@@ -956,12 +841,12 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({ onNavigate
                                 type="text"
                                 value={content.promoVideo.videoTitle}
                                 onChange={e => handleVideoSettingChange("videoTitle", e.target.value)}
-                                placeholder="e.g. Mobile Bible School: The Vision & Movement"
+                                placeholder="e.g. Mobile Bible School: Life, Doctrine & Ministry"
                             />
                         </div>
 
                         <div className="editor-field-group editor-form-full">
-                            <label>Video Tagline / Overview</label>
+                            <label>Video Tagline / Subtitle</label>
                             <textarea
                                 rows={2}
                                 value={content.promoVideo.videoTagline}
@@ -970,295 +855,50 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({ onNavigate
                             />
                         </div>
 
-                        <div className="editor-field-group">
-                            <label>Video Overlay CTA Button</label>
-                            <input
-                                type="text"
-                                value={content.promoVideo.ctaText}
-                                onChange={e => handleVideoSettingChange("ctaText", e.target.value)}
-                                placeholder="e.g. Apply for Next Cohort"
-                            />
-                        </div>
+                        {/* PLAYBACK BEHAVIOR TOGGLES */}
+                        <div className="editor-field-group editor-form-full" style={{ background: "#f0f2f5", padding: "16px", borderRadius: "10px" }}>
+                            <label style={{ fontSize: "13px", fontWeight: 700, marginBottom: "8px", display: "block" }}>
+                                Automatic Playback Settings
+                            </label>
+                            <div style={{ display: "flex", flexDirection: "column", gap: "10px", fontSize: "13px" }}>
+                                <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={content.promoVideo.autoPlay ?? true}
+                                        onChange={e => handleVideoSettingChange("autoPlay", e.target.checked)}
+                                        style={{ width: "16px", height: "16px" }}
+                                    />
+                                    <span><strong>Autoplay Video on Landing Page:</strong> Video starts playing automatically when visitors view the page.</span>
+                                </label>
 
-                        {/* STREAM URL FIELD (ONLY WHEN EMBED MODE OR OPTIONAL) */}
-                        <div className="editor-field-group editor-form-full">
-                            <label>External Stream Video URL (YouTube, Vimeo, or .mp4)</label>
-                            <input
-                                type="text"
-                                value={content.promoVideo.videoUrl}
-                                onChange={e => handleVideoSettingChange("videoUrl", e.target.value)}
-                                placeholder="e.g. https://www.youtube.com/watch?v=... or https://vimeo.com/... or https://domain.com/video.mp4"
-                            />
-                            <span className="editor-field-hint">
-                                Paste any YouTube link, Vimeo link, or direct MP4 URL. If empty, the system automatically uses the cinematic animated reel.
-                            </span>
-                        </div>
-                    </div>
+                                <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={content.promoVideo.loop ?? true}
+                                        onChange={e => handleVideoSettingChange("loop", e.target.checked)}
+                                        style={{ width: "16px", height: "16px" }}
+                                    />
+                                    <span><strong>Loop Continuously:</strong> Seamlessly restart video from beginning when playback finishes.</span>
+                                </label>
 
-                    {/* CINEMATIC SCENES ACCORDION */}
-                    <div style={{ marginTop: 24 }}>
-                        <h4 style={{ margin: "0 0 4px", fontSize: "15px", fontWeight: 700, color: "#050505" }}>
-                            Cinematic Reel Scenes ({content.promoVideo.scenes?.length || 0} Chapters)
-                        </h4>
-                        <p style={{ margin: "0 0 12px", fontSize: "12.5px", color: "#65676b" }}>
-                            Customize each scene’s headline, voiceover narration script, theological Greek quote, and background atmosphere.
-                        </p>
-
-                        <div className="scenes-accordion-deck">
-                            {content.promoVideo.scenes?.map((scene, sIdx) => (
-                                <div key={scene.id || sIdx} className="scene-editor-card">
-                                    <div className="scene-editor-header">
-                                        <span>Scene {sIdx + 1}: {scene.chapterLabel}</span>
-                                        <span className="scene-editor-badge">CHAPTER {scene.chapterNumber}</span>
-                                    </div>
-
-                                    <div className="scene-editor-body">
-                                        <div className="editor-form-grid">
-                                            <div className="editor-field-group">
-                                                <label>Chapter Label (Short)</label>
-                                                <input
-                                                    type="text"
-                                                    value={scene.chapterLabel}
-                                                    onChange={e => handleSceneChange(sIdx, "chapterLabel", e.target.value)}
-                                                    placeholder="e.g. GREEK & EXEGESIS"
-                                                />
-                                            </div>
-
-                                            <div className="editor-field-group">
-                                                <label>Location / Intensive Badge</label>
-                                                <input
-                                                    type="text"
-                                                    value={scene.locationBadge}
-                                                    onChange={e => handleSceneChange(sIdx, "locationBadge", e.target.value)}
-                                                    placeholder="e.g. HERMENEUTICS LAB • 3.0 UNITS"
-                                                />
-                                            </div>
-
-                                            <div className="editor-field-group editor-form-full">
-                                                <label>Scene Main Headline</label>
-                                                <input
-                                                    type="text"
-                                                    value={scene.title}
-                                                    onChange={e => handleSceneChange(sIdx, "title", e.target.value)}
-                                                    placeholder="Headline shown in scene"
-                                                />
-                                            </div>
-
-                                            <div className="editor-field-group editor-form-full">
-                                                <label>Narration / Voiceover Subtitle</label>
-                                                <textarea
-                                                    rows={2}
-                                                    value={scene.subtitle}
-                                                    onChange={e => handleSceneChange(sIdx, "subtitle", e.target.value)}
-                                                    placeholder="Voiceover script or narrative description..."
-                                                />
-                                            </div>
-
-                                            <div className="editor-field-group">
-                                                <label>Promoted Event / Activity Title</label>
-                                                <input
-                                                    type="text"
-                                                    value={scene.eventBadge || ""}
-                                                    onChange={e => handleSceneChange(sIdx, "eventBadge", e.target.value)}
-                                                    placeholder="e.g. ANNUAL CONVOCATION & SUMMIT"
-                                                />
-                                            </div>
-
-                                            <div className="editor-field-group">
-                                                <label>Event Date & Location</label>
-                                                <input
-                                                    type="text"
-                                                    value={scene.eventDate || ""}
-                                                    onChange={e => handleSceneChange(sIdx, "eventDate", e.target.value)}
-                                                    placeholder="e.g. Nov 14–16, 2026 • Metro Manila Campus"
-                                                />
-                                            </div>
-
-                                            <div className="slide-upload-box editor-form-full">
-                                                <label style={{ fontSize: "12.5px", fontWeight: 700, color: "#050505", display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
-                                                    <UploadCloud size={15} color="#1877f2" />
-                                                    <span>Reel Slide Media (Upload Video or Photo)</span>
-                                                </label>
-
-                                                {/* UPLOADED FILE BANNER IF MEDIA IS PRESENT */}
-                                                {(scene.videoUrl || scene.imageUrl) ? (
-                                                    <div className="video-uploaded-file-banner" style={{ marginTop: 0, marginBottom: 10 }}>
-                                                        <div className="video-file-info">
-                                                            {scene.mediaType === "video" || scene.videoUrl ? (
-                                                                <Video size={24} color="#30d158" />
-                                                            ) : (
-                                                                <div style={{ width: 44, height: 44, borderRadius: 8, overflow: "hidden", flexShrink: 0, border: "1px solid #ccd0d5", background: "#000" }}>
-                                                                    <img
-                                                                        src={scene.imageUrl}
-                                                                        alt="Preview"
-                                                                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                                                                        onError={e => { (e.target as HTMLElement).style.display = "none"; }}
-                                                                    />
-                                                                </div>
-                                                            )}
-                                                            <div>
-                                                                <div style={{ fontWeight: 700, fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}>
-                                                                    <span>
-                                                                        {scene.videoName || scene.imageName || (scene.mediaType === "video" || scene.videoUrl ? "Custom Video Clip" : "Promotional Event Photo")}
-                                                                    </span>
-                                                                    <span style={{ fontSize: 10, fontWeight: 800, padding: "2px 6px", borderRadius: 4, background: (scene.mediaType === "video" || scene.videoUrl) ? "#e7f3ff" : "#ecfdf5", color: (scene.mediaType === "video" || scene.videoUrl) ? "#1877f2" : "#059669" }}>
-                                                                        {(scene.mediaType === "video" || scene.videoUrl) ? "🎥 VIDEO" : "📷 PHOTO"}
-                                                                    </span>
-                                                                </div>
-                                                                <div style={{ fontSize: 11, color: "#65676b" }}>
-                                                                    {scene.videoSize ? `${formatFileSize(scene.videoSize)} • ` : ""}Plays in Chapter {scene.chapterNumber} with Ken Burns &amp; contrast scrim
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                                                            <label
-                                                                className="btn-editor-preview"
-                                                                style={{ cursor: "pointer", margin: 0, padding: "6px 12px", fontSize: 12, display: "inline-flex", alignItems: "center", gap: 6 }}
-                                                            >
-                                                                <UploadCloud size={13} />
-                                                                <span>Upload New Video / Photo</span>
-                                                                <input
-                                                                    type="file"
-                                                                    accept="image/*,video/mp4,video/webm,video/ogg,video/quicktime"
-                                                                    style={{ display: "none" }}
-                                                                    onChange={e => handleSceneMediaUpload(sIdx, e)}
-                                                                />
-                                                            </label>
-                                                            <button
-                                                                type="button"
-                                                                className="btn-remove-video"
-                                                                style={{ padding: "6px 10px", fontSize: 12 }}
-                                                                onClick={() => handleSceneMediaRemove(sIdx)}
-                                                            >
-                                                                <Trash2 size={13} />
-                                                                <span>Remove</span>
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                ) : (
-                                                    /* BIG UPLOAD BUTTON / DROPZONE IF EMPTY */
-                                                    <label
-                                                        className="video-upload-dropzone"
-                                                        style={{ padding: "16px 20px", marginTop: 0, marginBottom: 10, cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}
-                                                    >
-                                                        <input
-                                                            type="file"
-                                                            accept="image/*,video/mp4,video/webm,video/ogg,video/quicktime"
-                                                            style={{ display: "none" }}
-                                                            onChange={e => handleSceneMediaUpload(sIdx, e)}
-                                                        />
-                                                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                                                            <UploadCloud size={18} color="#1877f2" />
-                                                            <span style={{ fontSize: 13.5, fontWeight: 700, color: "#1877f2" }}>
-                                                                Upload Video or Photo for Slide {sIdx + 1}
-                                                            </span>
-                                                        </div>
-                                                        <span style={{ fontSize: 11.5, color: "#65676b" }}>
-                                                            Supports MP4, WebM, MOV, JPG, PNG, WebP (Shown with smooth zoom and scrim overlay)
-                                                        </span>
-                                                    </label>
-                                                )}
-
-                                                {/* OPTIONAL EXTERNAL URL INPUT */}
-                                                <div style={{ marginTop: 4 }}>
-                                                    <details style={{ fontSize: 12, color: "#65676b" }}>
-                                                        <summary style={{ cursor: "pointer", userSelect: "none", color: "#1877f2", fontWeight: 600 }}>
-                                                            {scene.imageUrl || scene.videoUrl ? "Or edit media web link manually" : "Or enter external photo / video link"}
-                                                        </summary>
-                                                        <div style={{ marginTop: 8, display: "flex", gap: 8 }}>
-                                                            <input
-                                                                type="text"
-                                                                value={scene.imageUrl || scene.videoUrl || ""}
-                                                                onChange={e => {
-                                                                    const val = e.target.value;
-                                                                    if (val.match(/\.(mp4|webm|ogg|mov)$/i)) {
-                                                                        handleSceneChange(sIdx, "videoUrl", val);
-                                                                        handleSceneChange(sIdx, "mediaType", "video");
-                                                                    } else {
-                                                                        handleSceneChange(sIdx, "imageUrl", val);
-                                                                        handleSceneChange(sIdx, "mediaType", "image");
-                                                                    }
-                                                                }}
-                                                                placeholder="https://images.unsplash.com/... or https://domain.com/video.mp4"
-                                                                style={{ flex: 1, fontSize: 12, padding: "7px 10px", borderRadius: 6, border: "1px solid #ccd0d5" }}
-                                                            />
-                                                        </div>
-                                                    </details>
-                                                </div>
-                                            </div>
-
-                                            <div className="editor-field-group editor-form-full">
-                                                <label>Event Activity Highlights / Description</label>
-                                                <textarea
-                                                    rows={2}
-                                                    value={scene.eventDescription || ""}
-                                                    onChange={e => handleSceneChange(sIdx, "eventDescription", e.target.value)}
-                                                    placeholder="Brief overview of the activity, workshops, or graduation highlights..."
-                                                />
-                                            </div>
-
-                                            <div className="editor-field-group">
-                                                <label>Scripture / Greek Exegesis Phrase</label>
-                                                <input
-                                                    type="text"
-                                                    value={scene.quoteGreek || ""}
-                                                    onChange={e => handleSceneChange(sIdx, "quoteGreek", e.target.value)}
-                                                    placeholder="e.g. χάριτί ἐστε σεσῳσμένοι"
-                                                />
-                                            </div>
-
-                                            <div className="editor-field-group">
-                                                <label>Scripture English Translation</label>
-                                                <input
-                                                    type="text"
-                                                    value={scene.quoteEnglish || ""}
-                                                    onChange={e => handleSceneChange(sIdx, "quoteEnglish", e.target.value)}
-                                                    placeholder="e.g. “By grace you have been saved through faith”"
-                                                />
-                                            </div>
-
-                                            <div className="editor-field-group">
-                                                <label>Scene Duration (Seconds)</label>
-                                                <select
-                                                    value={scene.durationSeconds || 6}
-                                                    onChange={e => handleSceneChange(sIdx, "durationSeconds", Number(e.target.value))}
-                                                    style={{ width: "100%", padding: "9px 12px", borderRadius: "8px", border: "1px solid #ccd0d5" }}
-                                                >
-                                                    <option value={4}>4 seconds (Fast)</option>
-                                                    <option value={6}>6 seconds (Standard)</option>
-                                                    <option value={8}>8 seconds (Extended)</option>
-                                                    <option value={10}>10 seconds (Slow Cinematic)</option>
-                                                </select>
-                                            </div>
-
-                                            <div className="editor-field-group">
-                                                <label>Background Atmosphere Theme</label>
-                                                <div className="gradient-preset-picker">
-                                                    {GRADIENT_PRESETS.map((preset, pIdx) => (
-                                                        <button
-                                                            key={pIdx}
-                                                            type="button"
-                                                            className={`gradient-swatch ${scene.bgGradient === preset.value ? "selected" : ""}`}
-                                                            style={{ background: preset.value }}
-                                                            title={preset.name}
-                                                            onClick={() => handleSceneChange(sIdx, "bgGradient", preset.value)}
-                                                        />
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
+                                <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
+                                    <input
+                                        type="checkbox"
+                                        checked={content.promoVideo.muted ?? true}
+                                        onChange={e => handleVideoSettingChange("muted", e.target.checked)}
+                                        style={{ width: "16px", height: "16px" }}
+                                    />
+                                    <span><strong>Muted by Default:</strong> Recommended for modern browsers to guarantee video autoplays without being blocked. Visitors can unmute anytime with 1 click.</span>
+                                </label>
+                            </div>
                         </div>
                     </div>
 
                     {/* LIVE INTERACTIVE VIDEO PLAYER PREVIEW */}
-                    <div className="video-live-player-preview-card">
+                    <div className="video-live-player-preview-card" style={{ marginTop: "24px" }}>
                         <h4>
                             <Play size={16} fill="#2997ff" />
-                            LIVE INTERACTIVE PROMOTIONAL VIDEO PREVIEW
+                            LIVE AUTOMATIC PROMOTIONAL VIDEO PREVIEW
                         </h4>
                         <PromoVideoPlayer
                             settings={content.promoVideo}
@@ -1266,7 +906,6 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({ onNavigate
                                 if (onNavigateToSite) onNavigateToSite();
                                 else window.open("/", "_blank");
                             }}
-                            onUploadMedia={(sIdx, file) => processSceneMediaFile(sIdx, file)}
                         />
                     </div>
                 </div>
