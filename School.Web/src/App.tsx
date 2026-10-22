@@ -39,6 +39,7 @@ import {
 // =========================================================
 
 import SalesLandingPage from "./pages/SalesLandingPage";
+import { applyGlobalTheme } from "./services/landingPageContent";
 import LandingPage from "./pages/LandingPage";
 import AboutPage from "./pages/public/AboutPage";
 import ContactPage from "./pages/public/ContactPage";
@@ -1685,6 +1686,7 @@ const navigatePublic =
     // =====================================================
 
     useEffect(() => {
+        applyGlobalTheme();
         const adminAuthenticated =
             isLoggedIn();
 

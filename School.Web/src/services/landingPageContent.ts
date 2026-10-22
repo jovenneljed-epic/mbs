@@ -359,12 +359,17 @@ export const applyGlobalTheme = (theme?: ColorThemeSettings): void => {
 
         const root = document.documentElement;
 
-                // Primary Brand (Admin Portal, Buttons, Highlights, Active Navigation)
+                const heroEnd = activeTheme.heroBgEnd || activeTheme.primaryHover || "#0a1224";
+        const heroStart = activeTheme.heroBgStart || activeTheme.primary;
+
+        // Primary Brand (Admin Portal, Buttons, Highlights, Active Navigation)
         root.style.setProperty("--mbs-maroon", activeTheme.primary);
-        root.style.setProperty("--mbs-maroon-dark", activeTheme.primaryHover);
+        root.style.setProperty("--mbs-maroon-dark", activeTheme.primaryHover || activeTheme.primary);
         root.style.setProperty("--mbs-gold", activeTheme.secondary);
         root.style.setProperty("--mbs-gold-dark", activeTheme.secondary);
-        root.style.setProperty("--mbs-maroon-deep", activeTheme.heroBgEnd || "#3c0812");
+        root.style.setProperty("--mbs-gold-subtle", `${activeTheme.secondary}26`);
+        root.style.setProperty("--mbs-maroon-deep", heroEnd);
+        root.style.setProperty("--mbs-maroon-light", activeTheme.secondary || "#941e32");
 
         root.style.setProperty("--epic-primary", activeTheme.primary);
         root.style.setProperty("--epic-primary-dark", activeTheme.primaryHover);
@@ -399,10 +404,10 @@ export const applyGlobalTheme = (theme?: ColorThemeSettings): void => {
         root.style.setProperty("--theme-secondary", activeTheme.secondary);
         root.style.setProperty("--theme-glow", activeTheme.glow);
         root.style.setProperty("--theme-hero-glow", activeTheme.heroGlow);
-        root.style.setProperty("--theme-bg-start", activeTheme.heroBgStart);
-        root.style.setProperty("--theme-bg-end", activeTheme.heroBgEnd);
+        root.style.setProperty("--theme-bg-start", heroStart);
+        root.style.setProperty("--theme-bg-end", heroEnd);
         root.style.setProperty("--theme-gradient", activeTheme.gradient);
-        root.style.setProperty("--theme-card-accent", activeTheme.cardAccent);
+        root.style.setProperty("--theme-card-accent", activeTheme.cardAccent || `${activeTheme.secondary}33`);
 
         root.setAttribute("data-theme-id", activeTheme.themeId);
     } catch (e) {

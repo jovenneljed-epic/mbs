@@ -600,7 +600,12 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
             {/* ============================================================ */}
             <section className="ub-hero-section">
                 {/* Hero architectural background */}
-                <div className="ub-hero-bg">
+                <div 
+                    className="ub-hero-bg"
+                    style={{
+                        background: `radial-gradient(circle at 80% 20%, var(--mbs-maroon) 0%, var(--mbs-maroon-dark) 45%, var(--theme-bg-end, var(--mbs-maroon-deep)) 100%)`
+                    }}
+                >
                     <div className="ub-hero-overlay" />
                     <div className="ub-hero-grid-pattern" />
                 </div>
