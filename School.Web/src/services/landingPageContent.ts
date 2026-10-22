@@ -72,6 +72,21 @@ export interface ColorThemeSettings {
 }
 
 export const COLOR_THEME_PRESETS: Record<string, ColorThemeSettings> = {
+    "seminary-maroon": {
+        themeId: "seminary-maroon",
+        name: "Seminary Maroon & Gold",
+        badge: "OFFICIAL MBS",
+        description: "Prestigious institutional deep maroon with academic gold accents & collegiate ivory backdrop.",
+        primary: "#7A1526",
+        primaryHover: "#580d1b",
+        secondary: "#F59E0B",
+        glow: "rgba(122, 21, 38, 0.35)",
+        heroGlow: "rgba(122, 21, 38, 0.2)",
+        heroBgStart: "#3c0812",
+        heroBgEnd: "#1a0408",
+        gradient: "linear-gradient(180deg, #ffffff 20%, #fde68a 65%, #f59e0b 100%)",
+        cardAccent: "rgba(122, 21, 38, 0.2)",
+    },
     "classic-navy": {
         themeId: "classic-navy",
         name: "Classic Seminary",
@@ -179,7 +194,7 @@ export const COLOR_THEME_PRESETS: Record<string, ColorThemeSettings> = {
     },
 };
 
-export const DEFAULT_COLOR_THEME: ColorThemeSettings = COLOR_THEME_PRESETS["classic-navy"];
+export const DEFAULT_COLOR_THEME: ColorThemeSettings = COLOR_THEME_PRESETS["seminary-maroon"];
 
 export interface LandingPageContent {
     ribbonText: string;
@@ -204,74 +219,61 @@ export interface LandingPageContent {
 }
 
 export const DEFAULT_LANDING_CONTENT: LandingPageContent = {
-    ribbonText: "Spring & Summer 2027 Mobile Modular Cohorts. Bring accredited biblical education directly to your local church or province.",
-    ribbonCta: "Host a Mobile Cohort",
+    ribbonText: "Now Accepting Applications for Academic Year 2026-2027. Modular Pastoral Intensives & Global Online Seminary Studies.",
+    ribbonCta: "Apply for Admission",
     schoolName: "Mobile Bible School",
-    brandTagline: "INTERNATIONAL",
-    heroBadge: "ACCREDITED THEOLOGICAL EDUCATION • ZERO RELOCATION",
-    heroTitleWhite: "Deep Biblical Truth.",
-    heroTitleGradient: "Everywhere You Are Called.",
-    heroSubtitle: "Mobile Bible School delivers rigorous, Christ-centered seminary instruction directly to local churches, mission frontiers, and bi-vocational ministers. Study where you serve.",
+    brandTagline: "Theological Seminary & Ministerial Institute",
+    heroBadge: "CHRIST-CENTERED THEOLOGICAL EDUCATION • ACCREDITED SEMINARY",
+    heroTitleWhite: "Equipping Servants of the Word",
+    heroTitleGradient: "for God's Global Kingdom",
+    heroSubtitle: "Rooted in biblical inerrancy, sound theological scholarship, expository preaching, and pastoral ministry. Nurturing gospel-driven ministers equipped to preach the Truth and shepherd the flock with integrity.",
     ctaPrimary: "Apply for Admission",
-    ctaSecondary: "Explore Field Modules",
-    guarantee1: "100% Mobile & Modular",
-    guarantee2: "Keep Working Full-Time",
-    guarantee3: "80% Subsidized Tuition",
-    carouselEyebrow: "UPCOMING FIELD INTENSIVES",
-    carouselHeadline: "Where Mobile Bible School is Heading Next.",
-    carouselSubheadline: "Experience world-class faculty on location. Each 3-day modular session equips leaders with in-depth scripture study and practical ministry skills.",
+    ctaSecondary: "Access MBS Portals",
+    guarantee1: "40+ Years of Ministry",
+    guarantee2: "100% Ministry Placement",
+    guarantee3: "35+ Church Plants & Hubs",
+    carouselEyebrow: "CURRICULUM & DEGREES",
+    carouselHeadline: "Academic & Ministerial Programs",
+    carouselSubheadline: "Comprehensive biblical instruction combining exegetical precision, systematic theology, and practical pastoral ministry training.",
     modules: [
         {
             id: "module-1",
-            eyebrow: "FIELD INTENSIVE • ADVANCED HERMENEUTICS",
-            title: "Inductive Bible Study",
-            highlight: "& Expository Exegesis",
-            description: "Master the principles of biblical interpretation without relocating. We bring veteran theological faculty directly to your local church for a 3-day intensive on Greek tools, historical contexts, and expository sermon prep.",
-            hostLocation: "Central Host Church • Metro Manila Hub",
-            date: "November 14–16, 2026",
-            units: "3 Academic Units",
-            badge: "FALL COHORT",
-            tagline: "Uncompromising biblical scholarship. Grounded in the local church.",
-            primaryCta: "Apply for Hermeneutics Cohort",
+            eyebrow: "DIPLOMA LEVEL",
+            title: "Diploma in Pastoral Studies (DPS)",
+            highlight: "Expository Preaching & Church Ministry",
+            description: "Essential training in Expository Preaching, Systematic Theology I & II, and Christian Education for Church Workers.",
+            hostLocation: "Main Seminary Campus & Regional Hubs",
+            date: "Semester Term • Fall & Spring",
+            units: "2 Years • 60 Credits",
+            badge: "PASTORAL DIPLOMA",
+            tagline: "Sound biblical doctrine that fuels passionate discipleship.",
+            primaryCta: "Apply for DPS",
         },
         {
             id: "module-2",
-            eyebrow: "CORE THEOLOGY • SYSTEMATIC DOCTRINE",
-            title: "Theology Proper &",
-            highlight: "The Doctrines of Grace",
-            description: "A foundational survey of Systematic Theology tailored for bi-vocational pastors and church leaders. Explore the character of God, Christology, Pneumatology, and the sovereign plan of redemption.",
-            hostLocation: "North Luzon Regional Center • Baguio Hub",
-            date: "December 04–06, 2026",
-            units: "3 Academic Units",
-            badge: "WINTER COHORT",
-            tagline: "Sound doctrine that fuels passionate discipleship.",
-            primaryCta: "Enroll in Systematic Theology",
+            eyebrow: "FLAGSHIP DEGREE",
+            title: "Bachelor of Theology (B.Th.)",
+            highlight: "Original Biblical Languages & Exegesis",
+            description: "In-depth study in Biblical Greek, Hebrew, Hermeneutics, Pastoral Theology, Ecclesiology, and Pauline Epistles.",
+            hostLocation: "Main Campus & Online Extension",
+            date: "Full Academic Degree Program",
+            units: "4 Years • 128 Credits",
+            badge: "FLAGSHIP DEGREE",
+            tagline: "Equipping pastors with unyielding exegetical precision.",
+            primaryCta: "Apply for B.Th.",
         },
         {
             id: "module-3",
-            eyebrow: "MINISTRY PRACTICUM • HOMILETICS LAB",
-            title: "Expository Preaching",
-            highlight: "& Pastoral Care Lab",
-            description: "Step into an interactive preaching clinic. Deliver trial messages before mentor pastors, receive constructive exegetical feedback, and learn biblical counseling techniques for church care.",
-            hostLocation: "Visayas Regional Center • Cebu Hub",
-            date: "January 15–17, 2027",
-            units: "3 Academic Units",
-            badge: "SPRING 2027",
-            tagline: "Transforming scripture insights into life-changing proclamation.",
-            primaryCta: "Register for Preaching Lab",
-        },
-        {
-            id: "module-4",
-            eyebrow: "FRONTIER MISSIONS • CHURCH EXPANSION",
-            title: "Pioneer Church Planting",
-            highlight: "& Cross-Cultural Evangelism",
-            description: "Designed for evangelists and frontier missionaries. Learn strategy, demographic mapping, disciple-making movements, and multiplying indigenous church plants in unreached rural communities.",
-            hostLocation: "Mindanao Frontier Campus • Davao Hub",
-            date: "February 19–21, 2027",
-            units: "4 Academic Units",
-            badge: "MISSION FRONTIER",
-            tagline: "Equipping disciples to take the Gospel to the unreached ends.",
-            primaryCta: "Join Church Planting Practicum",
+            eyebrow: "GRADUATE LEVEL",
+            title: "Master of Ministry & Theology (M.Min / M.Th.)",
+            highlight: "Advanced Leadership & Apologetics",
+            description: "Advanced leadership in Apologetics, Church Management, Worship Leadership, and Reformation Theology.",
+            hostLocation: "Graduate Hall & Modular Seminars",
+            date: "Modular Graduate Cohorts",
+            units: "2 Years • Graduate Seminar",
+            badge: "GRADUATE SEMINARY",
+            tagline: "Forming scholarly shepherds and seminary educators.",
+            primaryCta: "Apply for M.Min",
         },
     ],
     promoVideo: {
@@ -415,7 +417,13 @@ export const applyGlobalTheme = (theme?: ColorThemeSettings): void => {
 
         const root = document.documentElement;
 
-        // Primary Brand (Admin Portal, Buttons, Highlights, Active Navigation)
+                // Primary Brand (Admin Portal, Buttons, Highlights, Active Navigation)
+        root.style.setProperty("--mbs-maroon", activeTheme.primary);
+        root.style.setProperty("--mbs-maroon-dark", activeTheme.primaryHover);
+        root.style.setProperty("--mbs-gold", activeTheme.secondary);
+        root.style.setProperty("--mbs-gold-dark", activeTheme.secondary);
+        root.style.setProperty("--mbs-maroon-deep", activeTheme.heroBgEnd || "#3c0812");
+
         root.style.setProperty("--epic-primary", activeTheme.primary);
         root.style.setProperty("--epic-primary-dark", activeTheme.primaryHover);
         root.style.setProperty("--epic-primary-light", `${activeTheme.primary}1f`);

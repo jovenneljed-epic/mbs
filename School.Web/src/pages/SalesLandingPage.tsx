@@ -1,12 +1,19 @@
 // ============================================================
 // SalesLandingPage.tsx -> MOBILE BIBLE SCHOOL & THEOLOGICAL SEMINARY
 // Official Institutional Portal & Academic Web System
-// Every button is real, functional, interactive, and connected
+// Fully connected to Landing Page Editor (CMS) & Real-time Content
 // ============================================================
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import "./SalesLandingPage.css";
 import { API_BASE_URL } from "../config";
+import {
+    getLandingPageContent,
+    LANDING_CONTENT_EVENT,
+    applyGlobalTheme,
+    type LandingPageContent
+} from "../services/landingPageContent";
+import { PromoVideoPlayer } from "../components/PromoVideoPlayer";
 import {
     GraduationCap,
     ChevronRight,
@@ -22,7 +29,7 @@ import {
     Building2,
     Compass,
     BookOpen,
-    Calendar,
+    Calendar
 } from "lucide-react";
 
 interface SalesLandingPageProps {
@@ -50,6 +57,39 @@ interface NewsArticle {
 }
 
 export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }) => {
+    // ------------------------------------------------------------
+    // Real-time CMS Content from LandingPageEditor
+    // ------------------------------------------------------------
+    const [content, setContent] = useState<LandingPageContent>(getLandingPageContent);
+
+    useEffect(() => {
+        const initial = getLandingPageContent();
+        setContent(initial);
+        if (initial.colorTheme) {
+            applyGlobalTheme(initial.colorTheme);
+        }
+
+        const handleContentUpdate = (e: any) => {
+            if (e && e.detail) {
+                setContent(e.detail);
+                if (e.detail.colorTheme) {
+                    applyGlobalTheme(e.detail.colorTheme);
+                }
+            } else {
+                const latest = getLandingPageContent();
+                setContent(latest);
+                if (latest.colorTheme) {
+                    applyGlobalTheme(latest.colorTheme);
+                }
+            }
+        };
+
+        window.addEventListener(LANDING_CONTENT_EVENT, handleContentUpdate);
+        return () => {
+            window.removeEventListener(LANDING_CONTENT_EVENT, handleContentUpdate);
+        };
+    }, []);
+
     // Search query state
     const [searchQuery, setSearchQuery] = useState("");
 
@@ -123,6 +163,12 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
             return;
         }
 
+        if (clean === "landing-editor") {
+            if (onNavigate) onNavigate("landing-editor");
+            else window.location.href = "/admin/landing-editor";
+            return;
+        }
+
         if (onNavigate) {
             onNavigate(clean);
         } else {
@@ -153,7 +199,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                     preferredTime: "Admission Application",
                     organizationType: formData.program,
                     userRole: formData.position,
-                    notes: `[Online Admission Application - Mobile Bible School]\nProgram: ${formData.program}\nRole: ${formData.position}\nMessage: ${formData.message}`
+                    notes: `[Online Admission Application - ${content.schoolName || "Mobile Bible School"}]\nProgram: ${formData.program}\nRole: ${formData.position}\nMessage: ${formData.message}`
                 })
             });
 
@@ -179,7 +225,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
         }
     };
 
-    // The 7 Official MBS Portals
+    // The 7 Official MBS Portals (Icon Launchers)
     const portals = useMemo(() => [
         {
             id: "admission",
@@ -410,7 +456,27 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
     return (
         <div className="ub-root">
             {/* ============================================================ */}
-            {/* TOP INSTITUTIONAL HEADER & BRANDING */}
+            {/* ANNOUNCEMENT RIBBON (EDITABLE FROM CMS)                       */}
+            {/* ============================================================ */}
+            {content.ribbonText && (
+                <div className="ub-announcement-ribbon">
+                    <div className="ub-announcement-container">
+                        <span className="ub-announcement-pill">ANNOUNCEMENT</span>
+                        <span className="ub-announcement-text">{content.ribbonText}</span>
+                        {content.ribbonCta && (
+                            <button
+                                className="ub-announcement-btn"
+                                onClick={() => openAdmissionWithProgram("Bachelor of Theology (B.Th.)")}
+                            >
+                                {content.ribbonCta} →
+                            </button>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* ============================================================ */}
+            {/* TOP INSTITUTIONAL HEADER & BRANDING                          */}
             {/* ============================================================ */}
             <header className="ub-header">
                 <div className="ub-header-container">
@@ -420,8 +486,8 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                             <BookOpen className="ub-crest-icon" />
                         </div>
                         <div className="ub-title-block">
-                            <h1 className="ub-university-name">Mobile Bible School</h1>
-                            <p className="ub-university-subtitle">Theological Seminary & Ministerial Institute</p>
+                            <h1 className="ub-university-name">{content.schoolName || "Mobile Bible School"}</h1>
+                            <p className="ub-university-subtitle">{content.brandTagline || "Theological Seminary & Ministerial Institute"}</p>
                         </div>
                     </div>
 
@@ -488,14 +554,14 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                             onClick={() => openAdmissionWithProgram("Bachelor of Theology (B.Th.)")}
                             title="Open Online Admissions Application"
                         >
-                            Apply Now
+                            {content.ctaPrimary || "Apply Now"}
                         </button>
                     </div>
                 </div>
             </header>
 
             {/* ============================================================ */}
-            {/* CAMPUS HERO SECTION */}
+            {/* CAMPUS HERO SECTION (CUSTOMIZED FROM CMS)                    */}
             {/* ============================================================ */}
             <section className="ub-hero-section">
                 {/* Hero architectural background */}
@@ -508,17 +574,16 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                     <div className="ub-hero-badge-row">
                         <span className="ub-accreditation-pill">
                             <Award className="ub-pill-icon" />
-                            CHRIST-CENTERED THEOLOGICAL EDUCATION • ACCREDITED SEMINARY
+                            {content.heroBadge || "CHRIST-CENTERED THEOLOGICAL EDUCATION • ACCREDITED SEMINARY"}
                         </span>
                     </div>
 
                     <h2 className="ub-hero-title">
-                        Equipping Servants of the Word for God’s Global Kingdom
+                        {content.heroTitleWhite} {content.heroTitleGradient}
                     </h2>
 
                     <p className="ub-hero-description">
-                        Rooted in biblical inerrancy, sound theological scholarship, expository preaching, and pastoral ministry.
-                        Nurturing gospel-driven ministers equipped to preach the Truth and shepherd the flock with integrity.
+                        {content.heroSubtitle}
                     </p>
 
                     {/* Hero CTA buttons */}
@@ -527,7 +592,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                             className="ub-btn-hero-primary"
                             onClick={() => openAdmissionWithProgram("Bachelor of Theology (B.Th.)")}
                         >
-                            Apply for Admission
+                            {content.ctaPrimary || "Apply for Admission"}
                             <ArrowRight className="ub-btn-arrow" />
                         </button>
 
@@ -539,7 +604,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                                 document.getElementById("mbs-portals")?.scrollIntoView({ behavior: "smooth" });
                             }}
                         >
-                            Access MBS Portals
+                            {content.ctaSecondary || "Access MBS Portals"}
                             <ChevronRight className="ub-btn-arrow" />
                         </a>
                     </div>
@@ -566,18 +631,18 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                     {/* Quick Stats Bar */}
                     <div className="ub-hero-stats-card">
                         <div className="ub-stat-col">
-                            <div className="ub-stat-number">40+</div>
-                            <div className="ub-stat-label">Years of Ministry</div>
+                            <div className="ub-stat-number">{content.guarantee1?.split(" ")[0] || "40+"}</div>
+                            <div className="ub-stat-label">{content.guarantee1?.replace(/^\S+\s*/, "") || "Years of Ministry"}</div>
                         </div>
                         <div className="ub-stat-divider" />
                         <div className="ub-stat-col">
-                            <div className="ub-stat-number">100%</div>
-                            <div className="ub-stat-label">Ministry Placement</div>
+                            <div className="ub-stat-number">{content.guarantee2?.split(" ")[0] || "100%"}</div>
+                            <div className="ub-stat-label">{content.guarantee2?.replace(/^\S+\s*/, "") || "Ministry Placement"}</div>
                         </div>
                         <div className="ub-stat-divider" />
                         <div className="ub-stat-col">
-                            <div className="ub-stat-number">35+</div>
-                            <div className="ub-stat-label">Church Plants & Hubs</div>
+                            <div className="ub-stat-number">{content.guarantee3?.split(" ")[0] || "35+"}</div>
+                            <div className="ub-stat-label">{content.guarantee3?.replace(/^\S+\s*/, "") || "Church Plants & Hubs"}</div>
                         </div>
                         <div className="ub-stat-divider" />
                         <div className="ub-stat-col">
@@ -589,7 +654,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
             </section>
 
             {/* ============================================================ */}
-            {/* MBS PORTALS (THE 7 OFFICIAL CARDS) */}
+            {/* MBS PORTALS (THE 7 COMPACT CLICKABLE ICONS)                  */}
             {/* ============================================================ */}
             <section id="mbs-portals" className="ub-portals-section">
                 <div className="ub-portals-container">
@@ -597,10 +662,6 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                         <span className="ub-section-tag">STUDENT, FACULTY & MINISTERIAL SERVICES</span>
                         <h2 className="ub-section-title">MBS Portals</h2>
                         <div className="ub-title-line" />
-                        <p className="ub-section-lead">
-                            Centralized access point for Mobile Bible School academic portals, course syllabi,
-                            admissions applications, tuition payment, and student records.
-                        </p>
                     </div>
 
                     <div className="ub-portals-icon-grid">
@@ -639,77 +700,73 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
             </section>
 
             {/* ============================================================ */}
-            {/* ACADEMIC THEOLOGICAL PROGRAMS */}
+            {/* PROMOTIONAL VIDEO / MEDIA SHOWCASE (FROM CMS)                */}
+            {/* ============================================================ */}
+            {content.promoVideo && (
+                <section className="ub-promo-video-section">
+                    <div className="ub-portals-container">
+                        <div className="ub-section-header">
+                            <span className="ub-section-tag">FEATURED VIDEO SHOWCASE</span>
+                            <h2 className="ub-section-title">{content.promoVideo.videoTitle || "Seminary Video Showcase"}</h2>
+                            <div className="ub-title-line" />
+                            {content.promoVideo.videoTagline && (
+                                <p className="ub-section-lead">{content.promoVideo.videoTagline}</p>
+                            )}
+                        </div>
+                        <div className="ub-promo-player-wrapper">
+                            <PromoVideoPlayer
+                                settings={content.promoVideo}
+                                onApplyClick={() => openAdmissionWithProgram("Bachelor of Theology (B.Th.)")}
+                                onEditClick={() => navigateTo("landing-editor")}
+                            />
+                        </div>
+                    </div>
+                </section>
+            )}
+
+            {/* ============================================================ */}
+            {/* ACADEMIC THEOLOGICAL PROGRAMS (FROM CMS MODULES)             */}
             {/* ============================================================ */}
             <section id="academic-programs" className="ub-programs-section">
                 <div className="ub-portals-container">
                     <div className="ub-section-header">
-                        <span className="ub-section-tag">CURRICULUM & DEGREES</span>
-                        <h2 className="ub-section-title">Academic & Ministerial Programs</h2>
+                        <span className="ub-section-tag">{content.carouselEyebrow || "CURRICULUM & DEGREES"}</span>
+                        <h2 className="ub-section-title">{content.carouselHeadline || "Academic & Ministerial Programs"}</h2>
                         <div className="ub-title-line" />
                         <p className="ub-section-lead">
-                            Comprehensive biblical instruction combining exegetical precision, systematic theology,
-                            and practical pastoral ministry training.
+                            {content.carouselSubheadline || "Comprehensive biblical instruction combining exegetical precision, systematic theology, and practical pastoral ministry training."}
                         </p>
                     </div>
 
                     <div className="ub-programs-grid">
-                        <div className="ub-program-card">
-                            <span className="ub-program-level">DIPLOMA LEVEL</span>
-                            <h3 className="ub-program-name">Diploma in Pastoral Studies (DPS)</h3>
-                            <p className="ub-program-desc">
-                                Essential training in Expository Preaching, Systematic Theology I & II, and Christian Education for Church Workers.
-                            </p>
-                            <div className="ub-program-meta">
-                                <span>2 Years • 60 Credits</span>
-                                <button
-                                    className="ub-program-link"
-                                    onClick={() => openAdmissionWithProgram("Diploma in Pastoral Studies (DPS)")}
-                                >
-                                    Apply →
-                                </button>
+                        {(content.modules && content.modules.length > 0 ? content.modules : []).map((mod, index) => (
+                            <div
+                                key={mod.id || index}
+                                className={`ub-program-card ${index === 1 ? "ub-program-card-featured" : ""}`}
+                            >
+                                <span className={`ub-program-level ${index === 1 ? "ub-badge-gold" : ""}`}>
+                                    {mod.eyebrow || mod.badge || "DEGREE PROGRAM"}
+                                </span>
+                                <h3 className="ub-program-name">{mod.title}</h3>
+                                {mod.highlight && <h4 className="ub-program-highlight">{mod.highlight}</h4>}
+                                <p className="ub-program-desc">{mod.description}</p>
+                                <div className="ub-program-meta">
+                                    <span>{mod.units || mod.date || "Academic Units"}</span>
+                                    <button
+                                        className="ub-program-link"
+                                        onClick={() => openAdmissionWithProgram(mod.title)}
+                                    >
+                                        {mod.primaryCta || "Apply →"}
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-
-                        <div className="ub-program-card ub-program-card-featured">
-                            <span className="ub-program-level ub-badge-gold">FLAGSHIP DEGREE</span>
-                            <h3 className="ub-program-name">Bachelor of Theology (B.Th.)</h3>
-                            <p className="ub-program-desc">
-                                In-depth study in Biblical Greek, Hebrew, Hermeneutics, Pastoral Theology, Ecclesiology, and Pauline Epistles.
-                            </p>
-                            <div className="ub-program-meta">
-                                <span>4 Years • 128 Credits</span>
-                                <button
-                                    className="ub-program-link"
-                                    onClick={() => openAdmissionWithProgram("Bachelor of Theology (B.Th.)")}
-                                >
-                                    Apply →
-                                </button>
-                            </div>
-                        </div>
-
-                        <div className="ub-program-card">
-                            <span className="ub-program-level">GRADUATE LEVEL</span>
-                            <h3 className="ub-program-name">Master of Ministry & Theology (M.Min / M.Th.)</h3>
-                            <p className="ub-program-desc">
-                                Advanced leadership in Apologetics, Church Management, Worship Leadership, and Reformation Theology.
-                            </p>
-                            <div className="ub-program-meta">
-                                <span>2 Years • Graduate Seminar</span>
-                                <button
-                                    className="ub-program-link"
-                                    onClick={() => openAdmissionWithProgram("Master of Ministry (M.Min.)")}
-                                >
-                                    Apply →
-                                </button>
-                            </div>
-                        </div>
+                        ))}
                     </div>
                 </div>
             </section>
 
             {/* ============================================================ */}
-            {/* LICENSURE & ORDAINED ACHIEVERS SHOWCASE */}
+            {/* LICENSURE & ORDAINED ACHIEVERS SHOWCASE                      */}
             {/* ============================================================ */}
             <section className="ub-achievers-section">
                 <div className="ub-portals-container">
@@ -793,7 +850,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
             </section>
 
             {/* ============================================================ */}
-            {/* NEWS & FEATURES SECTION */}
+            {/* NEWS & FEATURES SECTION                                     */}
             {/* ============================================================ */}
             <section className="ub-news-section">
                 <div className="ub-portals-container">
@@ -829,7 +886,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
             </section>
 
             {/* ============================================================ */}
-            {/* INSTITUTIONAL FOOTER */}
+            {/* INSTITUTIONAL FOOTER                                        */}
             {/* ============================================================ */}
             <footer id="campuses" className="ub-footer">
                 <div className="ub-footer-main">
@@ -841,8 +898,8 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                                     <BookOpen className="ub-crest-icon" />
                                 </div>
                                 <div className="ub-title-block">
-                                    <h3 className="ub-university-name text-white">Mobile Bible School</h3>
-                                    <p className="ub-university-subtitle text-amber-200">Theological Seminary & Institute</p>
+                                    <h3 className="ub-university-name text-white">{content.schoolName || "Mobile Bible School"}</h3>
+                                    <p className="ub-university-subtitle text-amber-200">{content.brandTagline || "Theological Seminary & Institute"}</p>
                                 </div>
                             </div>
                             <p className="ub-footer-motto">
@@ -897,7 +954,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
 
                 <div className="ub-footer-bottom">
                     <div className="ub-portals-container ub-footer-bottom-flex">
-                        <p>© {new Date().getFullYear()} Mobile Bible School & Theological Seminary. All Rights Reserved.</p>
+                        <p>© {new Date().getFullYear()} {content.schoolName || "Mobile Bible School"} & Theological Seminary. All Rights Reserved.</p>
                         <div className="ub-footer-links">
                             <a href="#privacy" onClick={(e) => { e.preventDefault(); navigateTo("contact"); }}>Privacy Policy</a>
                             <span>•</span>
@@ -910,7 +967,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
             </footer>
 
             {/* ============================================================ */}
-            {/* ONLINE ADMISSION APPLICATION MODAL */}
+            {/* ONLINE ADMISSION APPLICATION MODAL                           */}
             {/* ============================================================ */}
             {isAdmissionOpen && (
                 <div className="ub-modal-overlay" onClick={() => setIsAdmissionOpen(false)}>
@@ -928,7 +985,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                                 <GraduationCap className="w-4 h-4 mr-1 text-amber-400" />
                                 Official Online Application
                             </div>
-                            <h3 className="ub-modal-title">Mobile Bible School Admission</h3>
+                            <h3 className="ub-modal-title">{content.schoolName || "Mobile Bible School"} Admission</h3>
                             <p className="ub-modal-desc">
                                 Fill out your preliminary application for theological, pastoral, or graduate ministerial degree studies.
                             </p>
@@ -939,7 +996,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                                 <CheckCircle2 className="w-14 h-14 text-emerald-500 mb-3" />
                                 <h4>Application Submitted Successfully!</h4>
                                 <p>
-                                    Thank you for applying to Mobile Bible School. Our Admissions Committee and Registrar will contact you via email and phone regarding entrance requirements and course scheduling.
+                                    Thank you for applying to {content.schoolName || "Mobile Bible School"}. Our Admissions Committee and Registrar will contact you via email and phone regarding entrance requirements and course scheduling.
                                 </p>
                                 <button
                                     className="ub-btn-hero-primary mt-4"
@@ -1077,7 +1134,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
             )}
 
             {/* ============================================================ */}
-            {/* ARTICLE READER MODAL (DISPATCH MODAL) */}
+            {/* ARTICLE READER MODAL (DISPATCH MODAL)                         */}
             {/* ============================================================ */}
             {activeArticle && (
                 <div className="ub-modal-overlay" onClick={() => setActiveArticle(null)}>

@@ -1612,3 +1612,95 @@
 .ub-portal-icon-tile:hover .ub-portal-icon-label {
     color: var(--mbs-maroon);
 }
+
+/* ============================================================ */
+/* ANNOUNCEMENT RIBBON & PROMO VIDEO STYLES (CMS CONNECTED)    */
+/* ============================================================ */
+
+.ub-announcement-ribbon {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    color: #FFFFFF;
+    border-bottom: 2px solid var(--mbs-gold);
+    padding: 9px 24px;
+    font-size: 0.82rem;
+    position: relative;
+    z-index: 101;
+}
+
+.ub-announcement-container {
+    max-width: 1360px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    text-align: center;
+}
+
+.ub-announcement-pill {
+    background: var(--mbs-gold);
+    color: #450A0A;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.ub-announcement-text {
+    color: #F1F5F9;
+    font-weight: 600;
+}
+
+.ub-announcement-btn {
+    background: transparent;
+    border: none;
+    color: var(--mbs-gold-light);
+    font-size: 0.8rem;
+    font-weight: 800;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0 4px;
+    transition: color 0.15s ease;
+}
+
+.ub-announcement-btn:hover {
+    color: #FFFFFF;
+}
+
+.ub-promo-video-section {
+    padding: 56px 24px;
+    background: #0f172a;
+    color: #FFFFFF;
+    border-top: 2px solid var(--mbs-gold);
+    border-bottom: 2px solid var(--mbs-gold);
+}
+
+.ub-promo-video-section .ub-section-tag {
+    color: var(--mbs-gold);
+}
+
+.ub-promo-video-section .ub-section-title {
+    color: #FFFFFF;
+}
+
+.ub-promo-video-section .ub-section-lead {
+    color: #CBD5E1;
+}
+
+.ub-promo-player-wrapper {
+    max-width: 1040px;
+    margin: 0 auto;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+}
+
+.ub-program-highlight {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--mbs-gold-dark);
+    margin: 0 0 8px 0;
+}
