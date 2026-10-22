@@ -603,79 +603,36 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                         </p>
                     </div>
 
-                    <div className="ub-portals-grid">
+                    <div className="ub-portals-icon-grid">
                         {filteredPortals.map((portal) => (
-                            <div
+                            <button
                                 key={portal.id}
-                                className={`ub-portal-card ub-portal-card-${portal.id}`}
+                                className="ub-portal-icon-tile"
                                 onClick={portal.handler}
-                                role="button"
-                                tabIndex={0}
-                                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); portal.handler(); } }}
+                                title={`${portal.title} — ${portal.description}`}
+                                type="button"
                             >
-                                <div className="ub-card-top">
-                                    <div className="ub-card-icon-container">
-                                        {/* Dynamic Icon based on Portal layout */}
-                                        {portal.icon === "admission" && (
-                                            <div className="ub-portal-icon-box ub-icon-admission">
-                                                <GraduationCap className="ub-icon-svg" />
-                                            </div>
-                                        )}
-                                        {portal.icon === "enrollment" && (
-                                            <div className="ub-portal-icon-box ub-icon-enrollment">
-                                                <Building2 className="ub-icon-svg" />
-                                            </div>
-                                        )}
-                                        {portal.icon === "payment" && (
-                                            <div className="ub-portal-icon-box ub-icon-payment">
-                                                <CreditCard className="ub-icon-svg" />
-                                            </div>
-                                        )}
-                                        {portal.icon === "mail" && (
-                                            <div className="ub-portal-icon-box ub-icon-mail">
-                                                <Mail className="ub-icon-svg" />
-                                            </div>
-                                        )}
-                                        {portal.icon === "profile" && (
-                                            <div className="ub-portal-icon-box ub-icon-profile">
-                                                <User className="ub-icon-svg" />
-                                            </div>
-                                        )}
-                                        {portal.icon === "lms" && (
-                                            <div className="ub-portal-icon-box ub-icon-lms">
-                                                <div className="ub-lms-hub-icon">
-                                                    <div className="ub-hub-center" />
-                                                    <div className="ub-hub-dot ub-dot-1" />
-                                                    <div className="ub-hub-dot ub-dot-2" />
-                                                    <div className="ub-hub-dot ub-dot-3" />
-                                                    <div className="ub-hub-dot ub-dot-4" />
-                                                    <div className="ub-hub-dot ub-dot-5" />
-                                                    <div className="ub-hub-dot ub-dot-6" />
-                                                </div>
-                                            </div>
-                                        )}
-                                        {portal.icon === "touch" && (
-                                            <div className="ub-portal-icon-box ub-icon-registrar">
-                                                <Compass className="ub-icon-svg" />
-                                            </div>
-                                        )}
-                                    </div>
-                                    <span className="ub-portal-badge">{portal.badge}</span>
+                                <div className={`ub-portal-icon-circle ub-circle-${portal.id}`}>
+                                    {portal.icon === "admission" && <GraduationCap className="ub-icon-svg" />}
+                                    {portal.icon === "enrollment" && <Building2 className="ub-icon-svg" />}
+                                    {portal.icon === "payment" && <CreditCard className="ub-icon-svg" />}
+                                    {portal.icon === "mail" && <Mail className="ub-icon-svg" />}
+                                    {portal.icon === "profile" && <User className="ub-icon-svg" />}
+                                    {portal.icon === "lms" && (
+                                        <div className="ub-lms-hub-icon">
+                                            <div className="ub-hub-center" />
+                                            <div className="ub-hub-dot ub-dot-1" />
+                                            <div className="ub-hub-dot ub-dot-2" />
+                                            <div className="ub-hub-dot ub-dot-3" />
+                                            <div className="ub-hub-dot ub-dot-4" />
+                                            <div className="ub-hub-dot ub-dot-5" />
+                                            <div className="ub-hub-dot ub-dot-6" />
+                                        </div>
+                                    )}
+                                    {portal.icon === "touch" && <Compass className="ub-icon-svg" />}
                                 </div>
-
-                                <div className="ub-card-body">
-                                    <h3 className="ub-portal-title">{portal.title}</h3>
-                                    <h4 className="ub-portal-sub">{portal.subtitle}</h4>
-                                    <p className="ub-portal-desc">{portal.description}</p>
-                                </div>
-
-                                <div className="ub-card-footer">
-                                    <span className="ub-portal-action">
-                                        {portal.actionText}
-                                        <ChevronRight className="ub-action-arrow" />
-                                    </span>
-                                </div>
-                            </div>
+                                <span className="ub-portal-icon-label">{portal.title}</span>
+                            </button>
                         ))}
                     </div>
                 </div>
