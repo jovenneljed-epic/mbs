@@ -6,10 +6,12 @@ import {
     resetLandingPageContent,
     applyGlobalTheme,
     COLOR_THEME_PRESETS,
+    DEFAULT_FOOTER_SETTINGS,
     type LandingPageContent,
     type FieldModuleItem,
     type PromoVideoSettings,
-    type ColorThemeSettings
+    type ColorThemeSettings,
+    type FooterSettings
 } from "../../services/landingPageContent";
 import { PromoVideoPlayer } from "../../components/PromoVideoPlayer";
 import {
@@ -32,7 +34,11 @@ import {
     UploadCloud,
     Trash2,
     Video,
-    Palette
+    Palette,
+    Building2,
+    MapPin,
+    Phone,
+    Link2
 } from "lucide-react";
 
 interface LandingPageEditorProps {
@@ -41,7 +47,7 @@ interface LandingPageEditorProps {
 
 export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({ onNavigateToSite }) => {
     const [content, setContent] = useState<LandingPageContent>(getLandingPageContent);
-    const [activeTab, setActiveTab] = useState<"hero" | "theme" | "video" | "banner" | "modules" | "preview">("hero");
+    const [activeTab, setActiveTab] = useState<"hero" | "theme" | "video" | "banner" | "modules" | "footer" | "preview">("hero");
     const [savedNotification, setSavedNotification] = useState(false);
 
     useEffect(() => {
@@ -52,6 +58,16 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({ onNavigate
         setContent(prev => ({
             ...prev,
             [field]: value,
+        }));
+    };
+
+    const handleFooterChange = (field: keyof FooterSettings, value: string) => {
+        setContent(prev => ({
+            ...prev,
+            footer: {
+                ...(prev.footer || DEFAULT_FOOTER_SETTINGS),
+                [field]: value,
+            }
         }));
     };
 
@@ -329,6 +345,15 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({ onNavigate
                 >
                     <Layers size={16} />
                     <span>Cohort Field Modules ({content.modules.length})</span>
+                </button>
+
+                <button
+                    type="button"
+                    className={`editor-tab-btn ${activeTab === "footer" ? "active" : ""}`}
+                    onClick={() => setActiveTab("footer")}
+                >
+                    <Building2 size={16} />
+                    <span>🏛️ Footer &amp; Contact</span>
                 </button>
 
                 <button
@@ -1182,6 +1207,291 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({ onNavigate
                             </div>
                         </div>
                     ))}
+                </div>
+            )}
+
+            {/* TAB: FOOTER & CONTACT EDITOR */}
+            {activeTab === "footer" && (
+                <div className="editor-card">
+                    <h3>
+                        <Building2 size={18} color="#1877f2" />
+                        Institutional Footer &amp; Contact Editor
+                    </h3>
+                    <p style={{ fontSize: 13, color: "#64748b", marginTop: -6, marginBottom: 20 }}>
+                        Configure institutional mottos, campus branches, direct portal links, admissions phone lines, and legal policies shown in the public footer.
+                    </p>
+
+                    {/* Section 1: Motto & Accreditations */}
+                    <div style={{ marginBottom: 24, paddingBottom: 20, borderBottom: "1px solid #e2e8f0" }}>
+                        <h4 style={{ fontSize: 14, fontWeight: 700, color: "#1e293b", marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
+                            <BookOpen size={16} color="#7A1526" />
+                            Column 1: Theological Motto &amp; Accreditations
+                        </h4>
+                        <div className="editor-form-grid">
+                            <div className="editor-field-group editor-form-full">
+                                <label>Theological Scripture Motto</label>
+                                <textarea
+                                    rows={3}
+                                    value={content.footer?.scriptureMotto ?? DEFAULT_FOOTER_SETTINGS.scriptureMotto}
+                                    onChange={e => handleFooterChange("scriptureMotto", e.target.value)}
+                                    placeholder="Enter seminary scripture quote or mission motto..."
+                                />
+                                <span className="editor-field-hint">Featured prominently under the institutional seal in Column 1</span>
+                            </div>
+
+                            <div className="editor-field-group">
+                                <label>Accreditation Badge 1</label>
+                                <input
+                                    type="text"
+                                    value={content.footer?.accreditation1 ?? DEFAULT_FOOTER_SETTINGS.accreditation1}
+                                    onChange={e => handleFooterChange("accreditation1", e.target.value)}
+                                    placeholder="e.g. ACTS ACCREDITED"
+                                />
+                            </div>
+
+                            <div className="editor-field-group">
+                                <label>Accreditation Badge 2</label>
+                                <input
+                                    type="text"
+                                    value={content.footer?.accreditation2 ?? DEFAULT_FOOTER_SETTINGS.accreditation2}
+                                    onChange={e => handleFooterChange("accreditation2", e.target.value)}
+                                    placeholder="e.g. CCHE RECOGNIZED"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Section 2: Campuses & Contact */}
+                    <div style={{ marginBottom: 24, paddingBottom: 20, borderBottom: "1px solid #e2e8f0" }}>
+                        <h4 style={{ fontSize: 14, fontWeight: 700, color: "#1e293b", marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
+                            <MapPin size={16} color="#7A1526" />
+                            Column 2: Campuses &amp; Training Centers
+                        </h4>
+                        <div className="editor-form-grid">
+                            <div className="editor-field-group editor-form-full">
+                                <label>Column 2 Heading</label>
+                                <input
+                                    type="text"
+                                    value={content.footer?.column2Heading ?? DEFAULT_FOOTER_SETTINGS.column2Heading}
+                                    onChange={e => handleFooterChange("column2Heading", e.target.value)}
+                                    placeholder="e.g. Campuses & Training Centers"
+                                />
+                            </div>
+
+                            <div className="editor-field-group">
+                                <label>Main Seminary Campus</label>
+                                <input
+                                    type="text"
+                                    value={content.footer?.mainCampus ?? DEFAULT_FOOTER_SETTINGS.mainCampus}
+                                    onChange={e => handleFooterChange("mainCampus", e.target.value)}
+                                    placeholder="e.g. Metro Manila, Philippines"
+                                />
+                            </div>
+
+                            <div className="editor-field-group">
+                                <label>Regional Modular Centers</label>
+                                <input
+                                    type="text"
+                                    value={content.footer?.regionalCenters ?? DEFAULT_FOOTER_SETTINGS.regionalCenters}
+                                    onChange={e => handleFooterChange("regionalCenters", e.target.value)}
+                                    placeholder="e.g. Luzon • Visayas • Mindanao"
+                                />
+                            </div>
+
+                            <div className="editor-field-group">
+                                <label>Online Extension</label>
+                                <input
+                                    type="text"
+                                    value={content.footer?.onlineExtension ?? DEFAULT_FOOTER_SETTINGS.onlineExtension}
+                                    onChange={e => handleFooterChange("onlineExtension", e.target.value)}
+                                    placeholder="e.g. Global Classroom Access"
+                                />
+                            </div>
+
+                            <div className="editor-field-group">
+                                <label style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                                    <Phone size={12} color="#7A1526" />
+                                    Admissions Inquiries Phone / Landline
+                                </label>
+                                <input
+                                    type="text"
+                                    value={content.footer?.inquiriesPhone ?? DEFAULT_FOOTER_SETTINGS.inquiriesPhone}
+                                    onChange={e => handleFooterChange("inquiriesPhone", e.target.value)}
+                                    placeholder="e.g. +63 (02) 8800-BIBLE"
+                                />
+                            </div>
+
+                            <div className="editor-field-group editor-form-full">
+                                <label style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                                    <Phone size={12} color="#7A1526" />
+                                    Direct Mobile Hotline
+                                </label>
+                                <input
+                                    type="text"
+                                    value={content.footer?.directMobile ?? DEFAULT_FOOTER_SETTINGS.directMobile}
+                                    onChange={e => handleFooterChange("directMobile", e.target.value)}
+                                    placeholder="e.g. +63 917 123 4567"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Section 3: Direct Portals */}
+                    <div style={{ marginBottom: 24, paddingBottom: 20, borderBottom: "1px solid #e2e8f0" }}>
+                        <h4 style={{ fontSize: 14, fontWeight: 700, color: "#1e293b", marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
+                            <Link2 size={16} color="#7A1526" />
+                            Column 3: Direct Portals Navigation
+                        </h4>
+                        <div className="editor-form-grid">
+                            <div className="editor-field-group editor-form-full">
+                                <label>Column 3 Heading</label>
+                                <input
+                                    type="text"
+                                    value={content.footer?.column3Heading ?? DEFAULT_FOOTER_SETTINGS.column3Heading}
+                                    onChange={e => handleFooterChange("column3Heading", e.target.value)}
+                                    placeholder="e.g. MBS Direct Portals"
+                                />
+                            </div>
+
+                            <div className="editor-field-group">
+                                <label>Portal 1 Button Label (Student Portal)</label>
+                                <input
+                                    type="text"
+                                    value={content.footer?.portal1Label ?? DEFAULT_FOOTER_SETTINGS.portal1Label}
+                                    onChange={e => handleFooterChange("portal1Label", e.target.value)}
+                                    placeholder="e.g. Student Portal (My MBS)"
+                                />
+                            </div>
+
+                            <div className="editor-field-group">
+                                <label>Portal 2 Button Label (Admin / Faculty)</label>
+                                <input
+                                    type="text"
+                                    value={content.footer?.portal2Label ?? DEFAULT_FOOTER_SETTINGS.portal2Label}
+                                    onChange={e => handleFooterChange("portal2Label", e.target.value)}
+                                    placeholder="e.g. Seminary Admin & Faculty Portal"
+                                />
+                            </div>
+
+                            <div className="editor-field-group">
+                                <label>Portal 3 Button Label (Theological LMS)</label>
+                                <input
+                                    type="text"
+                                    value={content.footer?.portal3Label ?? DEFAULT_FOOTER_SETTINGS.portal3Label}
+                                    onChange={e => handleFooterChange("portal3Label", e.target.value)}
+                                    placeholder="e.g. Theological LMS (Class Modules)"
+                                />
+                            </div>
+
+                            <div className="editor-field-group">
+                                <label>Portal 4 Button Label (Tuition & Payment)</label>
+                                <input
+                                    type="text"
+                                    value={content.footer?.portal4Label ?? DEFAULT_FOOTER_SETTINGS.portal4Label}
+                                    onChange={e => handleFooterChange("portal4Label", e.target.value)}
+                                    placeholder="e.g. Tuition & Assessment Payment"
+                                />
+                            </div>
+
+                            <div className="editor-field-group editor-form-full">
+                                <label>Portal 5 Button Label (Admissions Desk)</label>
+                                <input
+                                    type="text"
+                                    value={content.footer?.portal5Label ?? DEFAULT_FOOTER_SETTINGS.portal5Label}
+                                    onChange={e => handleFooterChange("portal5Label", e.target.value)}
+                                    placeholder="e.g. Online Admissions Desk"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Section 4: Admissions Desk */}
+                    <div style={{ marginBottom: 24, paddingBottom: 20, borderBottom: "1px solid #e2e8f0" }}>
+                        <h4 style={{ fontSize: 14, fontWeight: 700, color: "#1e293b", marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
+                            <Building2 size={16} color="#7A1526" />
+                            Column 4: Admissions Desk &amp; Quick Action
+                        </h4>
+                        <div className="editor-form-grid">
+                            <div className="editor-field-group editor-form-full">
+                                <label>Column 4 Heading</label>
+                                <input
+                                    type="text"
+                                    value={content.footer?.column4Heading ?? DEFAULT_FOOTER_SETTINGS.column4Heading}
+                                    onChange={e => handleFooterChange("column4Heading", e.target.value)}
+                                    placeholder="e.g. Admissions Desk"
+                                />
+                            </div>
+
+                            <div className="editor-field-group editor-form-full">
+                                <label>Admissions Overview Blurb</label>
+                                <textarea
+                                    rows={3}
+                                    value={content.footer?.admissionsBlurb ?? DEFAULT_FOOTER_SETTINGS.admissionsBlurb}
+                                    onChange={e => handleFooterChange("admissionsBlurb", e.target.value)}
+                                    placeholder="Enter admissions information blurb..."
+                                />
+                            </div>
+
+                            <div className="editor-field-group">
+                                <label>Admissions Button Label (CTA)</label>
+                                <input
+                                    type="text"
+                                    value={content.footer?.admissionsCtaText ?? DEFAULT_FOOTER_SETTINGS.admissionsCtaText}
+                                    onChange={e => handleFooterChange("admissionsCtaText", e.target.value)}
+                                    placeholder="e.g. Apply for Admission"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Section 5: Bottom Copyright & Legal Links */}
+                    <div>
+                        <h4 style={{ fontSize: 14, fontWeight: 700, color: "#1e293b", marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
+                            <Sparkles size={16} color="#7A1526" />
+                            Bottom Bar: Copyright &amp; Legal Policies
+                        </h4>
+                        <div className="editor-form-grid">
+                            <div className="editor-field-group editor-form-full">
+                                <label>Copyright Statement</label>
+                                <input
+                                    type="text"
+                                    value={content.footer?.copyrightText ?? DEFAULT_FOOTER_SETTINGS.copyrightText}
+                                    onChange={e => handleFooterChange("copyrightText", e.target.value)}
+                                    placeholder="e.g. © 2026 Mobile Bible School & Theological Seminary. All Rights Reserved."
+                                />
+                            </div>
+
+                            <div className="editor-field-group">
+                                <label>Policy Link 1 Label</label>
+                                <input
+                                    type="text"
+                                    value={content.footer?.legalLink1Text ?? DEFAULT_FOOTER_SETTINGS.legalLink1Text}
+                                    onChange={e => handleFooterChange("legalLink1Text", e.target.value)}
+                                    placeholder="e.g. Privacy Policy"
+                                />
+                            </div>
+
+                            <div className="editor-field-group">
+                                <label>Policy Link 2 Label</label>
+                                <input
+                                    type="text"
+                                    value={content.footer?.legalLink2Text ?? DEFAULT_FOOTER_SETTINGS.legalLink2Text}
+                                    onChange={e => handleFooterChange("legalLink2Text", e.target.value)}
+                                    placeholder="e.g. Academic Policies"
+                                />
+                            </div>
+
+                            <div className="editor-field-group editor-form-full">
+                                <label>Policy Link 3 Label</label>
+                                <input
+                                    type="text"
+                                    value={content.footer?.legalLink3Text ?? DEFAULT_FOOTER_SETTINGS.legalLink3Text}
+                                    onChange={e => handleFooterChange("legalLink3Text", e.target.value)}
+                                    placeholder="e.g. Admissions Desk"
+                                />
+                            </div>
+                        </div>
+                    </div>
                 </div>
             )}
 

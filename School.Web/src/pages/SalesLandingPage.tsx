@@ -923,7 +923,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
             </section>
 
             {/* ============================================================ */}
-            {/* INSTITUTIONAL FOOTER                                        */}
+            {/* INSTITUTIONAL FOOTER (CUSTOMIZABLE FROM CMS)                 */}
             {/* ============================================================ */}
             <footer id="campuses" className="ub-footer">
                 <div className="ub-footer-main">
@@ -935,55 +935,58 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                                     <BookOpen className="ub-crest-icon" />
                                 </div>
                                 <div className="ub-title-block">
-                                    <h3 className="ub-university-name text-white">{content.schoolName || "Mobile Bible School"}</h3>
-                                    <p className="ub-university-subtitle text-amber-200">{content.brandTagline || "Theological Seminary & Institute"}</p>
+                                    <h3 className="ub-university-name text-white">
+                                        {content.footer?.schoolName || content.schoolName || "Mobile Bible School"}
+                                    </h3>
+                                    <p className="ub-university-subtitle text-amber-200">
+                                        {content.footer?.brandTagline || content.brandTagline || "Theological Seminary & Institute"}
+                                    </p>
                                 </div>
                             </div>
                             <p className="ub-footer-motto">
-                                "Preach the word; be ready in season and out of season; reprove, rebuke, and exhort,
-                                with complete patience and teaching." — 2 Timothy 4:2
+                                {content.footer?.scriptureMotto || '"Preach the word; be ready in season and out of season; reprove, rebuke, and exhort, with complete patience and teaching." — 2 Timothy 4:2'}
                             </p>
                             <div className="ub-footer-accreditations">
-                                <span className="ub-tag-accred">ACTS ACCREDITED</span>
-                                <span className="ub-tag-accred">CCHE RECOGNIZED</span>
+                                <span className="ub-tag-accred">{content.footer?.accreditation1 || "ACTS ACCREDITED"}</span>
+                                <span className="ub-tag-accred">{content.footer?.accreditation2 || "CCHE RECOGNIZED"}</span>
                             </div>
                         </div>
 
                         {/* Column 2: Campus Locations */}
                         <div className="ub-footer-col">
-                            <h4 className="ub-footer-heading">Campuses & Training Centers</h4>
+                            <h4 className="ub-footer-heading">{content.footer?.column2Heading || "Campuses & Training Centers"}</h4>
                             <ul className="ub-footer-list">
-                                <li><strong>Main Seminary Campus:</strong> Metro Manila, Philippines</li>
-                                <li><strong>Regional Modular Centers:</strong> Luzon • Visayas • Mindanao</li>
-                                <li><strong>Online Extension:</strong> Global Classroom Access</li>
-                                <li><strong>Admissions Inquiries:</strong> +63 (02) 8800-BIBLE</li>
-                                <li><strong>Direct Mobile:</strong> +63 917 123 4567</li>
+                                <li><strong>Main Seminary Campus:</strong> {content.footer?.mainCampus || "Metro Manila, Philippines"}</li>
+                                <li><strong>Regional Modular Centers:</strong> {content.footer?.regionalCenters || "Luzon • Visayas • Mindanao"}</li>
+                                <li><strong>Online Extension:</strong> {content.footer?.onlineExtension || "Global Classroom Access"}</li>
+                                <li><strong>Admissions Inquiries:</strong> {content.footer?.inquiriesPhone || "+63 (02) 8800-BIBLE"}</li>
+                                <li><strong>Direct Mobile:</strong> {content.footer?.directMobile || "+63 917 123 4567"}</li>
                             </ul>
                         </div>
 
                         {/* Column 3: Quick Portals & Links */}
                         <div className="ub-footer-col">
-                            <h4 className="ub-footer-heading">MBS Direct Portals</h4>
+                            <h4 className="ub-footer-heading">{content.footer?.column3Heading || "MBS Direct Portals"}</h4>
                             <ul className="ub-footer-list">
-                                <li><button onClick={() => navigateTo("client-login")}>Student Portal (My MBS)</button></li>
-                                <li><button onClick={() => navigateTo("login")}>Seminary Admin & Faculty Portal</button></li>
-                                <li><button onClick={() => navigateTo("learning")}>Theological LMS (Class Modules)</button></li>
-                                <li><button onClick={() => navigateTo("client-payment")}>Tuition & Assessment Payment</button></li>
-                                <li><button onClick={() => openAdmissionWithProgram("Bachelor of Theology (B.Th.)")}>Online Admissions Desk</button></li>
+                                <li><button onClick={() => navigateTo("client-login")}>{content.footer?.portal1Label || "Student Portal (My MBS)"}</button></li>
+                                <li><button onClick={() => navigateTo("login")}>{content.footer?.portal2Label || "Seminary Admin & Faculty Portal"}</button></li>
+                                <li><button onClick={() => navigateTo("learning")}>{content.footer?.portal3Label || "Theological LMS (Class Modules)"}</button></li>
+                                <li><button onClick={() => navigateTo("client-payment")}>{content.footer?.portal4Label || "Tuition & Assessment Payment"}</button></li>
+                                <li><button onClick={() => openAdmissionWithProgram("Bachelor of Theology (B.Th.)")}>{content.footer?.portal5Label || "Online Admissions Desk"}</button></li>
                             </ul>
                         </div>
 
                         {/* Column 4: Admissions & Faith Statement */}
                         <div className="ub-footer-col">
-                            <h4 className="ub-footer-heading">Admissions Desk</h4>
+                            <h4 className="ub-footer-heading">{content.footer?.column4Heading || "Admissions Desk"}</h4>
                             <p className="text-sm text-gray-300 mb-3">
-                                Accepting applications for the upcoming academic semester. Open to pastors, church workers, and theological scholars.
+                                {content.footer?.admissionsBlurb || "Accepting applications for the upcoming academic semester. Open to pastors, church workers, and theological scholars."}
                             </p>
                             <button
                                 className="ub-btn-footer-apply"
                                 onClick={() => openAdmissionWithProgram("Bachelor of Theology (B.Th.)")}
                             >
-                                Apply for Admission
+                                {content.footer?.admissionsCtaText || "Apply for Admission"}
                             </button>
                         </div>
                     </div>
@@ -991,13 +994,19 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
 
                 <div className="ub-footer-bottom">
                     <div className="ub-portals-container ub-footer-bottom-flex">
-                        <p>© {new Date().getFullYear()} {content.schoolName || "Mobile Bible School"} & Theological Seminary. All Rights Reserved.</p>
+                        <p>{content.footer?.copyrightText || `© ${new Date().getFullYear()} ${content.schoolName || "Mobile Bible School"} & Theological Seminary. All Rights Reserved.`}</p>
                         <div className="ub-footer-links">
-                            <a href="#privacy" onClick={(e) => { e.preventDefault(); navigateTo("contact"); }}>Privacy Policy</a>
+                            <a href="#privacy" onClick={(e) => { e.preventDefault(); navigateTo("contact"); }}>
+                                {content.footer?.legalLink1Text || "Privacy Policy"}
+                            </a>
                             <span>•</span>
-                            <a href="#terms" onClick={(e) => { e.preventDefault(); navigateTo("about"); }}>Academic Policies</a>
+                            <a href="#terms" onClick={(e) => { e.preventDefault(); navigateTo("about"); }}>
+                                {content.footer?.legalLink2Text || "Academic Policies"}
+                            </a>
                             <span>•</span>
-                            <a href="#admissions" onClick={(e) => { e.preventDefault(); openAdmissionWithProgram("Bachelor of Theology (B.Th.)"); }}>Admissions Desk</a>
+                            <a href="#admissions" onClick={(e) => { e.preventDefault(); openAdmissionWithProgram("Bachelor of Theology (B.Th.)"); }}>
+                                {content.footer?.legalLink3Text || "Admissions Desk"}
+                            </a>
                         </div>
                     </div>
                 </div>

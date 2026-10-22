@@ -199,6 +199,70 @@ export const COLOR_THEME_PRESETS: Record<string, ColorThemeSettings> = {
 
 export const DEFAULT_COLOR_THEME: ColorThemeSettings = COLOR_THEME_PRESETS["seminary-maroon"];
 
+export interface FooterSettings {
+    schoolName?: string;
+    brandTagline?: string;
+    scriptureMotto: string;
+    accreditation1: string;
+    accreditation2: string;
+    
+    // Column 2: Campuses & Centers
+    column2Heading: string;
+    mainCampus: string;
+    regionalCenters: string;
+    onlineExtension: string;
+    inquiriesPhone: string;
+    directMobile: string;
+    
+    // Column 3: Direct Portals
+    column3Heading: string;
+    portal1Label: string;
+    portal2Label: string;
+    portal3Label: string;
+    portal4Label: string;
+    portal5Label: string;
+    
+    // Column 4: Admissions Desk
+    column4Heading: string;
+    admissionsBlurb: string;
+    admissionsCtaText: string;
+    
+    // Bottom Bar
+    copyrightText: string;
+    legalLink1Text: string;
+    legalLink2Text: string;
+    legalLink3Text: string;
+}
+
+export const DEFAULT_FOOTER_SETTINGS: FooterSettings = {
+    scriptureMotto: '"Preach the word; be ready in season and out of season; reprove, rebuke, and exhort, with complete patience and teaching." — 2 Timothy 4:2',
+    accreditation1: "ACTS ACCREDITED",
+    accreditation2: "CCHE RECOGNIZED",
+    
+    column2Heading: "Campuses & Training Centers",
+    mainCampus: "Metro Manila, Philippines",
+    regionalCenters: "Luzon • Visayas • Mindanao",
+    onlineExtension: "Global Classroom Access",
+    inquiriesPhone: "+63 (02) 8800-BIBLE",
+    directMobile: "+63 917 123 4567",
+    
+    column3Heading: "MBS Direct Portals",
+    portal1Label: "Student Portal (My MBS)",
+    portal2Label: "Seminary Admin & Faculty Portal",
+    portal3Label: "Theological LMS (Class Modules)",
+    portal4Label: "Tuition & Assessment Payment",
+    portal5Label: "Online Admissions Desk",
+    
+    column4Heading: "Admissions Desk",
+    admissionsBlurb: "Accepting applications for the upcoming academic semester. Open to pastors, church workers, and theological scholars.",
+    admissionsCtaText: "Apply for Admission",
+    
+    copyrightText: "© 2026 Mobile Bible School & Theological Seminary. All Rights Reserved.",
+    legalLink1Text: "Privacy Policy",
+    legalLink2Text: "Academic Policies",
+    legalLink3Text: "Admissions Desk",
+};
+
 export interface LandingPageContent {
     ribbonText: string;
     ribbonCta: string;
@@ -219,6 +283,7 @@ export interface LandingPageContent {
     modules: FieldModuleItem[];
     promoVideo: PromoVideoSettings;
     colorTheme: ColorThemeSettings;
+    footer: FooterSettings;
 }
 
 export const DEFAULT_LANDING_CONTENT: LandingPageContent = {
@@ -295,6 +360,7 @@ export const DEFAULT_LANDING_CONTENT: LandingPageContent = {
         scenes: [],
     },
     colorTheme: DEFAULT_COLOR_THEME,
+    footer: DEFAULT_FOOTER_SETTINGS,
 };
 
 const STORAGE_KEY = "sms_landing_content";
@@ -331,6 +397,12 @@ export const getLandingPageContent = (): LandingPageContent => {
                 ...parsedTheme,
             };
 
+            const parsedFooter = parsed.footer || {};
+            const resolvedFooter: FooterSettings = {
+                ...DEFAULT_FOOTER_SETTINGS,
+                ...parsedFooter,
+            };
+
             return {
                 ...DEFAULT_LANDING_CONTENT,
                 ...parsed,
@@ -344,6 +416,7 @@ export const getLandingPageContent = (): LandingPageContent => {
                     scenes: mergedScenes,
                 },
                 colorTheme: resolvedTheme,
+                footer: resolvedFooter,
             };
         }
     } catch (e) {
