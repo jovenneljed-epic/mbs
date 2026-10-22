@@ -321,7 +321,7 @@ const PAGE_TITLES: Record<Page, string> = {
         "Teachers & Faculty Corner",
 
     visitors:
-        "Admissions & Inquiries",
+        "Admissions & Applications",
 
     giving:
         "Tuition & Fee Collection",
@@ -405,7 +405,7 @@ const PAGE_SUBTITLES: Record<Page, string> = {
         "Comprehensive profiling for teaching faculty and non-teaching staff, subject loads & student rosters",
 
     visitors:
-        "Manage student admissions, inquiries, campus visitors and follow-ups",
+        "Comprehensive collegiate applicant intake, document review, entrance screening, and matriculation",
 
     giving:
         "Student tuition, fees, and units multi-payment system with Cash, GCash, Bank Transfers, and Official Receipts",
@@ -1209,7 +1209,7 @@ const NAVIGATION_SECTIONS: NavigationSection[] = [
         items: [
             {
                 page: "visitors",
-                label: "Admissions & Inquiries",
+                label: "Admissions & Applications",
                 icon: <UserPlus size={18} strokeWidth={2} />,
                 permission: "Visitors",
             },

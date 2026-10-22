@@ -82,6 +82,23 @@ export interface SchoolReceiptPrintData {
     notes?: string;
 }
 
+export interface AdmissionLetterData {
+    applicantName: string;
+    applicantCode: string;
+    program: string;
+    modeOfLearning: string;
+    applicantType?: string;
+    applicationDate: string;
+    examScore?: string;
+    interviewRating?: string;
+    address?: string;
+    contactNumber?: string;
+    email?: string;
+    guardianName?: string;
+    admittedTerm?: string;
+    admittedBy?: string;
+}
+
 export class SchoolPrintService {
     /**
      * Prints an official academic report table with school letterhead, summary stats, and signature block.
@@ -1308,6 +1325,350 @@ export class SchoolPrintService {
      * Executes the print by writing into an isolated iframe to bypass any app overflow/layout constraints.
      * Falls back to a clean popup window if necessary.
      */
+    /**
+     * Prints an official university Letter of Admission & Acceptance Offer.
+     */
+    public static printAdmissionAcceptanceLetter(data: AdmissionLetterData): void {
+        const currentDate = new Date().toLocaleDateString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric"
+        });
+        const docRefNumber = `MBS-ADM-ACC-${new Date().getFullYear()}-${data.applicantCode.replace(/[^A-Za-z0-9]/g, "") || Math.floor(1000 + Math.random() * 9000)}`;
+
+        const html = `
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <title>Official Letter of Admission - ${data.applicantName}</title>
+            <style>
+                @page {
+                    size: A4 portrait;
+                    margin: 15mm 15mm 18mm 15mm;
+                }
+                * {
+                    box-sizing: border-box;
+                    -webkit-print-color-adjust: exact !important;
+                    print-color-adjust: exact !important;
+                }
+                body {
+                    margin: 0;
+                    padding: 0;
+                    font-family: "Times New Roman", Times, Georgia, serif;
+                    color: #0f172a;
+                    font-size: 11pt;
+                    line-height: 1.6;
+                }
+                .accent-bar {
+                    height: 5px;
+                    background: linear-gradient(90deg, #1e3a8a, #2563eb, #3b82f6);
+                    margin-bottom: 20px;
+                }
+                .letter-header {
+                    display: table;
+                    width: 100%;
+                    border-bottom: 2px solid #1e3a8a;
+                    padding-bottom: 12px;
+                    margin-bottom: 20px;
+                }
+                .header-left {
+                    display: table-cell;
+                    vertical-align: middle;
+                }
+                .header-right {
+                    display: table-cell;
+                    vertical-align: middle;
+                    text-align: right;
+                }
+                .inst-name {
+                    font-size: 18pt;
+                    font-weight: bold;
+                    color: #1e3a8a;
+                    letter-spacing: 0.5px;
+                    margin: 0;
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                }
+                .inst-sub {
+                    font-size: 10pt;
+                    color: #475569;
+                    margin: 2px 0 0 0;
+                    font-style: italic;
+                }
+                .inst-dept {
+                    font-size: 8.5pt;
+                    color: #64748b;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    margin-top: 3px;
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                }
+                .badge-doc {
+                    display: inline-block;
+                    background: #1e3a8a;
+                    color: #ffffff;
+                    padding: 4px 10px;
+                    font-size: 8pt;
+                    font-weight: bold;
+                    letter-spacing: 1px;
+                    text-transform: uppercase;
+                    border-radius: 4px;
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                }
+                .meta-text {
+                    font-size: 8.5pt;
+                    color: #475569;
+                    margin-top: 4px;
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                }
+                .date-ref-row {
+                    display: table;
+                    width: 100%;
+                    margin-bottom: 18px;
+                    font-size: 10pt;
+                }
+                .date-col {
+                    display: table-cell;
+                    text-align: left;
+                }
+                .ref-col {
+                    display: table-cell;
+                    text-align: right;
+                    font-family: monospace;
+                    font-size: 9.5pt;
+                    color: #334155;
+                }
+                .recipient-block {
+                    margin-bottom: 20px;
+                    line-height: 1.45;
+                }
+                .recipient-name {
+                    font-weight: bold;
+                    font-size: 12pt;
+                    color: #0f172a;
+                }
+                .recipient-sub {
+                    font-size: 10pt;
+                    color: #334155;
+                }
+                .doc-banner {
+                    text-align: center;
+                    padding: 8px 12px;
+                    background: #f8fafc;
+                    border: 1px solid #cbd5e1;
+                    border-radius: 4px;
+                    margin-bottom: 20px;
+                }
+                .doc-banner h2 {
+                    margin: 0;
+                    font-size: 13pt;
+                    font-weight: bold;
+                    color: #1e3a8a;
+                    letter-spacing: 1px;
+                    text-transform: uppercase;
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                }
+                .letter-body p {
+                    margin: 0 0 12px 0;
+                    text-align: justify;
+                }
+                .spec-card {
+                    background: #f1f5f9;
+                    border-left: 4px solid #2563eb;
+                    padding: 12px 16px;
+                    margin: 16px 0;
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                    font-size: 9.5pt;
+                }
+                .spec-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                }
+                .spec-table td {
+                    padding: 4px 6px;
+                    vertical-align: top;
+                }
+                .spec-label {
+                    width: 25%;
+                    font-weight: bold;
+                    color: #475569;
+                    font-size: 8.5pt;
+                    text-transform: uppercase;
+                }
+                .spec-val {
+                    color: #0f172a;
+                    font-weight: 600;
+                }
+                .sig-container {
+                    display: table;
+                    width: 100%;
+                    margin-top: 36px;
+                    page-break-inside: avoid;
+                }
+                .sig-col {
+                    display: table-cell;
+                    width: 50%;
+                    vertical-align: top;
+                }
+                .sig-box {
+                    width: 230px;
+                }
+                .sig-line {
+                    border-bottom: 1.5px solid #0f172a;
+                    margin-bottom: 6px;
+                    height: 40px;
+                }
+                .sig-name {
+                    font-weight: bold;
+                    font-size: 10pt;
+                    color: #0f172a;
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                }
+                .sig-title {
+                    font-size: 8.5pt;
+                    color: #475569;
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                }
+                .footer-notice {
+                    margin-top: 26px;
+                    padding-top: 8px;
+                    border-top: 1px solid #e2e8f0;
+                    font-size: 8pt;
+                    color: #64748b;
+                    display: table;
+                    width: 100%;
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                }
+                .footer-left {
+                    display: table-cell;
+                    text-align: left;
+                }
+                .footer-right {
+                    display: table-cell;
+                    text-align: right;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="accent-bar"></div>
+
+            <div class="letter-header">
+                <div class="header-left">
+                    <h1 class="inst-name">MOBILE BIBLE SCHOOL</h1>
+                    <div class="inst-sub">Theological Seminary & Institute of Christian Leadership</div>
+                    <div class="inst-dept">Office of Admissions and the University Registrar</div>
+                </div>
+                <div class="header-right">
+                    <div class="badge-doc">OFFICIAL NOTICE OF ACCEPTANCE</div>
+                    <div class="meta-text">A.Y. 2026–2027 • Regular Intake</div>
+                </div>
+            </div>
+
+            <div class="date-ref-row">
+                <div class="date-col">${currentDate}</div>
+                <div class="ref-col">Ref: ${docRefNumber}</div>
+            </div>
+
+            <div class="recipient-block">
+                <div class="recipient-name">${data.applicantName}</div>
+                <div class="recipient-sub">Applicant Code: <strong>${data.applicantCode}</strong></div>
+                ${data.address ? `<div class="recipient-sub">${data.address}</div>` : ""}
+                ${data.email || data.contactNumber ? `<div class="recipient-sub">${data.email || ""} • ${data.contactNumber || ""}</div>` : ""}
+            </div>
+
+            <div class="doc-banner">
+                <h2>OFFICIAL LETTER OF ADMISSION & ACCEPTANCE</h2>
+            </div>
+
+            <div class="letter-body">
+                <p>Dear <strong>${data.applicantName}</strong>,</p>
+
+                <p>
+                    On behalf of the Board of Admissions, the Academic Council, and the Faculty of Mobile Bible School & Seminary,
+                    we are delighted to inform you that you have been granted <strong>OFFICIAL ADMISSION</strong> to the program of study indicated below for 
+                    <strong>${data.admittedTerm || "Academic Year 2026–2027 (1st Semester)"}</strong>.
+                </p>
+
+                <p>
+                    Your application, academic credentials, and diagnostic evaluation have been thoroughly appraised. 
+                    The Admissions Committee was highly impressed with your spiritual calling, ministerial dedication, and scholastic aptitude.
+                </p>
+
+                <div class="spec-card">
+                    <table class="spec-table">
+                        <tr>
+                            <td class="spec-label">ADMITTED PROGRAM:</td>
+                            <td class="spec-val" style="color: #1e3a8a; font-size: 11pt;">${data.program}</td>
+                        </tr>
+                        <tr>
+                            <td class="spec-label">MODE OF LEARNING:</td>
+                            <td class="spec-val">${data.modeOfLearning}</td>
+                        </tr>
+                        <tr>
+                            <td class="spec-label">APPLICANT TYPE:</td>
+                            <td class="spec-val">${data.applicantType || "Freshman / First-Time College"}</td>
+                        </tr>
+                        ${data.examScore ? `
+                        <tr>
+                            <td class="spec-label">SCREENING RATING:</td>
+                            <td class="spec-val" style="color: #15803d;">Entrance Evaluation: ${data.examScore} ${data.interviewRating ? `• Interview: ${data.interviewRating}` : ""}</td>
+                        </tr>
+                        ` : ""}
+                        <tr>
+                            <td class="spec-label">ADMISSION STATUS:</td>
+                            <td class="spec-val" style="color: #15803d; font-weight: 800;">OFFICIALLY ACCEPTED & CLEARED</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <p>
+                    To confirm your enrollment, please present this Official Notice of Acceptance along with any remaining document requirements to the Office of the Registrar. 
+                    You may then proceed with formal course subject enlistment, academic orientation, and receipt of your official Student Identification Number.
+                </p>
+
+                <p>
+                    We welcome you to our academic community of faith, scholarship, and ministry. 
+                    May the Lord richly bless your theological journey as you prepare for Kingdom leadership.
+                </p>
+
+                <p style="margin-top: 18px;">
+                    Respectfully in Christ,
+                </p>
+            </div>
+
+            <div class="sig-container">
+                <div class="sig-col">
+                    <div class="sig-box">
+                        <div class="sig-line"></div>
+                        <div class="sig-name">Dr. Samuel Vance, Th.D.</div>
+                        <div class="sig-title">Dean of Academic Affairs</div>
+                    </div>
+                </div>
+                <div class="sig-col" style="text-align: right;">
+                    <div class="sig-box" style="margin-left: auto;">
+                        <div class="sig-line"></div>
+                        <div class="sig-name">Clarissa Mendez, M.Ed.</div>
+                        <div class="sig-title">Director of Admissions & University Registrar</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-notice">
+                <div class="footer-left">
+                    <span>Mobile Bible School Admissions & Registrar Office • Main Campus • Accreditation Verified</span>
+                </div>
+                <div class="footer-right">
+                    <span>Security Document ID: ${docRefNumber}</span>
+                </div>
+            </div>
+        </body>
+        </html>
+        `;
+
+        this.executePrint(html);
+    }
+
     private static executePrint(html: string): void {
         try {
             let iframe = document.getElementById("school-print-frame") as HTMLIFrameElement | null;
