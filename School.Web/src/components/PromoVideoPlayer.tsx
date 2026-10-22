@@ -1,7 +1,7 @@
 // ============================================================
-// PromoVideoPlayer.tsx -> AUTOMATIC PROMOTIONAL VIDEO PLAYER
-// Streamlined for real automatic video playback
-// All fake cinematic scene carousels & slides removed
+// PromoVideoPlayer.tsx -> MODERN STYLISH AUTOMATIC VIDEO FRAME
+// Auto-plays when scrolled into view • Pauses when scrolled away
+// Sleek compact glass chassis • Resilient fallback & poster
 // ============================================================
 
 import React, { useState, useEffect, useRef } from "react";
@@ -54,7 +54,9 @@ function getEmbedUrl(rawUrl: string, autoPlay: boolean = true, isMuted: boolean 
     return url;
 }
 
-const DEFAULT_FALLBACK_VIDEO = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4";
+// High reliability fallback (hosted locally in public/videos)
+const DEFAULT_FALLBACK_VIDEO = "/videos/promo.mp4";
+const DEFAULT_POSTER = "/images/announcements/sunday-worship.jpg";
 
 export const PromoVideoPlayer: React.FC<PromoVideoPlayerProps> = ({
     settings,
@@ -62,7 +64,7 @@ export const PromoVideoPlayer: React.FC<PromoVideoPlayerProps> = ({
     onEditClick
 }) => {
     const [uploadedUrl, setUploadedUrl] = useState<string | null>(settings.uploadedVideoUrl || null);
-    const [isPlaying, setIsPlaying] = useState(true);
+    const [isPlaying, setIsPlaying] = useState(false);
     const [isMuted, setIsMuted] = useState(settings.muted ?? true);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
@@ -70,6 +72,7 @@ export const PromoVideoPlayer: React.FC<PromoVideoPlayerProps> = ({
 
     const videoRef = useRef<HTMLVideoElement>(null);
     const chassisRef = useRef<HTMLDivElement>(null);
+    const userManuallyPausedRef = useRef<boolean>(false);
 
     // Sync uploaded video from IndexedDB
     useEffect(() => {
@@ -99,20 +102,86 @@ export const PromoVideoPlayer: React.FC<PromoVideoPlayerProps> = ({
         };
     }, [settings.uploadedVideoUrl]);
 
-    // Determine the active video source
-    const rawSource = uploadedUrl || settings.videoUrl || DEFAULT_FALLBACK_VIDEO;
+    // Active source resolution (guaranteed not to point to blocked Google sample)
+    let rawSource = uploadedUrl || settings.videoUrl;
+    if (!rawSource || rawSource.includes("commondatastorage.googleapis.com")) {
+        rawSource = DEFAULT_FALLBACK_VIDEO;
+    }
+
     const isYouTube = /(?:youtube\.com|youtu\.be)/i.test(rawSource);
     const isVimeo = /vimeo\.com/i.test(rawSource);
     const isEmbed = isYouTube || isVimeo;
     const embedSrc = isEmbed ? getEmbedUrl(rawSource, settings.autoPlay ?? true, isMuted) : null;
+    const activePoster = settings.posterUrl || DEFAULT_POSTER;
+
+    // ============================================================
+    // AUTOMATIC PLAY WHEN SCROLLED INTO VIEW (IntersectionObserver)
+    // ============================================================
+    useEffect(() => {
+        const target = chassisRef.current;
+        if (!target) return;
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                const entry = entries[0];
+                if (!entry) return;
+
+                if (entry.isIntersecting) {
+                    // Element is visible in viewport!
+                    // If user previously manually paused on this section, don't override,
+                    // but if it's the normal scroll into view, trigger autoplay
+                    if (!userManuallyPausedRef.current && videoRef.current) {
+                        videoRef.current.muted = isMuted;
+                        const playPromise = videoRef.current.play();
+                        if (playPromise !== undefined) {
+                            playPromise
+                                .then(() => {
+                                    setIsPlaying(true);
+                                })
+                                .catch(() => {
+                                    // Browser policy blocked unmuted autoplay: force mute & retry
+                                    if (videoRef.current) {
+                                        videoRef.current.muted = true;
+                                        setIsMuted(true);
+                                        videoRef.current.play()
+                                            .then(() => setIsPlaying(true))
+                                            .catch(() => setIsPlaying(false));
+                                    }
+                                });
+                        }
+                    }
+                } else {
+                    // Scrolled out of view: pause to conserve memory & bandwidth
+                    if (videoRef.current && !videoRef.current.paused) {
+                        videoRef.current.pause();
+                        setIsPlaying(false);
+                    }
+                    // Reset user manual pause flag once they scroll completely away,
+                    // so when they scroll back it auto-plays afresh
+                    userManuallyPausedRef.current = false;
+                }
+            },
+            {
+                // Trigger when 30% of the chassis is visible on screen
+                threshold: [0.15, 0.35],
+                rootMargin: "0px 0px -40px 0px"
+            }
+        );
+
+        observer.observe(target);
+        return () => {
+            observer.disconnect();
+        };
+    }, [isMuted, rawSource]);
 
     // Handle HTML5 video events
     const togglePlay = () => {
         if (!videoRef.current) return;
         if (videoRef.current.paused) {
-            videoRef.current.play();
-            setIsPlaying(true);
+            userManuallyPausedRef.current = false;
+            videoRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
         } else {
+            userManuallyPausedRef.current = true;
             videoRef.current.pause();
             setIsPlaying(false);
         }
@@ -139,9 +208,9 @@ export const PromoVideoPlayer: React.FC<PromoVideoPlayerProps> = ({
 
     const handleRestart = () => {
         if (videoRef.current) {
+            userManuallyPausedRef.current = false;
             videoRef.current.currentTime = 0;
-            videoRef.current.play();
-            setIsPlaying(true);
+            videoRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
         }
     };
 
@@ -150,23 +219,25 @@ export const PromoVideoPlayer: React.FC<PromoVideoPlayerProps> = ({
             ref={chassisRef}
             className={`promo-player-chassis ${isFullscreen ? "fullscreen-active" : ""}`}
         >
-            {/* TOP BAR BROWSER CHROME */}
+            {/* MODERN SLIM TOP BAR */}
             <div className="promo-player-topbar">
                 <div className="traffic-dots">
-                    <span className="dot-red" />
-                    <span className="dot-yellow" />
-                    <span className="dot-green" />
+                    <span className="dot-red" title="Close" />
+                    <span className="dot-yellow" title="Minimize" />
+                    <span className="dot-green" title="Expand" />
                 </div>
 
                 <div className="promo-player-url">
+                    <span className="url-lock">🔒</span>
                     <span className="url-protocol">https://</span>
                     <span className="url-domain">mobilebibleschool.edu</span>
                     <span className="url-path">/promotional-video</span>
                 </div>
 
                 <div className="promo-player-meta-strip">
-                    <span className="promo-badge-pill">
-                        {settings.badgeText || "OFFICIAL PROMOTIONAL VIDEO"}
+                    <span className={`promo-badge-pill ${isPlaying ? "status-playing" : ""}`}>
+                        <span className="pulse-indicator" />
+                        {isPlaying ? "AUTO-PLAYING" : (settings.badgeText || "PROMOTIONAL VIDEO")}
                     </span>
                     {onEditClick && (
                         <button
@@ -175,8 +246,8 @@ export const PromoVideoPlayer: React.FC<PromoVideoPlayerProps> = ({
                             onClick={onEditClick}
                             title="Edit Video Settings in CMS"
                         >
-                            <Settings size={14} />
-                            <span>CMS Settings</span>
+                            <Settings size={13} />
+                            <span>Edit in CMS</span>
                         </button>
                     )}
                 </div>
@@ -199,7 +270,7 @@ export const PromoVideoPlayer: React.FC<PromoVideoPlayerProps> = ({
                         <video
                             ref={videoRef}
                             src={rawSource}
-                            autoPlay={settings.autoPlay ?? true}
+                            poster={activePoster}
                             loop={settings.loop ?? true}
                             muted={isMuted}
                             playsInline
@@ -219,39 +290,42 @@ export const PromoVideoPlayer: React.FC<PromoVideoPlayerProps> = ({
                         <div className="promo-floating-controls">
                             <button
                                 type="button"
-                                className="promo-btn-floating"
+                                className="promo-btn-floating btn-play-pause"
                                 onClick={togglePlay}
-                                title={isPlaying ? "Pause" : "Play"}
+                                title={isPlaying ? "Pause Video" : "Play Video"}
                             >
-                                {isPlaying ? <Pause size={18} /> : <Play size={18} />}
+                                {isPlaying ? <Pause size={16} /> : <Play size={16} />}
+                                <span className="floating-ctrl-label">{isPlaying ? "Pause" : "Play"}</span>
                             </button>
 
                             <button
                                 type="button"
-                                className={`promo-btn-floating ${isMuted ? "btn-muted-active" : ""}`}
+                                className={`promo-btn-floating btn-audio-toggle ${isMuted ? "btn-muted-active" : "btn-unmuted"}`}
                                 onClick={toggleMute}
-                                title={isMuted ? "Unmute Audio" : "Mute Audio"}
+                                title={isMuted ? "Click to Unmute Audio" : "Mute Sound"}
                             >
-                                {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-                                <span className="floating-mute-label">{isMuted ? "Click to Unmute" : "Sound On"}</span>
+                                {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+                                <span className="floating-mute-label">
+                                    {isMuted ? "Click to Unmute" : "Sound On"}
+                                </span>
                             </button>
 
                             <button
                                 type="button"
-                                className="promo-btn-floating"
+                                className="promo-btn-floating btn-icon-only"
                                 onClick={handleRestart}
-                                title="Replay Video"
+                                title="Replay Video from Beginning"
                             >
-                                <RotateCcw size={18} />
+                                <RotateCcw size={15} />
                             </button>
 
                             <button
                                 type="button"
-                                className="promo-btn-floating"
+                                className="promo-btn-floating btn-icon-only"
                                 onClick={toggleFullscreen}
-                                title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+                                title={isFullscreen ? "Exit Fullscreen" : "Fullscreen View"}
                             >
-                                {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
+                                {isFullscreen ? <Minimize size={15} /> : <Maximize size={15} />}
                             </button>
                         </div>
 
@@ -275,7 +349,7 @@ export const PromoVideoPlayer: React.FC<PromoVideoPlayerProps> = ({
                         {settings.videoTitle || "Mobile Bible School: Life, Doctrine & Ministry"}
                     </h3>
                     <p className="promo-bottom-desc">
-                        {settings.videoTagline || "Watch how our accredited theological curriculum equips pastors and servants of the Word worldwide."}
+                        {settings.videoTagline || "Equipping pastors and servants of the Word worldwide with sound doctrine."}
                     </p>
                 </div>
 
@@ -286,7 +360,7 @@ export const PromoVideoPlayer: React.FC<PromoVideoPlayerProps> = ({
                         onClick={onApplyClick}
                     >
                         <span>{settings.ctaText || "Apply for Admission"}</span>
-                        <ArrowRight size={16} />
+                        <ArrowRight size={15} />
                     </button>
                 )}
             </div>

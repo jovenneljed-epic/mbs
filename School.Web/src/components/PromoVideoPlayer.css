@@ -1,20 +1,31 @@
 /* =========================================================
-   PROMO VIDEO PLAYER (AUTOMATIC STREAMLINED THEME)
-   Apple Studio Display Frame • Pure Automatic Video
+   PROMO VIDEO PLAYER (MODERN STYLISH AUTOMATIC VIDEO THEME)
+   Compact Cinema Glass Frame • Ambient Gold Rim Glow
+   Automatic Scroll-to-Play • Pure Streamlined Display
 ========================================================= */
 
 .promo-player-chassis {
     width: 100%;
-    background: #0d0e12;
-    border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: #0b0d14;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    box-shadow: 
+        0 25px 60px -15px rgba(0, 0, 0, 0.85),
+        0 0 35px rgba(245, 158, 11, 0.16),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
     position: relative;
     user-select: none;
-    transition: all 0.3s ease;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+}
+
+.promo-player-chassis:hover {
+    box-shadow: 
+        0 30px 70px -15px rgba(0, 0, 0, 0.9),
+        0 0 45px rgba(245, 158, 11, 0.24),
+        inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
 
 .promo-player-chassis.fullscreen-active {
@@ -28,84 +39,129 @@
     z-index: 999999;
     border-radius: 0;
     border: none;
+    box-shadow: none;
 }
 
-/* TOP BAR BROWSER CHROME */
+/* COMPACT MODERN TOP BAR */
 .promo-player-topbar {
-    height: 42px;
-    background: #15161b;
+    height: 36px;
+    background: linear-gradient(180deg, #181b24 0%, #10131a 100%);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 16px;
-    gap: 12px;
+    padding: 0 14px;
+    gap: 10px;
 }
 
 .traffic-dots {
     display: flex;
     align-items: center;
-    gap: 7px;
+    gap: 6px;
 }
 
 .traffic-dots span {
-    width: 11px;
-    height: 11px;
+    width: 9px;
+    height: 9px;
     border-radius: 50%;
     display: inline-block;
+    transition: opacity 0.2s ease;
 }
 
-.dot-red { background: #ff5f56; }
-.dot-yellow { background: #ffbd2e; }
-.dot-green { background: #27c93f; }
+.traffic-dots:hover span {
+    opacity: 0.85;
+}
+
+.dot-red { background: #ff5f56; box-shadow: 0 0 4px rgba(255, 95, 86, 0.6); }
+.dot-yellow { background: #ffbd2e; box-shadow: 0 0 4px rgba(255, 189, 46, 0.6); }
+.dot-green { background: #27c93f; box-shadow: 0 0 4px rgba(39, 201, 63, 0.6); }
 
 .promo-player-url {
     font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-    font-size: 11px;
-    color: #86868b;
+    font-size: 10.5px;
+    color: #8e95a5;
     display: flex;
     align-items: center;
-    gap: 2px;
-    background: rgba(0, 0, 0, 0.3);
-    padding: 3px 12px;
+    gap: 3px;
+    background: rgba(0, 0, 0, 0.35);
+    padding: 2px 10px;
     border-radius: 980px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    letter-spacing: -0.01em;
 }
 
-.url-protocol { color: #555866; }
-.url-domain { color: #a1a1a6; font-weight: 500; }
-.url-path { color: #2997ff; }
+.url-lock {
+    font-size: 9px;
+    opacity: 0.75;
+    margin-right: 2px;
+}
+
+.url-protocol { color: #585e72; }
+.url-domain { color: #cbd5e1; font-weight: 600; }
+.url-path { color: #38bdf8; }
 
 .promo-player-meta-strip {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
 }
 
 .promo-badge-pill {
-    font-size: 10px;
+    font-size: 9.5px;
     font-weight: 700;
     color: #F59E0B;
-    background: rgba(245, 158, 11, 0.15);
+    background: rgba(245, 158, 11, 0.12);
     border: 1px solid rgba(245, 158, 11, 0.3);
-    padding: 2px 8px;
-    border-radius: 4px;
-    letter-spacing: 0.05em;
+    padding: 2px 7px;
+    border-radius: 980px;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.3s ease;
+}
+
+.promo-badge-pill.status-playing {
+    color: #34D399;
+    background: rgba(16, 185, 129, 0.15);
+    border-color: rgba(52, 211, 153, 0.4);
+}
+
+.pulse-indicator {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #34D399;
+    display: inline-block;
+    animation: promoPulseDot 1.6s infinite ease-in-out;
+}
+
+@keyframes promoPulseDot {
+    0%, 100% {
+        transform: scale(0.9);
+        opacity: 0.5;
+        box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7);
+    }
+    50% {
+        transform: scale(1.15);
+        opacity: 1;
+        box-shadow: 0 0 8px rgba(52, 211, 153, 0.9);
+    }
 }
 
 .btn-chassis-edit {
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.15);
     color: #FFFFFF;
-    font-size: 11px;
+    font-size: 10.5px;
     font-weight: 600;
-    padding: 4px 10px;
-    border-radius: 6px;
+    padding: 3px 8px;
+    border-radius: 5px;
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 4px;
     transition: all 0.15s ease;
 }
 
@@ -131,6 +187,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    background: #000000;
 }
 
 .promo-native-video {
@@ -139,6 +196,7 @@
     object-fit: cover;
     display: block;
     cursor: pointer;
+    background-color: #000000;
 }
 
 .promo-iframe {
@@ -148,48 +206,67 @@
     display: block;
 }
 
-/* FLOATING CONTROLS */
+/* SLEEK MODERN FLOATING CONTROLS */
 .promo-floating-controls {
     position: absolute;
-    bottom: 20px;
-    right: 20px;
+    bottom: 14px;
+    right: 14px;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     z-index: 10;
 }
 
 .promo-btn-floating {
-    background: rgba(15, 23, 42, 0.85);
+    background: rgba(11, 15, 25, 0.82);
     color: #FFFFFF;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    padding: 8px 14px;
-    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    padding: 6px 12px;
+    border-radius: 980px;
     display: flex;
     align-items: center;
-    gap: 8px;
-    font-size: 12px;
+    gap: 6px;
+    font-size: 11px;
     font-weight: 700;
     cursor: pointer;
-    backdrop-filter: blur(8px);
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(12px);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
 }
 
 .promo-btn-floating:hover {
-    background: rgba(30, 41, 59, 0.95);
+    background: rgba(26, 36, 52, 0.95);
     border-color: #F59E0B;
     transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(245, 158, 11, 0.3);
 }
 
-.btn-muted-active {
-    background: rgba(122, 21, 38, 0.9);
+.promo-btn-floating.btn-icon-only {
+    padding: 7px 8px;
+    border-radius: 50%;
+}
+
+.promo-btn-floating.btn-audio-toggle.btn-muted-active {
+    background: linear-gradient(135deg, rgba(180, 83, 9, 0.88) 0%, rgba(120, 53, 15, 0.92) 100%);
     border-color: #F59E0B;
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+    animation: promoSoundPulse 2.2s infinite ease-in-out;
 }
 
+@keyframes promoSoundPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 14px rgba(245, 158, 11, 0.7);
+    }
+}
+
+.floating-ctrl-label,
 .floating-mute-label {
-    font-size: 11px;
-    letter-spacing: 0.04em;
+    font-size: 10.5px;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
 }
 
 /* PROGRESS BAR */
@@ -198,61 +275,63 @@
     bottom: 0;
     left: 0;
     right: 0;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.2);
+    height: 3px;
+    background: rgba(255, 255, 255, 0.15);
     z-index: 5;
 }
 
 .promo-video-progress-fill {
     height: 100%;
-    background: #F59E0B;
+    background: linear-gradient(90deg, #F59E0B 0%, #FBBF24 100%);
+    box-shadow: 0 0 8px #F59E0B;
     transition: width 0.2s linear;
 }
 
-/* BOTTOM BAR */
+/* COMPACT BOTTOM INFO & ACTION BAR */
 .promo-player-bottom-bar {
-    background: #111318;
+    background: #0d0f16;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 18px 24px;
+    padding: 14px 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 20px;
+    gap: 16px;
     flex-wrap: wrap;
 }
 
 .promo-bottom-info {
     flex: 1;
-    min-width: 280px;
+    min-width: 240px;
 }
 
 .promo-bottom-title {
-    font-size: 1.15rem;
+    font-size: 1.05rem;
     font-weight: 800;
     color: #FFFFFF;
-    margin: 0 0 4px 0;
-    font-family: "Georgia", serif;
+    margin: 0 0 3px 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    letter-spacing: -0.01em;
 }
 
 .promo-bottom-desc {
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     color: #94A3B8;
     margin: 0;
-    line-height: 1.45;
+    line-height: 1.4;
 }
 
 .promo-btn-apply-cta {
     background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
     color: #450A0A;
-    font-size: 0.88rem;
+    font-size: 0.84rem;
     font-weight: 800;
-    padding: 10px 20px;
-    border-radius: 8px;
+    padding: 8px 18px;
+    border-radius: 7px;
     border: none;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
     transition: all 0.2s ease;
     white-space: nowrap;
@@ -264,10 +343,30 @@
 }
 
 @media (max-width: 640px) {
+    .promo-player-chassis {
+        border-radius: 14px;
+    }
+    .promo-player-topbar {
+        height: 32px;
+        padding: 0 10px;
+    }
+    .promo-player-url {
+        display: none;
+    }
+    .promo-floating-controls {
+        bottom: 10px;
+        right: 10px;
+        gap: 6px;
+    }
+    .promo-btn-floating {
+        padding: 5px 9px;
+        font-size: 10px;
+    }
     .promo-player-bottom-bar {
+        padding: 12px 14px;
         flex-direction: column;
         align-items: flex-start;
-        gap: 12px;
+        gap: 10px;
     }
     .promo-btn-apply-cta {
         width: 100%;

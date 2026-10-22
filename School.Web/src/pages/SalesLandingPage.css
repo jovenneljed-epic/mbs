@@ -1692,11 +1692,16 @@
 }
 
 .ub-promo-video-section {
-    padding: 56px 24px;
-    background: #0f172a;
+    padding: 42px 20px;
+    background: radial-gradient(ellipse at 50% 25%, #161e31 0%, #090c14 100%);
     color: #FFFFFF;
-    border-top: 2px solid var(--mbs-gold);
-    border-bottom: 2px solid var(--mbs-gold);
+    border-top: 1px solid rgba(245, 158, 11, 0.35);
+    border-bottom: 1px solid rgba(245, 158, 11, 0.35);
+    position: relative;
+}
+
+.ub-promo-video-section .ub-section-header {
+    margin-bottom: 22px;
 }
 
 .ub-promo-video-section .ub-section-tag {
@@ -1705,18 +1710,21 @@
 
 .ub-promo-video-section .ub-section-title {
     color: #FFFFFF;
+    font-size: 1.85rem;
 }
 
 .ub-promo-video-section .ub-section-lead {
     color: #CBD5E1;
+    font-size: 0.95rem;
+    max-width: 620px;
+    margin: 0 auto;
 }
 
 .ub-promo-player-wrapper {
-    max-width: 1040px;
+    max-width: 760px;
     margin: 0 auto;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    border-radius: 20px;
+    position: relative;
 }
 
 .ub-program-highlight {

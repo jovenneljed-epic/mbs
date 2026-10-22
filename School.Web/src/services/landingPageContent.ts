@@ -42,6 +42,7 @@ export interface PromoScene {
 export interface PromoVideoSettings {
     mode: "cinematic" | "embed" | "uploaded";
     videoUrl: string;
+    posterUrl?: string;
     uploadedVideoUrl?: string;
     uploadedVideoName?: string;
     uploadedVideoSize?: number;
@@ -280,8 +281,9 @@ export const DEFAULT_LANDING_CONTENT: LandingPageContent = {
     ],
     promoVideo: {
         mode: "embed",
-        videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-        badgeText: "OFFICIAL PROMOTIONAL VIDEO • 4K",
+        videoUrl: "/videos/promo.mp4",
+        posterUrl: "/images/announcements/sunday-worship.jpg",
+        badgeText: "AUTO-PLAY ON SCROLL • MBS OFFICIAL",
         videoTitle: "Mobile Bible School: Life, Doctrine & Ministry",
         videoTagline: "Watch how our accredited theological curriculum equips pastors and servants of the Word worldwide.",
         durationLabel: "03:45",
@@ -304,6 +306,12 @@ export const getLandingPageContent = (): LandingPageContent => {
         if (stored) {
             const parsed = JSON.parse(stored);
             const promo = parsed.promoVideo || {};
+            if (!promo.videoUrl || promo.videoUrl.includes("commondatastorage.googleapis.com")) {
+                promo.videoUrl = "/videos/promo.mp4";
+            }
+            if (!promo.posterUrl) {
+                promo.posterUrl = "/images/announcements/sunday-worship.jpg";
+            }
             const mergedScenes: PromoScene[] = Array.isArray(promo.scenes) ? promo.scenes : [];
 
             const parsedTheme = parsed.colorTheme || {};
