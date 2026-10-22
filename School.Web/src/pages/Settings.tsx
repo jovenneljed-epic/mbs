@@ -107,6 +107,7 @@ const MODULE_METADATA: Record<string, { label: string; desc: string; icon: strin
     "Ministries": { label: "Teachers & Faculty Corner", desc: "Instructor profiles, teaching loads & rosters", icon: "👨‍🏫" },
     "Reports": { label: "Academic & Financial Reports", desc: "Grade reports, attendance audits & balance sheets", icon: "📑" },
     "Settings": { label: "School & System Settings", desc: "Master configuration, roles & user controls", icon: "⚙️" },
+    "Blog Management": { label: "Notification & Automation", desc: "Automated email alerts and mobile push notifications for MBS app", icon: "🔔" },
     "Demo Requests": { label: "Admissions Inquiry Requests", desc: "Online application requests and campus inquiries", icon: "✨" },
     "Subscriptions": { label: "Campus Licensing & Subscriptions", desc: "Institution portal licensing and renewals", icon: "🏷️" },
     "Website Analytics": { label: "Website & Traffic Analytics", desc: "Portal web traffic, page views & conversions", icon: "🌐" },

@@ -19,7 +19,7 @@ namespace School.Api.Services
         // COMMON EMAIL SENDER
         // =====================================================
 
-        private async Task SendEmailAsync(
+        public async Task SendEmailAsync(
             string recipientEmail,
             string subject,
             string htmlBody)

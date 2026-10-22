@@ -344,7 +344,7 @@ const PAGE_TITLES: Record<Page, string> = {
     settings:
         "School Settings",
     "blog-management":
-        "School News & Announcements",
+        "Notification Automation Management",
 
 };
 
@@ -1250,8 +1250,8 @@ const NAVIGATION_SECTIONS: NavigationSection[] = [
             },
             {
                 page: "blog-management",
-                label: "News & Announcements",
-                icon: <FileText size={18} strokeWidth={2} />,
+                label: "Notification & Automation",
+                icon: <Bell size={18} strokeWidth={2} />,
                 permission: "Blog Management",
             },
             {
