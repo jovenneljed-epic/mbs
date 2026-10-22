@@ -2008,206 +2008,111 @@ const navigatePublic =
 
 const handlePublicNavigate =
 useCallback(
-    (page:string)=>{
-
-
-        // Dynamic ministry evaluation route
-
-        if(
-            page.startsWith(
-                "/ministry-evaluation/"
-            )
-        )
-        {
-
-            navigateToUrl(page);
-
+    (page: string) => {
+        if (!page) {
+            navigatePublic("landing");
             return;
-
         }
 
+        // Dynamic ministry evaluation route
+        if (page.startsWith("/ministry-evaluation/")) {
+            navigateToUrl(page);
+            return;
+        }
 
+        // Normalize leading slashes
+        const normalized = page.startsWith("/") ? page.replace(/^\/+/, "") : page;
 
-        switch(page)
-        {
-
-
+        switch (normalized) {
+            case "":
             case "landing":
-
                 navigatePublic("landing");
-
                 break;
-
-
 
             case "home":
-
                 navigatePublic("home");
-
                 break;
-
-
 
             case "about":
-
                 navigatePublic("about");
-
                 break;
-
-
 
             case "ministries":
-
                 navigatePublic("ministries");
-
                 break;
-
-
 
             case "epic-system":
-
                 navigatePublic("epic-system");
-
                 break;
-
-
 
             case "learning":
-
                 navigatePublic("learning");
-
                 break;
-
-
 
             case "contact":
-
                 navigatePublic("contact");
-
                 break;
-
-
 
             case "academy":
-
                 navigatePublic("academy");
-
                 break;
-
-
 
             case "whats-new":
-
                 navigatePublic("whats-new");
-
                 break;
-
-
 
             case "opt-in":
-
                 navigatePublic("opt-in");
-
                 break;
-
-
 
             case "offer":
-
                 navigatePublic("offer");
-
                 break;
-
-
 
             case "checkout":
-
                 navigatePublic("checkout");
-
                 break;
-
-
 
             case "payment":
-
                 navigatePublic("payment");
-
                 break;
-
-
 
             case "thank-you":
-
                 navigatePublic("thank-you");
-
                 break;
-
-
 
             case "login":
             case "admin-login":
-
-                navigateToUrl(
-                    ADMIN_LOGIN_ROUTE
-                );
-
+                navigateToUrl(ADMIN_LOGIN_ROUTE);
                 break;
-
-
 
             case "client-login":
-
-                navigateToUrl(
-                    CLIENT_LOGIN_ROUTE
-                );
-
+            case "student-portal":
+                navigateToUrl(CLIENT_LOGIN_ROUTE);
                 break;
 
+            case "client-portal":
+                navigateToUrl(CLIENT_PORTAL_ROUTE);
+                break;
 
-
-            case "client-payment":
-            {
-
-                const subscriptionId =
-                getPaymentSubscriptionId();
-
-
-                const url =
-                subscriptionId
-
-                ?
-
-                `${PAGE_ROUTES["client-payment"]}?subscriptionId=${subscriptionId}`
-
-                :
-
-                PAGE_ROUTES["client-payment"];
-
-
-
+            case "client-payment": {
+                const subscriptionId = getPaymentSubscriptionId();
+                const url = subscriptionId
+                    ? `${PAGE_ROUTES["client-payment"]}?subscriptionId=${subscriptionId}`
+                    : PAGE_ROUTES["client-payment"];
                 navigateToUrl(url);
-
-
                 break;
-
             }
 
-
-
             default:
-
-                navigatePublic(
-                    "landing"
-                );
-
+                if (normalized in PUBLIC_ROUTES) {
+                    navigatePublic(normalized as PublicPage);
+                } else {
+                    navigateToUrl(`/${normalized}`);
+                }
         }
-
-
     },
-    [
-        navigatePublic,
-        navigateToUrl
-    ]
+    [navigatePublic, navigateToUrl]
 );
 
     // =====================================================

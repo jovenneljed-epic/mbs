@@ -1,7 +1,7 @@
 // ============================================================
 // SalesLandingPage.tsx -> MOBILE BIBLE SCHOOL & THEOLOGICAL SEMINARY
 // Official Institutional Portal & Academic Web System
-// Structured after collegiate portal architecture
+// Every button is real, functional, interactive, and connected
 // ============================================================
 
 import React, { useState, useMemo } from "react";
@@ -21,7 +21,8 @@ import {
     Mail,
     Building2,
     Compass,
-    BookOpen
+    BookOpen,
+    Calendar,
 } from "lucide-react";
 
 interface SalesLandingPageProps {
@@ -38,6 +39,16 @@ interface AdmissionFormData {
     message: string;
 }
 
+interface NewsArticle {
+    id: string;
+    tag: string;
+    title: string;
+    date: string;
+    excerpt: string;
+    fullContent: string[];
+    image: string;
+}
+
 export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }) => {
     // Search query state
     const [searchQuery, setSearchQuery] = useState("");
@@ -48,9 +59,12 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
     const [admissionSuccess, setAdmissionSuccess] = useState(false);
     const [admissionError, setAdmissionError] = useState<string | null>(null);
 
+    // Active News Article Reader Modal State
+    const [activeArticle, setActiveArticle] = useState<NewsArticle | null>(null);
+
     // Achievers pagination state
     const [achieverPage, setAchieverPage] = useState(1);
-    const totalAchieverPages = 12;
+    const totalAchieverPages = 3;
 
     const [formData, setFormData] = useState<AdmissionFormData>({
         fullName: "",
@@ -67,6 +81,58 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
     ) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    // Centralized Bulletproof Navigation
+    const navigateTo = (route: string) => {
+        const clean = route.startsWith("/") ? route.replace(/^\/+/, "") : route;
+
+        if (clean === "client-login" || clean === "student-portal") {
+            if (onNavigate) onNavigate("client-login");
+            else window.location.href = "/client-login";
+            return;
+        }
+
+        if (clean === "login" || clean === "admin-login") {
+            if (onNavigate) onNavigate("login");
+            else window.location.href = "/login";
+            return;
+        }
+
+        if (clean === "client-payment") {
+            if (onNavigate) onNavigate("client-payment");
+            else window.location.href = "/client-payment";
+            return;
+        }
+
+        if (clean === "learning") {
+            if (onNavigate) onNavigate("learning");
+            else window.location.href = "/learning";
+            return;
+        }
+
+        if (clean === "contact") {
+            if (onNavigate) onNavigate("contact");
+            else window.location.href = "/contact";
+            return;
+        }
+
+        if (clean === "about") {
+            if (onNavigate) onNavigate("about");
+            else window.location.href = "/about";
+            return;
+        }
+
+        if (onNavigate) {
+            onNavigate(clean);
+        } else {
+            window.location.href = `/${clean}`;
+        }
+    };
+
+    const openAdmissionWithProgram = (programName: string) => {
+        setFormData(prev => ({ ...prev, program: programName }));
+        setIsAdmissionOpen(true);
     };
 
     const handleAdmissionSubmit = async (e: React.FormEvent) => {
@@ -113,14 +179,6 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
         }
     };
 
-    const navigateTo = (route: string) => {
-        if (onNavigate) {
-            onNavigate(route);
-        } else {
-            window.location.href = route;
-        }
-    };
-
     // The 7 Official MBS Portals
     const portals = useMemo(() => [
         {
@@ -131,7 +189,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
             description: "Apply for undergraduate, pastoral diploma, and graduate theological programs.",
             actionText: "Apply Online",
             badge: "Open for SY 2026-2027",
-            handler: () => setIsAdmissionOpen(true)
+            handler: () => openAdmissionWithProgram("Bachelor of Theology (B.Th.)")
         },
         {
             id: "enrollment",
@@ -141,7 +199,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
             description: "Register for semester subjects, select class schedules, and verify curriculum load.",
             actionText: "Proceed to Enrollment",
             badge: "Active Term",
-            handler: () => navigateTo("/client-login")
+            handler: () => navigateTo("client-login")
         },
         {
             id: "payment",
@@ -151,7 +209,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
             description: "Secure tuition payments, course module dues, and financial ledger review.",
             actionText: "Make Payment",
             badge: "Instant Verification",
-            handler: () => navigateTo("/client-payment")
+            handler: () => navigateTo("client-payment")
         },
         {
             id: "mail",
@@ -161,7 +219,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
             description: "Official communications for seminary students, pastoral faculty, and administration.",
             actionText: "Access Mail & Inquiries",
             badge: "Webmail Service",
-            handler: () => navigateTo("/contact")
+            handler: () => navigateTo("contact")
         },
         {
             id: "my-mbs",
@@ -171,7 +229,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
             description: "Centralized portal for student schedules, academic records, announcements, and profile.",
             actionText: "Login to My MBS",
             badge: "Single Sign-On",
-            handler: () => navigateTo("/client-login")
+            handler: () => navigateTo("client-login")
         },
         {
             id: "mbs-lms",
@@ -181,7 +239,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
             description: "Access online lecture videos, Greek/Hebrew exegetical tools, syllabi, and reading modules.",
             actionText: "Open LMS Hub",
             badge: "Interactive Classroom",
-            handler: () => navigateTo("/learning")
+            handler: () => navigateTo("learning")
         },
         {
             id: "e-registrar",
@@ -191,18 +249,23 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
             description: "Official transcript requests, grade evaluations, graduation status, and pastoral endorsements.",
             actionText: "Access Records",
             badge: "Official Evaluation",
-            handler: () => navigateTo("/client-login")
+            handler: () => navigateTo("client-login")
         }
     ], [onNavigate]);
 
     // News & Features items
-    const newsArticles = useMemo(() => [
+    const newsArticles: NewsArticle[] = useMemo(() => [
         {
             id: "pastoral-summit",
             tag: "MINISTRY SUMMIT",
             title: "MBS Hosts Annual National Pastors & Church Planters Colloquium 2026",
             date: "October 28, 2026",
             excerpt: "Over 350 church leaders, alumni, and seminary delegates gathered for three days of expository preaching, pastoral revitalization, and church planting strategies.",
+            fullContent: [
+                "The Mobile Bible School Annual National Pastors & Church Planters Colloquium brought together over 350 pastors, missionaries, and church planters from across Luzon, Visayas, and Mindanao.",
+                "Keynote lectures centered on 'Expository Preaching in a Pluralistic Age', led by visiting seminary scholars and faculty leaders. Sessions covered biblical hermeneutics, pulpit endurance, family pastoral health, and establishing self-multiplying congregations in unreached towns.",
+                "The event also celebrated the commissioning of 24 new church planting teams preparing to enter pioneering ministry fields across the Philippine archipelago."
+            ],
             image: "/images/announcements/sunday-worship.jpg"
         },
         {
@@ -211,6 +274,11 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
             title: "MBS Alumni Pioneering 18 Cross-Cultural Church Plants in Southeast Asia",
             date: "October 16, 2026",
             excerpt: "From remote island communities to urban centers, our graduates continue to plant self-sustaining, Scripture-grounded congregations.",
+            fullContent: [
+                "The MBS Missions Board published its 2026 Field Assessment Report detailing remarkable ministry milestones achieved by Mobile Bible School alumni serving in frontier mission fields.",
+                "Eighteen new indigenous fellowships have taken root, with local leaders being discipled through modular theological extension courses translated into indigenous regional dialects.",
+                "Mobile Bible School continues to support missionary pastors through ongoing theological mentoring, leadership workshops, and study material sponsorships."
+            ],
             image: "/images/announcements/youth-night.jpg"
         },
         {
@@ -219,43 +287,114 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
             title: "Seminary Launches Modular Programs in Advanced Hermeneutics & Biblical Counseling",
             date: "October 05, 2026",
             excerpt: "Designed for bivocational pastors and church ministry leaders, new evening and weekend intensive modules provide rigorous theological training.",
+            fullContent: [
+                "Responding to requests from church networks and bivocational servants, Mobile Bible School is launching brand new modular certificate tracks designed for busy ministry practitioners.",
+                "The curriculum includes specialized courses in Biblical Counseling, Advanced Hermeneutics, Pauline Epistles, and Expository Preaching, taught by seasoned pastoral faculty.",
+                "Enrolled students can attend both on-campus modular intensives and complete assignments via the MBS LMS cloud classroom."
+            ],
             image: "/images/announcements/epic-platform-update.jpg"
         }
     ], []);
 
-    // Alumni & Achievers
-    const achievers = useMemo(() => [
-        {
-            id: "1",
-            category: "BACHELOR OF THEOLOGY (B.TH.)",
-            rate: "100% ORDAINED",
-            title: "Rev. David S. Morales, B.Th.",
-            role: "Senior Pastor & Church Planter",
-            honors: "Batch 2021 Summa Cum Laude",
-            achievement: "Successfully planted 3 daughter churches and equipped 45 lay preachers.",
-            initials: "DM"
-        },
-        {
-            id: "2",
-            category: "MASTER OF MINISTRY (M.MIN.)",
-            rate: "DISTINGUISHED ALUMNA",
-            title: "Dr. Rebecca L. Santos, M.Min.",
-            role: "Director of Biblical Counseling & Family Ministry",
-            honors: "Batch 2019 Valedictorian",
-            achievement: "Author of pastoral counseling manuals used across 80+ partner churches.",
-            initials: "RS"
-        },
-        {
-            id: "3",
-            category: "MASTER OF THEOLOGY (M.TH.)",
-            rate: "EXPOSITOR & SCHOLAR",
-            title: "Pastor Jonathan M. Cruz, M.Th.",
-            role: "Dean of Biblical Languages & Exegesis",
-            honors: "Batch 2016 High Distinction",
-            achievement: "Lecturer in New Testament Greek, mentoring pastors in expository pulpit ministry.",
-            initials: "JC"
-        }
-    ], []);
+    // Alumni & Achievers Database across 3 pages
+    const achieversData = useMemo(() => ({
+        1: [
+            {
+                id: "1",
+                category: "BACHELOR OF THEOLOGY (B.TH.)",
+                rate: "100% ORDAINED",
+                title: "Rev. David S. Morales, B.Th.",
+                role: "Senior Pastor & Church Planter",
+                honors: "Batch 2021 Summa Cum Laude",
+                achievement: "Successfully planted 3 daughter churches and equipped 45 lay preachers across Southern Tagalog.",
+                initials: "DM"
+            },
+            {
+                id: "2",
+                category: "MASTER OF MINISTRY (M.MIN.)",
+                rate: "DISTINGUISHED ALUMNA",
+                title: "Dr. Rebecca L. Santos, M.Min.",
+                role: "Director of Biblical Counseling & Family Ministry",
+                honors: "Batch 2019 Valedictorian",
+                achievement: "Author of pastoral counseling manuals used across 80+ partner churches in Metro Manila.",
+                initials: "RS"
+            },
+            {
+                id: "3",
+                category: "MASTER OF THEOLOGY (M.TH.)",
+                rate: "EXPOSITOR & SCHOLAR",
+                title: "Pastor Jonathan M. Cruz, M.Th.",
+                role: "Dean of Biblical Languages & Exegesis",
+                honors: "Batch 2016 High Distinction",
+                achievement: "Lecturer in New Testament Greek, mentoring 120+ pastors in expository verse-by-verse pulpit ministry.",
+                initials: "JC"
+            }
+        ],
+        2: [
+            {
+                id: "4",
+                category: "DIPLOMA IN PASTORAL STUDIES (DPS)",
+                rate: "CHURCH REVITALIZER",
+                title: "Pastor Timothy A. Bautista, DPS",
+                role: "Lead Pastor & Youth Evangelist",
+                honors: "Batch 2022 Magna Cum Laude",
+                achievement: "Revitalized a struggling municipal congregation, growing active Sunday attendance from 30 to over 280 members.",
+                initials: "TB"
+            },
+            {
+                id: "5",
+                category: "CROSS-CULTURAL MISSIONS",
+                rate: "FRONTIER MISSIONARY",
+                title: "Missionary Sarah G. Ramos, B.Th.",
+                role: "Indigenous Church Planter",
+                honors: "Batch 2020 Leadership Award",
+                achievement: "Established 4 tribal Bible study fellowship hubs with translated hymnody and children's catechisms.",
+                initials: "SR"
+            },
+            {
+                id: "6",
+                category: "DOCTOR OF THEOLOGY (D.TH.)",
+                rate: "THEOLOGICAL PROFESSOR",
+                title: "Dr. Benjamin K. Lee, D.Th.",
+                role: "Professor of Systematic Theology",
+                honors: "Batch 2014 Doctoral Fellow",
+                achievement: "Published 3 peer-reviewed theological treatises on Reformation Ecclesiology and Expository Preaching.",
+                initials: "BL"
+            }
+        ],
+        3: [
+            {
+                id: "7",
+                category: "CERTIFICATE IN BIBLICAL STUDIES (CBS)",
+                rate: "LAY MINISTRY LEADER",
+                title: "Sister Mary Grace Torres, CBS",
+                role: "Director of Children's Ministry & VBS",
+                honors: "Batch 2023 Exemplary Service",
+                achievement: "Trained 200+ Sunday school teachers and coordinated Vacation Bible Schools reaching 1,500 children.",
+                initials: "MT"
+            },
+            {
+                id: "8",
+                category: "BACHELOR OF THEOLOGY (B.TH.)",
+                rate: "CAMPUS CHAPLAIN",
+                title: "Pastor Emmanuel R. Reyes, B.Th.",
+                role: "Collegiate Chaplain & Discipleship Mentor",
+                honors: "Batch 2018 Academic Excellence",
+                achievement: "Founded collegiate Christian fellowships across 5 university campuses in central Luzon.",
+                initials: "ER"
+            },
+            {
+                id: "9",
+                category: "MASTER OF MINISTRY (M.MIN.)",
+                rate: "WORSHIP DIRECTOR",
+                title: "Pastor Nathaniel O. Castro, M.Min.",
+                role: "Dean of Church Music & Hymnology",
+                honors: "Batch 2017 Ministry Distinction",
+                achievement: "Mentored over 60 church choirs and praise ensembles in Christ-centered, scripture-rich liturgical worship.",
+                initials: "NC"
+            }
+        ]
+    }), []);
 
     // Filtered portals
     const filteredPortals = useMemo(() => {
@@ -288,16 +427,37 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
 
                     {/* Nav Middle Links */}
                     <nav className="ub-nav-links">
-                        <a href="#campuses" className="ub-nav-link" onClick={(e) => { e.preventDefault(); navigateTo("/about"); }}>
+                        <a
+                            href="#campuses"
+                            className="ub-nav-link"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                document.getElementById("campuses")?.scrollIntoView({ behavior: "smooth" });
+                            }}
+                        >
                             MAIN CAMPUS
                         </a>
-                        <a href="#extension" className="ub-nav-link" onClick={(e) => { e.preventDefault(); navigateTo("/learning"); }}>
+                        <a
+                            href="#learning"
+                            className="ub-nav-link"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                navigateTo("learning");
+                            }}
+                        >
                             ONLINE EXTENSION
                         </a>
-                        <a href="#programs" className="ub-nav-link" onClick={(e) => { e.preventDefault(); navigateTo("/about"); }}>
+                        <a
+                            href="#academic-programs"
+                            className="ub-nav-link"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                document.getElementById("academic-programs")?.scrollIntoView({ behavior: "smooth" });
+                            }}
+                        >
                             ACADEMIC PROGRAMS
                         </a>
-                        <div className="ub-anniversary-badge">
+                        <div className="ub-anniversary-badge" title="40+ Years of Faithful Ministry & Theological Rigor">
                             <span className="ub-anniversary-sparkle">★</span>
                             <span>40+ Years of Ministry</span>
                         </div>
@@ -307,8 +467,8 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                     <div className="ub-header-actions">
                         <button
                             className="ub-btn-portal-student"
-                            onClick={() => navigateTo("/client-login")}
-                            title="Student Portal Login"
+                            onClick={() => navigateTo("client-login")}
+                            title="Student / Member Portal Login"
                         >
                             <User className="ub-btn-icon" />
                             <span>Student Portal</span>
@@ -316,7 +476,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
 
                         <button
                             className="ub-btn-portal-admin"
-                            onClick={() => navigateTo("/login")}
+                            onClick={() => navigateTo("login")}
                             title="Administrator / Faculty Login"
                         >
                             <ShieldCheck className="ub-btn-icon" />
@@ -325,7 +485,8 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
 
                         <button
                             className="ub-btn-apply"
-                            onClick={() => setIsAdmissionOpen(true)}
+                            onClick={() => openAdmissionWithProgram("Bachelor of Theology (B.Th.)")}
+                            title="Open Online Admissions Application"
                         >
                             Apply Now
                         </button>
@@ -364,7 +525,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                     <div className="ub-hero-actions">
                         <button
                             className="ub-btn-hero-primary"
-                            onClick={() => setIsAdmissionOpen(true)}
+                            onClick={() => openAdmissionWithProgram("Bachelor of Theology (B.Th.)")}
                         >
                             Apply for Admission
                             <ArrowRight className="ub-btn-arrow" />
@@ -373,6 +534,10 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                         <a
                             href="#mbs-portals"
                             className="ub-btn-hero-secondary"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                document.getElementById("mbs-portals")?.scrollIntoView({ behavior: "smooth" });
+                            }}
                         >
                             Access MBS Portals
                             <ChevronRight className="ub-btn-arrow" />
@@ -444,10 +609,13 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                                 key={portal.id}
                                 className={`ub-portal-card ub-portal-card-${portal.id}`}
                                 onClick={portal.handler}
+                                role="button"
+                                tabIndex={0}
+                                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); portal.handler(); } }}
                             >
                                 <div className="ub-card-top">
                                     <div className="ub-card-icon-container">
-                                        {/* Dynamic Icon based on UB Portal layout */}
+                                        {/* Dynamic Icon based on Portal layout */}
                                         {portal.icon === "admission" && (
                                             <div className="ub-portal-icon-box ub-icon-admission">
                                                 <GraduationCap className="ub-icon-svg" />
@@ -475,7 +643,6 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                                         )}
                                         {portal.icon === "lms" && (
                                             <div className="ub-portal-icon-box ub-icon-lms">
-                                                {/* LMS segmented circular icon LMS learning hub */}
                                                 <div className="ub-lms-hub-icon">
                                                     <div className="ub-hub-center" />
                                                     <div className="ub-hub-dot ub-dot-1" />
@@ -517,7 +684,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
             {/* ============================================================ */}
             {/* ACADEMIC THEOLOGICAL PROGRAMS */}
             {/* ============================================================ */}
-            <section className="ub-programs-section">
+            <section id="academic-programs" className="ub-programs-section">
                 <div className="ub-portals-container">
                     <div className="ub-section-header">
                         <span className="ub-section-tag">CURRICULUM & DEGREES</span>
@@ -538,7 +705,12 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                             </p>
                             <div className="ub-program-meta">
                                 <span>2 Years • 60 Credits</span>
-                                <button className="ub-program-link" onClick={() => setIsAdmissionOpen(true)}>Apply →</button>
+                                <button
+                                    className="ub-program-link"
+                                    onClick={() => openAdmissionWithProgram("Diploma in Pastoral Studies (DPS)")}
+                                >
+                                    Apply →
+                                </button>
                             </div>
                         </div>
 
@@ -550,7 +722,12 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                             </p>
                             <div className="ub-program-meta">
                                 <span>4 Years • 128 Credits</span>
-                                <button className="ub-program-link" onClick={() => setIsAdmissionOpen(true)}>Apply →</button>
+                                <button
+                                    className="ub-program-link"
+                                    onClick={() => openAdmissionWithProgram("Bachelor of Theology (B.Th.)")}
+                                >
+                                    Apply →
+                                </button>
                             </div>
                         </div>
 
@@ -562,7 +739,12 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                             </p>
                             <div className="ub-program-meta">
                                 <span>2 Years • Graduate Seminar</span>
-                                <button className="ub-program-link" onClick={() => setIsAdmissionOpen(true)}>Apply →</button>
+                                <button
+                                    className="ub-program-link"
+                                    onClick={() => openAdmissionWithProgram("Master of Ministry (M.Min.)")}
+                                >
+                                    Apply →
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -585,7 +767,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                     </div>
 
                     <div className="ub-achievers-grid">
-                        {achievers.map((achiever) => (
+                        {(achieversData[achieverPage as keyof typeof achieversData] || achieversData[1]).map((achiever) => (
                             <div key={achiever.id} className="ub-achiever-card">
                                 <div className="ub-achiever-banner">
                                     <span className="ub-achiever-rate-tag">{achiever.rate}</span>
@@ -614,7 +796,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                         ))}
                     </div>
 
-                    {/* Pagination bar matching the collegiate screenshot */}
+                    {/* Pagination bar with real page switching */}
                     <div className="ub-pagination-bar">
                         <button
                             className="ub-page-nav"
@@ -642,12 +824,6 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                             3
                         </button>
                         <span className="ub-page-ellipsis">...</span>
-                        <button
-                            className={`ub-page-number ${achieverPage === totalAchieverPages ? "active" : ""}`}
-                            onClick={() => setAchieverPage(totalAchieverPages)}
-                        >
-                            {totalAchieverPages}
-                        </button>
                         <button
                             className="ub-page-nav"
                             disabled={achieverPage === totalAchieverPages}
@@ -683,7 +859,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                                     <p className="ub-news-excerpt">{article.excerpt}</p>
                                     <button
                                         className="ub-news-read-more"
-                                        onClick={() => setIsAdmissionOpen(true)}
+                                        onClick={() => setActiveArticle(article)}
                                     >
                                         Read Dispatch
                                         <ArrowRight className="w-4 h-4 ml-1" />
@@ -698,12 +874,12 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
             {/* ============================================================ */}
             {/* INSTITUTIONAL FOOTER */}
             {/* ============================================================ */}
-            <footer className="ub-footer">
+            <footer id="campuses" className="ub-footer">
                 <div className="ub-footer-main">
                     <div className="ub-portals-container ub-footer-grid">
                         {/* Column 1: Institutional Seal & About */}
                         <div className="ub-footer-col ub-footer-col-brand">
-                            <div className="ub-brand ub-footer-brand">
+                            <div className="ub-brand ub-footer-brand" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
                                 <div className="ub-crest">
                                     <BookOpen className="ub-crest-icon" />
                                 </div>
@@ -738,11 +914,11 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                         <div className="ub-footer-col">
                             <h4 className="ub-footer-heading">MBS Direct Portals</h4>
                             <ul className="ub-footer-list">
-                                <li><button onClick={() => navigateTo("/client-login")}>Student Portal (My MBS)</button></li>
-                                <li><button onClick={() => navigateTo("/login")}>Seminary Admin & Faculty Portal</button></li>
-                                <li><button onClick={() => navigateTo("/learning")}>Theological LMS (Class Modules)</button></li>
-                                <li><button onClick={() => navigateTo("/client-payment")}>Tuition & Assessment Payment</button></li>
-                                <li><button onClick={() => setIsAdmissionOpen(true)}>Online Admissions Desk</button></li>
+                                <li><button onClick={() => navigateTo("client-login")}>Student Portal (My MBS)</button></li>
+                                <li><button onClick={() => navigateTo("login")}>Seminary Admin & Faculty Portal</button></li>
+                                <li><button onClick={() => navigateTo("learning")}>Theological LMS (Class Modules)</button></li>
+                                <li><button onClick={() => navigateTo("client-payment")}>Tuition & Assessment Payment</button></li>
+                                <li><button onClick={() => openAdmissionWithProgram("Bachelor of Theology (B.Th.)")}>Online Admissions Desk</button></li>
                             </ul>
                         </div>
 
@@ -754,7 +930,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                             </p>
                             <button
                                 className="ub-btn-footer-apply"
-                                onClick={() => setIsAdmissionOpen(true)}
+                                onClick={() => openAdmissionWithProgram("Bachelor of Theology (B.Th.)")}
                             >
                                 Apply for Admission
                             </button>
@@ -766,11 +942,11 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                     <div className="ub-portals-container ub-footer-bottom-flex">
                         <p>© {new Date().getFullYear()} Mobile Bible School & Theological Seminary. All Rights Reserved.</p>
                         <div className="ub-footer-links">
-                            <a href="#privacy" onClick={(e) => { e.preventDefault(); navigateTo("/contact"); }}>Privacy Policy</a>
+                            <a href="#privacy" onClick={(e) => { e.preventDefault(); navigateTo("contact"); }}>Privacy Policy</a>
                             <span>•</span>
-                            <a href="#terms" onClick={(e) => { e.preventDefault(); navigateTo("/contact"); }}>Academic Policies</a>
+                            <a href="#terms" onClick={(e) => { e.preventDefault(); navigateTo("about"); }}>Academic Policies</a>
                             <span>•</span>
-                            <a href="#admissions" onClick={(e) => { e.preventDefault(); setIsAdmissionOpen(true); }}>Admissions Desk</a>
+                            <a href="#admissions" onClick={(e) => { e.preventDefault(); openAdmissionWithProgram("Bachelor of Theology (B.Th.)"); }}>Admissions Desk</a>
                         </div>
                     </div>
                 </div>
@@ -939,6 +1115,60 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
                                 </div>
                             </form>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {/* ============================================================ */}
+            {/* ARTICLE READER MODAL (DISPATCH MODAL) */}
+            {/* ============================================================ */}
+            {activeArticle && (
+                <div className="ub-modal-overlay" onClick={() => setActiveArticle(null)}>
+                    <div className="ub-modal-content ub-article-modal-content" onClick={(e) => e.stopPropagation()}>
+                        <button
+                            className="ub-modal-close"
+                            onClick={() => setActiveArticle(null)}
+                            aria-label="Close Article"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+
+                        <div className="ub-article-modal-header">
+                            <span className="ub-article-modal-tag">{activeArticle.tag}</span>
+                            <div className="ub-article-modal-date">
+                                <Calendar className="w-4 h-4 mr-1 text-amber-600 inline" />
+                                {activeArticle.date}
+                            </div>
+                            <h2 className="ub-article-modal-title">{activeArticle.title}</h2>
+                        </div>
+
+                        <div className="ub-article-modal-image-wrapper">
+                            <img src={activeArticle.image} alt={activeArticle.title} className="ub-article-modal-img" />
+                        </div>
+
+                        <div className="ub-article-modal-body">
+                            {activeArticle.fullContent.map((paragraph, idx) => (
+                                <p key={idx} className="ub-article-paragraph">{paragraph}</p>
+                            ))}
+                        </div>
+
+                        <div className="ub-article-modal-footer">
+                            <button
+                                className="ub-btn-hero-primary"
+                                onClick={() => {
+                                    setActiveArticle(null);
+                                    openAdmissionWithProgram("Bachelor of Theology (B.Th.)");
+                                }}
+                            >
+                                Inquire with Admissions
+                            </button>
+                            <button
+                                className="ub-btn-cancel"
+                                onClick={() => setActiveArticle(null)}
+                            >
+                                Close Dispatch
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
