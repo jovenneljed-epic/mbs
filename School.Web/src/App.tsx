@@ -230,7 +230,7 @@ const PAGE_ROUTES: Record<Page, string> = {
     "member-attendance-report": "/member-attendance-report",
 
     services: "/services",
-    events: "/events",
+    events: "/admin/events",
     ministries: "/cms/ministries",
  visitors: "/visitors",
     giving: "/giving",
@@ -1017,6 +1017,13 @@ const getPageFromPath = (
         return getLMSRouteState(
             normalized
         ).page;
+    }
+
+    if (
+        normalized === "/admin/events" ||
+        normalized === "/cms/events"
+    ) {
+        return "events";
     }
 
     return (
