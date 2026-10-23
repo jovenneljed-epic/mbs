@@ -811,6 +811,117 @@ static async Task SeedDatabaseAsync(
 
         await DatabaseSeeder.SeedSubscriptionPlansAsync(
             context);
+
+        // --------------------------------------------------------
+        // EVENTS SEEDING (MOBILE BIBLE SCHOOL & THEOLOGICAL SEMINARY)
+        // --------------------------------------------------------
+        if (!await context.Events.AnyAsync() && defaultCustId > 0)
+        {
+            var seedEvents = new List<Event>
+            {
+                new Event
+                {
+                    CustomerId = defaultCustId,
+                    Title = "Modular Pastoral Intensive: Expository Preaching & Hermeneutics",
+                    EventType = "Pastoral Intensive",
+                    EventDate = new DateTime(2026, 11, 14),
+                    StartTime = new TimeSpan(9, 0, 0),
+                    EndTime = new TimeSpan(17, 0, 0),
+                    Venue = "Main Seminary Campus (Hall A) & Zoom",
+                    Speaker = "Dr. Jonathan M. Cruz, M.Th.",
+                    Ministry = "Biblical Studies & Homiletics",
+                    Status = "SCHEDULED",
+                    Description = "In-depth exegetical study of original biblical manuscripts, homiletical structural design, and verse-by-verse expository pulpit delivery for pastors and church leaders.",
+                    CreatedAt = DateTime.UtcNow
+                },
+                new Event
+                {
+                    CustomerId = defaultCustId,
+                    Title = "Seminary Admissions Open House & Campus Tour",
+                    EventType = "Admissions Open House",
+                    EventDate = new DateTime(2026, 12, 5),
+                    StartTime = new TimeSpan(10, 0, 0),
+                    EndTime = new TimeSpan(14, 0, 0),
+                    Venue = "Metro Manila Seminary Headquarters",
+                    Speaker = "Admissions Directorate & Faculty Deans",
+                    Ministry = "Academic Admissions Desk",
+                    Status = "SCHEDULED",
+                    Description = "Tour our theological library, meet distinguished pastoral faculty, evaluate degree credits, and receive on-the-spot modular enrollment assistance.",
+                    CreatedAt = DateTime.UtcNow
+                },
+                new Event
+                {
+                    CustomerId = defaultCustId,
+                    Title = "National Church Planting & Leadership Colloquium",
+                    EventType = "Leadership Summit",
+                    EventDate = new DateTime(2027, 1, 22),
+                    StartTime = new TimeSpan(8, 30, 0),
+                    EndTime = new TimeSpan(16, 30, 0),
+                    Venue = "Seminary Grand Auditorium & Regional Centers",
+                    Speaker = "Pastoral Council & Guest Theologians",
+                    Ministry = "Missions & Church Planting",
+                    Status = "SCHEDULED",
+                    Description = "Equipping bivocational church planters, church revitalizers, and lay elders with sound ecclesiology and strategic church multiplication.",
+                    CreatedAt = DateTime.UtcNow
+                },
+                new Event
+                {
+                    CustomerId = defaultCustId,
+                    Title = "41st Annual Seminary Commencement & Commissioning Service",
+                    EventType = "Commencement Exercises",
+                    EventDate = new DateTime(2027, 3, 27),
+                    StartTime = new TimeSpan(14, 0, 0),
+                    EndTime = new TimeSpan(18, 0, 0),
+                    Venue = "Seminary Cathedral Grounds",
+                    Speaker = "Chancellor & Board of Trustees",
+                    Ministry = "Academic Council",
+                    Status = "SCHEDULED",
+                    Description = "Conferral of degrees for Bachelor of Theology (B.Th.), Master of Ministry (M.Min.), and Diploma in Pastoral Studies (DPS).",
+                    CreatedAt = DateTime.UtcNow
+                }
+            };
+            context.Events.AddRange(seedEvents);
+            await context.SaveChangesAsync();
+        }
+
+        // --------------------------------------------------------
+        // ANNOUNCEMENTS SEEDING
+        // --------------------------------------------------------
+        if (!await context.Announcements.AnyAsync())
+        {
+            var seedAnnouncements = new List<Announcement>
+            {
+                new Announcement
+                {
+                    Title = "Now Accepting Applications for Academic Year 2026-2027",
+                    Category = "ADMISSIONS",
+                    IsPublished = true,
+                    PublishDate = new DateTime(2026, 10, 15),
+                    CreatedDate = DateTime.UtcNow,
+                    Content = "Registration is officially open for modular on-campus intensives and global online seminary cohorts. Early applicant scholarships are available for pastors and church planters."
+                },
+                new Announcement
+                {
+                    Title = "MBS Theological LMS 3.0 Platform Upgrade & Cloud Library",
+                    Category = "ACADEMIC LMS",
+                    IsPublished = true,
+                    PublishDate = new DateTime(2026, 10, 10),
+                    CreatedDate = DateTime.UtcNow,
+                    Content = "Students can now access over 15,000 digital commentaries, exegetical lexicons, and class video replays directly in the student portal."
+                },
+                new Announcement
+                {
+                    Title = "80% Subsidized Tuition Grant Active for Full-Time Ministers",
+                    Category = "SCHOLARSHIPS",
+                    IsPublished = true,
+                    PublishDate = new DateTime(2026, 9, 28),
+                    CreatedDate = DateTime.UtcNow,
+                    Content = "Through generous seminary partners, an 80% tuition subsidy grant is now active for full-time bivocational ministers and rural church workers."
+                }
+            };
+            context.Announcements.AddRange(seedAnnouncements);
+            await context.SaveChangesAsync();
+        }
     }
     catch (Exception ex)
     {

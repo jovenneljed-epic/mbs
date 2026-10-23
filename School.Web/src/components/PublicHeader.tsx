@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from "react";
 import "./PublicHeader.css";
+import { BookOpen, User, ShieldCheck, Calendar, Bell, Image as ImageIcon, GraduationCap } from "lucide-react";
 
 interface PublicHeaderProps {
     onNavigate?: (page: string) => void;
@@ -13,32 +14,38 @@ const PublicHeader: React.FC<PublicHeaderProps> = ({
     const navigateTo = useCallback(
         (page: string) => {
             setMenuOpen(false);
-            onNavigate?.(page);
+            if (onNavigate) {
+                onNavigate(page);
+            } else {
+                window.location.href = `/${page}`;
+            }
         },
         [onNavigate]
     );
 
     return (
-        <header className="epic-public-navbar">
+        <header className="epic-public-navbar mbs-unified-header">
             <div className="epic-public-nav-inner">
 
-                {/* LOGO */}
+                {/* BRAND LOGO */}
                 <button
                     type="button"
-                    className="epic-public-logo"
+                    className="epic-public-logo mbs-brand-btn"
                     onClick={() => navigateTo("home")}
-                    aria-label="Go to EPIC Church home"
+                    aria-label="Mobile Bible School Home"
                 >
-                    <span className="epic-public-logo-mark">
-                        EPIC
-                    </span>
+                    <div className="mbs-header-crest">
+                        <BookOpen size={20} color="#580D1B" />
+                    </div>
 
-                    <span className="epic-public-logo-text">
-                        <strong>EPIC CHURCH</strong>
-                        <small>
-                            Engaging People Into Christ
+                    <div className="epic-public-logo-text">
+                        <strong style={{ fontSize: "1.1rem", letterSpacing: "0.02em" }}>
+                            Mobile Bible School
+                        </strong>
+                        <small style={{ color: "#FDE68A", fontSize: "0.75rem", letterSpacing: "0.04em" }}>
+                            Theological Seminary &amp; Institute
                         </small>
-                    </span>
+                    </div>
                 </button>
 
                 {/* DESKTOP / MOBILE NAVIGATION */}
@@ -64,23 +71,34 @@ const PublicHeader: React.FC<PublicHeaderProps> = ({
 
                     <button
                         type="button"
-                        onClick={() => navigateTo("ministries")}
+                        onClick={() => navigateTo("events")}
+                        className="mbs-nav-highlight-btn"
                     >
-                        Ministries
+                        <Calendar size={13} style={{ display: "inline", marginRight: 4, verticalAlign: -1 }} />
+                        Events
                     </button>
 
                     <button
                         type="button"
-                        onClick={() => navigateTo("epic-system")}
+                        onClick={() => navigateTo("announcements")}
                     >
-                        EPIC System
+                        <Bell size={13} style={{ display: "inline", marginRight: 4, verticalAlign: -1 }} />
+                        Announcements
+                    </button>
+
+                    <button
+                        type="button"
+                        onClick={() => navigateTo("gallery")}
+                    >
+                        <ImageIcon size={13} style={{ display: "inline", marginRight: 4, verticalAlign: -1 }} />
+                        Gallery
                     </button>
 
                     <button
                         type="button"
                         onClick={() => navigateTo("learning")}
                     >
-                        Learning
+                        Theological LMS
                     </button>
 
                     <button
@@ -90,40 +108,47 @@ const PublicHeader: React.FC<PublicHeaderProps> = ({
                         Contact
                     </button>
 
-                    {/* MOBILE LOGIN */}
+                    {/* MOBILE PORTAL BUTTONS */}
                     <button
                         type="button"
                         className="epic-mobile-login"
                         onClick={() => navigateTo("client-login")}
                     >
-                        <span className="epic-login-icon">
-                            ↪
-                        </span>
-                        LOGIN
+                        <User size={14} style={{ display: "inline", marginRight: 5 }} />
+                        Student Portal
                     </button>
 
-                    {/* MOBILE CTA */}
                     <button
                         type="button"
                         className="epic-mobile-connect"
-                        onClick={() => navigateTo("contact")}
+                        onClick={() => navigateTo("login")}
                     >
-                        Connect With Us
+                        <ShieldCheck size={14} style={{ display: "inline", marginRight: 5 }} />
+                        Admin Portal
                     </button>
                 </nav>
 
                 {/* DESKTOP ACTIONS */}
                 <div className="epic-public-nav-actions">
-
                     <button
                         type="button"
                         className="epic-client-login-button"
                         onClick={() => navigateTo("client-login")}
+                        title="Student / Member Portal Login"
                     >
-                        <span className="epic-login-icon">
-                            ↪
-                        </span>
-                        LOGIN
+                        <User size={13} style={{ display: "inline", marginRight: 4, verticalAlign: -1 }} />
+                        Student Portal
+                    </button>
+
+                    <button
+                        type="button"
+                        className="epic-client-login-button"
+                        onClick={() => navigateTo("login")}
+                        title="Faculty / Administrator Login"
+                        style={{ borderColor: "rgba(245, 158, 11, 0.4)" }}
+                    >
+                        <ShieldCheck size={13} style={{ display: "inline", marginRight: 4, verticalAlign: -1 }} />
+                        Admin Portal
                     </button>
 
                     <button
@@ -131,23 +156,17 @@ const PublicHeader: React.FC<PublicHeaderProps> = ({
                         className="epic-nav-cta"
                         onClick={() => navigateTo("contact")}
                     >
-                        Connect With Us
+                        <GraduationCap size={14} style={{ display: "inline", marginRight: 5, verticalAlign: -2 }} />
+                        Apply Now
                     </button>
-
                 </div>
 
-                {/* MOBILE MENU */}
+                {/* MOBILE MENU TOGGLE */}
                 <button
                     type="button"
                     className="epic-mobile-menu"
-                    onClick={() =>
-                        setMenuOpen((open) => !open)
-                    }
-                    aria-label={
-                        menuOpen
-                            ? "Close navigation"
-                            : "Open navigation"
-                    }
+                    onClick={() => setMenuOpen((open) => !open)}
+                    aria-label={menuOpen ? "Close navigation" : "Open navigation"}
                     aria-expanded={menuOpen}
                 >
                     {menuOpen ? "✕" : "☰"}
