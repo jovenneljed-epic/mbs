@@ -1987,8 +1987,9 @@
 }
 
 .apple-event-date-box {
-    background: linear-gradient(135deg, #7A1526 0%, #450A0A 100%);
-    border: 1px solid rgba(245, 158, 11, 0.6);
+    background: linear-gradient(135deg, var(--theme-primary, #7A1526) 0%, var(--theme-bg-end, #450A0A) 100%);
+    border: 1px solid var(--theme-border-highlight, rgba(245, 158, 11, 0.6));
+    transition: background 0.4s ease, border-color 0.4s ease;
     border-radius: 7px;
     min-width: 44px;
     padding: 4px 6px;

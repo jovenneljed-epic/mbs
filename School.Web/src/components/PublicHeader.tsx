@@ -36,14 +36,14 @@ const PublicHeader: React.FC<PublicHeaderProps> = ({
                     aria-label="Mobile Bible School Home"
                 >
                     <div className="mbs-header-crest">
-                        <BookOpen size={20} color="#580D1B" />
+                        <BookOpen size={20} color="var(--theme-bg-end, #580D1B)" />
                     </div>
 
                     <div className="epic-public-logo-text">
                         <strong style={{ fontSize: "1.1rem", letterSpacing: "0.02em" }}>
                             Mobile Bible School
                         </strong>
-                        <small style={{ color: "#FDE68A", fontSize: "0.75rem", letterSpacing: "0.04em" }}>
+                        <small style={{ color: "var(--theme-secondary, #FDE68A)", fontSize: "0.75rem", letterSpacing: "0.04em" }}>
                             Theological Seminary &amp; Institute
                         </small>
                     </div>

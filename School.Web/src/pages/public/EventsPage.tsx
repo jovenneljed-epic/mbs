@@ -333,7 +333,7 @@ export const EventsPage: React.FC<EventsPageProps> = ({ onNavigate }) => {
                 {/* LOADING SKELETON */}
                 {isLoading && (
                     <div className="mbs-loading-state">
-                        <RefreshCw size={28} className="spin" color="#7A1526" />
+                        <RefreshCw size={28} className="spin" color="var(--theme-primary, #7A1526)" />
                         <p>Fetching real-time event schedules from MBS database...</p>
                     </div>
                 )}
@@ -532,7 +532,7 @@ export const EventsPage: React.FC<EventsPageProps> = ({ onNavigate }) => {
 
                                 <div className="mbs-modal-meta-grid">
                                     <div className="mbs-modal-meta-cell">
-                                        <Calendar size={15} color="#7A1526" />
+                                        <Calendar size={15} color="var(--theme-primary, #7A1526)" />
                                         <div>
                                             <strong>Date</strong>
                                             <span>{selectedEvent.formattedDate || selectedEvent.startDate}</span>
@@ -540,7 +540,7 @@ export const EventsPage: React.FC<EventsPageProps> = ({ onNavigate }) => {
                                     </div>
 
                                     <div className="mbs-modal-meta-cell">
-                                        <Clock size={15} color="#7A1526" />
+                                        <Clock size={15} color="var(--theme-primary, #7A1526)" />
                                         <div>
                                             <strong>Time</strong>
                                             <span>{selectedEvent.time}</span>
@@ -548,7 +548,7 @@ export const EventsPage: React.FC<EventsPageProps> = ({ onNavigate }) => {
                                     </div>
 
                                     <div className="mbs-modal-meta-cell">
-                                        <MapPin size={15} color="#7A1526" />
+                                        <MapPin size={15} color="var(--theme-primary, #7A1526)" />
                                         <div>
                                             <strong>Location</strong>
                                             <span>{selectedEvent.location}</span>
@@ -556,7 +556,7 @@ export const EventsPage: React.FC<EventsPageProps> = ({ onNavigate }) => {
                                     </div>
 
                                     <div className="mbs-modal-meta-cell">
-                                        <User size={15} color="#7A1526" />
+                                        <User size={15} color="var(--theme-primary, #7A1526)" />
                                         <div>
                                             <strong>Speaker / Dean</strong>
                                             <span>{selectedEvent.speaker || "Faculty Directorate"}</span>

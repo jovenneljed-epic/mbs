@@ -33,10 +33,11 @@
     background:
         linear-gradient(
             135deg,
-            #10213f 0%,
-            #173967 48%,
-            #1d5b72 100%
+            var(--theme-bg-start, #10213f) 0%,
+            var(--theme-bg-end, #173967) 48%,
+            var(--theme-surface, #1d5b72) 100%
         );
+    transition: background 0.6s cubic-bezier(0.16, 1, 0.3, 1);
     overflow: hidden;
 }
 
