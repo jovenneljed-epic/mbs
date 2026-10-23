@@ -98,6 +98,19 @@ export const EventsPage: React.FC<EventsPageProps> = ({ onNavigate }) => {
 
     useEffect(() => {
         loadData();
+
+        const handleEventsUpdated = (e: any) => {
+            if (e?.detail && Array.isArray(e.detail) && e.detail.length > 0) {
+                setEvents(e.detail);
+            } else {
+                loadData();
+            }
+        };
+
+        window.addEventListener("mbs:school-events-updated", handleEventsUpdated);
+        return () => {
+            window.removeEventListener("mbs:school-events-updated", handleEventsUpdated);
+        };
     }, []);
 
     const handleRefresh = () => {

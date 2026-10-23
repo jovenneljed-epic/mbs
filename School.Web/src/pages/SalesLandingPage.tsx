@@ -155,14 +155,18 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
     // Fetch live SMS events & announcements
     useEffect(() => {
         let mounted = true;
-        setIsLoadingEvents(true);
-        getPublicSchoolEvents().then(events => {
-            if (mounted && events && events.length > 0) {
-                setSchoolEvents(events);
-            }
-        }).finally(() => {
-            if (mounted) setIsLoadingEvents(false);
-        });
+        const fetchEvents = () => {
+            setIsLoadingEvents(true);
+            getPublicSchoolEvents().then(events => {
+                if (mounted && events && events.length > 0) {
+                    setSchoolEvents(events);
+                }
+            }).finally(() => {
+                if (mounted) setIsLoadingEvents(false);
+            });
+        };
+
+        fetchEvents();
 
         getPublicSchoolAnnouncements().then(announcements => {
             if (mounted && announcements && announcements.length > 0) {
@@ -170,8 +174,19 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
             }
         });
 
+        const handleEventsUpdated = (e: any) => {
+            if (e?.detail && Array.isArray(e.detail) && e.detail.length > 0) {
+                if (mounted) setSchoolEvents(e.detail);
+            } else {
+                fetchEvents();
+            }
+        };
+
+        window.addEventListener("mbs:school-events-updated", handleEventsUpdated);
+
         return () => {
             mounted = false;
+            window.removeEventListener("mbs:school-events-updated", handleEventsUpdated);
         };
     }, []);
 

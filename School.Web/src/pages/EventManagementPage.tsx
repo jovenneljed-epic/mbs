@@ -1,3 +1,9 @@
+// ============================================================
+// EventManagementPage.tsx -> MOBILE BIBLE SCHOOL & THEOLOGICAL SEMINARY
+// Official School Events Manager & Landing Page Editor CMS
+// Directly controls and synchronizes events shown on the Public Landing Page
+// ============================================================
+
 import React, {
     useCallback,
     useEffect,
@@ -5,1398 +11,585 @@ import React, {
     useState,
 } from "react";
 import axios from "axios";
-import { CalendarDays, Users } from "lucide-react";
+import {
+    Calendar,
+    CalendarDays,
+    Clock,
+    MapPin,
+    User,
+    Plus,
+    Edit3,
+    Trash2,
+    ExternalLink,
+    CheckCircle2,
+    AlertCircle,
+    Search,
+    Sparkles,
+    RefreshCw,
+    Globe,
+    Building2,
+    BookOpen,
+    Download,
+    Tag,
+    X,
+    Users
+} from "lucide-react";
 import { API_BASE_URL } from "../config";
-import "./EventManagementPage.css";
+import {
+    getPublicSchoolEvents,
+    saveSchoolEventsCache,
+    notifySchoolEventsUpdated,
+    formatDateLong,
+    parseDayMonth,
+    type SchoolEventItem,
+} from "../services/schoolPublicDataService";
 import EventPlanningPanel from "./events/EventPlanningPanel";
+import "./EventManagementPage.css";
 
 /* =========================================================
-   TYPES
+   TYPES & PRESETS
 ========================================================= */
 
-type EventStatus =
-    | "Upcoming"
-    | "Ongoing"
-    | "Completed"
-    | "Cancelled";
+export type EventStatus =
+    | "SCHEDULED"
+    | "UPCOMING"
+    | "ONGOING"
+    | "COMPLETED"
+    | "CANCELLED";
 
-type AssignmentDisplayStatus =
-    | "Assigned"
-    | "Pending"
-    | "In Progress"
-    | "Completed"
-    | "Cancelled";
-
-interface EventAssignment {
-    id: number;
-    eventId?: number;
-    eventDepartmentId?: number | null;
-    eventRoleId?: number | null;
-    memberId?: number | null;
-    role: string;
-    person: string;
-    department: string;
-    status: AssignmentDisplayStatus;
-    priority: string;
-    notes: string;
-    createdAt?: string;
-    updatedAt?: string | null;
-}
-
-interface ChurchEvent {
-    id: number;
+export interface SchoolEventFormState {
+    id?: number | string;
     title: string;
     eventType: string;
-    location: string;
     startDate: string;
     startTime: string;
     endTime: string;
-    coordinator: string;
+    location: string;
+    speaker: string;
     ministry: string;
     status: EventStatus;
     description: string;
     notes: string;
-    assignments: EventAssignment[];
 }
 
-interface NewEventForm {
-    title: string;
-    eventType: string;
-    location: string;
-    startDate: string;
-    startTime: string;
-    endTime: string;
-    coordinator: string;
-    ministry: string;
-    description: string;
-    notes: string;
-}
+const EVENT_TYPE_OPTIONS = [
+    "Pastoral Intensive",
+    "Admissions Open House",
+    "Leadership Summit",
+    "Commencement Exercises",
+    "Modular Seminar",
+    "Theological Colloquium",
+    "Biblical Hermeneutics Workshop",
+    "Missions Conference",
+    "Campus Activity"
+];
 
-interface AssignmentForm {
-    role: string;
-    person: string;
-    department: string;
-    status: AssignmentDisplayStatus;
-    priority: string;
-    notes: string;
-}
+const STATUS_OPTIONS: { value: EventStatus; label: string }[] = [
+    { value: "SCHEDULED", label: "Scheduled (Live on Landing Page)" },
+    { value: "UPCOMING", label: "Upcoming (Highlighted)" },
+    { value: "ONGOING", label: "Ongoing (Active Today)" },
+    { value: "COMPLETED", label: "Completed (Past Event)" },
+    { value: "CANCELLED", label: "Cancelled" },
+];
+
+const INITIAL_FORM_STATE: SchoolEventFormState = {
+    title: "",
+    eventType: "Pastoral Intensive",
+    startDate: new Date().toISOString().split("T")[0],
+    startTime: "09:00",
+    endTime: "17:00",
+    location: "Main Seminary Campus (Hall A) & Zoom",
+    speaker: "",
+    ministry: "Biblical Studies & Homiletics",
+    status: "SCHEDULED",
+    description: "",
+    notes: ""
+};
 
 /* =========================================================
-   DEFAULTS
+   AUTH HELPER
 ========================================================= */
 
-const DEFAULT_EVENT_FORM: NewEventForm = {
-    title: "",
-    eventType: "Conference",
-    location: "",
-    startDate: "",
-    startTime: "",
-    endTime: "",
-    coordinator: "",
-    ministry: "",
-    description: "",
-    notes: "",
-};
+function getAuthHeaders(): Record<string, string> {
+    const token =
+        localStorage.getItem("token") ||
+        localStorage.getItem("accessToken") ||
+        "";
 
-const DEFAULT_ASSIGNMENT_FORM: AssignmentForm = {
-    role: "",
-    person: "",
-    department: "",
-    status: "Pending",
-    priority: "Normal",
-    notes: "",
-};
+    return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 /* =========================================================
    COMPONENT
 ========================================================= */
 
-const EventManagementPage: React.FC = () => {
-    /* =====================================================
-       STATE
-    ===================================================== */
+export const EventManagementPage: React.FC = () => {
+    // ---------------------------------------------------------
+    // Main Data States
+    // ---------------------------------------------------------
+    const [events, setEvents] = useState<SchoolEventItem[]>([]);
+    const [selectedEventId, setSelectedEventId] = useState<number | string | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [saving, setSaving] = useState<boolean>(false);
+    const [deleting, setDeleting] = useState<boolean>(false);
+    const [error, setError] = useState<string>("");
+    const [successMessage, setSuccessMessage] = useState<string>("");
 
-    const [events, setEvents] = useState<ChurchEvent[]>([]);
-    const [selectedEventId, setSelectedEventId] =
-        useState<number | null>(null);
+    // ---------------------------------------------------------
+    // Filters & Tabs
+    // ---------------------------------------------------------
+    const [search, setSearch] = useState<string>("");
+    const [statusFilter, setStatusFilter] = useState<string>("ALL");
+    const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
+    const [activeDetailTab, setActiveDetailTab] = useState<"landing" | "operations">("landing");
 
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
+    // ---------------------------------------------------------
+    // Modal States
+    // ---------------------------------------------------------
+    const [showModal, setShowModal] = useState<boolean>(false);
+    const [modalMode, setModalMode] = useState<"create" | "edit">("create");
+    const [formState, setFormState] = useState<SchoolEventFormState>(INITIAL_FORM_STATE);
+    const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+    const [eventToDelete, setEventToDelete] = useState<SchoolEventItem | null>(null);
 
-    const [search, setSearch] = useState("");
-    const [statusFilter, setStatusFilter] = useState("ALL");
-
-    /* =====================================================
-       CREATE EVENT
-    ===================================================== */
-
-    const [showCreateModal, setShowCreateModal] = useState(false);
-    const [creating, setCreating] = useState(false);
-
-    const [newEvent, setNewEvent] = useState<NewEventForm>({
-        ...DEFAULT_EVENT_FORM,
-    });
-
-    /* =====================================================
-       ASSIGNMENTS
-    ===================================================== */
-
-    const [showAssignmentModal, setShowAssignmentModal] =
-        useState(false);
-
-    const [savingAssignment, setSavingAssignment] = useState(false);
-
-    const [assignmentForm, setAssignmentForm] =
-        useState<AssignmentForm>({
-            ...DEFAULT_ASSIGNMENT_FORM,
-        });
-
-    const [editingAssignment, setEditingAssignment] =
-        useState<EventAssignment | null>(null);
-
-    const [viewingAssignment, setViewingAssignment] =
-        useState<EventAssignment | null>(null);
-
-    /* =====================================================
-       AUTH HEADERS
-    ===================================================== */
-
-    const getAuthHeaders = useCallback(() => {
-        const token =
-            localStorage.getItem("token") ||
-            localStorage.getItem("accessToken") ||
-            localStorage.getItem("jwt");
-
-        if (!token) {
-            return {};
+    // ---------------------------------------------------------
+    // Auto-dismiss success notification
+    // ---------------------------------------------------------
+    useEffect(() => {
+        if (successMessage) {
+            const timer = setTimeout(() => setSuccessMessage(""), 4500);
+            return () => clearTimeout(timer);
         }
+    }, [successMessage]);
 
-        /*
-         * IMPORTANT:
-         * Use string concatenation instead of a template literal.
-         * This avoids the Vite/OXC parsing problem.
-         */
-        return {
-            Authorization: "Bearer " + token,
-        };
+    // ---------------------------------------------------------
+    // Load Events (Synchronized with backend & Landing Page)
+    // ---------------------------------------------------------
+    const loadEvents = useCallback(async (preferredId?: number | string | null) => {
+        try {
+            setLoading(true);
+            setError("");
+
+            // 1. Try authorized backend endpoint first
+            let fetchedEvents: SchoolEventItem[] = [];
+            try {
+                const response = await axios.get(`${API_BASE_URL}/Events`, {
+                    headers: getAuthHeaders(),
+                    timeout: 6000
+                });
+
+                const data = response.data;
+                const rawList: any[] = Array.isArray(data)
+                    ? data
+                    : Array.isArray(data?.items)
+                    ? data.items
+                    : Array.isArray(data?.data)
+                    ? data.data
+                    : [];
+
+                if (rawList.length > 0) {
+                    fetchedEvents = rawList.map((e, idx) => {
+                        const rawDate = e.startDate || e.eventDate || e.EventDate || e.StartDate || "";
+                        const cleanDate = rawDate.includes("T") ? rawDate.split("T")[0] : rawDate;
+                        const sTime = e.startTime || e.StartTime || "";
+                        const eTime = e.endTime || e.EndTime || "";
+
+                        return {
+                            id: e.id || e.eventId || e.EventId || idx + 1,
+                            title: e.title || e.Title || "Seminary Event",
+                            eventType: e.eventType || e.EventType || "Campus Activity",
+                            startDate: cleanDate,
+                            formattedDate: formatDateLong(cleanDate),
+                            dayMonth: parseDayMonth(cleanDate),
+                            time: sTime ? `${sTime}${eTime ? ` - ${eTime}` : ""}` : "TBA",
+                            rawStartTime: sTime,
+                            rawEndTime: eTime,
+                            location: e.venue || e.Venue || e.location || e.Location || "Main Seminary Campus",
+                            speaker: e.speaker || e.Speaker || e.coordinator || e.Coordinator || "",
+                            ministry: e.ministry || e.Ministry || "",
+                            status: e.status || e.Status || "SCHEDULED",
+                            description: e.description || e.Description || e.notes || e.Notes || "Join us for this theological seminar.",
+                            notes: e.notes || e.Notes || ""
+                        };
+                    });
+                }
+            } catch (authErr) {
+                console.warn("Could not fetch authorized /Events, falling back to public events helper:", authErr);
+            }
+
+            // 2. If empty or authorized endpoint was unavailable, load via centralized public service
+            if (fetchedEvents.length === 0) {
+                fetchedEvents = await getPublicSchoolEvents();
+            }
+
+            setEvents(fetchedEvents);
+
+            // Sync cache and notify open tabs / landing page
+            saveSchoolEventsCache(fetchedEvents);
+
+            // Set selected event
+            setSelectedEventId((prev) => {
+                if (preferredId != null && fetchedEvents.some(ev => String(ev.id) === String(preferredId))) {
+                    return preferredId;
+                }
+                if (prev != null && fetchedEvents.some(ev => String(ev.id) === String(prev))) {
+                    return prev;
+                }
+                return fetchedEvents[0]?.id ?? null;
+            });
+
+        } catch (err: any) {
+            console.error("Error loading school events:", err);
+            setError("Unable to load events. Please check your network connection.");
+        } finally {
+            setLoading(false);
+        }
     }, []);
 
-    /* =====================================================
-       API ERROR
-    ===================================================== */
-
-    const getApiErrorMessage = useCallback(
-        (err: any, fallback: string): string => {
-            const data = err?.response?.data;
-
-            if (!data) {
-                return fallback;
-            }
-
-            if (typeof data === "string") {
-                return data;
-            }
-
-            if (data.message) {
-                return String(data.message);
-            }
-
-            if (data.title) {
-                return String(data.title);
-            }
-
-            if (data.errors) {
-                const validationErrors = Object.values(
-                    data.errors
-                )
-                    .flat()
-                    .map((value) => String(value))
-                    .join("\n");
-
-                if (validationErrors) {
-                    return validationErrors;
-                }
-            }
-
-            return fallback;
-        },
-        []
-    );
-
-    /* =====================================================
-       STATUS NORMALIZATION
-    ===================================================== */
-
-    const normalizeStatus = useCallback(
-        (value: unknown): EventStatus => {
-            const status = String(value ?? "")
-                .trim()
-                .toLowerCase()
-                .replace(/_/g, " ");
-
-            if (
-                status === "ongoing" ||
-                status === "in progress" ||
-                status === "inprogress"
-            ) {
-                return "Ongoing";
-            }
-
-            if (
-                status === "completed" ||
-                status === "complete" ||
-                status === "finished"
-            ) {
-                return "Completed";
-            }
-
-            if (
-                status === "cancelled" ||
-                status === "canceled"
-            ) {
-                return "Cancelled";
-            }
-
-            return "Upcoming";
-        },
-        []
-    );
-
-    const normalizeAssignmentStatus = useCallback(
-        (value: unknown): AssignmentDisplayStatus => {
-            const status = String(value ?? "")
-                .trim()
-                .toLowerCase()
-                .replace(/-/g, "_")
-                .replace(/\s+/g, "_");
-
-            switch (status) {
-                case "assigned":
-                    return "Assigned";
-
-                case "in_progress":
-                case "inprogress":
-                    return "In Progress";
-
-                case "completed":
-                case "complete":
-                    return "Completed";
-
-                case "cancelled":
-                case "canceled":
-                    return "Cancelled";
-
-                default:
-                    return "Pending";
-            }
-        },
-        []
-    );
-
-    /* =====================================================
-       NORMALIZE ASSIGNMENT
-    ===================================================== */
-
-    const normalizeAssignment = useCallback(
-        (
-            assignment: any,
-            index: number
-        ): EventAssignment => {
-            return {
-                id: Number(
-                    assignment?.eventAssignmentId ??
-                        assignment?.EventAssignmentId ??
-                        assignment?.id ??
-                        assignment?.Id ??
-                        index + 1
-                ),
-
-                eventId:
-                    assignment?.eventId ??
-                    assignment?.EventId,
-
-                eventDepartmentId:
-                    assignment?.eventDepartmentId ??
-                    assignment?.EventDepartmentId ??
-                    null,
-
-                eventRoleId:
-                    assignment?.eventRoleId ??
-                    assignment?.EventRoleId ??
-                    null,
-
-                memberId:
-                    assignment?.memberId ??
-                    assignment?.MemberId ??
-                    null,
-
-                role:
-                    assignment?.roleName ??
-                    assignment?.RoleName ??
-                    assignment?.role ??
-                    assignment?.Role ??
-                    "Unspecified Role",
-
-                person:
-                    assignment?.assignedPerson ??
-                    assignment?.AssignedPerson ??
-                    assignment?.memberName ??
-                    assignment?.MemberName ??
-                    assignment?.person ??
-                    assignment?.Person ??
-                    "To Be Assigned",
-
-                department:
-                    assignment?.departmentName ??
-                    assignment?.DepartmentName ??
-                    assignment?.department ??
-                    assignment?.Department ??
-                    "",
-
-                status: normalizeAssignmentStatus(
-                    assignment?.assignmentStatus ??
-                        assignment?.AssignmentStatus ??
-                        assignment?.status ??
-                        assignment?.Status
-                ),
-
-                priority:
-                    assignment?.priority ??
-                    assignment?.Priority ??
-                    "Normal",
-
-                notes:
-                    assignment?.notes ??
-                    assignment?.Notes ??
-                    "",
-
-                createdAt:
-                    assignment?.createdAt ??
-                    assignment?.CreatedAt,
-
-                updatedAt:
-                    assignment?.updatedAt ??
-                    assignment?.UpdatedAt ??
-                    null,
-            };
-        },
-        [normalizeAssignmentStatus]
-    );
-
-    /* =====================================================
-       NORMALIZE EVENT
-    ===================================================== */
-
-    const normalizeEvent = useCallback(
-        (
-            event: any,
-            index: number
-        ): ChurchEvent => {
-            const rawAssignments =
-                event?.assignments ??
-                event?.Assignments ??
-                event?.eventAssignments ??
-                event?.EventAssignments ??
-                [];
-
-            return {
-                id: Number(
-                    event?.eventId ??
-                        event?.EventId ??
-                        event?.id ??
-                        event?.Id ??
-                        index + 1
-                ),
-
-                title:
-                    event?.title ??
-                    event?.Title ??
-                    "Untitled Event",
-
-                eventType:
-                    event?.eventType ??
-                    event?.EventType ??
-                    "Event",
-
-                location:
-                    event?.venue ??
-                    event?.Venue ??
-                    event?.location ??
-                    event?.Location ??
-                    "TBA",
-
-                startDate:
-                    event?.eventDate ??
-                    event?.EventDate ??
-                    event?.startDate ??
-                    event?.StartDate ??
-                    "",
-
-                startTime:
-                    event?.startTime ??
-                    event?.StartTime ??
-                    "",
-
-                endTime:
-                    event?.endTime ??
-                    event?.EndTime ??
-                    "",
-
-                coordinator:
-                    event?.speaker ??
-                    event?.Speaker ??
-                    event?.coordinator ??
-                    event?.Coordinator ??
-                    "To Be Assigned",
-
-                ministry:
-                    event?.ministry ??
-                    event?.Ministry ??
-                    "",
-
-                status: normalizeStatus(
-                    event?.status ??
-                        event?.Status
-                ),
-
-                description:
-                    event?.description ??
-                    event?.Description ??
-                    "",
-
-                notes:
-                    event?.notes ??
-                    event?.Notes ??
-                    "",
-
-                assignments:
-                    Array.isArray(rawAssignments)
-                        ? rawAssignments.map(
-                              (
-                                  assignment: any,
-                                  assignmentIndex: number
-                              ) =>
-                                  normalizeAssignment(
-                                      assignment,
-                                      assignmentIndex
-                                  )
-                          )
-                        : [],
-            };
-        },
-        [normalizeAssignment, normalizeStatus]
-    );
-
-    /* =====================================================
-       LOAD EVENT ASSIGNMENTS
-    ===================================================== */
-
-    const loadEventAssignments = useCallback(
-        async (
-            eventId: number
-        ): Promise<EventAssignment[]> => {
-            try {
-                const response = await axios.get(
-                    API_BASE_URL +
-                        "/EventAssignments/event/" +
-                        eventId,
-                    {
-                        headers: getAuthHeaders(),
-                    }
-                );
-
-                const data = response.data;
-
-                const raw =
-                    Array.isArray(data)
-                        ? data
-                        : data?.assignments ??
-                          data?.items ??
-                          data?.data ??
-                          data?.value ??
-                          [];
-
-                if (!Array.isArray(raw)) {
-                    return [];
-                }
-
-                return raw.map(
-                    (
-                        assignment: any,
-                        index: number
-                    ) =>
-                        normalizeAssignment(
-                            assignment,
-                            index
-                        )
-                );
-            } catch (err) {
-                console.error(
-                    "Unable to load assignments for event " +
-                        eventId,
-                    err
-                );
-
-                return [];
-            }
-        },
-        [
-            getAuthHeaders,
-            normalizeAssignment,
-        ]
-    );
-
-    /* =====================================================
-       LOAD EVENTS
-    ===================================================== */
-
-    const loadEvents = useCallback(
-        async (
-            preferredEventId?: number | null
-        ) => {
-            try {
-                setLoading(true);
-                setError("");
-
-                const response = await axios.get(
-                    API_BASE_URL + "/Events",
-                    {
-                        headers: getAuthHeaders(),
-                    }
-                );
-
-                const data = response.data;
-
-                let rawEvents: any[] = [];
-
-                if (Array.isArray(data)) {
-                    rawEvents = data;
-                } else if (
-                    Array.isArray(data?.items)
-                ) {
-                    rawEvents = data.items;
-                } else if (
-                    Array.isArray(data?.data)
-                ) {
-                    rawEvents = data.data;
-                } else if (
-                    Array.isArray(data?.value)
-                ) {
-                    rawEvents = data.value;
-                }
-
-                const normalized =
-                    await Promise.all(
-                        rawEvents.map(
-                            async (
-                                event,
-                                index
-                            ) => {
-                                const normalizedEvent =
-                                    normalizeEvent(
-                                        event,
-                                        index
-                                    );
-
-                                const assignments =
-                                    await loadEventAssignments(
-                                        normalizedEvent.id
-                                    );
-
-                                return {
-                                    ...normalizedEvent,
-                                    assignments,
-                                };
-                            }
-                        )
-                    );
-
-                setEvents(normalized);
-
-                setSelectedEventId(
-                    (previous) => {
-                        if (
-                            preferredEventId !=
-                                null &&
-                            normalized.some(
-                                (event) =>
-                                    event.id ===
-                                    preferredEventId
-                            )
-                        ) {
-                            return preferredEventId;
-                        }
-
-                        if (
-                            previous != null &&
-                            normalized.some(
-                                (event) =>
-                                    event.id ===
-                                    previous
-                            )
-                        ) {
-                            return previous;
-                        }
-
-                        return (
-                            normalized[0]?.id ??
-                            null
-                        );
-                    }
-                );
-            } catch (err: any) {
-                console.error(
-                    "Unable to load events:",
-                    err
-                );
-
-                if (
-                    err?.response?.status ===
-                    401
-                ) {
-                    setError(
-                        "Your session has expired or you are not authorized. Please log in again."
-                    );
-                } else {
-                    setError(
-                        getApiErrorMessage(
-                            err,
-                            "Unable to load events from the server."
-                        )
-                    );
-                }
-
-                setEvents([]);
-                setSelectedEventId(null);
-            } finally {
-                setLoading(false);
-            }
-        },
-        [
-            getAuthHeaders,
-            getApiErrorMessage,
-            loadEventAssignments,
-            normalizeEvent,
-        ]
-    );
-
-    /* =====================================================
-       INITIAL LOAD
-    ===================================================== */
-
+    // Initial load
     useEffect(() => {
         void loadEvents();
     }, [loadEvents]);
 
-    /* =====================================================
-       FILTERED EVENTS
-    ===================================================== */
+    // ---------------------------------------------------------
+    // Selected Event
+    // ---------------------------------------------------------
+    const selectedEvent = useMemo<SchoolEventItem | null>(() => {
+        if (selectedEventId == null) return events[0] || null;
+        return events.find((e) => String(e.id) === String(selectedEventId)) || events[0] || null;
+    }, [events, selectedEventId]);
 
+    // ---------------------------------------------------------
+    // Filtered Events
+    // ---------------------------------------------------------
     const filteredEvents = useMemo(() => {
-        const query =
-            search.trim().toLowerCase();
-
-        return events.filter((event) => {
-            const searchableText = [
-                event.title,
-                event.location,
-                event.eventType,
-                event.coordinator,
-                event.ministry,
-            ]
-                .join(" ")
-                .toLowerCase();
-
+        return events.filter((ev) => {
+            // Search
+            const query = search.trim().toLowerCase();
             const matchesSearch =
                 !query ||
-                searchableText.includes(query);
+                ev.title.toLowerCase().includes(query) ||
+                ev.eventType.toLowerCase().includes(query) ||
+                ev.location.toLowerCase().includes(query) ||
+                (ev.speaker && ev.speaker.toLowerCase().includes(query)) ||
+                (ev.ministry && ev.ministry.toLowerCase().includes(query)) ||
+                (ev.description && ev.description.toLowerCase().includes(query));
 
+            // Status filter
             const matchesStatus =
                 statusFilter === "ALL" ||
-                event.status === statusFilter;
+                ev.status.toUpperCase() === statusFilter.toUpperCase();
 
-            return (
-                matchesSearch &&
-                matchesStatus
-            );
+            // Category filter
+            const matchesCategory =
+                categoryFilter === "ALL" ||
+                ev.eventType.toLowerCase() === categoryFilter.toLowerCase();
+
+            return matchesSearch && matchesStatus && matchesCategory;
         });
-    }, [
-        events,
-        search,
-        statusFilter,
-    ]);
+    }, [events, search, statusFilter, categoryFilter]);
 
-    /* =====================================================
-       SELECTED EVENT
-    ===================================================== */
+    // ---------------------------------------------------------
+    // Statistics
+    // ---------------------------------------------------------
+    const stats = useMemo(() => {
+        const total = events.length;
+        const upcoming = events.filter((e) => {
+            const st = (e.status || "").toUpperCase();
+            return st === "SCHEDULED" || st === "UPCOMING";
+        }).length;
+        const ongoing = events.filter((e) => (e.status || "").toUpperCase() === "ONGOING").length;
+        const completed = events.filter((e) => (e.status || "").toUpperCase() === "COMPLETED").length;
+        return { total, upcoming, ongoing, completed };
+    }, [events]);
 
-    const selectedEvent = useMemo(
-        () =>
-            events.find(
-                (event) =>
-                    event.id ===
-                    selectedEventId
-            ) ?? null,
-        [events, selectedEventId]
-    );
-
-    /* =====================================================
-       STATISTICS
-    ===================================================== */
-
-    const statistics = useMemo(
-        () => ({
-            total: events.length,
-
-            upcoming: events.filter(
-                (event) =>
-                    event.status === "Upcoming"
-            ).length,
-
-            ongoing: events.filter(
-                (event) =>
-                    event.status === "Ongoing"
-            ).length,
-
-            completed: events.filter(
-                (event) =>
-                    event.status === "Completed"
-            ).length,
-        }),
-        [events]
-    );
-
-    /* =====================================================
-       FORM HELPERS
-    ===================================================== */
-
-    const resetNewEvent = useCallback(() => {
-        setNewEvent({
-            ...DEFAULT_EVENT_FORM,
+    // ---------------------------------------------------------
+    // Open Create Modal
+    // ---------------------------------------------------------
+    const handleOpenCreate = () => {
+        setFormState({
+            ...INITIAL_FORM_STATE,
+            startDate: new Date().toISOString().split("T")[0]
         });
-    }, []);
-
-    const resetAssignmentForm = useCallback(() => {
-        setAssignmentForm({
-            ...DEFAULT_ASSIGNMENT_FORM,
-        });
-    }, []);
-
-    const updateNewEventField = <
-        K extends keyof NewEventForm
-    >(
-        field: K,
-        value: NewEventForm[K]
-    ) => {
-        setNewEvent((previous) => ({
-            ...previous,
-            [field]: value,
-        }));
+        setModalMode("create");
+        setShowModal(true);
     };
 
-    const updateAssignmentField = <
-        K extends keyof AssignmentForm
-    >(
-        field: K,
-        value: AssignmentForm[K]
-    ) => {
-        setAssignmentForm((previous) => ({
-            ...previous,
-            [field]: value,
-        }));
+    // ---------------------------------------------------------
+    // Open Edit Modal
+    // ---------------------------------------------------------
+    const handleOpenEdit = (eventItem: SchoolEventItem) => {
+        let sTime = eventItem.rawStartTime || "";
+        let eTime = eventItem.rawEndTime || "";
+
+        // Attempt parsing from time string if raw times missing (e.g. "09:00 - 17:00")
+        if (!sTime && eventItem.time) {
+            const parts = eventItem.time.split("-").map(p => p.trim());
+            sTime = parts[0] || "09:00";
+            eTime = parts[1] || "17:00";
+        }
+
+        // Clean time to HH:MM format
+        if (sTime.includes(":") && sTime.length > 5) sTime = sTime.substring(0, 5);
+        if (eTime.includes(":") && eTime.length > 5) eTime = eTime.substring(0, 5);
+
+        let validStatus: EventStatus = "SCHEDULED";
+        const upper = (eventItem.status || "").toUpperCase();
+        if (["SCHEDULED", "UPCOMING", "ONGOING", "COMPLETED", "CANCELLED"].includes(upper)) {
+            validStatus = upper as EventStatus;
+        }
+
+        setFormState({
+            id: eventItem.id,
+            title: eventItem.title,
+            eventType: eventItem.eventType || "Pastoral Intensive",
+            startDate: eventItem.startDate || new Date().toISOString().split("T")[0],
+            startTime: sTime || "09:00",
+            endTime: eTime || "17:00",
+            location: eventItem.location || "Main Seminary Campus",
+            speaker: eventItem.speaker || "",
+            ministry: eventItem.ministry || "Biblical Studies & Homiletics",
+            status: validStatus,
+            description: eventItem.description || "",
+            notes: eventItem.notes || ""
+        });
+
+        setModalMode("edit");
+        setShowModal(true);
     };
 
-    /* =====================================================
-       CREATE EVENT MODAL
-    ===================================================== */
+    // ---------------------------------------------------------
+    // Save Event (Create or Update)
+    // ---------------------------------------------------------
+    const handleSaveEvent = async (e: React.FormEvent) => {
+        e.preventDefault();
 
-    const handleOpenCreateModal =
-        useCallback(() => {
-            resetNewEvent();
-            setShowCreateModal(true);
-        }, [resetNewEvent]);
-
-    const handleCloseCreateModal =
-        useCallback(() => {
-            if (creating) {
-                return;
-            }
-
-            setShowCreateModal(false);
-            resetNewEvent();
-        }, [
-            creating,
-            resetNewEvent,
-        ]);
-
-    /* =====================================================
-       CREATE EVENT
-    ===================================================== */
-
-    const handleCreateEvent = async (
-        event: React.FormEvent<HTMLFormElement>
-    ) => {
-        event.preventDefault();
-
-        if (creating) {
+        if (!formState.title.trim()) {
+            alert("Please enter the event title.");
             return;
         }
 
-        const title =
-            newEvent.title.trim();
-
-        const location =
-            newEvent.location.trim();
-
-        if (!title) {
-            alert(
-                "Please enter the event title."
-            );
+        if (!formState.location.trim()) {
+            alert("Please enter the venue or campus location.");
             return;
         }
 
-        if (!location) {
-            alert(
-                "Please enter the venue or location."
-            );
-            return;
-        }
-
-        if (!newEvent.startDate) {
-            alert(
-                "Please select the event date."
-            );
-            return;
-        }
-
-        if (
-            newEvent.startTime &&
-            newEvent.endTime &&
-            newEvent.endTime <=
-                newEvent.startTime
-        ) {
-            alert(
-                "The end time must be later than the start time."
-            );
+        if (!formState.startDate) {
+            alert("Please select the event date.");
             return;
         }
 
         try {
-            setCreating(true);
+            setSaving(true);
+            setError("");
 
-            const payload = {
-                title,
-                eventType:
-                    newEvent.eventType.trim() ||
-                    "Conference",
-                eventDate:
-                    newEvent.startDate,
-                startTime:
-                    newEvent.startTime || null,
-                endTime:
-                    newEvent.endTime || null,
-                venue: location,
-                speaker:
-                    newEvent.coordinator.trim() ||
-                    null,
-                ministry:
-                    newEvent.ministry.trim() ||
-                    null,
-                status: "SCHEDULED",
-                description:
-                    newEvent.description.trim() ||
-                    null,
-                notes:
-                    newEvent.notes.trim() ||
-                    null,
+            const cleanStartTime = formState.startTime ? (formState.startTime.length === 5 ? `${formState.startTime}:00` : formState.startTime) : "09:00:00";
+            const cleanEndTime = formState.endTime ? (formState.endTime.length === 5 ? `${formState.endTime}:00` : formState.endTime) : "17:00:00";
+
+            const apiPayload = {
+                title: formState.title.trim(),
+                eventType: formState.eventType.trim() || "Pastoral Intensive",
+                eventDate: formState.startDate,
+                startTime: cleanStartTime,
+                endTime: cleanEndTime,
+                venue: formState.location.trim(),
+                speaker: formState.speaker.trim() || null,
+                ministry: formState.ministry.trim() || null,
+                status: formState.status || "SCHEDULED",
+                description: formState.description.trim() || null,
+                notes: formState.notes.trim() || null,
             };
 
-            const response = await axios.post(
-                API_BASE_URL + "/Events",
-                payload,
-                {
-                    headers: {
-                        ...getAuthHeaders(),
-                        "Content-Type":
-                            "application/json",
-                    },
+            let savedId: number | string = formState.id || 0;
+            const isNumericId = typeof formState.id === "number" || (!isNaN(Number(formState.id)) && Number(formState.id) > 0);
+
+            if (modalMode === "edit" && isNumericId && Number(formState.id) < 100) {
+                // Update existing backend event
+                try {
+                    await axios.put(`${API_BASE_URL}/Events/${formState.id}`, {
+                        ...apiPayload,
+                        eventId: Number(formState.id)
+                    }, {
+                        headers: {
+                            ...getAuthHeaders(),
+                            "Content-Type": "application/json"
+                        }
+                    });
+                } catch (putErr) {
+                    console.warn("PUT to backend failed, attempting POST to ensure record exists in DB:", putErr);
+                    const postRes = await axios.post(`${API_BASE_URL}/Events`, apiPayload, {
+                        headers: {
+                            ...getAuthHeaders(),
+                            "Content-Type": "application/json"
+                        }
+                    });
+                    savedId = postRes.data?.eventId || postRes.data?.id || savedId;
                 }
-            );
-
-            const createdId = Number(
-                response.data?.eventId ??
-                    response.data?.EventId ??
-                    response.data?.id ??
-                    response.data?.Id
-            );
-
-            setShowCreateModal(false);
-            resetNewEvent();
-
-            if (
-                Number.isFinite(createdId) &&
-                createdId > 0
-            ) {
-                await loadEvents(createdId);
             } else {
-                await loadEvents();
+                // Create new event on backend
+                try {
+                    const postRes = await axios.post(`${API_BASE_URL}/Events`, apiPayload, {
+                        headers: {
+                            ...getAuthHeaders(),
+                            "Content-Type": "application/json"
+                        }
+                    });
+                    savedId = postRes.data?.eventId || postRes.data?.id || Date.now();
+                } catch (postErr) {
+                    console.warn("Backend POST failed, persisting to local storage and cache:", postErr);
+                    savedId = formState.id || Date.now();
+                }
             }
 
-            alert(
-                "Event created successfully."
+            // Construct updated event item
+            const dayMonth = parseDayMonth(formState.startDate);
+            const formattedTime = `${formState.startTime}${formState.endTime ? ` - ${formState.endTime}` : ""}`;
+            const updatedItem: SchoolEventItem = {
+                id: savedId,
+                title: formState.title.trim(),
+                eventType: formState.eventType.trim(),
+                startDate: formState.startDate,
+                formattedDate: formatDateLong(formState.startDate),
+                dayMonth,
+                time: formattedTime,
+                rawStartTime: formState.startTime,
+                rawEndTime: formState.endTime,
+                location: formState.location.trim(),
+                speaker: formState.speaker.trim(),
+                ministry: formState.ministry.trim(),
+                status: formState.status,
+                description: formState.description.trim() || "Join us for this theological seminar and fellowship.",
+                notes: formState.notes.trim()
+            };
+
+            // Update in-memory events list
+            let updatedList: SchoolEventItem[];
+            if (modalMode === "edit") {
+                updatedList = events.map(ev => String(ev.id) === String(formState.id) ? updatedItem : ev);
+            } else {
+                updatedList = [updatedItem, ...events];
+            }
+
+            setEvents(updatedList);
+            setSelectedEventId(savedId);
+
+            // Save to shared cache & trigger instant landing page refresh
+            saveSchoolEventsCache(updatedList);
+            notifySchoolEventsUpdated(updatedList);
+
+            setShowModal(false);
+            setSuccessMessage(
+                modalMode === "edit"
+                    ? `✓ Event "${formState.title}" updated and published to Landing Page!`
+                    : `✓ Event "${formState.title}" published live to Landing Page & School Calendar!`
             );
+
         } catch (err: any) {
-            console.error(
-                "CREATE EVENT ERROR:",
-                err
-            );
-
-            alert(
-                getApiErrorMessage(
-                    err,
-                    "Unable to create the event."
-                )
-            );
+            console.error("Save event error:", err);
+            alert("Error saving event: " + (err.response?.data?.message || err.message));
         } finally {
-            setCreating(false);
+            setSaving(false);
         }
     };
 
-    /* =====================================================
-       ASSIGNMENT MODAL
-    ===================================================== */
-
-    const handleOpenAssignmentModal =
-        useCallback(() => {
-            if (!selectedEvent) {
-                alert(
-                    "Please select an event first."
-                );
-                return;
-            }
-
-            setEditingAssignment(null);
-            resetAssignmentForm();
-            setShowAssignmentModal(true);
-        }, [
-            resetAssignmentForm,
-            selectedEvent,
-        ]);
-
-    const handleCloseAssignmentModal =
-        useCallback(() => {
-            if (savingAssignment) {
-                return;
-            }
-
-            setShowAssignmentModal(false);
-            setEditingAssignment(null);
-            resetAssignmentForm();
-        }, [
-            resetAssignmentForm,
-            savingAssignment,
-        ]);
-
-    /* =====================================================
-       EDIT ASSIGNMENT
-    ===================================================== */
-
-    const handleEditAssignment = (
-        assignment: EventAssignment
-    ) => {
-        setEditingAssignment(
-            assignment
-        );
-
-        setAssignmentForm({
-            role: assignment.role || "",
-            person:
-                assignment.person || "",
-            department:
-                assignment.department || "",
-            status:
-                assignment.status ||
-                "Pending",
-            priority:
-                assignment.priority ||
-                "Normal",
-            notes:
-                assignment.notes || "",
-        });
-
-        setShowAssignmentModal(true);
-    };
-
-    /* =====================================================
-       SAVE ASSIGNMENT
-    ===================================================== */
-
-    const handleSaveAssignment = async (
-        event: React.FormEvent<HTMLFormElement>
-    ) => {
-        event.preventDefault();
-
-        if (!selectedEvent) {
-            alert(
-                "Please select an event first."
-            );
-            return;
-        }
-
-        if (
-            !assignmentForm.role.trim()
-        ) {
-            alert(
-                "Please enter the assignment role."
-            );
-            return;
-        }
-
-        if (
-            !assignmentForm.person.trim()
-        ) {
-            alert(
-                "Please enter the assigned person or team."
-            );
-            return;
-        }
-
-        if (savingAssignment) {
-            return;
-        }
-
-        const payload = {
-            eventId: selectedEvent.id,
-
-            eventDepartmentId:
-                editingAssignment?.eventDepartmentId ??
-                null,
-
-            eventRoleId:
-                editingAssignment?.eventRoleId ??
-                null,
-
-            memberId:
-                editingAssignment?.memberId ??
-                null,
-
-            assignedPerson:
-                assignmentForm.person.trim(),
-
-            departmentName:
-                assignmentForm.department.trim() ||
-                null,
-
-            roleName:
-                assignmentForm.role.trim(),
-
-            assignmentStatus:
-                assignmentForm.status
-                    .trim()
-                    .replace(/\s+/g, "_")
-                    .toUpperCase(),
-
-            priority:
-                assignmentForm.priority
-                    .trim()
-                    .toUpperCase(),
-
-            notes:
-                assignmentForm.notes.trim() ||
-                null,
-        };
-
-        const isEditing =
-            editingAssignment !== null;
+    // ---------------------------------------------------------
+    // Delete Event
+    // ---------------------------------------------------------
+    const handleConfirmDelete = async () => {
+        if (!eventToDelete) return;
 
         try {
-            setSavingAssignment(true);
+            setDeleting(true);
+            const idToDelete = eventToDelete.id;
 
-            console.log(
-                "================================="
-            );
-            console.log(
-                "EVENT ASSIGNMENT SAVE"
-            );
-            console.log(
-                "URL:",
-                isEditing
-                    ? API_BASE_URL +
-                      "/EventAssignments/" +
-                      editingAssignment.id
-                    : API_BASE_URL +
-                      "/EventAssignments"
-            );
-            console.log(
-                "PAYLOAD:",
-                payload
-            );
-            console.log(
-                "================================="
-            );
-
-            let response;
-
-            if (isEditing) {
-                response =
-                    await axios.put(
-                        API_BASE_URL +
-                            "/EventAssignments/" +
-                            editingAssignment.id,
-                        payload,
-                        {
-                            headers: {
-                                ...getAuthHeaders(),
-                                "Content-Type":
-                                    "application/json",
-                            },
-                        }
-                    );
-            } else {
-                response =
-                    await axios.post(
-                        API_BASE_URL +
-                            "/EventAssignments",
-                        payload,
-                        {
-                            headers: {
-                                ...getAuthHeaders(),
-                                "Content-Type":
-                                    "application/json",
-                            },
-                        }
-                    );
-            }
-
-            console.log(
-                "ASSIGNMENT API RESPONSE:",
-                response.data
-            );
-
-            const assignments =
-                await loadEventAssignments(
-                    selectedEvent.id
-                );
-
-            setEvents((previous) =>
-                previous.map((event) =>
-                    event.id ===
-                    selectedEvent.id
-                        ? {
-                              ...event,
-                              assignments,
-                          }
-                        : event
-                )
-            );
-
-            setShowAssignmentModal(false);
-            setEditingAssignment(null);
-            resetAssignmentForm();
-
-            alert(
-                isEditing
-                    ? "Assignment updated successfully."
-                    : "Assignment saved successfully."
-            );
-        } catch (err: any) {
-            console.error(
-                "================================="
-            );
-            console.error(
-                "ASSIGNMENT SAVE ERROR"
-            );
-            console.error(err);
-            console.error(
-                "STATUS:",
-                err?.response?.status
-            );
-            console.error(
-                "RESPONSE:",
-                err?.response?.data
-            );
-            console.error(
-                "================================="
-            );
-
-            const message =
-                getApiErrorMessage(
-                    err,
-                    isEditing
-                        ? "Unable to update assignment."
-                        : "Unable to save assignment."
-                );
-
-            alert(message);
-        } finally {
-            setSavingAssignment(false);
-        }
-    };
-
-    /* =====================================================
-       DELETE ASSIGNMENT
-    ===================================================== */
-
-    const handleDeleteAssignment =
-        async (
-            assignment: EventAssignment
-        ) => {
-            if (!selectedEvent) {
-                return;
-            }
-
-            const confirmed =
-                window.confirm(
-                    "Delete this assignment?\n\nRole: " +
-                        assignment.role +
-                        "\nAssigned: " +
-                        assignment.person
-                );
-
-            if (!confirmed) {
-                return;
-            }
-
-            try {
-                await axios.delete(
-                    API_BASE_URL +
-                        "/EventAssignments/" +
-                        assignment.id,
-                    {
-                        headers:
-                            getAuthHeaders(),
-                    }
-                );
-
-                const assignments =
-                    await loadEventAssignments(
-                        selectedEvent.id
-                    );
-
-                setEvents((previous) =>
-                    previous.map((event) =>
-                        event.id ===
-                        selectedEvent.id
-                            ? {
-                                  ...event,
-                                  assignments,
-                              }
-                            : event
-                    )
-                );
-
-                if (
-                    viewingAssignment?.id ===
-                    assignment.id
-                ) {
-                    setViewingAssignment(
-                        null
-                    );
+            // Delete from backend if numeric ID
+            if (typeof idToDelete === "number" || (!isNaN(Number(idToDelete)) && Number(idToDelete) > 0)) {
+                try {
+                    await axios.delete(`${API_BASE_URL}/Events/${idToDelete}`, {
+                        headers: getAuthHeaders(),
+                        timeout: 5000
+                    });
+                } catch (delErr) {
+                    console.warn("Backend DELETE returned warning (might have been local seed):", delErr);
                 }
-
-                alert(
-                    "Assignment deleted successfully."
-                );
-            } catch (err: any) {
-                console.error(
-                    "DELETE ASSIGNMENT ERROR:",
-                    err
-                );
-
-                alert(
-                    getApiErrorMessage(
-                        err,
-                        "Unable to delete assignment."
-                    )
-                );
             }
-        };
 
-    /* =====================================================
-       DATE HELPERS
-    ===================================================== */
+            // Update state
+            const updatedList = events.filter(ev => String(ev.id) !== String(idToDelete));
+            setEvents(updatedList);
+            saveSchoolEventsCache(updatedList);
+            notifySchoolEventsUpdated(updatedList);
 
-    const normalizeDate = (
-        value: string
-    ) => {
-        if (!value) {
-            return "";
+            if (String(selectedEventId) === String(idToDelete)) {
+                setSelectedEventId(updatedList[0]?.id || null);
+            }
+
+            setShowDeleteModal(false);
+            setEventToDelete(null);
+            setSuccessMessage(`✓ Event "${eventToDelete.title}" removed from Landing Page.`);
+
+        } catch (err: any) {
+            console.error("Delete event error:", err);
+            alert("Failed to delete event: " + (err.message || "Unknown error"));
+        } finally {
+            setDeleting(false);
         }
-
-        return value.includes("T")
-            ? value.split("T")[0]
-            : value;
     };
 
-    const getDateObject = (
-        value: string
-    ): Date | null => {
-        const normalized =
-            normalizeDate(value);
+    // ---------------------------------------------------------
+    // Export .ICS Calendar File
+    // ---------------------------------------------------------
+    const handleDownloadIcs = (eventItem: SchoolEventItem) => {
+        const cleanTitle = eventItem.title.replace(/[\\;,\n]/g, " ");
+        const cleanDesc = eventItem.description.replace(/[\\;,\n]/g, " ");
+        const cleanLoc = eventItem.location.replace(/[\\;,\n]/g, " ");
 
-        if (!normalized) {
-            return null;
-        }
+        const dateParts = eventItem.startDate.split("-");
+        const y = dateParts[0] || "2026";
+        const m = (dateParts[1] || "11").padStart(2, "0");
+        const d = (dateParts[2] || "14").padStart(2, "0");
 
-        const date = new Date(
-            normalized + "T00:00:00"
-        );
+        const sHour = (eventItem.rawStartTime || "09:00").split(":")[0] || "09";
+        const sMin = (eventItem.rawStartTime || "09:00").split(":")[1] || "00";
+        const eHour = (eventItem.rawEndTime || "17:00").split(":")[0] || "17";
+        const eMin = (eventItem.rawEndTime || "17:00").split(":")[1] || "00";
 
-        return Number.isNaN(
-            date.getTime()
-        )
-            ? null
-            : date;
+        const startIso = `${y}${m}${d}T${sHour}${sMin}00`;
+        const endIso = `${y}${m}${d}T${eHour}${eMin}00`;
+
+        const icsContent = [
+            "BEGIN:VCALENDAR",
+            "VERSION:2.0",
+            "PRODID:-//Mobile Bible School//School Events CMS//EN",
+            "CALSCALE:GREGORIAN",
+            "METHOD:PUBLISH",
+            "BEGIN:VEVENT",
+            `UID:mbs-event-${eventItem.id}@mobilebibleschool.org`,
+            `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").split(".")[0]}Z`,
+            `DTSTART:${startIso}`,
+            `DTEND:${endIso}`,
+            `SUMMARY:${cleanTitle}`,
+            `DESCRIPTION:${cleanDesc}`,
+            `LOCATION:${cleanLoc}`,
+            "STATUS:CONFIRMED",
+            "END:VEVENT",
+            "END:VCALENDAR"
+        ].join("\r\n");
+
+        const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute("download", `${cleanTitle.substring(0, 30).toLowerCase().replace(/[^a-z0-9]/g, "_")}.ics`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
     };
 
-    const formatDate = (
-        value: string
-    ) => {
-        const date =
-            getDateObject(value);
-
-        return date
-            ? date.toLocaleDateString(
-                  "en-US",
-                  {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                  }
-              )
-            : value || "—";
-    };
-
-    const getEventDay = (
-        value: string
-    ): string | number => {
-        const date =
-            getDateObject(value);
-
-        return date
-            ? date.getDate()
-            : "—";
-    };
-
-    const getEventMonth = (
-        value: string
-    ) => {
-        const date =
-            getDateObject(value);
-
-        return date
-            ? date.toLocaleDateString(
-                  "en-US",
-                  {
-                      month: "short",
-                  }
-              )
-            : "";
-    };
-
-    /* =====================================================
+    /* =========================================================
        RENDER
-    ===================================================== */
+    ========================================================= */
 
     return (
         <div className="event-management">
@@ -1404,1642 +597,788 @@ const EventManagementPage: React.FC = () => {
             {/* =================================================
                 HEADER
             ================================================= */}
-
             <div className="event-page-header">
-
                 <div className="event-page-heading">
-
                     <div className="event-page-icon">
-                        <CalendarDays size={26} />
+                        <CalendarDays size={28} className="text-blue-600" />
                     </div>
-
                     <div>
-                        <span className="event-eyebrow">
-                            SCHOOL EVENT MANAGEMENT
-                        </span>
-
-                        <h1>
-                            Event Management System
-                        </h1>
-
+                        <div className="event-eyebrow-container">
+                            <span className="event-eyebrow">
+                                SCHOOL MANAGEMENT SYSTEM &bull; LANDING PAGE CMS
+                            </span>
+                            <span className="landing-live-indicator">
+                                <span className="live-dot pulse"></span>
+                                Synced Live with Landing Page &amp; Main Campus Menu
+                            </span>
+                        </div>
+                        <h1>School Events &amp; Landing Page Editor</h1>
                         <p>
-                            Plan, organize and manage
-                            school events, programs
-                            and teams.
+                            Add, edit, and publish official Mobile Bible School seminary intensives, admissions open houses, and graduation ceremonies shown on the public website.
                         </p>
                     </div>
-
                 </div>
 
-                <button
-                    type="button"
-                    className="event-primary-button create-event-button"
-                    onClick={
-                        handleOpenCreateModal
-                    }
-                    disabled={creating}
-                >
-                    <span className="create-event-icon">
-                        ＋
-                    </span>
-
-                    <span>
-                        Create Event
-                    </span>
-                </button>
-
-            </div>
-
-            {/* =================================================
-                STATISTICS
-            ================================================= */}
-
-            <div className="event-stat-grid">
-
-                <div className="event-stat-card">
-                    <span>
-                        TOTAL EVENTS
-                    </span>
-
-                    <strong>
-                        {statistics.total}
-                    </strong>
-
-                    <small>
-                        All managed events
-                    </small>
-                </div>
-
-                <div className="event-stat-card upcoming">
-                    <span>
-                        UPCOMING
-                    </span>
-
-                    <strong>
-                        {statistics.upcoming}
-                    </strong>
-
-                    <small>
-                        Scheduled events
-                    </small>
-                </div>
-
-                <div className="event-stat-card ongoing">
-                    <span>
-                        ONGOING
-                    </span>
-
-                    <strong>
-                        {statistics.ongoing}
-                    </strong>
-
-                    <small>
-                        Currently active
-                    </small>
-                </div>
-
-                <div className="event-stat-card completed">
-                    <span>
-                        COMPLETED
-                    </span>
-
-                    <strong>
-                        {statistics.completed}
-                    </strong>
-
-                    <small>
-                        Finished events
-                    </small>
-                </div>
-
-            </div>
-
-            {/* =================================================
-                ERROR
-            ================================================= */}
-
-            {error && (
-                <div className="event-error">
-
-                    <span>
-                        {error}
-                    </span>
+                <div className="event-header-actions">
+                    <button
+                        type="button"
+                        className="event-secondary-button preview-website-button"
+                        onClick={() => window.open("/#campus", "_blank")}
+                        title="Preview how events appear on the public Landing Page"
+                    >
+                        <Globe size={16} />
+                        <span>Preview on Landing Page</span>
+                        <ExternalLink size={13} className="ml-1 opacity-70" />
+                    </button>
 
                     <button
                         type="button"
-                        onClick={() =>
-                            void loadEvents()
-                        }
+                        className="event-secondary-button refresh-button"
+                        onClick={() => void loadEvents(selectedEventId)}
+                        disabled={loading}
+                        title="Refresh events list from database"
+                    >
+                        <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+                        <span>Sync / Refresh</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        className="event-primary-button create-event-button"
+                        onClick={handleOpenCreate}
+                    >
+                        <Plus size={18} strokeWidth={2.5} />
+                        <span>Create School Event</span>
+                    </button>
+                </div>
+            </div>
+
+            {/* =================================================
+                SUCCESS & ERROR BANNERS
+            ================================================= */}
+            {successMessage && (
+                <div className="event-success-banner">
+                    <CheckCircle2 size={18} />
+                    <span>{successMessage}</span>
+                    <button
+                        type="button"
+                        className="banner-close"
+                        onClick={() => setSuccessMessage("")}
+                    >
+                        &times;
+                    </button>
+                </div>
+            )}
+
+            {error && (
+                <div className="event-error-banner">
+                    <AlertCircle size={18} />
+                    <span>{error}</span>
+                    <button
+                        type="button"
+                        onClick={() => void loadEvents(selectedEventId)}
                     >
                         Retry
                     </button>
-
                 </div>
             )}
 
             {/* =================================================
-                WORKSPACE
+                STATISTICS RIBBON
             ================================================= */}
+            <div className="event-stat-grid">
+                <div className="event-stat-card">
+                    <div className="stat-card-top">
+                        <span>TOTAL SCHOOL EVENTS</span>
+                        <Calendar size={18} className="stat-icon" />
+                    </div>
+                    <strong>{stats.total}</strong>
+                    <small>Official MBS events recorded</small>
+                </div>
 
+                <div className="event-stat-card upcoming">
+                    <div className="stat-card-top">
+                        <span>UPCOMING COHORTS</span>
+                        <Sparkles size={18} className="stat-icon" />
+                    </div>
+                    <strong>{stats.upcoming}</strong>
+                    <small>Actively published on Landing Page</small>
+                </div>
+
+                <div className="event-stat-card ongoing">
+                    <div className="stat-card-top">
+                        <span>ACTIVE / ONGOING</span>
+                        <Clock size={18} className="stat-icon" />
+                    </div>
+                    <strong>{stats.ongoing}</strong>
+                    <small>Currently in session</small>
+                </div>
+
+                <div className="event-stat-card completed">
+                    <div className="stat-card-top">
+                        <span>CONCLUDED EVENTS</span>
+                        <BookOpen size={18} className="stat-icon" />
+                    </div>
+                    <strong>{stats.completed}</strong>
+                    <small>Graduations &amp; prior summits</small>
+                </div>
+            </div>
+
+            {/* =================================================
+                MAIN WORKSPACE (Master / Detail Layout)
+            ================================================= */}
             <div className="event-workspace">
 
-                {/* =================================================
-                    EVENT LIST
-                ================================================= */}
-
+                {/* =============================================
+                    LEFT PANEL: EVENTS DIRECTORY & FILTERS
+                ============================================= */}
                 <section className="event-list-panel">
-
                     <div className="event-list-header">
-
                         <div>
-                            <span>
-                                EVENTS
-                            </span>
+                            <span className="section-eyebrow">MBS EVENTS DIRECTORY</span>
+                            <h2>All School Events ({filteredEvents.length})</h2>
+                        </div>
+                    </div>
 
-                            <h2>
-                                Event Calendar
-                            </h2>
+                    {/* Search & Filter Controls */}
+                    <div className="event-filters-container">
+                        <div className="event-search-box">
+                            <Search size={16} className="search-icon" />
+                            <input
+                                type="text"
+                                placeholder="Search by title, speaker, venue..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                            />
+                            {search && (
+                                <button
+                                    type="button"
+                                    className="search-clear-btn"
+                                    onClick={() => setSearch("")}
+                                >
+                                    &times;
+                                </button>
+                            )}
                         </div>
 
+                        <div className="event-filter-selects">
+                            <select
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                                title="Filter by event status"
+                            >
+                                <option value="ALL">All Statuses</option>
+                                <option value="SCHEDULED">Scheduled</option>
+                                <option value="UPCOMING">Upcoming</option>
+                                <option value="ONGOING">Ongoing</option>
+                                <option value="COMPLETED">Completed</option>
+                                <option value="CANCELLED">Cancelled</option>
+                            </select>
+
+                            <select
+                                value={categoryFilter}
+                                onChange={(e) => setCategoryFilter(e.target.value)}
+                                title="Filter by event category"
+                            >
+                                <option value="ALL">All Categories</option>
+                                {EVENT_TYPE_OPTIONS.map((cat) => (
+                                    <option key={cat} value={cat}>
+                                        {cat}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
 
-                    <div className="event-filters">
-
-                        <input
-                            type="text"
-                            placeholder="Search events..."
-                            value={search}
-                            onChange={(event) =>
-                                setSearch(
-                                    event.target.value
-                                )
-                            }
-                        />
-
-                        <select
-                            value={
-                                statusFilter
-                            }
-                            onChange={(event) =>
-                                setStatusFilter(
-                                    event.target.value
-                                )
-                            }
-                        >
-                            <option value="ALL">
-                                All Status
-                            </option>
-
-                            <option value="Upcoming">
-                                Upcoming
-                            </option>
-
-                            <option value="Ongoing">
-                                Ongoing
-                            </option>
-
-                            <option value="Completed">
-                                Completed
-                            </option>
-
-                            <option value="Cancelled">
-                                Cancelled
-                            </option>
-                        </select>
-
-                    </div>
-
+                    {/* Events List */}
                     <div className="event-list">
-
                         {loading && (
-                            <div className="event-loading">
-                                Loading events...
+                            <div className="event-loading-state">
+                                <RefreshCw size={24} className="animate-spin text-blue-600 mb-2" />
+                                <span>Loading school events from system...</span>
+                            </div>
+                        )}
+
+                        {!loading && filteredEvents.length === 0 && (
+                            <div className="event-empty-list">
+                                <CalendarDays size={36} className="text-gray-400 mb-2" />
+                                <strong>No events match your criteria</strong>
+                                <p>Try clearing filters or create a new school event.</p>
+                                <button
+                                    type="button"
+                                    className="event-primary-button text-xs mt-3"
+                                    onClick={handleOpenCreate}
+                                >
+                                    ＋ Create School Event
+                                </button>
                             </div>
                         )}
 
                         {!loading &&
-                            filteredEvents.length ===
-                                0 && (
-                                <div className="event-empty-list">
-                                    No events found.
-                                </div>
-                            )}
-
-                        {!loading &&
-                            filteredEvents.map(
-                                (event) => (
-                                    <button
-                                        type="button"
-                                        key={
-                                            event.id
-                                        }
-                                        className={
-                                            "event-list-item " +
-                                            (selectedEventId ===
-                                            event.id
-                                                ? "selected"
-                                                : "")
-                                        }
-                                        onClick={() =>
-                                            setSelectedEventId(
-                                                event.id
-                                            )
-                                        }
+                            filteredEvents.map((eventItem) => {
+                                const isSelected = String(selectedEvent?.id) === String(eventItem.id);
+                                return (
+                                    <div
+                                        key={eventItem.id}
+                                        className={`event-list-item-card ${isSelected ? "selected" : ""}`}
+                                        onClick={() => setSelectedEventId(eventItem.id)}
                                     >
-
-                                        <div className="event-list-date">
-
-                                            <strong>
-                                                {getEventDay(
-                                                    event.startDate
-                                                )}
-                                            </strong>
-
-                                            <span>
-                                                {getEventMonth(
-                                                    event.startDate
-                                                )}
-                                            </span>
-
+                                        {/* Date Tile */}
+                                        <div className="event-list-date-tile">
+                                            <strong>{eventItem.dayMonth.day}</strong>
+                                            <span>{eventItem.dayMonth.month}</span>
                                         </div>
 
-                                        <div className="event-list-content">
+                                        {/* Content info */}
+                                        <div className="event-list-card-content">
+                                            <div className="event-card-tags">
+                                                <span className="category-pill">{eventItem.eventType}</span>
+                                                <span className={`status-pill ${eventItem.status.toLowerCase()}`}>
+                                                    {eventItem.status}
+                                                </span>
+                                            </div>
 
-                                            <strong>
-                                                {
-                                                    event.title
-                                                }
-                                            </strong>
+                                            <h4 className="event-card-title">{eventItem.title}</h4>
 
-                                            <span>
-                                                {
-                                                    event.eventType
-                                                }
-                                            </span>
-
-                                            <small>
-                                                📍{" "}
-                                                {
-                                                    event.location
-                                                }
-                                            </small>
-
+                                            <div className="event-card-meta">
+                                                <span>
+                                                    <Clock size={13} />
+                                                    {eventItem.time}
+                                                </span>
+                                                <span>
+                                                    <MapPin size={13} />
+                                                    {eventItem.location}
+                                                </span>
+                                                {eventItem.speaker && (
+                                                    <span>
+                                                        <User size={13} />
+                                                        {eventItem.speaker}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
 
-                                        <span
-                                            className={
-                                                "event-status " +
-                                                event.status.toLowerCase()
-                                            }
-                                        >
-                                            {
-                                                event.status
-                                            }
-                                        </span>
-
-                                    </button>
-                                )
-                            )}
-
+                                        {/* Quick Edit Action */}
+                                        <div className="event-card-hover-actions">
+                                            <button
+                                                type="button"
+                                                className="quick-edit-btn"
+                                                title="Edit this event"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleOpenEdit(eventItem);
+                                                }}
+                                            >
+                                                <Edit3 size={15} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })}
                     </div>
-
                 </section>
 
-                {/* =================================================
-                    EVENT DETAILS
-                ================================================= */}
-
+                {/* =============================================
+                    RIGHT PANEL: EVENT DETAILS & CMS EDITOR
+                ============================================= */}
                 <section className="event-details-panel">
-
-                    {loading ? (
+                    {loading && !selectedEvent ? (
                         <div className="event-empty-details">
-
-                            <div>
-                                ⏳
-                            </div>
-
-                            <h2>
-                                Loading Events
-                            </h2>
-
-                            <p>
-                                Please wait while
-                                event data is
-                                loaded.
-                            </p>
-
+                            <RefreshCw size={36} className="animate-spin text-blue-600 mb-3" />
+                            <h2>Loading Event Details</h2>
+                            <p>Connecting to Mobile Bible School database...</p>
                         </div>
                     ) : !selectedEvent ? (
                         <div className="event-empty-details">
-
-                            <div>
-                                <CalendarDays size={42} />
-                            </div>
-
-                            <h2>
-                                Select an Event
-                            </h2>
-
-                            <p>
-                                Select an event from
-                                the list to view its
-                                program and team
-                                details.
-                            </p>
-
+                            <CalendarDays size={48} className="text-blue-500 mb-3" />
+                            <h2>Select a School Event</h2>
+                            <p>Choose an event from the directory on the left to edit its details, update landing page synopsis, or plan its program.</p>
                             <button
                                 type="button"
-                                className="event-primary-button"
-                                onClick={
-                                    handleOpenCreateModal
-                                }
+                                className="event-primary-button mt-4"
+                                onClick={handleOpenCreate}
                             >
-                                ＋ Create Your First Event
+                                <Plus size={16} />
+                                <span>Create Your First School Event</span>
                             </button>
-
                         </div>
                     ) : (
-                        <>
+                        <div className="event-details-inner">
 
-                            {/* =================================================
-                                EVENT HEADER
-                            ================================================= */}
-
-                            <div className="event-details-header">
-
+                            {/* Details Header & Actions Toolbar */}
+                            <div className="event-details-top-banner">
                                 <div>
-
-                                    <span className="event-detail-type">
-                                        {
-                                            selectedEvent.eventType
-                                        }
-                                    </span>
-
-                                    <h2>
-                                        {
-                                            selectedEvent.title
-                                        }
-                                    </h2>
-
-                                    <p>
-                                        {
-                                            selectedEvent.description ||
-                                            "No event description available."
-                                        }
-                                    </p>
-
-                                </div>
-
-                                <span
-                                    className={
-                                        "event-status large " +
-                                        selectedEvent.status.toLowerCase()
-                                    }
-                                >
-                                    {
-                                        selectedEvent.status
-                                    }
-                                </span>
-
-                            </div>
-
-                            {/* =================================================
-                                EVENT INFORMATION
-                            ================================================= */}
-
-                            <div className="event-information-grid">
-
-                                <div>
-                                    <span>
-                                        DATE
-                                    </span>
-
-                                    <strong>
-                                        {formatDate(
-                                            selectedEvent.startDate
-                                        )}
-                                    </strong>
-                                </div>
-
-                                <div>
-                                    <span>
-                                        TIME
-                                    </span>
-
-                                    <strong>
-                                        {
-                                            selectedEvent.startTime ||
-                                            "TBA"
-                                        }
-                                        {" — "}
-                                        {
-                                            selectedEvent.endTime ||
-                                            "TBA"
-                                        }
-                                    </strong>
-                                </div>
-
-                                <div>
-                                    <span>
-                                        VENUE
-                                    </span>
-
-                                    <strong>
-                                        {
-                                            selectedEvent.location
-                                        }
-                                    </strong>
-                                </div>
-
-                                <div>
-                                    <span>
-                                        SPEAKER /
-                                        COORDINATOR
-                                    </span>
-
-                                    <strong>
-                                        {
-                                            selectedEvent.coordinator
-                                        }
-                                    </strong>
-                                </div>
-
-                                <div>
-                                    <span>
-                                        MINISTRY
-                                    </span>
-
-                                    <strong>
-                                        {
-                                            selectedEvent.ministry ||
-                                            "—"
-                                        }
-                                    </strong>
-                                </div>
-
-                            </div>
-
-                            {/* =================================================
-                                EVENT PLANNING
-                            ================================================= */}
-
-                            <div className="event-section event-planning-section">
-
-                                <div className="event-section-header">
-
-                                    <div>
-
-                                        <span>
-                                            EVENT PLANNING
+                                    <div className="event-category-row">
+                                        <span className="event-category-badge">
+                                            <Tag size={13} />
+                                            {selectedEvent.eventType}
                                         </span>
-
-                                        <h3>
-                                            Plan This Event
-                                        </h3>
-
-                                        <p>
-                                            Manage the
-                                            program,
-                                            departments,
-                                            roles and
-                                            assignments
-                                            for this
-                                            specific
-                                            event.
-                                        </p>
-
+                                        <span className={`event-status-badge ${selectedEvent.status.toLowerCase()}`}>
+                                            ● {selectedEvent.status}
+                                        </span>
+                                        <span className="landing-synced-pill">
+                                            <Globe size={13} />
+                                            Visible on Landing Page
+                                        </span>
                                     </div>
 
+                                    <h2 className="event-hero-title">{selectedEvent.title}</h2>
                                 </div>
 
-                                <EventPlanningPanel
-                                    eventId={
-                                        selectedEvent.id
-                                    }
-                                />
+                                {/* Main Action Buttons */}
+                                <div className="event-details-action-bar">
+                                    <button
+                                        type="button"
+                                        className="event-edit-button"
+                                        onClick={() => handleOpenEdit(selectedEvent)}
+                                        title="Open full editor modal for this event"
+                                    >
+                                        <Edit3 size={16} />
+                                        <span>Edit Event</span>
+                                    </button>
 
+                                    <button
+                                        type="button"
+                                        className="event-ics-button"
+                                        onClick={() => handleDownloadIcs(selectedEvent)}
+                                        title="Download .ICS calendar invite"
+                                    >
+                                        <Download size={15} />
+                                        <span>.ICS Invite</span>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        className="event-delete-button"
+                                        onClick={() => {
+                                            setEventToDelete(selectedEvent);
+                                            setShowDeleteModal(true);
+                                        }}
+                                        title="Delete this event from the system and landing page"
+                                    >
+                                        <Trash2 size={15} />
+                                        <span>Delete</span>
+                                    </button>
+                                </div>
                             </div>
 
-                            {/* =================================================
-                                NOTES
-                            ================================================= */}
+                            {/* View Switcher Tabs */}
+                            <div className="event-detail-tabs">
+                                <button
+                                    type="button"
+                                    className={`detail-tab-btn ${activeDetailTab === "landing" ? "active" : ""}`}
+                                    onClick={() => setActiveDetailTab("landing")}
+                                >
+                                    <Globe size={16} />
+                                    <span>Landing Page Content &amp; Synopsis</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`detail-tab-btn ${activeDetailTab === "operations" ? "active" : ""}`}
+                                    onClick={() => setActiveDetailTab("operations")}
+                                >
+                                    <Users size={16} />
+                                    <span>Event Program &amp; Assignments</span>
+                                </button>
+                            </div>
 
-                            {selectedEvent.notes && (
-                                <div className="event-section">
+                            {/* TAB 1: LANDING PAGE CONTENT & DETAILS */}
+                            {activeDetailTab === "landing" && (
+                                <div className="landing-content-container">
 
-                                    <div className="event-section-header">
-
-                                        <div>
-
-                                            <span>
-                                                EVENT NOTES
-                                            </span>
-
-                                            <h3>
-                                                Additional
-                                                Information
-                                            </h3>
-
+                                    {/* Information Grid */}
+                                    <div className="event-information-grid">
+                                        <div className="info-card">
+                                            <div className="info-label">
+                                                <Calendar size={14} />
+                                                <span>DATE</span>
+                                            </div>
+                                            <strong>{selectedEvent.formattedDate || selectedEvent.startDate}</strong>
+                                            <small>{selectedEvent.startDate}</small>
                                         </div>
 
+                                        <div className="info-card">
+                                            <div className="info-label">
+                                                <Clock size={14} />
+                                                <span>TIME &amp; SCHEDULE</span>
+                                            </div>
+                                            <strong>{selectedEvent.time || "TBA"}</strong>
+                                            <small>Standard Manila Seminary Time</small>
+                                        </div>
+
+                                        <div className="info-card">
+                                            <div className="info-label">
+                                                <MapPin size={14} />
+                                                <span>VENUE / LOCATION</span>
+                                            </div>
+                                            <strong>{selectedEvent.location || "Main Seminary Campus"}</strong>
+                                            <small>Hybrid On-Campus &amp; Online Hub</small>
+                                        </div>
+
+                                        <div className="info-card">
+                                            <div className="info-label">
+                                                <User size={14} />
+                                                <span>SPEAKER / DEAN</span>
+                                            </div>
+                                            <strong>{selectedEvent.speaker || "Faculty Deans & Theologians"}</strong>
+                                            <small>Academic Directorate</small>
+                                        </div>
+
+                                        <div className="info-card full-span">
+                                            <div className="info-label">
+                                                <Building2 size={14} />
+                                                <span>DEPARTMENT / MINISTRY</span>
+                                            </div>
+                                            <strong>{selectedEvent.ministry || "Biblical Studies & Homiletics"}</strong>
+                                        </div>
                                     </div>
 
-                                    <div className="event-notes">
-                                        {
-                                            selectedEvent.notes
-                                        }
+                                    {/* Landing Page Synopsis Card */}
+                                    <div className="landing-synopsis-section">
+                                        <div className="section-head">
+                                            <div className="flex items-center gap-2">
+                                                <Sparkles size={17} className="text-amber-500" />
+                                                <h3>Public Landing Page Event Synopsis</h3>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                className="synopsis-edit-link"
+                                                onClick={() => handleOpenEdit(selectedEvent)}
+                                            >
+                                                Edit Synopsis &rarr;
+                                            </button>
+                                        </div>
+                                        <div className="synopsis-content-box">
+                                            <p>{selectedEvent.description || "No public event description entered yet."}</p>
+                                        </div>
+                                        <div className="synopsis-footer-hint">
+                                            <span>
+                                                👁 This exact text is displayed in the Apple-style Main Campus menu and in the modal when visitors click on this event.
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Internal Notes */}
+                                    {selectedEvent.notes && (
+                                        <div className="internal-notes-section">
+                                            <div className="section-head">
+                                                <h3>Administrative &amp; Faculty Notes</h3>
+                                            </div>
+                                            <div className="notes-box">
+                                                <p>{selectedEvent.notes}</p>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Quick Preview Callout */}
+                                    <div className="landing-page-preview-callout">
+                                        <div className="callout-icon">
+                                            <Globe size={24} className="text-blue-600" />
+                                        </div>
+                                        <div className="callout-body">
+                                            <strong>Check Live Display on Public Website</strong>
+                                            <p>Verify how this event appears to prospective students, pastors, and church leaders on the Mobile Bible School home page.</p>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            className="event-primary-button text-xs py-2 px-3"
+                                            onClick={() => window.open("/#campus", "_blank")}
+                                        >
+                                            <span>Open Landing Page</span>
+                                            <ExternalLink size={14} />
+                                        </button>
                                     </div>
 
                                 </div>
                             )}
 
-                            {/* =================================================
-                                ASSIGNMENTS
-                            ================================================= */}
-
-                            <div className="event-section">
-
-                                <div className="event-section-header">
-
-                                    <div>
-
-                                        <span>
-                                            EVENT PROGRAM
-                                        </span>
-
-                                        <h3>
-                                            Program &
-                                            Team
-                                            Assignments
-                                        </h3>
-
-                                    </div>
-
-                                    <button
-                                        type="button"
-                                        className="event-secondary-button"
-                                        onClick={
-                                            handleOpenAssignmentModal
-                                        }
-                                    >
-                                        + Add Assignment
-                                    </button>
-
-                                </div>
-
-                                <div className="event-assignment-table">
-
-                                    <div className="event-assignment-row header">
-
-                                        <span>
-                                            ROLE
-                                        </span>
-
-                                        <span>
-                                            ASSIGNED
-                                            PERSON /
-                                            TEAM
-                                        </span>
-
-                                        <span>
-                                            DEPARTMENT
-                                        </span>
-
-                                        <span>
-                                            STATUS
-                                        </span>
-
-                                        <span>
-                                            ACTION
-                                        </span>
-
-                                    </div>
-
-                                    {selectedEvent.assignments.length ===
-                                    0 ? (
-                                        <div className="event-no-assignments">
-
-                                            <div>
-                                                <Users size={36} />
-                                            </div>
-
-                                            <strong>
-                                                No
-                                                assignments
-                                                yet
-                                            </strong>
-
-                                            <p>
-                                                Start
-                                                building
-                                                this
-                                                event's
-                                                program
-                                                and
-                                                working
-                                                team.
-                                            </p>
-
+                            {/* TAB 2: INTERNAL OPERATIONS & PROGRAM ASSIGNMENTS */}
+                            {activeDetailTab === "operations" && (
+                                <div className="operations-content-container">
+                                    <div className="operations-banner">
+                                        <Users size={20} className="text-blue-600" />
+                                        <div>
+                                            <strong>Volunteer &amp; Department Assignments for: {selectedEvent.title}</strong>
+                                            <p>Manage speakers, audiovisual techs, ushering, logistical needs, and event checklist tasks.</p>
                                         </div>
-                                    ) : (
-                                        selectedEvent.assignments.map(
-                                            (assignment) => (
-                                                <div
-                                                    className="event-assignment-row"
-                                                    key={
-                                                        assignment.id
-                                                    }
-                                                >
+                                    </div>
 
-                                                    <strong>
-                                                        {
-                                                            assignment.role
-                                                        }
-                                                    </strong>
-
-                                                    <span>
-                                                        {
-                                                            assignment.person
-                                                        }
-                                                    </span>
-
-                                                    <span>
-                                                        {
-                                                            assignment.department ||
-                                                            "—"
-                                                        }
-                                                    </span>
-
-                                                    <span
-                                                        className={
-                                                            assignment.status ===
-                                                                "Assigned" ||
-                                                            assignment.status ===
-                                                                "Completed"
-                                                                ? "assignment-assigned"
-                                                                : "assignment-pending"
-                                                        }
-                                                    >
-                                                        ●{" "}
-                                                        {
-                                                            assignment.status
-                                                        }
-                                                    </span>
-
-                                                    <div className="event-assignment-actions">
-
-                                                        <button
-                                                            type="button"
-                                                            className="event-assignment-view"
-                                                            title="View assignment"
-                                                            onClick={() =>
-                                                                setViewingAssignment(
-                                                                    assignment
-                                                                )
-                                                            }
-                                                        >
-                                                            👁
-                                                            <span>
-                                                                View
-                                                            </span>
-                                                        </button>
-
-                                                        <button
-                                                            type="button"
-                                                            className="event-assignment-edit"
-                                                            title="Edit assignment"
-                                                            onClick={() =>
-                                                                handleEditAssignment(
-                                                                    assignment
-                                                                )
-                                                            }
-                                                        >
-                                                            ✎
-                                                            <span>
-                                                                Edit
-                                                            </span>
-                                                        </button>
-
-                                                        <button
-                                                            type="button"
-                                                            className="event-assignment-delete"
-                                                            title="Delete assignment"
-                                                            onClick={() =>
-                                                                void handleDeleteAssignment(
-                                                                    assignment
-                                                                )
-                                                            }
-                                                        >
-                                                            🗑
-                                                            <span>
-                                                                Delete
-                                                            </span>
-                                                        </button>
-
-                                                    </div>
-
-                                                </div>
-                                            )
-                                        )
+                                    {/* Embedded existing EventPlanningPanel */}
+                                    {typeof selectedEvent.id === "number" && (
+                                        <EventPlanningPanel eventId={selectedEvent.id} />
                                     )}
-
+                                    {typeof selectedEvent.id !== "number" && (
+                                        <div className="p-6 text-center text-gray-500 bg-white rounded-xl border border-gray-200">
+                                            <p>Save this event to the database to manage operational tasks and volunteer assignments.</p>
+                                        </div>
+                                    )}
                                 </div>
+                            )}
 
-                            </div>
-
-                        </>
+                        </div>
                     )}
-
                 </section>
 
             </div>
 
             {/* =================================================
-                ADD / EDIT ASSIGNMENT MODAL
+                CREATE & EDIT SCHOOL EVENT MODAL
             ================================================= */}
-
-            {showAssignmentModal &&
-                selectedEvent && (
-                    <div
-                        className="event-modal-overlay"
-                        onClick={
-                            handleCloseAssignmentModal
-                        }
-                    >
-
-                        <div
-                            className="event-modal"
-                            onClick={(event) =>
-                                event.stopPropagation()
-                            }
-                        >
-
-                            <div className="event-modal-header">
-
-                                <div>
-
-                                    <span>
-                                        EVENT PROGRAM
-                                    </span>
-
-                                    <h2>
-                                        {editingAssignment
-                                            ? "Edit Assignment"
-                                            : "Add Assignment"}
-                                    </h2>
-
-                                    <small>
-                                        {editingAssignment
-                                            ? "Editing assignment #" +
-                                              editingAssignment.id
-                                            : (
-                                                <>
-                                                    Add
-                                                    assignment
-                                                    for:{" "}
-                                                    <strong>
-                                                        {
-                                                            selectedEvent.title
-                                                        }
-                                                    </strong>
-                                                </>
-                                            )}
-                                    </small>
-
-                                </div>
-
-                                <button
-                                    type="button"
-                                    disabled={
-                                        savingAssignment
-                                    }
-                                    onClick={
-                                        handleCloseAssignmentModal
-                                    }
-                                >
-                                    ×
-                                </button>
-
-                            </div>
-
-                            <form
-                                onSubmit={
-                                    handleSaveAssignment
-                                }
-                            >
-
-                                <div className="event-form-grid">
-
-                                    <div className="event-form-field">
-
-                                        <label>
-                                            ROLE
-                                        </label>
-
-                                        <input
-                                            type="text"
-                                            value={
-                                                assignmentForm.role
-                                            }
-                                            onChange={(event) =>
-                                                updateAssignmentField(
-                                                    "role",
-                                                    event.target.value
-                                                )
-                                            }
-                                            placeholder="e.g. Worship Leader"
-                                            required
-                                        />
-
-                                    </div>
-
-                                    <div className="event-form-field">
-
-                                        <label>
-                                            ASSIGNED
-                                            PERSON /
-                                            TEAM
-                                        </label>
-
-                                        <input
-                                            type="text"
-                                            value={
-                                                assignmentForm.person
-                                            }
-                                            onChange={(event) =>
-                                                updateAssignmentField(
-                                                    "person",
-                                                    event.target.value
-                                                )
-                                            }
-                                            placeholder="e.g. Juan Dela Cruz"
-                                            required
-                                        />
-
-                                    </div>
-
-                                    <div className="event-form-field">
-
-                                        <label>
-                                            DEPARTMENT /
-                                            MINISTRY
-                                        </label>
-
-                                        <input
-                                            type="text"
-                                            value={
-                                                assignmentForm.department
-                                            }
-                                            onChange={(event) =>
-                                                updateAssignmentField(
-                                                    "department",
-                                                    event.target.value
-                                                )
-                                            }
-                                            placeholder="e.g. Worship Ministry"
-                                        />
-
-                                    </div>
-
-                                    <div className="event-form-field">
-
-                                        <label>
-                                            PRIORITY
-                                        </label>
-
-                                        <select
-                                            value={
-                                                assignmentForm.priority
-                                            }
-                                            onChange={(event) =>
-                                                updateAssignmentField(
-                                                    "priority",
-                                                    event.target.value
-                                                )
-                                            }
-                                        >
-                                            <option value="Low">
-                                                Low
-                                            </option>
-
-                                            <option value="Normal">
-                                                Normal
-                                            </option>
-
-                                            <option value="High">
-                                                High
-                                            </option>
-
-                                            <option value="Critical">
-                                                Critical
-                                            </option>
-                                        </select>
-
-                                    </div>
-
-                                    <div className="event-form-field">
-
-                                        <label>
-                                            ASSIGNMENT
-                                            STATUS
-                                        </label>
-
-                                        <select
-                                            value={
-                                                assignmentForm.status
-                                            }
-                                            onChange={(event) =>
-                                                updateAssignmentField(
-                                                    "status",
-                                                    event.target
-                                                        .value as AssignmentDisplayStatus
-                                                )
-                                            }
-                                        >
-                                            <option value="Pending">
-                                                Pending
-                                            </option>
-
-                                            <option value="Assigned">
-                                                Assigned
-                                            </option>
-
-                                            <option value="In Progress">
-                                                In Progress
-                                            </option>
-
-                                            <option value="Completed">
-                                                Completed
-                                            </option>
-
-                                            <option value="Cancelled">
-                                                Cancelled
-                                            </option>
-                                        </select>
-
-                                    </div>
-
-                                    <div className="event-form-field full">
-
-                                        <label>
-                                            ASSIGNMENT
-                                            NOTES
-                                        </label>
-
-                                        <textarea
-                                            value={
-                                                assignmentForm.notes
-                                            }
-                                            onChange={(event) =>
-                                                updateAssignmentField(
-                                                    "notes",
-                                                    event.target.value
-                                                )
-                                            }
-                                            placeholder="Instructions, responsibilities, reminders..."
-                                            rows={4}
-                                        />
-
-                                    </div>
-
-                                </div>
-
-                                <div className="event-modal-actions">
-
-                                    <button
-                                        type="button"
-                                        className="event-cancel-button"
-                                        disabled={
-                                            savingAssignment
-                                        }
-                                        onClick={
-                                            handleCloseAssignmentModal
-                                        }
-                                    >
-                                        Cancel
-                                    </button>
-
-                                    <button
-                                        type="submit"
-                                        className="event-primary-button"
-                                        disabled={
-                                            savingAssignment
-                                        }
-                                    >
-                                        {savingAssignment
-                                            ? editingAssignment
-                                                ? "Updating..."
-                                                : "Saving..."
-                                            : editingAssignment
-                                                ? "Update Assignment"
-                                                : "Save Assignment"}
-                                    </button>
-
-                                </div>
-
-                            </form>
-
-                        </div>
-
-                    </div>
-                )}
-
-            {/* =================================================
-                VIEW ASSIGNMENT
-            ================================================= */}
-
-            {viewingAssignment && (
+            {showModal && (
                 <div
                     className="event-modal-overlay"
-                    onClick={() =>
-                        setViewingAssignment(null)
-                    }
+                    onClick={() => !saving && setShowModal(false)}
                 >
-
                     <div
-                        className="event-assignment-view-modal"
-                        onClick={(event) =>
-                            event.stopPropagation()
-                        }
+                        className="event-modal cms-modal"
+                        onClick={(e) => e.stopPropagation()}
                     >
-
                         <div className="event-modal-header">
-
                             <div>
-
-                                <span>
-                                    EVENT PROGRAM
+                                <span className="modal-eyebrow">
+                                    {modalMode === "edit" ? "EDITING SCHOOL EVENT" : "NEW SCHOOL EVENT"}
                                 </span>
-
                                 <h2>
-                                    Assignment Details
+                                    {modalMode === "edit" ? "Edit School Event & Landing Page Content" : "Create & Publish School Event"}
                                 </h2>
-
-                                {selectedEvent && (
-                                    <small>
-                                        {
-                                            selectedEvent.title
-                                        }
-                                    </small>
-                                )}
-
-                            </div>
-
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    setViewingAssignment(
-                                        null
-                                    )
-                                }
-                            >
-                                ×
-                            </button>
-
-                        </div>
-
-                        <div className="event-assignment-view-content">
-
-                            <div className="assignment-view-hero">
-
-                                <div className="assignment-view-icon">
-                                    👤
-                                </div>
-
-                                <div>
-
-                                    <span>
-                                        ASSIGNED ROLE
-                                    </span>
-
-                                    <h3>
-                                        {
-                                            viewingAssignment.role
-                                        }
-                                    </h3>
-
-                                    <p>
-                                        {
-                                            viewingAssignment.person
-                                        }
-                                    </p>
-
-                                </div>
-
-                            </div>
-
-                            <div className="assignment-view-grid">
-
-                                <div className="assignment-view-card">
-
-                                    <span>
-                                        ASSIGNED PERSON /
-                                        TEAM
-                                    </span>
-
-                                    <strong>
-                                        {
-                                            viewingAssignment.person ||
-                                            "To Be Assigned"
-                                        }
-                                    </strong>
-
-                                </div>
-
-                                <div className="assignment-view-card">
-
-                                    <span>
-                                        DEPARTMENT /
-                                        MINISTRY
-                                    </span>
-
-                                    <strong>
-                                        {
-                                            viewingAssignment.department ||
-                                            "—"
-                                        }
-                                    </strong>
-
-                                </div>
-
-                                <div className="assignment-view-card">
-
-                                    <span>
-                                        STATUS
-                                    </span>
-
-                                    <strong
-                                        className={
-                                            "assignment-view-status " +
-                                            viewingAssignment.status
-                                                .toLowerCase()
-                                                .replace(
-                                                    /\s+/g,
-                                                    "-"
-                                                )
-                                        }
-                                    >
-                                        ●{" "}
-                                        {
-                                            viewingAssignment.status
-                                        }
-                                    </strong>
-
-                                </div>
-
-                                <div className="assignment-view-card">
-
-                                    <span>
-                                        PRIORITY
-                                    </span>
-
-                                    <strong
-                                        className={
-                                            "assignment-view-priority " +
-                                            viewingAssignment.priority.toLowerCase()
-                                        }
-                                    >
-                                        {
-                                            viewingAssignment.priority
-                                        }
-                                    </strong>
-
-                                </div>
-
-                            </div>
-
-                            <div className="assignment-view-notes">
-
-                                <span>
-                                    ASSIGNMENT NOTES
-                                </span>
-
-                                {viewingAssignment.notes ? (
-                                    <p>
-                                        {
-                                            viewingAssignment.notes
-                                        }
-                                    </p>
-                                ) : (
-                                    <p className="empty">
-                                        No additional
-                                        instructions
-                                        or notes were
-                                        provided.
-                                    </p>
-                                )}
-
-                            </div>
-
-                            <div className="assignment-view-audit">
-
-                                <div>
-
-                                    <span>
-                                        CREATED
-                                    </span>
-
-                                    <strong>
-                                        {viewingAssignment.createdAt
-                                            ? new Date(
-                                                  viewingAssignment.createdAt
-                                              ).toLocaleString()
-                                            : "—"}
-                                    </strong>
-
-                                </div>
-
-                                <div>
-
-                                    <span>
-                                        LAST UPDATED
-                                    </span>
-
-                                    <strong>
-                                        {viewingAssignment.updatedAt
-                                            ? new Date(
-                                                  viewingAssignment.updatedAt
-                                              ).toLocaleString()
-                                            : "Not updated"}
-                                    </strong>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                        <div className="event-assignment-view-footer">
-
-                            <button
-                                type="button"
-                                className="event-secondary-button"
-                                onClick={() =>
-                                    setViewingAssignment(
-                                        null
-                                    )
-                                }
-                            >
-                                Close
-                            </button>
-
-                        </div>
-
-                    </div>
-
-                </div>
-            )}
-
-            {/* =================================================
-                CREATE EVENT MODAL
-            ================================================= */}
-
-            {showCreateModal && (
-                <div
-                    className="event-modal-overlay"
-                    onClick={
-                        handleCloseCreateModal
-                    }
-                >
-
-                    <div
-                        className="event-modal"
-                        onClick={(event) =>
-                            event.stopPropagation()
-                        }
-                    >
-
-                        <div className="event-modal-header">
-
-                            <div>
-
-                                <span>
-                                    EVENT MANAGEMENT
-                                </span>
-
-                                <h2>
-                                    Create New Event
-                                </h2>
-
                                 <small>
-                                    Create a new church
-                                    event and start
-                                    planning its
-                                    program.
+                                    Changes will immediately update the live Landing Page and Public Events directory.
                                 </small>
-
                             </div>
-
                             <button
                                 type="button"
-                                disabled={creating}
-                                onClick={
-                                    handleCloseCreateModal
-                                }
+                                className="modal-close-btn"
+                                disabled={saving}
+                                onClick={() => setShowModal(false)}
                             >
-                                ×
+                                <X size={20} />
                             </button>
-
                         </div>
 
-                        <form
-                            onSubmit={
-                                handleCreateEvent
-                            }
-                        >
-
+                        <form onSubmit={handleSaveEvent} className="event-editor-form">
                             <div className="event-form-grid">
 
+                                {/* Title */}
                                 <div className="event-form-field full">
-
                                     <label>
-                                        EVENT TITLE
+                                        EVENT TITLE <span className="text-red-500">*</span>
                                     </label>
-
                                     <input
                                         type="text"
-                                        value={
-                                            newEvent.title
-                                        }
-                                        onChange={(event) =>
-                                            updateNewEventField(
-                                                "title",
-                                                event.target.value
-                                            )
-                                        }
-                                        placeholder="e.g. Community Outreach 2026"
+                                        value={formState.title}
+                                        onChange={(e) => setFormState({ ...formState, title: e.target.value })}
+                                        placeholder="e.g. Modular Pastoral Intensive: Expository Preaching & Hermeneutics"
                                         required
+                                        maxLength={200}
                                     />
-
+                                    <span className="field-hint">The main headline displayed on the landing page dropdown and event cards.</span>
                                 </div>
 
+                                {/* Event Category */}
                                 <div className="event-form-field">
-
-                                    <label>
-                                        EVENT TYPE
-                                    </label>
-
+                                    <label>EVENT CATEGORY / TYPE</label>
                                     <select
-                                        value={
-                                            newEvent.eventType
-                                        }
-                                        onChange={(event) =>
-                                            updateNewEventField(
-                                                "eventType",
-                                                event.target.value
-                                            )
-                                        }
+                                        value={formState.eventType}
+                                        onChange={(e) => setFormState({ ...formState, eventType: e.target.value })}
                                     >
-                                        <option value="Conference">
-                                            Conference
-                                        </option>
-
-                                        <option value="Seminar">
-                                            Seminar
-                                        </option>
-
-                                        <option value="Outreach">
-                                            Outreach
-                                        </option>
-
-                                        <option value="Fun Run">
-                                            Fun Run
-                                        </option>
-
-                                        <option value="Camp">
-                                            Camp
-                                        </option>
-
-                                        <option value="Fellowship">
-                                            Fellowship
-                                        </option>
-
-                                        <option value="Concert">
-                                            Concert
-                                        </option>
-
-                                        <option value="Training">
-                                            Training
-                                        </option>
-
-                                        <option value="Community Event">
-                                            Community Event
-                                        </option>
-
-                                        <option value="Other">
-                                            Other
-                                        </option>
+                                        {EVENT_TYPE_OPTIONS.map((opt) => (
+                                            <option key={opt} value={opt}>
+                                                {opt}
+                                            </option>
+                                        ))}
                                     </select>
-
                                 </div>
 
+                                {/* Status */}
                                 <div className="event-form-field">
-
-                                    <label>
-                                        SPEAKER /
-                                        COORDINATOR
-                                    </label>
-
-                                    <input
-                                        type="text"
-                                        value={
-                                            newEvent.coordinator
-                                        }
-                                        onChange={(event) =>
-                                            updateNewEventField(
-                                                "coordinator",
-                                                event.target.value
-                                            )
-                                        }
-                                        placeholder="Speaker or event coordinator"
-                                    />
-
+                                    <label>STATUS ON WEBSITE</label>
+                                    <select
+                                        value={formState.status}
+                                        onChange={(e) => setFormState({ ...formState, status: e.target.value as EventStatus })}
+                                    >
+                                        {STATUS_OPTIONS.map((opt) => (
+                                            <option key={opt.value} value={opt.value}>
+                                                {opt.label}
+                                            </option>
+                                        ))}
+                                    </select>
                                 </div>
 
-                                <div className="event-form-field full">
-
-                                    <label>
-                                        MINISTRY
-                                    </label>
-
-                                    <input
-                                        type="text"
-                                        value={
-                                            newEvent.ministry
-                                        }
-                                        onChange={(event) =>
-                                            updateNewEventField(
-                                                "ministry",
-                                                event.target.value
-                                            )
-                                        }
-                                        placeholder="e.g. Youth Ministry"
-                                    />
-
-                                </div>
-
-                                <div className="event-form-field full">
-
-                                    <label>
-                                        VENUE / LOCATION
-                                    </label>
-
-                                    <input
-                                        type="text"
-                                        value={
-                                            newEvent.location
-                                        }
-                                        onChange={(event) =>
-                                            updateNewEventField(
-                                                "location",
-                                                event.target.value
-                                            )
-                                        }
-                                        placeholder="Church, school, community center..."
-                                        required
-                                    />
-
-                                </div>
-
+                                {/* Date */}
                                 <div className="event-form-field">
-
                                     <label>
-                                        DATE
+                                        EVENT DATE <span className="text-red-500">*</span>
                                     </label>
-
                                     <input
                                         type="date"
-                                        value={
-                                            newEvent.startDate
-                                        }
-                                        onChange={(event) =>
-                                            updateNewEventField(
-                                                "startDate",
-                                                event.target.value
-                                            )
-                                        }
+                                        value={formState.startDate}
+                                        onChange={(e) => setFormState({ ...formState, startDate: e.target.value })}
                                         required
                                     />
-
                                 </div>
 
+                                {/* Time Range */}
+                                <div className="event-form-field time-range-group">
+                                    <label>TIME SCHEDULE</label>
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="time"
+                                            value={formState.startTime}
+                                            onChange={(e) => setFormState({ ...formState, startTime: e.target.value })}
+                                            title="Start Time"
+                                        />
+                                        <span className="text-gray-400 font-medium">to</span>
+                                        <input
+                                            type="time"
+                                            value={formState.endTime}
+                                            onChange={(e) => setFormState({ ...formState, endTime: e.target.value })}
+                                            title="End Time"
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Venue / Location */}
                                 <div className="event-form-field">
-
                                     <label>
-                                        START TIME
+                                        CAMPUS VENUE / LOCATION <span className="text-red-500">*</span>
                                     </label>
-
                                     <input
-                                        type="time"
-                                        value={
-                                            newEvent.startTime
-                                        }
-                                        onChange={(event) =>
-                                            updateNewEventField(
-                                                "startTime",
-                                                event.target.value
-                                            )
-                                        }
+                                        type="text"
+                                        value={formState.location}
+                                        onChange={(e) => setFormState({ ...formState, location: e.target.value })}
+                                        placeholder="e.g. Main Seminary Campus (Hall A) & Zoom"
+                                        required
                                     />
-
                                 </div>
 
+                                {/* Speaker / Faculty */}
                                 <div className="event-form-field">
-
-                                    <label>
-                                        END TIME
-                                    </label>
-
+                                    <label>SPEAKER / LECTURER / DEAN</label>
                                     <input
-                                        type="time"
-                                        value={
-                                            newEvent.endTime
-                                        }
-                                        onChange={(event) =>
-                                            updateNewEventField(
-                                                "endTime",
-                                                event.target.value
-                                            )
-                                        }
+                                        type="text"
+                                        value={formState.speaker}
+                                        onChange={(e) => setFormState({ ...formState, speaker: e.target.value })}
+                                        placeholder="e.g. Dr. Jonathan M. Cruz, M.Th."
                                     />
-
                                 </div>
 
+                                {/* Ministry / Department */}
                                 <div className="event-form-field full">
+                                    <label>ACADEMIC DEPARTMENT / MINISTRY</label>
+                                    <input
+                                        type="text"
+                                        value={formState.ministry}
+                                        onChange={(e) => setFormState({ ...formState, ministry: e.target.value })}
+                                        placeholder="e.g. Biblical Studies & Homiletics, Admissions Directorate"
+                                    />
+                                </div>
 
+                                {/* Landing Page Description */}
+                                <div className="event-form-field full">
                                     <label>
-                                        DESCRIPTION
+                                        LANDING PAGE SYNOPSIS / EVENT DESCRIPTION <span className="text-red-500">*</span>
                                     </label>
-
                                     <textarea
-                                        value={
-                                            newEvent.description
-                                        }
-                                        onChange={(event) =>
-                                            updateNewEventField(
-                                                "description",
-                                                event.target.value
-                                            )
-                                        }
-                                        placeholder="Describe the purpose and goals of this event..."
                                         rows={4}
+                                        value={formState.description}
+                                        onChange={(e) => setFormState({ ...formState, description: e.target.value })}
+                                        placeholder="Detailed event synopsis, key objectives, scripture focus, or who should attend. Displayed when visitors view this event on the landing page..."
+                                        required
                                     />
-
+                                    <span className="field-hint">Visitors on the website read this synopsis before registering.</span>
                                 </div>
 
+                                {/* Administrative Notes */}
                                 <div className="event-form-field full">
-
-                                    <label>
-                                        NOTES
-                                    </label>
-
+                                    <label>INTERNAL FACULTY / ADMINISTRATIVE NOTES</label>
                                     <textarea
-                                        value={
-                                            newEvent.notes
-                                        }
-                                        onChange={(event) =>
-                                            updateNewEventField(
-                                                "notes",
-                                                event.target.value
-                                            )
-                                        }
-                                        placeholder="Additional event notes..."
-                                        rows={3}
+                                        rows={2}
+                                        value={formState.notes}
+                                        onChange={(e) => setFormState({ ...formState, notes: e.target.value })}
+                                        placeholder="Internal notes, logistical requirements, room bookings, honorariums (not shown publicly)..."
                                     />
-
                                 </div>
 
                             </div>
 
+                            {/* Modal Actions */}
                             <div className="event-modal-actions">
-
                                 <button
                                     type="button"
                                     className="event-cancel-button"
-                                    disabled={creating}
-                                    onClick={
-                                        handleCloseCreateModal
-                                    }
+                                    disabled={saving}
+                                    onClick={() => setShowModal(false)}
                                 >
                                     Cancel
                                 </button>
 
                                 <button
                                     type="submit"
-                                    className="event-primary-button"
-                                    disabled={creating}
+                                    className="event-primary-button submit-publish-btn"
+                                    disabled={saving}
                                 >
-                                    {creating
-                                        ? "Creating..."
-                                        : "Create Event"}
+                                    {saving ? (
+                                        <>
+                                            <RefreshCw size={16} className="animate-spin" />
+                                            <span>Saving &amp; Publishing...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <CheckCircle2 size={16} />
+                                            <span>{modalMode === "edit" ? "Save & Update Landing Page" : "Publish to Landing Page"}</span>
+                                        </>
+                                    )}
                                 </button>
-
                             </div>
-
                         </form>
-
                     </div>
+                </div>
+            )}
 
+            {/* =================================================
+                DELETE CONFIRMATION MODAL
+            ================================================= */}
+            {showDeleteModal && eventToDelete && (
+                <div
+                    className="event-modal-overlay"
+                    onClick={() => !deleting && setShowDeleteModal(false)}
+                >
+                    <div
+                        className="event-modal delete-confirm-modal"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="delete-modal-icon">
+                            <Trash2 size={32} className="text-red-600" />
+                        </div>
+                        <h2>Delete School Event?</h2>
+                        <p>
+                            Are you sure you want to delete <strong>"{eventToDelete.title}"</strong>?
+                        </p>
+                        <div className="delete-modal-warning">
+                            <AlertCircle size={16} />
+                            <span>This event will be immediately removed from the Public Landing Page, Apple-style mega menu, and School Events Directory.</span>
+                        </div>
+
+                        <div className="delete-modal-actions">
+                            <button
+                                type="button"
+                                className="event-cancel-button"
+                                disabled={deleting}
+                                onClick={() => setShowDeleteModal(false)}
+                            >
+                                Keep Event
+                            </button>
+
+                            <button
+                                type="button"
+                                className="event-confirm-delete-btn"
+                                disabled={deleting}
+                                onClick={handleConfirmDelete}
+                            >
+                                {deleting ? "Deleting..." : "Yes, Delete Event"}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
 

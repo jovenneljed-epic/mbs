@@ -14,11 +14,14 @@ export interface SchoolEventItem {
     formattedDate: string;
     dayMonth: { day: string; month: string };
     time: string;
+    rawStartTime?: string;
+    rawEndTime?: string;
     location: string;
     speaker?: string;
     ministry?: string;
     status: string;
     description: string;
+    notes?: string;
 }
 
 export interface SchoolAnnouncementItem {
@@ -33,7 +36,7 @@ export interface SchoolAnnouncementItem {
 
 const MONTH_NAMES = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 
-function parseDayMonth(dateStr: string): { day: string; month: string } {
+export function parseDayMonth(dateStr: string): { day: string; month: string } {
     try {
         const d = new Date(dateStr);
         if (!isNaN(d.getTime())) {
@@ -48,7 +51,7 @@ function parseDayMonth(dateStr: string): { day: string; month: string } {
     return { day: "15", month: "MBS" };
 }
 
-function formatDateLong(dateStr: string): string {
+export function formatDateLong(dateStr: string): string {
     try {
         const d = new Date(dateStr);
         if (!isNaN(d.getTime())) {
@@ -156,6 +159,42 @@ export const DEFAULT_SCHOOL_ANNOUNCEMENTS: SchoolAnnouncementItem[] = [
     }
 ];
 
+export const EVENTS_CACHE_KEY = "mbs_school_events_cache";
+
+export function notifySchoolEventsUpdated(events?: SchoolEventItem[]): void {
+    if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("mbs:school-events-updated", { detail: events }));
+    }
+}
+
+export function saveSchoolEventsCache(events: SchoolEventItem[]): void {
+    try {
+        if (typeof window !== "undefined") {
+            localStorage.setItem(EVENTS_CACHE_KEY, JSON.stringify(events));
+            notifySchoolEventsUpdated(events);
+        }
+    } catch (e) {
+        console.warn("Failed to cache school events in localStorage:", e);
+    }
+}
+
+export function getSchoolEventsCache(): SchoolEventItem[] | null {
+    try {
+        if (typeof window !== "undefined") {
+            const raw = localStorage.getItem(EVENTS_CACHE_KEY);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    return parsed;
+                }
+            }
+        }
+    } catch (e) {
+        console.warn("Failed to read school events cache:", e);
+    }
+    return null;
+}
+
 // ------------------------------------------------------------
 // Public Events Fetcher (Connected directly to SMS)
 // ------------------------------------------------------------
@@ -195,29 +234,44 @@ export async function getPublicSchoolEvents(): Promise<SchoolEventItem[]> {
                 : [];
 
             if (rawEvents.length > 0) {
-                return rawEvents.map((e, idx) => {
+                const mappedEvents = rawEvents.map((e, idx) => {
                     const rawDate = e.startDate || e.eventDate || e.EventDate || e.StartDate || "";
                     const dayMonth = parseDayMonth(rawDate);
+                    const sTime = e.startTime || e.StartTime || "";
+                    const eTime = e.endTime || e.EndTime || "";
                     return {
                         id: e.id || e.eventId || e.EventId || idx + 1,
                         title: e.title || e.Title || "Seminary Event",
                         eventType: e.eventType || e.EventType || "Campus Activity",
-                        startDate: rawDate,
+                        startDate: rawDate.includes("T") ? rawDate.split("T")[0] : rawDate,
                         formattedDate: formatDateLong(rawDate),
                         dayMonth,
-                        time: e.startTime || e.StartTime ? `${e.startTime || e.StartTime}${e.endTime ? ` - ${e.endTime}` : ""}` : "TBA",
+                        time: sTime ? `${sTime}${eTime ? ` - ${eTime}` : ""}` : "TBA",
+                        rawStartTime: sTime,
+                        rawEndTime: eTime,
                         location: e.location || e.venue || e.Venue || "Main Seminary Campus",
                         speaker: e.speaker || e.Speaker || e.coordinator || e.Coordinator || "",
                         ministry: e.ministry || e.Ministry || "",
                         status: e.status || e.Status || "Upcoming",
-                        description: e.description || e.Description || e.notes || e.Notes || "Join us for this theological seminar and fellowship."
+                        description: e.description || e.Description || e.notes || e.Notes || "Join us for this theological seminar and fellowship.",
+                        notes: e.notes || e.Notes || ""
                     };
                 });
+
+                // Update cache
+                saveSchoolEventsCache(mappedEvents);
+                return mappedEvents;
             }
         }
     } catch (err) {
         // Silently fallback on network error/timeout
-        console.warn("SMS public events endpoint unavailable, using cached defaults:", err);
+        console.warn("SMS public events endpoint unavailable, attempting local cache fallback:", err);
+    }
+
+    // Check local storage cache before default fallback
+    const cached = getSchoolEventsCache();
+    if (cached && cached.length > 0) {
+        return cached;
     }
 
     return DEFAULT_SCHOOL_EVENTS;
