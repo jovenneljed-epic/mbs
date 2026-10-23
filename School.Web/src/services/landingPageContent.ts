@@ -195,6 +195,21 @@ export const COLOR_THEME_PRESETS: Record<string, ColorThemeSettings> = {
         gradient: "linear-gradient(180deg, #ffffff 30%, #cbd5e1 65%, #94a3b8 100%)",
         cardAccent: "rgba(255, 255, 255, 0.15)",
     },
+    "daylight-ivory": {
+        themeId: "daylight-ivory",
+        name: "Daylight Alabaster & Royal Navy",
+        badge: "DAYTIME CLARITY",
+        description: "Ultra-clean collegiate alabaster ivory, royal navy accents, and warm golden crest illumination.",
+        primary: "#1E40AF",
+        primaryHover: "#1E3A8A",
+        secondary: "#D97706",
+        glow: "rgba(30, 64, 175, 0.25)",
+        heroGlow: "rgba(217, 119, 6, 0.15)",
+        heroBgStart: "#F8FAFC",
+        heroBgEnd: "#EFF6FF",
+        gradient: "linear-gradient(135deg, #1E40AF 10%, #2563EB 50%, #D97706 100%)",
+        cardAccent: "rgba(30, 64, 175, 0.15)",
+    },
 };
 
 export const DEFAULT_COLOR_THEME: ColorThemeSettings = COLOR_THEME_PRESETS["seminary-maroon"];
@@ -425,64 +440,47 @@ export const getLandingPageContent = (): LandingPageContent => {
     return DEFAULT_LANDING_CONTENT;
 };
 
+import {
+    applyGlobalTheme as engineApplyTheme,
+    initGlobalThemeEngine,
+    setThemeMode,
+    setThemePreset,
+    getThemeMode,
+    LUXURY_THEME_PRESETS
+} from "./themeEngine";
+
+export { initGlobalThemeEngine, setThemeMode, setThemePreset, getThemeMode, LUXURY_THEME_PRESETS };
+
 export const applyGlobalTheme = (theme?: ColorThemeSettings): void => {
     try {
-        const activeTheme = theme || getLandingPageContent().colorTheme || DEFAULT_COLOR_THEME;
-        if (!activeTheme || typeof document === "undefined") return;
-
-        const root = document.documentElement;
-
-                const heroEnd = activeTheme.heroBgEnd || activeTheme.primaryHover || "#0a1224";
-        const heroStart = activeTheme.heroBgStart || activeTheme.primary;
-
-        // Primary Brand (Admin Portal, Buttons, Highlights, Active Navigation)
-        root.style.setProperty("--mbs-maroon", activeTheme.primary);
-        root.style.setProperty("--mbs-maroon-dark", activeTheme.primaryHover || activeTheme.primary);
-        root.style.setProperty("--mbs-gold", activeTheme.secondary);
-        root.style.setProperty("--mbs-gold-dark", activeTheme.secondary);
-        root.style.setProperty("--mbs-gold-subtle", `${activeTheme.secondary}26`);
-        root.style.setProperty("--mbs-maroon-deep", heroEnd);
-        root.style.setProperty("--mbs-maroon-light", activeTheme.secondary || "#941e32");
-
-        root.style.setProperty("--epic-primary", activeTheme.primary);
-        root.style.setProperty("--epic-primary-dark", activeTheme.primaryHover);
-        root.style.setProperty("--epic-primary-light", `${activeTheme.primary}1f`);
-        root.style.setProperty("--epic-primary-soft", `${activeTheme.primary}18`);
-        root.style.setProperty("--epic-accent", activeTheme.primary);
-        root.style.setProperty("--epic-accent-soft", `${activeTheme.primary}18`);
-        root.style.setProperty("--border-focus", activeTheme.primary);
-
-        // App Shell & Admin Sidebar Colors
-        root.style.setProperty("--epic-navy", activeTheme.primary);
-        root.style.setProperty("--epic-navy-2", activeTheme.primaryHover);
-        root.style.setProperty("--epic-blue", activeTheme.primary);
-        root.style.setProperty("--epic-blue-dark", activeTheme.primaryHover);
-        root.style.setProperty("--epic-indigo", activeTheme.primary);
-        root.style.setProperty("--epic-blue-glow", activeTheme.glow);
-        root.style.setProperty("--epic-primary-glow", activeTheme.glow);
-
-        // Secondary / Cyan / Gold Accents
-        root.style.setProperty("--epic-cyan", activeTheme.secondary);
-        root.style.setProperty("--epic-cyan-soft", `${activeTheme.secondary}22`);
-        root.style.setProperty("--epic-secondary", activeTheme.secondary);
-        root.style.setProperty("--theme-secondary-soft", `${activeTheme.secondary}22`);
-
-        // Landing Page / Keynote Apple theme variables
-        root.style.setProperty("--apple-blue", activeTheme.primary);
-        root.style.setProperty("--apple-blue-hover", activeTheme.primaryHover);
-        root.style.setProperty("--apple-blue-light", activeTheme.secondary);
-        root.style.setProperty("--apple-blue-glow", activeTheme.glow);
-        root.style.setProperty("--theme-primary", activeTheme.primary);
-        root.style.setProperty("--theme-primary-hover", activeTheme.primaryHover);
-        root.style.setProperty("--theme-secondary", activeTheme.secondary);
-        root.style.setProperty("--theme-glow", activeTheme.glow);
-        root.style.setProperty("--theme-hero-glow", activeTheme.heroGlow);
-        root.style.setProperty("--theme-bg-start", heroStart);
-        root.style.setProperty("--theme-bg-end", heroEnd);
-        root.style.setProperty("--theme-gradient", activeTheme.gradient);
-        root.style.setProperty("--theme-card-accent", activeTheme.cardAccent || `${activeTheme.secondary}33`);
-
-        root.setAttribute("data-theme-id", activeTheme.themeId);
+        if (theme) {
+            engineApplyTheme({
+                id: theme.themeId,
+                name: theme.name,
+                badge: theme.badge,
+                tagline: theme.description,
+                description: theme.description,
+                category: theme.themeId === "daylight-ivory" ? "light" : "royal",
+                primary: theme.primary,
+                primaryHover: theme.primaryHover,
+                secondary: theme.secondary,
+                secondaryHover: theme.secondary,
+                glow: theme.glow,
+                heroGlow: theme.heroGlow,
+                heroBgStart: theme.heroBgStart,
+                heroBgEnd: theme.heroBgEnd,
+                surfaceBg: theme.heroBgEnd,
+                surfaceGlass: `${theme.heroBgEnd}e6`,
+                borderColor: theme.cardAccent || `${theme.secondary}33`,
+                borderHighlight: theme.secondary,
+                textColor: theme.themeId === "daylight-ivory" ? "#0F172A" : "#FFFFFF",
+                textMuted: theme.themeId === "daylight-ivory" ? "#475569" : "#CBD5E1",
+                gradient: theme.gradient,
+                cardAccent: theme.cardAccent,
+            }, "preset");
+        } else {
+            engineApplyTheme();
+        }
     } catch (e) {
         console.warn("Failed to apply global theme:", e);
     }

@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from "react";
 import "./PublicHeader.css";
 import { BookOpen, User, ShieldCheck, Calendar, Bell, Image as ImageIcon, GraduationCap } from "lucide-react";
+import LuxuryThemeSwitcher from "./LuxuryThemeSwitcher";
 
 interface PublicHeaderProps {
     onNavigate?: (page: string) => void;
@@ -130,6 +131,8 @@ const PublicHeader: React.FC<PublicHeaderProps> = ({
 
                 {/* DESKTOP ACTIONS */}
                 <div className="epic-public-nav-actions">
+                    <LuxuryThemeSwitcher variant="header" />
+
                     <button
                         type="button"
                         className="epic-client-login-button"

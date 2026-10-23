@@ -14,6 +14,7 @@ import {
     type LandingPageContent
 } from "../services/landingPageContent";
 import { PromoVideoPlayer } from "../components/PromoVideoPlayer";
+import LuxuryThemeSwitcher from "../components/LuxuryThemeSwitcher";
 import {
     getPublicSchoolEvents,
     getPublicSchoolAnnouncements,
@@ -693,6 +694,8 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
 
                     {/* Actions Right */}
                     <div className="ub-header-actions">
+                        <LuxuryThemeSwitcher variant="header" />
+
                         <button
                             className="ub-btn-portal-student"
                             onClick={() => navigateTo("client-login")}

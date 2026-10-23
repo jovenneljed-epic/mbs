@@ -40,6 +40,7 @@ import {
 
 import SalesLandingPage from "./pages/SalesLandingPage";
 import { applyGlobalTheme } from "./services/landingPageContent";
+import LuxuryThemeSwitcher from "./components/LuxuryThemeSwitcher";
 import LandingPage from "./pages/LandingPage";
 import AboutPage from "./pages/public/AboutPage";
 import ContactPage from "./pages/public/ContactPage";
@@ -3832,6 +3833,8 @@ if(
                     </div>
 
                     <div className="epic-topbar-right">
+                        <LuxuryThemeSwitcher variant="header" />
+
                         <button
                             type="button"
                             className="fb-circle-action-btn"
