@@ -170,6 +170,10 @@ type PublicPage =
     | "landing"
     | "home"
     | "about"
+    | "statement-of-faith"
+    | "faculty"
+    | "accreditations"
+    | "campuses"
     | "blog"
     | "ministries"
     | "events"
@@ -259,6 +263,10 @@ const PUBLIC_ROUTES: Record<PublicPage, string> = {
 
     home: "/home",
     about: "/about",
+    "statement-of-faith": "/statement-of-faith",
+    faculty: "/faculty",
+    accreditations: "/accreditations",
+    campuses: "/campuses",
     ministries: "/ministries",
     events: "/events",
     announcements: "/announcements",
@@ -1069,6 +1077,10 @@ const isPublicPath = (
         PUBLIC_ROUTES.home,
 
         PUBLIC_ROUTES.about,
+        PUBLIC_ROUTES["statement-of-faith"],
+        PUBLIC_ROUTES.faculty,
+        PUBLIC_ROUTES.accreditations,
+        PUBLIC_ROUTES.campuses,
 
         PUBLIC_ROUTES.ministries,
 
@@ -1512,8 +1524,29 @@ const App: React.FC = () => {
         PUBLIC_ROUTES["thank-you"];
 
     const isAboutPage =
-        normalizedPath ===
-        PUBLIC_ROUTES.about;
+        normalizedPath === PUBLIC_ROUTES.about ||
+        normalizedPath === "/about";
+
+    const isFaithPage =
+        normalizedPath === PUBLIC_ROUTES["statement-of-faith"] ||
+        normalizedPath === "/statement-of-faith" ||
+        normalizedPath === "/faith" ||
+        normalizedPath === "/doctrine";
+
+    const isFacultyPage =
+        normalizedPath === PUBLIC_ROUTES.faculty ||
+        normalizedPath === "/faculty" ||
+        normalizedPath === "/deans";
+
+    const isAccreditationsPage =
+        normalizedPath === PUBLIC_ROUTES.accreditations ||
+        normalizedPath === "/accreditations" ||
+        normalizedPath === "/accreditation";
+
+    const isCampusesPage =
+        normalizedPath === PUBLIC_ROUTES.campuses ||
+        normalizedPath === "/campuses" ||
+        normalizedPath === "/locations";
 
     const isMinistriesPublicPage =
         normalizedPath ===
@@ -3374,6 +3407,51 @@ if (isThankYouPage) {
                 onNavigate={
                     handlePublicNavigate
                 }
+                initialTab="overview"
+            />
+        );
+    }
+
+    if (isFaithPage) {
+        return (
+            <AboutPage
+                onNavigate={
+                    handlePublicNavigate
+                }
+                initialTab="faith"
+            />
+        );
+    }
+
+    if (isFacultyPage) {
+        return (
+            <AboutPage
+                onNavigate={
+                    handlePublicNavigate
+                }
+                initialTab="faculty"
+            />
+        );
+    }
+
+    if (isAccreditationsPage) {
+        return (
+            <AboutPage
+                onNavigate={
+                    handlePublicNavigate
+                }
+                initialTab="accreditations"
+            />
+        );
+    }
+
+    if (isCampusesPage) {
+        return (
+            <AboutPage
+                onNavigate={
+                    handlePublicNavigate
+                }
+                initialTab="campuses"
             />
         );
     }

@@ -321,6 +321,30 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
             return;
         }
 
+        if (clean === "statement-of-faith" || clean === "faith" || clean === "doctrine") {
+            if (onNavigate) onNavigate("statement-of-faith");
+            else window.location.href = "/statement-of-faith";
+            return;
+        }
+
+        if (clean === "faculty" || clean === "deans") {
+            if (onNavigate) onNavigate("faculty");
+            else window.location.href = "/faculty";
+            return;
+        }
+
+        if (clean === "accreditations" || clean === "accreditation") {
+            if (onNavigate) onNavigate("accreditations");
+            else window.location.href = "/accreditations";
+            return;
+        }
+
+        if (clean === "campuses" || clean === "locations") {
+            if (onNavigate) onNavigate("campuses");
+            else window.location.href = "/campuses";
+            return;
+        }
+
         if (clean === "about") {
             if (onNavigate) onNavigate("about");
             else window.location.href = "/about";
@@ -798,7 +822,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
                                     className="apple-link-item"
                                     onClick={() => {
                                         closeCampusMenu();
-                                        navigateTo("about");
+                                        navigateTo("statement-of-faith");
                                     }}
                                 >
                                     <BookOpen size={13} className="apple-link-item-icon" />
@@ -810,7 +834,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
                                     className="apple-link-item"
                                     onClick={() => {
                                         closeCampusMenu();
-                                        navigateTo("about");
+                                        navigateTo("faculty");
                                     }}
                                 >
                                     <Award size={13} className="apple-link-item-icon" />
@@ -822,7 +846,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
                                     className="apple-link-item"
                                     onClick={() => {
                                         closeCampusMenu();
-                                        navigateTo("about");
+                                        navigateTo("accreditations");
                                     }}
                                 >
                                     <ShieldCheck size={13} className="apple-link-item-icon" />
@@ -834,7 +858,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
                                     className="apple-link-item"
                                     onClick={() => {
                                         closeCampusMenu();
-                                        document.getElementById("campuses")?.scrollIntoView({ behavior: "smooth" });
+                                        navigateTo("campuses");
                                     }}
                                 >
                                     <MapPin size={13} className="apple-link-item-icon" />
