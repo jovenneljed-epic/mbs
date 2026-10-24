@@ -24,7 +24,12 @@ const PublicHeader: React.FC<PublicHeaderProps> = ({
             if (onNavigate) {
                 onNavigate(page);
             } else {
-                window.location.href = `/${page}`;
+                window.location.assign(`/${page}`);
+            }
+            try {
+                window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+            } catch {
+                window.scrollTo(0, 0);
             }
         },
         [onNavigate]

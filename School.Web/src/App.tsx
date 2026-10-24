@@ -1354,86 +1354,7 @@ interface UserInfo {
 // APP
 // =========================================================
 
-interface ErrorBoundaryProps {
-    pageName: string;
-    children: React.ReactNode;
-}
 
-interface ErrorBoundaryState {
-    hasError: boolean;
-    error: Error | null;
-}
-
-class PublicErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
-    constructor(props: ErrorBoundaryProps) {
-        super(props);
-        this.state = { hasError: false, error: null };
-    }
-
-    static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-        return { hasError: true, error };
-    }
-
-    componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-        console.error(`[PublicErrorBoundary] Error in ${this.props.pageName}:`, error, errorInfo);
-    }
-
-    render() {
-        if (this.state.hasError) {
-            return (
-                <div style={{
-                    minHeight: "100vh",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: "40px 20px",
-                    background: "var(--theme-bg-end, #1a0408)",
-                    color: "#ffffff",
-                    textAlign: "center",
-                    fontFamily: "Inter, sans-serif"
-                }}>
-                    <h2 style={{ fontSize: "1.8rem", marginBottom: 12, color: "var(--theme-secondary, #F59E0B)" }}>
-                        Mobile Bible School &amp; Theological Seminary
-                    </h2>
-                    <p style={{ maxWidth: 500, color: "#CBD5E1", marginBottom: 24 }}>
-                        We encountered an unexpected display issue loading the {this.props.pageName} page.
-                    </p>
-                    <div style={{ display: "flex", gap: 12 }}>
-                        <button
-                            onClick={() => window.location.reload()}
-                            style={{
-                                padding: "10px 20px",
-                                background: "var(--theme-primary, #7A1526)",
-                                border: "1px solid var(--theme-secondary, #F59E0B)",
-                                color: "#ffffff",
-                                borderRadius: 8,
-                                cursor: "pointer",
-                                fontWeight: 700
-                            }}
-                        >
-                            Refresh Page
-                        </button>
-                        <button
-                            onClick={() => { window.location.href = "/"; }}
-                            style={{
-                                padding: "10px 20px",
-                                background: "rgba(255, 255, 255, 0.1)",
-                                border: "1px solid rgba(255, 255, 255, 0.2)",
-                                color: "#ffffff",
-                                borderRadius: 8,
-                                cursor: "pointer"
-                            }}
-                        >
-                            Return Home
-                        </button>
-                    </div>
-                </div>
-            );
-        }
-        return this.props.children;
-    }
-}
 
 const App: React.FC = () => {
     // =====================================================
@@ -2246,6 +2167,11 @@ useCallback(
             case "inquiries":
             case "campus-inquiries":
                 navigatePublic("contact");
+                try {
+                    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+                } catch {
+                    window.scrollTo(0, 0);
+                }
                 break;
 
             case "events":
@@ -3630,13 +3556,12 @@ if (isThankYouPage) {
         isContactPage
     ) {
         return (
-            <PublicErrorBoundary pageName="Contact & Campus Inquiries">
-                <ContactPage
-                    onNavigate={
-                        handlePublicNavigate
-                    }
-                />
-            </PublicErrorBoundary>
+            <ContactPage
+                key="mbs-public-contact-page"
+                onNavigate={
+                    handlePublicNavigate
+                }
+            />
         );
     }
 

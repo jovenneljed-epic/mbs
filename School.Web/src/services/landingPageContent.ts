@@ -407,9 +407,22 @@ export const getLandingPageContent = (): LandingPageContent => {
             }
             const mergedScenes: PromoScene[] = Array.isArray(promo.scenes) ? promo.scenes : [];
 
+            let defaultTheme = DEFAULT_COLOR_THEME;
+            if (typeof window !== "undefined") {
+                try {
+                    const storedAdminTheme = localStorage.getItem("mbs_admin_global_theme");
+                    if (storedAdminTheme) {
+                        const parsedAdmin = JSON.parse(storedAdminTheme);
+                        if (parsedAdmin?.primary) {
+                            defaultTheme = parsedAdmin;
+                        }
+                    }
+                } catch {}
+            }
+
             const parsedTheme = parsed.colorTheme || {};
             const resolvedTheme: ColorThemeSettings = {
-                ...DEFAULT_COLOR_THEME,
+                ...defaultTheme,
                 ...parsedTheme,
             };
 
@@ -438,6 +451,22 @@ export const getLandingPageContent = (): LandingPageContent => {
     } catch (e) {
         console.warn("Failed to read landing page content from localStorage:", e);
     }
+
+    if (typeof window !== "undefined") {
+        try {
+            const storedAdminTheme = localStorage.getItem("mbs_admin_global_theme");
+            if (storedAdminTheme) {
+                const parsedAdmin = JSON.parse(storedAdminTheme);
+                if (parsedAdmin?.primary) {
+                    return {
+                        ...DEFAULT_LANDING_CONTENT,
+                        colorTheme: parsedAdmin
+                    };
+                }
+            }
+        } catch {}
+    }
+
     return DEFAULT_LANDING_CONTENT;
 };
 
@@ -454,11 +483,36 @@ export { initGlobalThemeEngine, setThemeMode, setThemePreset, getThemeMode, LUXU
 
 export const applyGlobalTheme = (theme?: ColorThemeSettings, skipBroadcast = false): void => {
     try {
-        const activeTheme = theme || getLandingPageContent().colorTheme || DEFAULT_COLOR_THEME;
-        engineApplyTheme(activeTheme, skipBroadcast);
-        if (typeof window !== "undefined") {
+        let activeTheme = theme;
+        if (!activeTheme && typeof window !== "undefined") {
             try {
-                localStorage.setItem("mbs_admin_global_theme", JSON.stringify(activeTheme));
+                const storedAdminTheme = localStorage.getItem("mbs_admin_global_theme");
+                if (storedAdminTheme) {
+                    const parsedAdmin = JSON.parse(storedAdminTheme);
+                    if (parsedAdmin?.primary) {
+                        activeTheme = parsedAdmin;
+                    }
+                }
+                if (!activeTheme) {
+                    const landingContent = getLandingPageContent();
+                    if (landingContent?.colorTheme?.primary) {
+                        activeTheme = landingContent.colorTheme;
+                    }
+                }
+            } catch {}
+        }
+
+        if (!activeTheme || !activeTheme.primary) {
+            activeTheme = DEFAULT_COLOR_THEME;
+        }
+
+        engineApplyTheme(activeTheme, skipBroadcast);
+
+        // ONLY store to mbs_admin_global_theme if explicitly passed by an admin action!
+        // Never overwrite the admin's theme with defaults during fallback/empty calls!
+        if (theme && theme.primary && typeof window !== "undefined") {
+            try {
+                localStorage.setItem("mbs_admin_global_theme", JSON.stringify(theme));
             } catch {}
         }
     } catch (e) {

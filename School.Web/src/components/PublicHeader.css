@@ -208,17 +208,18 @@
 }
 
 .epic-nav-cta {
-    color: #fff;
+    color: #fff !important;
+    background: var(--theme-gradient, linear-gradient(135deg, var(--theme-primary, #047857), var(--theme-secondary, #10b981))) !important;
+    border: 1px solid var(--theme-secondary, rgba(255, 255, 255, 0.2)) !important;
+    box-shadow: 0 4px 16px var(--theme-glow, rgba(16, 185, 129, 0.35)) !important;
+    font-weight: 700;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
 
-    background:
-        linear-gradient(
-            135deg,
-            #168cff,
-            #35b9ff
-        );
-
-    box-shadow:
-        0 8px 22px rgba(22, 140, 255, 0.2);
+.epic-nav-cta:hover {
+    background: var(--theme-primary-hover, #059669) !important;
+    box-shadow: 0 6px 20px var(--theme-glow, rgba(16, 185, 129, 0.5)) !important;
+    transform: translateY(-1px);
 }
 
 .epic-login-icon {
@@ -438,16 +439,9 @@
         margin-top: 8px;
 
         color: #fff !important;
-
-        background:
-            linear-gradient(
-                135deg,
-                #168cff,
-                #35b9ff
-            ) !important;
-
-        box-shadow:
-            0 8px 22px rgba(22, 140, 255, 0.2);
+        background: var(--theme-gradient, linear-gradient(135deg, var(--theme-primary, #047857), var(--theme-secondary, #10b981))) !important;
+        border: 1px solid var(--theme-secondary, rgba(255, 255, 255, 0.2)) !important;
+        box-shadow: 0 4px 16px var(--theme-glow, rgba(16, 185, 129, 0.35)) !important;
     }
 
 
