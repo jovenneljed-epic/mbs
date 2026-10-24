@@ -435,8 +435,8 @@ const GalleryPage: React.FC<GalleryPageProps> = ({ onNavigate }) => {
                         {/* Institutional Stats Banner */}
                         <div className="mbs-gallery-stats-row">
                             <div className="mbs-gallery-stat-pill">
-                                <strong>40+ Years</strong>
-                                <span>Faithful Ministry</span>
+                                <strong>Faithful</strong>
+                                <span>Gospel Proclamation</span>
                             </div>
                             <div className="mbs-gallery-stat-pill">
                                 <strong>5,000+</strong>

@@ -265,7 +265,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, initialTab = "
                     </h1>
 
                     <p className="mbs-about-hero-subtitle">
-                        Rooted in verbal plenary biblical inerrancy, sound theological scholarship, expository preaching, and pastoral ministry. Equipping pastors, church planters, and ministers across 40 years of faithful gospel witness.
+                        Rooted in verbal plenary biblical inerrancy, sound theological scholarship, expository preaching, and pastoral ministry. Equipping pastors, church planters, and ministers through faithful gospel witness.
                     </p>
 
                     <div className="mbs-hero-trust-chips">

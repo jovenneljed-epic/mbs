@@ -312,7 +312,7 @@ export const DEFAULT_LANDING_CONTENT: LandingPageContent = {
     heroSubtitle: "Rooted in biblical inerrancy, sound theological scholarship, expository preaching, and pastoral ministry. Nurturing gospel-driven ministers equipped to preach the Truth and shepherd the flock with integrity.",
     ctaPrimary: "Apply for Admission",
     ctaSecondary: "Access MBS Portals",
-    guarantee1: "40+ Years of Ministry",
+    guarantee1: "5,000+ Alumni Leaders",
     guarantee2: "100% Ministry Placement",
     guarantee3: "35+ Church Plants & Hubs",
     carouselEyebrow: "CURRICULUM & DEGREES",

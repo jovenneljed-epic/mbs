@@ -742,10 +742,6 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
                         >
                             ACADEMIC PROGRAMS
                         </a>
-                        <div className="ub-anniversary-badge" title="40+ Years of Faithful Ministry & Theological Rigor">
-                            <span className="ub-anniversary-sparkle">★</span>
-                            <span>40+ Years of Ministry</span>
-                        </div>
                     </nav>
 
                     {/* Actions Right */}
@@ -1152,8 +1148,8 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
                     {/* Quick Stats Bar */}
                     <div className="ub-hero-stats-card">
                         <div className="ub-stat-col">
-                            <div className="ub-stat-number">{content.guarantee1?.split(" ")[0] || "40+"}</div>
-                            <div className="ub-stat-label">{content.guarantee1?.replace(/^\S+\s*/, "") || "Years of Ministry"}</div>
+                            <div className="ub-stat-number">{content.guarantee1?.split(" ")[0] || "5,000+"}</div>
+                            <div className="ub-stat-label">{content.guarantee1?.replace(/^\S+\s*/, "") || "Alumni Leaders"}</div>
                         </div>
                         <div className="ub-stat-divider" />
                         <div className="ub-stat-col">
