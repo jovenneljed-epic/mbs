@@ -496,10 +496,10 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({ onNavigate
                         <div>
                             <h3>
                                 <Palette size={20} color="#1877f2" />
-                                Landing Page Color Theme &amp; Visual Identity
+                                System Global Color Theme &amp; Visual Identity
                             </h3>
                             <p style={{ margin: "4px 0 0", color: "#65676b", fontSize: "13px" }}>
-                                Choose from 7 calibrated academic themes or fine-tune a custom color scheme. Updates live homepage buttons, badges, gradients, and glows immediately.
+                                Choose from calibrated institutional themes or fine-tune custom brand colors. Manually configured by the Administrator; saving here updates all pages across the entire system immediately.
                             </p>
                         </div>
                         <div className="theme-active-indicator">

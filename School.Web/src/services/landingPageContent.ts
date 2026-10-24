@@ -1,3 +1,4 @@
+import { API_BASE_URL } from "../config";
 export interface FieldModuleItem {
     id: string;
     eyebrow: string;
@@ -406,8 +407,11 @@ export const getLandingPageContent = (): LandingPageContent => {
             }
             const mergedScenes: PromoScene[] = Array.isArray(promo.scenes) ? promo.scenes : [];
 
-            // Institutional global theme is permanently locked to Seminary Maroon & Gold
-            const resolvedTheme: ColorThemeSettings = DEFAULT_COLOR_THEME;
+            const parsedTheme = parsed.colorTheme || {};
+            const resolvedTheme: ColorThemeSettings = {
+                ...DEFAULT_COLOR_THEME,
+                ...parsedTheme,
+            };
 
             const parsedFooter = parsed.footer || {};
             const resolvedFooter: FooterSettings = {
@@ -448,10 +452,15 @@ import {
 
 export { initGlobalThemeEngine, setThemeMode, setThemePreset, getThemeMode, LUXURY_THEME_PRESETS };
 
-export const applyGlobalTheme = (_theme?: ColorThemeSettings): void => {
+export const applyGlobalTheme = (theme?: ColorThemeSettings): void => {
     try {
-        // Enforce the permanent official MBS Seminary Maroon & 24K Gold global theme
-        engineApplyTheme();
+        const activeTheme = theme || getLandingPageContent().colorTheme || DEFAULT_COLOR_THEME;
+        engineApplyTheme(activeTheme);
+        if (typeof window !== "undefined") {
+            try {
+                localStorage.setItem("mbs_admin_global_theme", JSON.stringify(activeTheme));
+            } catch {}
+        }
     } catch (e) {
         console.warn("Failed to apply global theme:", e);
     }
@@ -461,7 +470,27 @@ export const saveLandingPageContent = (content: LandingPageContent): void => {
     try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(content));
         if (content.colorTheme) {
+            if (typeof window !== "undefined") {
+                localStorage.setItem("mbs_admin_global_theme", JSON.stringify(content.colorTheme));
+            }
             applyGlobalTheme(content.colorTheme);
+
+            // Persist to backend so all visitors and devices receive the admin-configured global theme
+            if (typeof window !== "undefined") {
+                try {
+                    const token = localStorage.getItem("token") || localStorage.getItem("accessToken");
+                    fetch(`${API_BASE_URL}/theme`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            ...(token ? { Authorization: `Bearer ${token}` } : {})
+                        },
+                        body: JSON.stringify(content.colorTheme)
+                    }).catch(err => console.warn("Failed to sync theme to backend:", err));
+                } catch {
+                    // ignore
+                }
+            }
         }
         window.dispatchEvent(new CustomEvent(LANDING_CONTENT_EVENT, { detail: content }));
     } catch (e) {
@@ -472,7 +501,25 @@ export const saveLandingPageContent = (content: LandingPageContent): void => {
 export const resetLandingPageContent = (): LandingPageContent => {
     try {
         localStorage.removeItem(STORAGE_KEY);
+        if (typeof window !== "undefined") {
+            localStorage.removeItem("mbs_admin_global_theme");
+        }
         applyGlobalTheme(DEFAULT_COLOR_THEME);
+
+        if (typeof window !== "undefined") {
+            try {
+                const token = localStorage.getItem("token") || localStorage.getItem("accessToken");
+                fetch(`${API_BASE_URL}/theme`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        ...(token ? { Authorization: `Bearer ${token}` } : {})
+                    },
+                    body: JSON.stringify(DEFAULT_COLOR_THEME)
+                }).catch(() => {});
+            } catch {}
+        }
+
         window.dispatchEvent(new CustomEvent(LANDING_CONTENT_EVENT, { detail: DEFAULT_LANDING_CONTENT }));
     } catch (e) {
         console.error("Failed to reset landing page content:", e);

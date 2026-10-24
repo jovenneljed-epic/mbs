@@ -1777,6 +1777,18 @@ const navigatePublic =
 
     useEffect(() => {
         applyGlobalTheme();
+
+        const handleThemeUpdate = () => {
+            applyGlobalTheme();
+        };
+
+        window.addEventListener("mbs:theme-changed", handleThemeUpdate);
+        window.addEventListener("sms_landing_content_updated", handleThemeUpdate);
+        window.addEventListener("storage", (e) => {
+            if (e.key === "mbs_admin_global_theme" || e.key === "sms_landing_content") {
+                applyGlobalTheme();
+            }
+        });
         const adminAuthenticated =
             isLoggedIn();
 
