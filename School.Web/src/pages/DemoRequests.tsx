@@ -30,7 +30,8 @@ import {
     Copy,
     Check,
     GraduationCap,
-    X
+    X,
+    RefreshCw
 } from "lucide-react";
 
 import "./DemoRequests.css";
@@ -234,6 +235,7 @@ const DemoRequests: React.FC = () => {
     const [deleting, setDeleting] = useState(false);
     const [copiedEmail, setCopiedEmail] = useState(false);
     const [converting, setConverting] = useState(false);
+    const [resendingEmailId, setResendingEmailId] = useState<number | null>(null);
 
     // Modal state: Log Manual Inquiry
     const [showAddModal, setShowAddModal] = useState(false);
@@ -468,6 +470,28 @@ const DemoRequests: React.FC = () => {
     // -----------------------------------------------------
     // FORWARD INQUIRY TO ADMISSIONS PIPELINE
     // -----------------------------------------------------
+    const handleResendInquiryEmail = async (id: number, email: string) => {
+        if (resendingEmailId === id) return;
+        try {
+            setResendingEmailId(id);
+            const res = await fetch(`${API_BASE_URL}/DemoRequests/${id}/resend-confirmation`, {
+                method: "POST",
+                headers: getHeaders()
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                throw new Error(data?.message || "Failed to resend confirmation email.");
+            }
+            showToast("success", `✓ Automated confirmation email successfully resent to ${email}!`);
+            await loadAllData(true);
+        } catch (err: unknown) {
+            const e = err as Error;
+            showToast("error", e.message || "Failed to resend confirmation email.");
+        } finally {
+            setResendingEmailId(null);
+        }
+    };
+
     const handleForwardToAdmissions = async () => {
         if (!selectedInquiry) return;
 
@@ -1087,6 +1111,19 @@ const DemoRequests: React.FC = () => {
                                                             <Check size={14} />
                                                         </button>
                                                     )}
+
+                                                    <button
+                                                        type="button"
+                                                        className="btn-action-resend"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleResendInquiryEmail(item.demoRequestId, item.email);
+                                                        }}
+                                                        disabled={resendingEmailId === item.demoRequestId}
+                                                        title={`Resend confirmation email to ${item.email}`}
+                                                    >
+                                                        <RefreshCw size={13} className={resendingEmailId === item.demoRequestId ? "spin" : ""} />
+                                                    </button>
                                                 </div>
                                             </td>
                                         </tr>
@@ -1224,6 +1261,17 @@ const DemoRequests: React.FC = () => {
                                 >
                                     <GraduationCap size={16} />
                                     <span>{converting ? "Registering..." : "Forward to Admissions"}</span>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    className="btn-toolbar-action btn-resend-auto-email"
+                                    onClick={() => handleResendInquiryEmail(selectedInquiry.demoRequestId, selectedInquiry.email)}
+                                    disabled={resendingEmailId === selectedInquiry.demoRequestId}
+                                    title="Trigger the auto-resender to dispatch official confirmation email via Resend"
+                                >
+                                    <RefreshCw size={15} className={resendingEmailId === selectedInquiry.demoRequestId ? "spin" : ""} />
+                                    <span>{resendingEmailId === selectedInquiry.demoRequestId ? "Resending Email..." : "Resend Auto Email"}</span>
                                 </button>
                             </div>
 

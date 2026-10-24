@@ -1,1012 +1,813 @@
-﻿/* =========================================================
-   EPIC CONTACT PAGE
-   ========================================================= */
+/* ============================================================ */
+/* ContactPage.css -> MOBILE BIBLE SCHOOL & THEOLOGICAL SEMINARY */
+/* Luxury Adaptive Academic Inquiries & Contact Styling         */
+/* ============================================================ */
 
-.epic-contact-page {
+.mbs-contact-page-root {
     min-height: 100vh;
-    background: #f7f8fb;
-    color: #101828;
-    font-family: inherit;
-}
-
-/* =========================================================
-   CONTAINER
-   ========================================================= */
-
-.epic-contact-container {
-    width: min(1180px, calc(100% - 48px));
-    margin: 0 auto;
-}
-
-/* =========================================================
-   NAVBAR
-   ========================================================= */
-
-.epic-contact-navbar {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    background: rgba(255, 255, 255, 0.96);
-    border-bottom: 1px solid #e8ebf0;
-    backdrop-filter: blur(16px);
-}
-
-.epic-contact-nav-inner {
-    width: min(1280px, calc(100% - 48px));
-    min-height: 78px;
-    margin: 0 auto;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 28px;
-}
-
-.epic-contact-logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
-    border: 0;
-    background: transparent;
-    padding: 0;
-
-    cursor: pointer;
-    text-align: left;
-}
-
-.epic-contact-logo-mark {
-    width: 46px;
-    height: 46px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 12px;
-
-    background: #102a56;
-    color: #f3c969;
-
-    font-size: 14px;
-    font-weight: 900;
-    letter-spacing: 1px;
-}
-
-.epic-contact-logo-text {
+    background-color: #F8FAFC;
+    color: #1E293B;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    transition: background-color 0.6s cubic-bezier(0.16, 1, 0.3, 1), color 0.4s ease;
 }
 
-.epic-contact-logo-text strong {
-    color: #102a56;
-    font-size: 15px;
-    letter-spacing: 0.7px;
+.mbs-contact-container {
+    max-width: 1240px;
+    width: 92%;
+    margin: 0 auto;
 }
 
-.epic-contact-logo-text small {
-    color: #7a8494;
-    font-size: 9px;
-    letter-spacing: 0.5px;
-}
+/* ============================================================ */
+/* HERO SECTION                                                 */
+/* ============================================================ */
 
-.epic-contact-nav-links {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.epic-contact-nav-links button {
-    border: 0;
-    background: transparent;
-
-    padding: 10px 13px;
-
-    color: #667085;
-
-    font: inherit;
-    font-size: 13px;
-    font-weight: 600;
-
-    cursor: pointer;
-
-    transition:
-        color 0.2s ease,
-        background 0.2s ease;
-}
-
-.epic-contact-nav-links button:hover {
-    color: #102a56;
-}
-
-.epic-contact-nav-links button.active {
-    color: #102a56;
-    background: #f0f3f8;
-    border-radius: 8px;
-}
-
-.epic-contact-login {
-    border: 1px solid #d7dce5;
-    background: #ffffff;
-
-    color: #102a56;
-
-    padding: 10px 19px;
-    border-radius: 8px;
-
-    font: inherit;
-    font-size: 13px;
-    font-weight: 700;
-
-    cursor: pointer;
-
-    transition:
-        background 0.2s ease,
-        color 0.2s ease,
-        border-color 0.2s ease;
-}
-
-.epic-contact-login:hover {
-    background: #102a56;
-    border-color: #102a56;
-    color: #ffffff;
-}
-
-/* =========================================================
-   HERO
-   ========================================================= */
-
-.epic-contact-hero {
+.mbs-contact-hero {
     position: relative;
+    background: linear-gradient(135deg, var(--theme-bg-start, #7A1526) 0%, var(--theme-bg-end, #450A0A) 60%, var(--theme-surface, #1A0408) 100%);
+    border-bottom: 3px solid var(--theme-secondary, #F59E0B);
+    padding: 60px 24px 64px 24px;
+    color: #FFFFFF;
+    text-align: center;
     overflow: hidden;
-
-    min-height: 600px;
-
-    display: flex;
-    align-items: center;
-
-    background:
-        radial-gradient(
-            circle at 80% 20%,
-            rgba(243, 201, 105, 0.14),
-            transparent 30%
-        ),
-        linear-gradient(
-            135deg,
-            #091a36 0%,
-            #102a56 50%,
-            #173c70 100%
-        );
-
-    color: #ffffff;
+    transition: background 0.6s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease;
 }
 
-.epic-contact-hero-glow {
+.mbs-contact-hero-glow {
     position: absolute;
-
-    width: 520px;
-    height: 520px;
-
-    right: -180px;
-    bottom: -260px;
-
-    border-radius: 50%;
-
-    border: 1px solid rgba(243, 201, 105, 0.2);
-    box-shadow:
-        0 0 0 70px rgba(243, 201, 105, 0.025),
-        0 0 0 140px rgba(243, 201, 105, 0.018);
+    inset: 0;
+    background: radial-gradient(circle at 50% 25%, var(--theme-hero-glow, rgba(245, 158, 11, 0.16)), transparent 70%);
+    pointer-events: none;
 }
 
-.epic-contact-hero .epic-contact-container {
+.mbs-contact-hero-content {
     position: relative;
     z-index: 2;
-
-    display: grid;
-    grid-template-columns: 1.4fr 0.6fr;
-    align-items: center;
-    gap: 80px;
+    max-width: 860px;
+    margin: 0 auto;
 }
 
-.epic-contact-hero-content {
-    max-width: 720px;
-}
-
-.epic-contact-label {
-    display: inline-block;
-
-    color: #b98b25;
-
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 2.4px;
-}
-
-.epic-contact-hero .epic-contact-label {
-    color: #f3c969;
-}
-
-.epic-contact-hero h1 {
-    margin: 20px 0 24px;
-
-    font-size: clamp(48px, 6vw, 78px);
-    line-height: 0.98;
-
-    letter-spacing: -3px;
-}
-
-.epic-contact-hero h1 span {
-    color: #f3c969;
-}
-
-.epic-contact-hero p {
-    max-width: 650px;
-
-    margin: 0;
-
-    color: rgba(255, 255, 255, 0.74);
-
-    font-size: 17px;
-    line-height: 1.8;
-}
-
-.epic-contact-hero-actions {
-    display: flex;
-    gap: 14px;
-    margin-top: 36px;
-}
-
-.epic-contact-primary-button,
-.epic-contact-secondary-button {
+.mbs-contact-hero-badge {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    gap: 18px;
-
-    min-height: 52px;
-
-    padding: 0 24px;
-
-    border-radius: 8px;
-
-    font: inherit;
-    font-size: 13px;
+    background: var(--theme-card-accent, rgba(245, 158, 11, 0.18));
+    color: var(--theme-secondary, #FDE68A);
+    font-size: 0.72rem;
     font-weight: 800;
-
-    cursor: pointer;
-
-    transition:
-        transform 0.2s ease,
-        background 0.2s ease,
-        border-color 0.2s ease;
+    letter-spacing: 0.08em;
+    padding: 4px 14px;
+    border-radius: 9999px;
+    border: 1px solid var(--theme-border, rgba(245, 158, 11, 0.4));
+    margin-bottom: 16px;
+    text-transform: uppercase;
 }
 
-.epic-contact-primary-button {
-    border: 1px solid #f3c969;
-    background: #f3c969;
-    color: #102a56;
+.mbs-contact-hero-title {
+    font-size: clamp(2rem, 4.2vw, 3.2rem);
+    font-weight: 900;
+    line-height: 1.18;
+    margin: 0 0 16px 0;
+    color: #FFFFFF;
+    letter-spacing: -0.02em;
 }
 
-.epic-contact-primary-button:hover {
-    transform: translateY(-2px);
-    background: #ffd982;
+.mbs-contact-hero-title span {
+    background: var(--theme-gradient, linear-gradient(180deg, #FFFFFF 20%, #FDE68A 65%, #F59E0B 100%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-.epic-contact-primary-button span {
-    font-size: 19px;
-}
-
-.epic-contact-secondary-button {
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    background: transparent;
-    color: #ffffff;
-}
-
-.epic-contact-secondary-button:hover {
-    border-color: rgba(255, 255, 255, 0.55);
-    background: rgba(255, 255, 255, 0.08);
-}
-
-.epic-contact-hero-mark {
-    min-height: 330px;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 24px;
-
-    background: rgba(255, 255, 255, 0.045);
-
-    text-align: center;
-
-    box-shadow:
-        inset 0 1px 0 rgba(255, 255, 255, 0.08);
-}
-
-.epic-contact-cross {
-    margin-bottom: 14px;
-
-    color: #f3c969;
-
-    font-size: 62px;
-}
-
-.epic-contact-hero-mark strong {
-    color: #ffffff;
-
-    font-size: 54px;
-    line-height: 1;
-
-    letter-spacing: 5px;
-}
-
-.epic-contact-hero-mark span {
-    margin-top: 14px;
-
-    color: rgba(255, 255, 255, 0.55);
-
-    font-size: 12px;
+.mbs-contact-hero-subtitle {
+    font-size: clamp(0.95rem, 1.8vw, 1.12rem);
+    color: #E2E8F0;
     line-height: 1.6;
+    margin: 0 auto 28px auto;
+    max-width: 740px;
 }
 
-/* =========================================================
-   INFO SECTION
-   ========================================================= */
-
-.epic-contact-info-section {
-    padding: 110px 0;
-    background: #ffffff;
-}
-
-.epic-contact-section-heading {
-    max-width: 700px;
-    margin-bottom: 52px;
-}
-
-.epic-contact-section-heading h2 {
-    margin: 16px 0;
-
-    color: #102a56;
-
-    font-size: clamp(38px, 5vw, 58px);
-    line-height: 1;
-    letter-spacing: -2px;
-}
-
-.epic-contact-section-heading h2 span {
-    color: #b98b25;
-}
-
-.epic-contact-section-heading p {
-    margin: 0;
-
-    color: #667085;
-
-    font-size: 16px;
-    line-height: 1.8;
-}
-
-.epic-contact-info-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 22px;
-}
-
-.epic-contact-info-card {
-    padding: 34px;
-
-    border: 1px solid #e7eaf0;
-    border-radius: 16px;
-
-    background: #ffffff;
-
-    transition:
-        transform 0.25s ease,
-        box-shadow 0.25s ease;
-}
-
-.epic-contact-info-card:hover {
-    transform: translateY(-5px);
-
-    box-shadow:
-        0 18px 45px rgba(16, 42, 86, 0.09);
-}
-
-.epic-contact-info-icon {
-    width: 54px;
-    height: 54px;
-
+.mbs-contact-trust-row {
     display: flex;
     align-items: center;
     justify-content: center;
-
-    margin-bottom: 24px;
-
-    border-radius: 13px;
-
-    background: #f3f5f8;
-    color: #b98b25;
-
-    font-size: 24px;
-}
-
-.epic-contact-info-card > span {
-    color: #9aa2af;
-
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 1.8px;
-}
-
-.epic-contact-info-card h3 {
-    margin: 9px 0 12px;
-
-    color: #102a56;
-
-    font-size: 22px;
-}
-
-.epic-contact-info-card p {
-    min-height: 56px;
-
-    margin: 0 0 18px;
-
-    color: #667085;
-
-    font-size: 14px;
-    line-height: 1.7;
-}
-
-.epic-contact-info-card a,
-.epic-contact-info-card button {
-    border: 0;
-    background: transparent;
-    padding: 0;
-
-    color: #102a56;
-
-    font: inherit;
-    font-size: 13px;
-    font-weight: 800;
-
-    cursor: pointer;
-    text-decoration: none;
-}
-
-.epic-contact-info-card a:hover,
-.epic-contact-info-card button:hover {
-    color: #b98b25;
-}
-
-/* =========================================================
-   FORM SECTION
-   ========================================================= */
-
-.epic-contact-form-section {
-    padding: 110px 0;
-
-    background:
-        linear-gradient(
-            180deg,
-            #f7f8fb 0%,
-            #eef1f6 100%
-        );
-}
-
-.epic-contact-form-card {
-    display: grid;
-    grid-template-columns: 0.8fr 1.2fr;
-    gap: 70px;
-
-    padding: 58px;
-
-    border-radius: 24px;
-
-    background: #ffffff;
-
-    box-shadow:
-        0 25px 70px rgba(16, 42, 86, 0.1);
-}
-
-.epic-contact-form-intro h2 {
-    margin: 18px 0;
-
-    color: #102a56;
-
-    font-size: clamp(38px, 4vw, 55px);
-    line-height: 1;
-    letter-spacing: -2px;
-}
-
-.epic-contact-form-intro h2 span {
-    color: #b98b25;
-}
-
-.epic-contact-form-intro p {
-    margin: 0;
-
-    color: #667085;
-
-    font-size: 15px;
-    line-height: 1.8;
-}
-
-.epic-contact-form-points {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-
-    margin-top: 32px;
-}
-
-.epic-contact-form-points div {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
-    color: #344054;
-
-    font-size: 13px;
-    font-weight: 600;
-}
-
-.epic-contact-form-points span {
-    width: 25px;
-    height: 25px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 50%;
-
-    background: #eef4ee;
-    color: #2e7d32;
-
-    font-size: 12px;
-}
-
-.epic-contact-form {
-    display: flex;
-    flex-direction: column;
     gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 12px;
 }
 
-.epic-contact-form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 18px;
-}
-
-.epic-contact-field {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.epic-contact-field label {
-    color: #344054;
-
-    font-size: 12px;
-    font-weight: 800;
-}
-
-.epic-contact-field input,
-.epic-contact-field select,
-.epic-contact-field textarea {
-    width: 100%;
-
-    box-sizing: border-box;
-
-    border: 1px solid #dfe3e9;
-    border-radius: 9px;
-
-    background: #fafbfc;
-
-    padding: 13px 14px;
-
-    color: #101828;
-
-    font: inherit;
-    font-size: 14px;
-
-    outline: none;
-
-    transition:
-        border-color 0.2s ease,
-        background 0.2s ease,
-        box-shadow 0.2s ease;
-}
-
-.epic-contact-field textarea {
-    resize: vertical;
-    min-height: 145px;
-}
-
-.epic-contact-field input:focus,
-.epic-contact-field select:focus,
-.epic-contact-field textarea:focus {
-    border-color: #102a56;
-    background: #ffffff;
-
-    box-shadow:
-        0 0 0 3px rgba(16, 42, 86, 0.08);
-}
-
-.epic-contact-field input::placeholder,
-.epic-contact-field textarea::placeholder {
-    color: #a0a7b2;
-}
-
-.epic-contact-success {
-    padding: 14px 16px;
-
-    border: 1px solid #cce5d0;
-    border-radius: 9px;
-
-    background: #effaf1;
-    color: #26702d;
-
-    font-size: 13px;
-    line-height: 1.5;
-}
-
-.epic-contact-submit {
+.mbs-trust-item {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    gap: 20px;
-
-    width: 100%;
-    min-height: 54px;
-
-    border: 0;
-    border-radius: 9px;
-
-    background: #102a56;
-    color: #ffffff;
-
-    font: inherit;
-    font-size: 13px;
-    font-weight: 800;
-
-    cursor: pointer;
-
-    transition:
-        transform 0.2s ease,
-        background 0.2s ease;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 6px 14px;
+    border-radius: 9999px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: #F8FAFC;
+    backdrop-filter: blur(8px);
 }
 
-.epic-contact-submit:hover {
-    transform: translateY(-2px);
-    background: #173c70;
-}
+/* ============================================================ */
+/* MAIN CONTENT LAYOUT                                          */
+/* ============================================================ */
 
-.epic-contact-submit span {
-    color: #f3c969;
-    font-size: 20px;
-}
-
-.epic-contact-form-note {
-    color: #98a2b3;
-
-    text-align: center;
-
-    font-size: 11px;
-}
-
-/* =========================================================
-   CTA
-   ========================================================= */
-
-.epic-contact-cta {
+.mbs-contact-main-container {
+    max-width: 1240px;
+    width: 92%;
+    margin: -24px auto 60px auto;
     position: relative;
-    overflow: hidden;
-
-    padding: 110px 0;
-
-    background:
-        radial-gradient(
-            circle at 50% 0%,
-            rgba(243, 201, 105, 0.13),
-            transparent 32%
-        ),
-        #0a1c38;
-
-    color: #ffffff;
-
-    text-align: center;
+    z-index: 5;
+    flex: 1;
 }
 
-.epic-contact-cta .epic-contact-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.epic-contact-cta-cross {
-    color: #f3c969;
-
-    font-size: 40px;
-}
-
-.epic-contact-cta h2 {
-    margin: 20px 0 8px;
-
-    font-size: clamp(34px, 5vw, 58px);
-    line-height: 1;
-    letter-spacing: -2px;
-}
-
-.epic-contact-cta h3 {
-    margin: 0;
-
-    color: #f3c969;
-
-    font-size: clamp(24px, 3vw, 36px);
-}
-
-.epic-contact-cta p {
-    margin: 24px 0 32px;
-
-    color: rgba(255, 255, 255, 0.6);
-
-    font-size: 15px;
-    line-height: 1.7;
-}
-
-/* =========================================================
-   FOOTER
-   ========================================================= */
-
-.epic-contact-footer {
-    padding: 70px 0 24px;
-
-    background: #07162c;
-    color: #ffffff;
-}
-
-.epic-contact-footer-grid {
+.mbs-contact-layout-grid {
     display: grid;
-    grid-template-columns: 1.5fr repeat(3, 1fr);
-    gap: 50px;
-
-    padding-bottom: 55px;
-
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.epic-contact-footer-grid > div {
-    display: flex;
-    flex-direction: column;
+    grid-template-columns: 1fr 1.35fr;
+    gap: 32px;
     align-items: flex-start;
 }
 
-.epic-contact-footer-logo {
-    width: 46px;
-    height: 46px;
+/* ============================================================ */
+/* LEFT COLUMN: DIRECTORY & CARDS                               */
+/* ============================================================ */
 
+.mbs-contact-info-col {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.mbs-info-section-header {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 22px 24px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.mbs-info-eyebrow {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 800;
+    color: var(--theme-secondary, #D97706);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 4px;
+}
+
+.mbs-info-section-header h2 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #0F172A;
+    margin: 0 0 8px 0;
+}
+
+.mbs-info-section-header p {
+    font-size: 0.85rem;
+    color: #64748B;
+    line-height: 1.55;
+    margin: 0;
+}
+
+.mbs-contact-cards-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.mbs-contact-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 18px 20px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.03);
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mbs-contact-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    border-color: var(--theme-secondary, #F59E0B);
+}
+
+.mbs-contact-card-icon {
+    width: 44px;
+    height: 44px;
+    background: var(--theme-card-accent, rgba(122, 21, 38, 0.08));
+    color: var(--theme-primary, #7A1526);
+    border: 1px solid var(--theme-border, rgba(122, 21, 38, 0.2));
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-
-    margin-bottom: 13px;
-
-    border-radius: 11px;
-
-    background: #f3c969;
-    color: #102a56;
-
-    font-size: 13px;
-    font-weight: 900;
+    flex-shrink: 0;
 }
 
-.epic-contact-footer-grid strong {
-    color: #ffffff;
-
-    font-size: 13px;
-    letter-spacing: 0.5px;
+.mbs-contact-card-body {
+    flex: 1;
 }
 
-.epic-contact-footer-grid p {
-    margin: 10px 0 5px;
-
-    color: rgba(255, 255, 255, 0.65);
-
-    font-size: 13px;
+.mbs-contact-card-body h3 {
+    font-size: 0.98rem;
+    font-weight: 800;
+    color: #0F172A;
+    margin: 0 0 4px 0;
 }
 
-.epic-contact-footer-grid small {
-    color: rgba(255, 255, 255, 0.35);
-
-    font-size: 10px;
-    line-height: 1.6;
+.mbs-contact-card-body p {
+    font-size: 0.82rem;
+    color: #64748B;
+    line-height: 1.45;
+    margin: 0 0 8px 0;
 }
 
-.epic-contact-footer-grid button {
-    border: 0;
-    background: transparent;
+.mbs-contact-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--theme-primary, #7A1526);
+    font-size: 0.83rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: color 0.15s ease;
+}
 
-    margin-top: 14px;
-    padding: 0;
+.mbs-contact-link:hover {
+    color: var(--theme-secondary, #F59E0B);
+    text-decoration: underline;
+}
 
-    color: rgba(255, 255, 255, 0.52);
+.mbs-contact-hours {
+    display: block;
+    font-size: 0.72rem;
+    color: #94A3B8;
+    margin-top: 4px;
+}
 
-    font: inherit;
-    font-size: 12px;
+.mbs-contact-location-text {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #334155;
+}
 
+/* ============================================================ */
+/* RIGHT COLUMN: INTERACTIVE FORM                               */
+/* ============================================================ */
+
+.mbs-form-wrapper-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 32px 36px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+    position: relative;
+}
+
+.mbs-form-header {
+    margin-bottom: 24px;
+}
+
+.mbs-form-tag {
+    display: inline-block;
+    background: var(--theme-card-accent, rgba(245, 158, 11, 0.12));
+    color: var(--theme-secondary, #B45309);
+    border: 1px solid var(--theme-border, rgba(245, 158, 11, 0.3));
+    font-size: 0.68rem;
+    font-weight: 800;
+    padding: 3px 9px;
+    border-radius: 6px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.mbs-form-header h2 {
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: #0F172A;
+    margin: 0 0 6px 0;
+}
+
+.mbs-form-header p {
+    font-size: 0.88rem;
+    color: #64748B;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.mbs-form-error-alert {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #FEF2F2;
+    border: 1px solid #FCA5A5;
+    color: #B91C1C;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.mbs-inquiry-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.mbs-form-row-2col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.mbs-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.mbs-input-group label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #334155;
+}
+
+.mbs-input-group label .req {
+    color: #EF4444;
+}
+
+.mbs-input-group input,
+.mbs-input-group select,
+.mbs-input-group textarea {
+    border: 1.5px solid #CBD5E1;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.88rem;
+    color: #0F172A;
+    background: #FFFFFF;
+    outline: none;
+    transition: all 0.18s ease;
+    font-family: inherit;
+}
+
+.mbs-input-group input:focus,
+.mbs-input-group select:focus,
+.mbs-input-group textarea:focus {
+    border-color: var(--theme-primary, #7A1526);
+    box-shadow: 0 0 0 3px var(--theme-card-accent, rgba(122, 21, 38, 0.15));
+}
+
+.mbs-input-group input::placeholder,
+.mbs-input-group textarea::placeholder {
+    color: #94A3B8;
+}
+
+.mbs-char-counter {
+    text-align: right;
+    font-size: 0.72rem;
+    color: #94A3B8;
+    margin-top: 2px;
+}
+
+.mbs-btn-submit-inquiry {
+    background: linear-gradient(135deg, var(--theme-primary, #7A1526) 0%, var(--theme-primary-hover, #580D1B) 100%);
+    color: #FFFFFF;
+    border: 1px solid var(--theme-secondary, #F59E0B);
+    border-radius: 10px;
+    padding: 14px 22px;
+    font-size: 0.95rem;
+    font-weight: 800;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px var(--theme-glow, rgba(122, 21, 38, 0.25));
+    margin-top: 6px;
+}
+
+.mbs-btn-submit-inquiry:hover:not(:disabled) {
+    background: var(--theme-primary-hover, #941E32);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px var(--theme-glow, rgba(122, 21, 38, 0.35));
+}
+
+.mbs-btn-submit-inquiry:disabled {
+    opacity: 0.75;
+    cursor: not-allowed;
+}
+
+.mbs-form-disclaimer {
+    font-size: 0.74rem;
+    color: #64748B;
+    line-height: 1.5;
+    text-align: center;
+    margin: 8px 0 0 0;
+}
+
+/* ============================================================ */
+/* SUCCESS STATE & AUTO EMAIL RESENDER                          */
+/* ============================================================ */
+
+.mbs-form-success-card {
+    text-align: center;
+    padding: 20px 8px;
+    animation: fadeIn 0.3s ease;
+}
+
+.mbs-success-badge-icon {
+    width: 68px;
+    height: 68px;
+    background: #ECFDF5;
+    color: #10B981;
+    border: 2px solid #A7F3D0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 18px auto;
+}
+
+.mbs-form-success-card h2 {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: #0F172A;
+    margin: 0 0 8px 0;
+}
+
+.mbs-success-subtitle {
+    font-size: 0.92rem;
+    color: #475569;
+    line-height: 1.55;
+    max-width: 480px;
+    margin: 0 auto 24px auto;
+}
+
+.mbs-tracking-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    background: #FEF3C7;
+    border: 1px solid #F59E0B;
+    border-radius: 10px;
+    padding: 10px 18px;
+    margin-bottom: 24px;
     text-align: left;
-
-    transition: color 0.2s ease;
 }
 
-.epic-contact-footer-grid button:hover,
-.epic-contact-footer-grid button.active {
-    color: #f3c969;
+.mbs-tracking-chip small {
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 800;
+    color: #92400E;
+    text-transform: uppercase;
 }
 
-.epic-contact-footer-bottom {
+.mbs-tracking-chip strong {
+    font-size: 1.15rem;
+    color: #78350F;
+    letter-spacing: 0.04em;
+}
+
+.mbs-btn-copy {
+    background: #FFFFFF;
+    border: 1px solid #D97706;
+    border-radius: 6px;
+    padding: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #78350F;
+    transition: all 0.15s ease;
+}
+
+.mbs-btn-copy:hover {
+    background: #FDE68A;
+}
+
+/* Auto Email Resender Box */
+.mbs-auto-resender-box {
+    background: #F8FAFC;
+    border: 1.5px dashed var(--theme-secondary, #F59E0B);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: left;
+    margin-bottom: 26px;
+}
+
+.mbs-resender-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.mbs-resender-header h4 {
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: #0F172A;
+    margin: 0 0 2px 0;
+}
+
+.mbs-resender-header p {
+    font-size: 0.82rem;
+    color: #475569;
+    margin: 0;
+}
+
+.mbs-resender-instructions {
+    font-size: 0.8rem;
+    color: #64748B;
+    line-height: 1.5;
+    margin: 0 0 14px 0;
+}
+
+.mbs-btn-auto-resend {
+    background: #FFFFFF;
+    border: 1.5px solid var(--theme-primary, #7A1526);
+    color: var(--theme-primary, #7A1526);
+    font-size: 0.82rem;
+    font-weight: 800;
+    border-radius: 8px;
+    padding: 9px 16px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: all 0.18s ease;
+}
+
+.mbs-btn-auto-resend:hover:not(:disabled) {
+    background: var(--theme-primary, #7A1526);
+    color: #FFFFFF;
+}
+
+.mbs-btn-auto-resend:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.mbs-resend-feedback-alert {
+    margin-top: 10px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #059669;
+}
+
+.mbs-success-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.mbs-btn-primary {
+    background: linear-gradient(135deg, var(--theme-primary, #7A1526) 0%, var(--theme-primary-hover, #580D1B) 100%);
+    color: #FFFFFF;
+    border: 1px solid var(--theme-secondary, #F59E0B);
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.mbs-btn-primary:hover {
+    background: var(--theme-primary-hover, #941E32);
+    transform: translateY(-1px);
+}
+
+.mbs-btn-secondary {
+    background: #F1F5F9;
+    color: #334155;
+    border: 1px solid #CBD5E1;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+}
+
+.mbs-btn-secondary:hover {
+    background: #E2E8F0;
+    color: #0F172A;
+}
+
+/* ============================================================ */
+/* FOOTER                                                       */
+/* ============================================================ */
+
+.mbs-contact-footer {
+    background: #0F172A;
+    color: #CBD5E1;
+    border-top: 3px solid var(--theme-primary, #7A1526);
+    padding: 40px 24px 20px 24px;
+    margin-top: auto;
+}
+
+.mbs-footer-content-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-
-    padding-top: 22px;
-
-    color: rgba(255, 255, 255, 0.35);
-
-    font-size: 10px;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding-bottom: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* =========================================================
-   RESPONSIVE
-   ========================================================= */
-
-@media (max-width: 1050px) {
-
-    .epic-contact-nav-links {
-        gap: 0;
-    }
-
-    .epic-contact-nav-links button {
-        padding: 9px 8px;
-        font-size: 12px;
-    }
-
-    .epic-contact-hero .epic-contact-container {
-        gap: 45px;
-    }
-
-    .epic-contact-form-card {
-        gap: 45px;
-        padding: 42px;
-    }
-
+.mbs-footer-brand-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
-@media (max-width: 850px) {
-
-    .epic-contact-nav-links {
-        display: none;
-    }
-
-    .epic-contact-hero {
-        min-height: auto;
-        padding: 90px 0;
-    }
-
-    .epic-contact-hero .epic-contact-container {
-        grid-template-columns: 1fr;
-    }
-
-    .epic-contact-hero-mark {
-        max-width: 360px;
-    }
-
-    .epic-contact-info-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .epic-contact-form-card {
-        grid-template-columns: 1fr;
-    }
-
-    .epic-contact-footer-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
+.mbs-footer-crest {
+    width: 38px;
+    height: 38px;
+    background: var(--theme-primary, #7A1526);
+    border: 1.5px solid var(--theme-secondary, #F59E0B);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
-@media (max-width: 600px) {
+.mbs-footer-brand-box h4 {
+    color: #FFFFFF;
+    font-size: 1rem;
+    margin: 0;
+}
 
-    .epic-contact-container {
-        width: min(100% - 30px, 1180px);
+.mbs-footer-brand-box small {
+    color: var(--theme-secondary, #FDE68A);
+    font-size: 0.72rem;
+}
+
+.mbs-footer-nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.mbs-footer-nav button {
+    background: none;
+    border: none;
+    padding: 0;
+    color: #94A3B8;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.mbs-footer-nav button:hover {
+    color: var(--theme-secondary, #F59E0B);
+}
+
+.mbs-footer-bottom-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 0.74rem;
+    color: #64748B;
+    margin-top: 18px;
+}
+
+/* ============================================================ */
+/* ANIMATIONS                                                   */
+/* ============================================================ */
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.spin {
+    animation: mbsContactSpin 1s linear infinite;
+}
+
+@keyframes mbsContactSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ============================================================ */
+/* DARK SCHEME SCOPING                                          */
+/* ============================================================ */
+
+[data-color-scheme="dark"] .mbs-contact-page-root {
+    background-color: var(--theme-bg-end, #020612);
+    color: var(--theme-text-primary, #F8FAFC);
+}
+
+[data-color-scheme="dark"] .mbs-info-section-header,
+[data-color-scheme="dark"] .mbs-contact-card,
+[data-color-scheme="dark"] .mbs-form-wrapper-card {
+    background: var(--theme-surface, #0B152D);
+    border-color: var(--theme-border, rgba(255, 255, 255, 0.1));
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+
+[data-color-scheme="dark"] .mbs-info-section-header h2,
+[data-color-scheme="dark"] .mbs-contact-card-body h3,
+[data-color-scheme="dark"] .mbs-form-header h2,
+[data-color-scheme="dark"] .mbs-form-success-card h2,
+[data-color-scheme="dark"] .mbs-resender-header h4 {
+    color: #FFFFFF;
+}
+
+[data-color-scheme="dark"] .mbs-info-section-header p,
+[data-color-scheme="dark"] .mbs-contact-card-body p,
+[data-color-scheme="dark"] .mbs-form-header p,
+[data-color-scheme="dark"] .mbs-form-disclaimer,
+[data-color-scheme="dark"] .mbs-resender-instructions {
+    color: var(--theme-text-muted, #94A3B8);
+}
+
+[data-color-scheme="dark"] .mbs-input-group label {
+    color: var(--theme-text-primary, #E2E8F0);
+}
+
+[data-color-scheme="dark"] .mbs-input-group input,
+[data-color-scheme="dark"] .mbs-input-group select,
+[data-color-scheme="dark"] .mbs-input-group textarea {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--theme-border, rgba(255, 255, 255, 0.15));
+    color: #FFFFFF;
+}
+
+[data-color-scheme="dark"] .mbs-contact-location-text {
+    color: #E2E8F0;
+}
+
+[data-color-scheme="dark"] .mbs-auto-resender-box {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+[data-color-scheme="dark"] .mbs-btn-auto-resend {
+    background: transparent;
+    color: var(--theme-secondary, #F59E0B);
+    border-color: var(--theme-secondary, #F59E0B);
+}
+
+[data-color-scheme="dark"] .mbs-btn-auto-resend:hover:not(:disabled) {
+    background: var(--theme-secondary, #F59E0B);
+    color: var(--theme-bg-end, #0B152D);
+}
+
+[data-color-scheme="dark"] .mbs-btn-secondary {
+    background: rgba(255, 255, 255, 0.08);
+    color: #E2E8F0;
+    border-color: var(--theme-border, rgba(255, 255, 255, 0.15));
+}
+
+[data-color-scheme="dark"] .mbs-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #FFFFFF;
+}
+
+/* ============================================================ */
+/* RESPONSIVE DESIGN                                            */
+/* ============================================================ */
+
+@media (max-width: 960px) {
+    .mbs-contact-layout-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
     }
 
-    .epic-contact-nav-inner {
-        width: min(100% - 30px, 1280px);
-        min-height: 68px;
+    .mbs-form-wrapper-card {
+        padding: 24px 20px;
     }
+}
 
-    .epic-contact-logo-text small {
-        display: none;
-    }
-
-    .epic-contact-login {
-        padding: 9px 13px;
-    }
-
-    .epic-contact-hero {
-        padding: 75px 0;
-    }
-
-    .epic-contact-hero h1 {
-        font-size: 48px;
-        letter-spacing: -2px;
-    }
-
-    .epic-contact-hero p {
-        font-size: 15px;
-    }
-
-    .epic-contact-hero-actions {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .epic-contact-hero-mark {
-        min-height: 260px;
-    }
-
-    .epic-contact-info-section,
-    .epic-contact-form-section,
-    .epic-contact-cta {
-        padding: 75px 0;
-    }
-
-    .epic-contact-form-card {
-        padding: 28px 20px;
-        border-radius: 16px;
-    }
-
-    .epic-contact-form-row {
+@media (max-width: 640px) {
+    .mbs-form-row-2col {
         grid-template-columns: 1fr;
     }
 
-    .epic-contact-footer-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 35px 25px;
-    }
-
-    .epic-contact-footer-bottom {
+    .mbs-footer-content-row,
+    .mbs-footer-bottom-row {
         flex-direction: column;
         align-items: flex-start;
-        gap: 8px;
+        gap: 16px;
     }
-
-}
-
-@media (max-width: 420px) {
-
-    .epic-contact-logo-mark {
-        width: 40px;
-        height: 40px;
-    }
-
-    .epic-contact-logo-text strong {
-        font-size: 12px;
-    }
-
-    .epic-contact-login {
-        font-size: 11px;
-    }
-
-    .epic-contact-footer-grid {
-        grid-template-columns: 1fr;
-    }
-
 }

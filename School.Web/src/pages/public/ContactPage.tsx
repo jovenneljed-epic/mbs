@@ -1,848 +1,612 @@
+// ============================================================
+// ContactPage.tsx -> MOBILE BIBLE SCHOOL & THEOLOGICAL SEMINARY
+// Official Public Contact & Inquiries Center
+// Direct Pipeline to Admin CMS Inquiries + Auto Email Resender
+// ============================================================
+
 import React, { useState } from "react";
 import PublicHeader from "../../components/PublicHeader";
 import "./ContactPage.css";
 import "./PublicUnisonTheme.css";
 import { API_BASE_URL } from "../../config";
+import {
+    Mail,
+    Phone,
+    MapPin,
+    Clock,
+    Calendar,
+    CheckCircle,
+    RefreshCw,
+    Send,
+    BookOpen,
+    GraduationCap,
+    AlertCircle,
+    Copy,
+    Check,
+    ShieldCheck
+} from "lucide-react";
 
 interface ContactPageProps {
-    onNavigate: (page: string) => void;
+    onNavigate?: (page: string) => void;
 }
 
 interface ContactFormData {
-    name: string;
+    fullName: string;
     email: string;
     phone: string;
-    organization?: string;
-    subject: string;
+    churchName: string; // Affiliation / Church / School
+    position: string;   // Category / Subject
     message: string;
 }
 
-const ContactPage: React.FC<ContactPageProps> = ({
-    onNavigate,
-}) => {
+const INQUIRY_CATEGORIES = [
+    "Admissions & Enrollment",
+    "Academic Programs & Curriculum",
+    "Tuition, Units & Fees",
+    "Campus Tour & Visit Request",
+    "System Demonstration Request",
+    "Student Records & Credentials",
+    "Partnership & Collaboration",
+    "General Inquiries"
+];
+
+const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
     const [form, setForm] = useState<ContactFormData>({
-        name: "",
+        fullName: "",
         email: "",
         phone: "",
-        organization: "",
-        subject: "",
+        churchName: "",
+        position: "Admissions & Enrollment",
         message: "",
     });
 
-    const [submitted, setSubmitted] = useState(false);
     const [submitting, setSubmitting] = useState(false);
-    const [error, setError] = useState("");
+    const [submitted, setSubmitted] = useState(false);
+    const [submissionResult, setSubmissionResult] = useState<{
+        demoRequestId?: number;
+        trackingCode?: string;
+        email?: string;
+    } | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
-    // =========================================================
-    // FORM CHANGE
-    // =========================================================
+    // Auto Email Resender state
+    const [resending, setResending] = useState(false);
+    const [resendStatus, setResendStatus] = useState<string | null>(null);
+    const [copiedTracking, setCopiedTracking] = useState(false);
 
     const handleChange = (
-        event: React.ChangeEvent<
-            HTMLInputElement |
-            HTMLTextAreaElement |
-            HTMLSelectElement
-        >
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
     ) => {
-        const { name, value } = event.target;
-
-        setForm((previous) => ({
-            ...previous,
+        const { name, value } = e.target;
+        setForm((prev) => ({
+            ...prev,
             [name]: value,
         }));
-
-        setSubmitted(false);
-        setError("");
+        setError(null);
     };
 
-    // =========================================================
-    // SUBMIT CONTACT FORM
-    //
-    // Uses the existing DemoRequests API.
-    //
-    // Contact Form -> DemoRequest
-    //
-    // name     -> FullName
-    // email    -> Email
-    // phone    -> Phone
-    // subject  -> Position
-    // message  -> Message
-    // automatic -> ChurchName = Website Contact Inquiry
-    // =========================================================
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
 
-    const handleSubmit = async (
-        event: React.FormEvent
-    ) => {
-        event.preventDefault();
+        if (submitting) return;
 
-        if (submitting) {
+        if (!form.fullName.trim()) {
+            setError("Please enter your full name.");
+            return;
+        }
+
+        if (!form.email.trim() || !form.email.includes("@")) {
+            setError("Please enter a valid email address.");
+            return;
+        }
+
+        if (!form.message.trim()) {
+            setError("Please enter your message or question.");
             return;
         }
 
         setSubmitting(true);
-        setSubmitted(false);
-        setError("");
+        setError(null);
+        setResendStatus(null);
 
         try {
             const payload = {
-                fullName: form.name.trim(),
-
-                // Organization or affiliation, default to Website Contact Visitor
-                churchName: form.organization?.trim() || "Website Contact Visitor",
-
+                fullName: form.fullName.trim(),
+                churchName: form.churchName.trim() || "Independent Candidate / General Inquirer",
                 email: form.email.trim().toLowerCase(),
-
-                phone:
-                    form.phone.trim() ||
-                    null,
-
-                // Existing DemoRequest.Position
-                // stores the selected inquiry type.
-                position:
-                    form.subject.trim() ||
-                    "General Inquiry",
-
-                message:
-                    form.message.trim(),
+                phone: form.phone.trim() || null,
+                position: form.position.trim() || "General Inquiries",
+                message: form.message.trim(),
             };
 
-            const response = await fetch(
-                `${API_BASE_URL}/DemoRequests`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type":
-                            "application/json",
-                    },
-                    body: JSON.stringify(payload),
-                }
-            );
+            const response = await fetch(`${API_BASE_URL}/DemoRequests`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(payload),
+            });
 
-            const data = await response
-                .json()
-                .catch(() => ({}));
+            const data = await response.json().catch(() => ({}));
 
             if (!response.ok) {
                 throw new Error(
-                    data?.message ||
-                    "Unable to send your message. Please try again."
+                    data?.message || "Failed to submit inquiry. Please verify your details."
                 );
             }
 
-            setSubmitted(true);
+            const id = data?.demoRequestId || 1;
+            const tracking = data?.trackingCode || `MBS-INQ-${String(id).padStart(5, "0")}`;
 
-            setForm({
-                name: "",
-                email: "",
-                phone: "",
-                organization: "",
-                subject: "",
-                message: "",
+            setSubmissionResult({
+                demoRequestId: id,
+                trackingCode: tracking,
+                email: payload.email,
             });
-        }
-        catch (err) {
-            console.error(
-                "Contact form submission error:",
-                err
-            );
 
-            setError(
-                err instanceof Error
-                    ? err.message
-                    : "Unable to send your message. Please try again."
-            );
-        }
-        finally {
+            setSubmitted(true);
+        } catch (err: any) {
+            console.error("Contact submission error:", err);
+            setError(err?.message || "Unable to send your message. Please try again.");
+        } finally {
             setSubmitting(false);
         }
     };
 
+    // Auto Email Resender Trigger
+    const handleResendConfirmation = async () => {
+        if (!submissionResult?.demoRequestId || resending) return;
+
+        setResending(true);
+        setResendStatus(null);
+
+        try {
+            const response = await fetch(
+                `${API_BASE_URL}/DemoRequests/${submissionResult.demoRequestId}/resend-confirmation`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            const data = await response.json().catch(() => ({}));
+
+            if (!response.ok) {
+                throw new Error(data?.message || "Failed to resend confirmation email.");
+            }
+
+            setResendStatus(
+                `✓ Confirmation email successfully resent to ${submissionResult.email}!`
+            );
+        } catch (err: any) {
+            console.error("Auto email resender error:", err);
+            setResendStatus(`⚠️ Could not resend email: ${err?.message || "Please try again later."}`);
+        } finally {
+            setResending(false);
+        }
+    };
+
+    const handleCopyTracking = (code: string) => {
+        navigator.clipboard.writeText(code);
+        setCopiedTracking(true);
+        setTimeout(() => setCopiedTracking(false), 2500);
+    };
+
+    const handleResetForm = () => {
+        setForm({
+            fullName: "",
+            email: "",
+            phone: "",
+            churchName: "",
+            position: "Admissions & Enrollment",
+            message: "",
+        });
+        setSubmitted(false);
+        setSubmissionResult(null);
+        setResendStatus(null);
+        setError(null);
+    };
+
     return (
-        <div className="epic-contact-page">
+        <div className="mbs-contact-page-root">
             <PublicHeader onNavigate={onNavigate} />
 
-            <section className="epic-contact-hero">
-
-                <div className="epic-contact-hero-glow" />
-
-                <div className="epic-contact-container">
-
-                    <div className="epic-contact-hero-content">
-
-                        <span className="epic-contact-label">
-                            GET IN TOUCH
+            {/* =========================================================
+                HERO SECTION
+            ========================================================= */}
+            <section className="mbs-contact-hero">
+                <div className="mbs-contact-hero-glow" />
+                <div className="mbs-contact-container">
+                    <div className="mbs-contact-hero-content">
+                        <span className="mbs-contact-hero-badge">
+                            <ShieldCheck size={13} style={{ display: "inline", marginRight: 5, verticalAlign: -1 }} />
+                            Official Admissions &amp; Campus Inquiries
                         </span>
 
-                        <h1>
-                            Let's Connect
-                            <br />
-                            <span>With School.</span>
+                        <h1 className="mbs-contact-hero-title">
+                            Connect With <span>Mobile Bible School</span>
                         </h1>
 
-                        <p>
-                            Whether you want to learn more about
-                            EPIC Church, explore the EPIC Church
-                            Management System, request a demo, or
-                            simply connect with us — we'd love to
-                            hear from you.
+                        <p className="mbs-contact-hero-subtitle">
+                            Theological Seminary &amp; Academic Institute — Have questions regarding our accredited degree programs, pastoral training, admissions, or course schedules? Our Admissions Directorate and Faculty Council are here to assist you.
                         </p>
 
-                        <div className="epic-contact-hero-actions">
-
-                            <button
-                                type="button"
-                                className="epic-contact-primary-button"
-                                onClick={() =>
-                                    document
-                                        .getElementById(
-                                            "contact-form"
-                                        )
-                                        ?.scrollIntoView({
-                                            behavior:
-                                                "smooth",
-                                        })
-                                }
-                            >
-                                Send Us a Message
-                                <span>→</span>
-                            </button>
-
-                            <button
-                                type="button"
-                                className="epic-contact-secondary-button"
-                                onClick={() =>
-                                    onNavigate("landing")
-                                }
-                            >
-                                Explore EPIC
-                            </button>
-
+                        <div className="mbs-contact-trust-row">
+                            <div className="mbs-trust-item">
+                                <GraduationCap size={15} color="var(--theme-secondary, #F59E0B)" />
+                                <span>Accredited Theological Curricula</span>
+                            </div>
+                            <div className="mbs-trust-item">
+                                <Send size={15} color="var(--theme-secondary, #F59E0B)" />
+                                <span>Direct Campus Inquiry Pipeline</span>
+                            </div>
+                            <div className="mbs-trust-item">
+                                <Mail size={15} color="var(--theme-secondary, #F59E0B)" />
+                                <span>Automated Confirmation &amp; Tracking</span>
+                            </div>
                         </div>
-
                     </div>
-
-                    <div className="epic-contact-hero-mark">
-
-                        <div className="epic-contact-cross">
-                            ✝
-                        </div>
-
-                        <strong>
-                            EPIC
-                        </strong>
-
-                        <span>
-                            Engaging People
-                            <br />
-                            Into Christ
-                        </span>
-
-                    </div>
-
                 </div>
-
             </section>
 
-            {/* =====================================================
-                CONTACT INFORMATION
-            ===================================================== */}
+            {/* =========================================================
+                MAIN CONTENT (GRID: INFO CARDS + FORM)
+            ========================================================= */}
+            <main className="mbs-contact-main-container">
+                <div className="mbs-contact-layout-grid">
 
-            <section className="epic-contact-info-section">
-
-                <div className="epic-contact-container">
-
-                    <div className="epic-contact-section-heading">
-
-                        <span className="epic-contact-label">
-                            CONNECT WITH US
-                        </span>
-
-                        <h2>
-                            We're Here
-                            <br />
-                            <span>To Help.</span>
-                        </h2>
-
-                        <p>
-                            Have a question about our church,
-                            ministries, or EPIC technology?
-                            Reach out and our team will be happy
-                            to connect with you.
-                        </p>
-
-                    </div>
-
-                    <div className="epic-contact-info-grid">
-
-                        <article className="epic-contact-info-card">
-
-                            <div className="epic-contact-info-icon">
-                                ✉
-                            </div>
-
-                            <span>
-                                EMAIL
-                            </span>
-
-                            <h3>
-                                Email Us
-                            </h3>
-
+                    {/* LEFT COLUMN: CAMPUS INFORMATION & HOTLINES */}
+                    <div className="mbs-contact-info-col">
+                        <div className="mbs-info-section-header">
+                            <span className="mbs-info-eyebrow">Direct Directory</span>
+                            <h2>Campus Contact Desks</h2>
                             <p>
-                                Send us your questions,
-                                inquiries or ministry concerns.
+                                Reach out directly to our admissions officers, faculty deans, or academic registrars through our verified campus channels.
                             </p>
-
-                            <a href="mailto:info@epicchurch.org">
-                                info@epicchurch.org
-                            </a>
-
-                        </article>
-
-                        <article className="epic-contact-info-card">
-
-                            <div className="epic-contact-info-icon">
-                                ☎
-                            </div>
-
-                            <span>
-                                PHONE
-                            </span>
-
-                            <h3>
-                                Call Us
-                            </h3>
-
-                            <p>
-                                Speak with our team about EPIC
-                                Church or the EPIC platform.
-                            </p>
-
-                            <a href="tel:+630000000000">
-                                +63 000 000 0000
-                            </a>
-
-                        </article>
-
-                        <article className="epic-contact-info-card">
-
-                            <div className="epic-contact-info-icon">
-                                ⛪
-                            </div>
-
-                            <span>
-                                CHURCH
-                            </span>
-
-                            <h3>
-                                Luke 4:18 Ministries
-                            </h3>
-
-                            <p>
-                                San Vicente Church
-                                <br />
-                                Philippines
-                            </p>
-
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    onNavigate(
-                                        "ministries"
-                                    )
-                                }
-                            >
-                                Learn About Our Church →
-                            </button>
-
-                        </article>
-
-                    </div>
-
-                </div>
-
-            </section>
-
-            {/* =====================================================
-                CONTACT FORM
-            ===================================================== */}
-
-            <section
-                id="contact-form"
-                className="epic-contact-form-section"
-            >
-
-                <div className="epic-contact-container">
-
-                    <div className="epic-contact-form-card">
-
-                        {/* =================================================
-                            FORM INTRO
-                        ================================================= */}
-
-                        <div className="epic-contact-form-intro">
-
-                            <span className="epic-contact-label">
-                                SEND A MESSAGE
-                            </span>
-
-                            <h2>
-                                We'd Love To
-                                <br />
-                                <span>Hear From You.</span>
-                            </h2>
-
-                            <p>
-                                Fill out the form and let us know
-                                how we can help. Your inquiry will
-                                be received by the EPIC team and
-                                managed through our EPIC Demo
-                                Requests system.
-                            </p>
-
-                            <div className="epic-contact-form-points">
-
-                                <div>
-                                    <span>✓</span>
-                                    Admissions & Enrollment Inquiries
-                                </div>
-
-                                <div>
-                                    <span>✓</span>
-                                    Academic Programs & Curricula
-                                </div>
-
-                                <div>
-                                    <span>✓</span>
-                                    Campus Tours & Consultations
-                                </div>
-
-                                <div>
-                                    <span>✓</span>
-                                    School System Demonstrations
-                                </div>
-
-                            </div>
-
                         </div>
 
-                        {/* =================================================
-                            FORM
-                        ================================================= */}
-
-                        <form
-                            className="epic-contact-form"
-                            onSubmit={handleSubmit}
-                        >
-
-                            {/* SUCCESS */}
-
-                            {submitted && (
-                                <div
-                                    className="epic-contact-success"
-                                    role="alert"
-                                >
-                                    ✓ Thank you for contacting our institution! Your inquiry has been received directly by our admissions & administration office. Our team will contact you shortly.
+                        <div className="mbs-contact-cards-stack">
+                            {/* Card 1: Admissions */}
+                            <div className="mbs-contact-card">
+                                <div className="mbs-contact-card-icon">
+                                    <GraduationCap size={22} />
                                 </div>
+                                <div className="mbs-contact-card-body">
+                                    <h3>Admissions &amp; Registrar</h3>
+                                    <p>Degree enrollment, certificate courses, transcript requests, and scholarship qualifications.</p>
+                                    <a href="mailto:admissions@mobilebibleschool.edu" className="mbs-contact-link">
+                                        <Mail size={14} /> admissions@mobilebibleschool.edu
+                                    </a>
+                                </div>
+                            </div>
+
+                            {/* Card 2: Campus Hotline */}
+                            <div className="mbs-contact-card">
+                                <div className="mbs-contact-card-icon">
+                                    <Phone size={22} />
+                                </div>
+                                <div className="mbs-contact-card-body">
+                                    <h3>Campus Desk &amp; Hotlines</h3>
+                                    <p>Direct telephone consultation with our administrative desk during active office hours.</p>
+                                    <a href="tel:+639000000000" className="mbs-contact-link">
+                                        <Phone size={14} /> +63 900 000 0000
+                                    </a>
+                                    <span className="mbs-contact-hours">
+                                        <Clock size={12} /> Mon – Fri: 8:00 AM – 5:00 PM (PHT)
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Card 3: Location */}
+                            <div className="mbs-contact-card">
+                                <div className="mbs-contact-card-icon">
+                                    <MapPin size={22} />
+                                </div>
+                                <div className="mbs-contact-card-body">
+                                    <h3>Seminary Main Campus</h3>
+                                    <p>Mobile Bible School &amp; Theological Seminary Headquarters and Academic Complex.</p>
+                                    <span className="mbs-contact-location-text">
+                                        Mobile Bible School Campus, Philippines
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Card 4: Dean Consultation */}
+                            <div className="mbs-contact-card">
+                                <div className="mbs-contact-card-icon">
+                                    <BookOpen size={22} />
+                                </div>
+                                <div className="mbs-contact-card-body">
+                                    <h3>Dean's Office &amp; Ministry Desk</h3>
+                                    <p>For pastoral candidates, church partnerships, church-plant training, and dean consultations.</p>
+                                    <a href="mailto:info@mobilebibleschool.edu" className="mbs-contact-link">
+                                        <Mail size={14} /> info@mobilebibleschool.edu
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* RIGHT COLUMN: INTERACTIVE INQUIRY FORM */}
+                    <div className="mbs-contact-form-col">
+                        <div className="mbs-form-wrapper-card">
+
+                            {/* SUCCESS STATE WITH AUTO EMAIL RESENDER */}
+                            {submitted && submissionResult ? (
+                                <div className="mbs-form-success-card">
+                                    <div className="mbs-success-badge-icon">
+                                        <CheckCircle size={44} />
+                                    </div>
+
+                                    <h2>Inquiry Dispatched Successfully!</h2>
+                                    <p className="mbs-success-subtitle">
+                                        Your message has been officially recorded into our campus database and queued for review by our Admissions Directorate.
+                                    </p>
+
+                                    {/* Tracking Code Chip */}
+                                    <div className="mbs-tracking-chip">
+                                        <div>
+                                            <small>Official Tracking Reference:</small>
+                                            <strong>{submissionResult.trackingCode}</strong>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            className="mbs-btn-copy"
+                                            onClick={() => handleCopyTracking(submissionResult.trackingCode || "")}
+                                            title="Copy Tracking ID"
+                                        >
+                                            {copiedTracking ? <Check size={16} color="#10B981" /> : <Copy size={16} />}
+                                        </button>
+                                    </div>
+
+                                    {/* Auto Email Resender Section */}
+                                    <div className="mbs-auto-resender-box">
+                                        <div className="mbs-resender-header">
+                                            <Mail size={18} color="var(--theme-secondary, #F59E0B)" />
+                                            <div>
+                                                <h4>Automated Email Confirmation</h4>
+                                                <p>An official receipt has been sent to <strong>{submissionResult.email}</strong>.</p>
+                                            </div>
+                                        </div>
+
+                                        <p className="mbs-resender-instructions">
+                                            Please check your inbox (and spam/junk folder). If you have not received it within a few moments, you can trigger an automatic resend:
+                                        </p>
+
+                                        <button
+                                            type="button"
+                                            className="mbs-btn-auto-resend"
+                                            onClick={handleResendConfirmation}
+                                            disabled={resending}
+                                        >
+                                            {resending ? (
+                                                <>
+                                                    <RefreshCw size={15} className="spin" />
+                                                    Resending Confirmation Email...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <RefreshCw size={15} />
+                                                    Resend Confirmation Email Now
+                                                </>
+                                            )}
+                                        </button>
+
+                                        {resendStatus && (
+                                            <div className="mbs-resend-feedback-alert">
+                                                {resendStatus}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Actions */}
+                                    <div className="mbs-success-actions">
+                                        <button
+                                            type="button"
+                                            className="mbs-btn-primary"
+                                            onClick={handleResetForm}
+                                        >
+                                            Send Another Message
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="mbs-btn-secondary"
+                                            onClick={() => onNavigate ? onNavigate("events") : window.location.href = "/events"}
+                                        >
+                                            <Calendar size={14} /> Explore School Events
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                /* REGULAR CONTACT INQUIRY FORM */
+                                <>
+                                    <div className="mbs-form-header">
+                                        <span className="mbs-form-tag">Interactive Campus Form</span>
+                                        <h2>Submit Official Inquiry</h2>
+                                        <p>
+                                            Your message will route directly to our Admissions &amp; Inquiries module in the MBS administration portal.
+                                        </p>
+                                    </div>
+
+                                    {error && (
+                                        <div className="mbs-form-error-alert" role="alert">
+                                            <AlertCircle size={18} />
+                                            <span>{error}</span>
+                                        </div>
+                                    )}
+
+                                    <form className="mbs-inquiry-form" onSubmit={handleSubmit}>
+                                        {/* Category Select */}
+                                        <div className="mbs-input-group">
+                                            <label htmlFor="position">
+                                                Inquiry Purpose / Category <span className="req">*</span>
+                                            </label>
+                                            <select
+                                                id="position"
+                                                name="position"
+                                                value={form.position}
+                                                onChange={handleChange}
+                                                required
+                                            >
+                                                {INQUIRY_CATEGORIES.map((cat) => (
+                                                    <option key={cat} value={cat}>
+                                                        {cat}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+
+                                        {/* Full Name & Email */}
+                                        <div className="mbs-form-row-2col">
+                                            <div className="mbs-input-group">
+                                                <label htmlFor="fullName">
+                                                    Your Full Name <span className="req">*</span>
+                                                </label>
+                                                <input
+                                                    id="fullName"
+                                                    type="text"
+                                                    name="fullName"
+                                                    placeholder="Pastor / Brother / Sister Name"
+                                                    value={form.fullName}
+                                                    onChange={handleChange}
+                                                    required
+                                                    maxLength={150}
+                                                />
+                                            </div>
+
+                                            <div className="mbs-input-group">
+                                                <label htmlFor="email">
+                                                    Email Address <span className="req">*</span>
+                                                </label>
+                                                <input
+                                                    id="email"
+                                                    type="email"
+                                                    name="email"
+                                                    placeholder="your.email@example.com"
+                                                    value={form.email}
+                                                    onChange={handleChange}
+                                                    required
+                                                    maxLength={150}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Phone & Affiliation */}
+                                        <div className="mbs-form-row-2col">
+                                            <div className="mbs-input-group">
+                                                <label htmlFor="phone">
+                                                    Phone / Mobile Number
+                                                </label>
+                                                <input
+                                                    id="phone"
+                                                    type="tel"
+                                                    name="phone"
+                                                    placeholder="+63 9XX XXX XXXX"
+                                                    value={form.phone}
+                                                    onChange={handleChange}
+                                                    maxLength={50}
+                                                />
+                                            </div>
+
+                                            <div className="mbs-input-group">
+                                                <label htmlFor="churchName">
+                                                    Church / Christian School / Organization
+                                                </label>
+                                                <input
+                                                    id="churchName"
+                                                    type="text"
+                                                    name="churchName"
+                                                    placeholder="e.g. Grace Fellowship, Independent, etc."
+                                                    value={form.churchName}
+                                                    onChange={handleChange}
+                                                    maxLength={200}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Message Textarea */}
+                                        <div className="mbs-input-group">
+                                            <label htmlFor="message">
+                                                Your Inquiry or Consultation Message <span className="req">*</span>
+                                            </label>
+                                            <textarea
+                                                id="message"
+                                                name="message"
+                                                rows={5}
+                                                placeholder="Please provide details regarding your inquiry, degree interest, questions, or preferred consultation dates..."
+                                                value={form.message}
+                                                onChange={handleChange}
+                                                required
+                                                maxLength={1000}
+                                            />
+                                            <small className="mbs-char-counter">
+                                                {form.message.length} / 1000 characters
+                                            </small>
+                                        </div>
+
+                                        {/* Submit Button */}
+                                        <button
+                                            type="submit"
+                                            className="mbs-btn-submit-inquiry"
+                                            disabled={submitting}
+                                        >
+                                            {submitting ? (
+                                                <>
+                                                    <RefreshCw size={17} className="spin" />
+                                                    Routing Message to Inquiries Desk...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Send size={17} />
+                                                    Submit Official Inquiry
+                                                </>
+                                            )}
+                                        </button>
+
+                                        <p className="mbs-form-disclaimer">
+                                            🔒 All communications are confidential and processed in accordance with Mobile Bible School privacy and academic records policies. An automatic receipt will be dispatched to your email address.
+                                        </p>
+                                    </form>
+                                </>
                             )}
 
-                            {/* ERROR */}
-
-                            {error && (
-                                <div
-                                    className="epic-contact-error"
-                                    role="alert"
-                                >
-                                    {error}
-                                </div>
-                            )}
-
-                            {/* =================================================
-                                REQUESTER + EMAIL
-                            ================================================= */}
-
-                            <div className="epic-contact-form-row">
-
-                                <div className="epic-contact-field">
-
-                                    <label htmlFor="name">
-                                        Requester Name
-                                    </label>
-
-                                    <input
-                                        id="name"
-                                        type="text"
-                                        name="name"
-                                        placeholder="Enter your full name"
-                                        value={form.name}
-                                        onChange={handleChange}
-                                        required
-                                        maxLength={150}
-                                    />
-
-                                </div>
-
-                                <div className="epic-contact-field">
-
-                                    <label htmlFor="email">
-                                        Email Address
-                                    </label>
-
-                                    <input
-                                        id="email"
-                                        type="email"
-                                        name="email"
-                                        placeholder="you@example.com"
-                                        value={form.email}
-                                        onChange={handleChange}
-                                        required
-                                        maxLength={150}
-                                    />
-
-                                </div>
-
-                            </div>
-
-                            {/* =================================================
-                                ORGANIZATION / AFFILIATION
-                            ================================================= */}
-
-                            <div className="epic-contact-field" style={{ marginBottom: "16px" }}>
-                                <label htmlFor="organization">
-                                    School / Church / Affiliation (Optional)
-                                </label>
-                                <input
-                                    id="organization"
-                                    type="text"
-                                    name="organization"
-                                    placeholder="e.g. Grace Christian Academy, Local Church, or Independent"
-                                    value={form.organization || ""}
-                                    onChange={handleChange}
-                                    maxLength={200}
-                                />
-                            </div>
-
-                            {/* =================================================
-                                PHONE + POSITION / INQUIRY TYPE
-                            ================================================= */}
-
-                            <div className="epic-contact-form-row">
-
-                                <div className="epic-contact-field">
-
-                                    <label htmlFor="phone">
-                                        Phone Number
-                                    </label>
-
-                                    <input
-                                        id="phone"
-                                        type="tel"
-                                        name="phone"
-                                        placeholder="+63 9XX XXX XXXX"
-                                        value={form.phone}
-                                        onChange={handleChange}
-                                        maxLength={50}
-                                    />
-
-                                </div>
-
-                                <div className="epic-contact-field">
-
-                                    <label htmlFor="subject">
-                                        Position / Inquiry Type
-                                    </label>
-
-                                    <select
-                                        id="subject"
-                                        name="subject"
-                                        value={form.subject}
-                                        onChange={handleChange}
-                                        required
-                                    >
-
-                                        <option value="">
-                                            Select inquiry category
-                                        </option>
-
-                                        <option value="Admissions & Enrollment">
-                                            Admissions & Enrollment
-                                        </option>
-
-                                        <option value="Academic Programs & Curriculum">
-                                            Academic Programs & Curriculum
-                                        </option>
-
-                                        <option value="Tuition, Units & Fees">
-                                            Tuition, Units & Fees
-                                        </option>
-
-                                        <option value="Campus Tour & Visit Request">
-                                            Campus Tour & Visit Request
-                                        </option>
-
-                                        <option value="System Demonstration Request">
-                                            System Demonstration Request
-                                        </option>
-
-                                        <option value="Student Records & Credentials">
-                                            Student Records & Credentials
-                                        </option>
-
-                                        <option value="Partnership & Collaboration">
-                                            Partnership & Collaboration
-                                        </option>
-
-                                        <option value="General Inquiries">
-                                            General Inquiries
-                                        </option>
-
-                                    </select>
-
-                                </div>
-
-                            </div>
-
-                            {/* =================================================
-                                MESSAGE
-                            ================================================= */}
-
-                            <div className="epic-contact-field">
-
-                                <label htmlFor="message">
-                                    Message
-                                </label>
-
-                                <textarea
-                                    id="message"
-                                    name="message"
-                                    rows={7}
-                                    placeholder="Tell us how we can help..."
-                                    value={form.message}
-                                    onChange={handleChange}
-                                    required
-                                    maxLength={1000}
-                                />
-
-                            </div>
-
-                            {/* =================================================
-                                SUBMIT
-                            ================================================= */}
-
-                            <button
-                                type="submit"
-                                className="epic-contact-submit"
-                                disabled={submitting}
-                            >
-
-                                {submitting
-                                    ? "Sending Message..."
-                                    : "Send Message"}
-
-                                {!submitting && (
-                                    <span>→</span>
-                                )}
-
-                            </button>
-
-                            <small className="epic-contact-form-note">
-                                Your information will only be
-                                used to respond to your inquiry.
-                            </small>
-
-                        </form>
-
+                        </div>
                     </div>
 
                 </div>
+            </main>
 
-            </section>
-
-            {/* =====================================================
-                CTA
-            ===================================================== */}
-
-            <section className="epic-contact-cta">
-
-                <div className="epic-contact-container">
-
-                    <span className="epic-contact-cta-cross">
-                        ✝
-                    </span>
-
-                    <h2>
-                        Your Church Has A Mission.
-                    </h2>
-
-                    <h3>
-                        Let EPIC Help You Manage It.
-                    </h3>
-
-                    <p>
-                        Engaging People Into Christ.
-                        <br />
-                        Empowering Churches Through Technology.
-                    </p>
-
-                    <button
-                        type="button"
-                        className="epic-contact-primary-button"
-                        onClick={() =>
-                            onNavigate("landing")
-                        }
-                    >
-                        Explore EPIC
-                        <span>→</span>
-                    </button>
-
-                </div>
-
-            </section>
-
-            {/* =====================================================
+            {/* =========================================================
                 FOOTER
-            ===================================================== */}
-
-            <footer className="epic-contact-footer">
-
-                <div className="epic-contact-container">
-
-                    <div className="epic-contact-footer-grid">
-
-                        <div>
-
-                            <div className="epic-contact-footer-logo">
-                                EPIC
+            ========================================================= */}
+            <footer className="mbs-contact-footer">
+                <div className="mbs-contact-container">
+                    <div className="mbs-footer-content-row">
+                        <div className="mbs-footer-brand-box">
+                            <div className="mbs-footer-crest">
+                                <BookOpen size={18} color="#FFFFFF" />
                             </div>
-
-                            <strong>
-                                EPIC CHURCH
-                            </strong>
-
-                            <p>
-                                Engaging People Into Christ.
-                            </p>
-
-                            <small>
-                                Church Management &
-                                Discipleship Platform
-                            </small>
-
+                            <div>
+                                <h4>Mobile Bible School &amp; Theological Seminary</h4>
+                                <small>Academic Portal &amp; Campus Communication System</small>
+                            </div>
                         </div>
-
-                        <div>
-
-                            <strong>
-                                EPIC CHURCH
-                            </strong>
-
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    onNavigate("about")
-                                }
-                            >
-                                About EPIC
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    onNavigate("ministries")
-                                }
-                            >
-                                Our Church
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    onNavigate("landing")
-                                }
-                            >
-                                Home
-                            </button>
-
+                        <div className="mbs-footer-nav">
+                            <button type="button" onClick={() => onNavigate ? onNavigate("home") : window.location.href = "/home"}>Home</button>
+                            <button type="button" onClick={() => onNavigate ? onNavigate("about") : window.location.href = "/about"}>About</button>
+                            <button type="button" onClick={() => onNavigate ? onNavigate("events") : window.location.href = "/events"}>Events</button>
+                            <button type="button" onClick={() => onNavigate ? onNavigate("announcements") : window.location.href = "/announcements"}>Announcements</button>
+                            <button type="button" onClick={() => onNavigate ? onNavigate("learning") : window.location.href = "/learning"}>Theological LMS</button>
                         </div>
-
-                        <div>
-
-                            <strong>
-                                EPIC SYSTEM
-                            </strong>
-
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    onNavigate("system")
-                                }
-                            >
-                                Platform
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    onNavigate("pricing")
-                                }
-                            >
-                                Pricing
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    onNavigate("landing")
-                                }
-                            >
-                                Request Demo
-                            </button>
-
-                        </div>
-
-                        <div>
-
-                            <strong>
-                                CONNECT
-                            </strong>
-
-                            <button
-                                type="button"
-                                className="active"
-                            >
-                                Contact Us
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    onNavigate("about")
-                                }
-                            >
-                                About Us
-                            </button>
-
-                        </div>
-
                     </div>
-
-                    <div className="epic-contact-footer-bottom">
-
-                        <span>
-                            © {new Date().getFullYear()} EPIC
-                            Church Management System
-                        </span>
-
-                        <span>
-                            Engaging People Into Christ
-                        </span>
-
+                    <div className="mbs-footer-bottom-row">
+                        <span>© {new Date().getFullYear()} Mobile Bible School &amp; Theological Seminary. All rights reserved.</span>
+                        <span>Equipping Disciples • Advancing Theological Scholarship • Proclaiming Truth</span>
                     </div>
-
                 </div>
-
             </footer>
-
         </div>
     );
 };

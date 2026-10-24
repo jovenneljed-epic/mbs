@@ -1173,3 +1173,48 @@
     margin: 4px 0 0 0;
     font-size: 13px;
 }
+
+
+/* Auto Email Resender Button in Quick Actions */
+.btn-resend-auto-email {
+    background: #7c2d12;
+    color: #fef3c7;
+    border: 1px solid #b45309;
+}
+
+.btn-resend-auto-email:hover:not(:disabled) {
+    background: #9a3412;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(180, 83, 9, 0.25);
+}
+
+.btn-resend-auto-email:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Quick Resend button in Table */
+.btn-action-resend {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    background: #fffbeb;
+    color: #b45309;
+    border: 1px solid #fde68a;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-action-resend:hover:not(:disabled) {
+    background: #b45309;
+    color: white;
+    border-color: #b45309;
+}
+
+.btn-action-resend:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
