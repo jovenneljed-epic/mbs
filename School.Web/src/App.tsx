@@ -1095,6 +1095,11 @@ const isPublicPath = (
         PUBLIC_ROUTES.learning,
 
         PUBLIC_ROUTES.contact,
+        "/contact",
+        "/contact-us",
+        "/inquiry",
+        "/inquiries",
+        "/campus-inquiries",
 
 
         PUBLIC_ROUTES["business-home"],
@@ -1561,8 +1566,12 @@ const App: React.FC = () => {
         PUBLIC_ROUTES.learning;
 
     const isContactPage =
-        normalizedPath ===
-        PUBLIC_ROUTES.contact;
+        normalizedPath === PUBLIC_ROUTES.contact ||
+        normalizedPath === "/contact" ||
+        normalizedPath === "/contact-us" ||
+        normalizedPath === "/inquiry" ||
+        normalizedPath === "/inquiries" ||
+        normalizedPath === "/campus-inquiries";
 
     const isEventsPublicPage =
         normalizedPath ===
@@ -1685,6 +1694,12 @@ const App: React.FC = () => {
                 syncRouteState(
                     pathname
                 );
+
+                try {
+                    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+                } catch {
+                    window.scrollTo(0, 0);
+                }
 
                 if (
                     pathname ===
@@ -2119,6 +2134,9 @@ useCallback(
                 break;
 
             case "contact":
+            case "contact-us":
+            case "inquiry":
+            case "inquiries":
                 navigatePublic("contact");
                 break;
 
@@ -3656,13 +3674,22 @@ if(
 }
 
     // =====================================================
-    // ADMIN PROTECTION
+    // ADMIN PROTECTION & PUBLIC FALLBACK
     // =====================================================
 
     if (
         !isAuthenticated
     ) {
-        return null;
+        return (
+            <SalesLandingPage
+                onLogin={
+                    handleLandingLogin
+                }
+                onNavigate={
+                    handlePublicNavigate
+                }
+            />
+        );
     }
 
     // =====================================================

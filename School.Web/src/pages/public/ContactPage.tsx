@@ -4,7 +4,8 @@
 // Direct Pipeline to Admin CMS Inquiries + Auto Email Resender
 // ============================================================
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { applyGlobalTheme } from "../../services/landingPageContent";
 import PublicHeader from "../../components/PublicHeader";
 import "./ContactPage.css";
 import "./PublicUnisonTheme.css";
@@ -51,6 +52,16 @@ const INQUIRY_CATEGORIES = [
 ];
 
 const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
+    useEffect(() => {
+        try {
+            window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+        } catch {
+            window.scrollTo(0, 0);
+        }
+        document.title = "Contact & Campus Inquiries | Mobile Bible School & Theological Seminary";
+        applyGlobalTheme();
+    }, []);
+
     const [form, setForm] = useState<ContactFormData>({
         fullName: "",
         email: "",
@@ -211,7 +222,7 @@ const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
 
     return (
         <div className="mbs-contact-page-root">
-            <PublicHeader onNavigate={onNavigate} />
+            <PublicHeader onNavigate={onNavigate} hideThemeSwitcher={true} />
 
             {/* =========================================================
                 HERO SECTION
