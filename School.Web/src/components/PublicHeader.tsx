@@ -1,7 +1,6 @@
 import React, { useCallback, useState } from "react";
 import "./PublicHeader.css";
 import { BookOpen, User, ShieldCheck, Calendar, Bell, Image as ImageIcon, GraduationCap } from "lucide-react";
-import LuxuryThemeSwitcher from "./LuxuryThemeSwitcher";
 
 interface PublicHeaderProps {
     onNavigate?: (page: string) => void;
@@ -12,7 +11,7 @@ interface PublicHeaderProps {
 const PublicHeader: React.FC<PublicHeaderProps> = ({
     onNavigate,
     hideAbout = false,
-    hideThemeSwitcher = false,
+    hideThemeSwitcher: _hideThemeSwitcher = false,
 }) => {
     const [menuOpen, setMenuOpen] = useState(false);
 
@@ -140,7 +139,7 @@ const PublicHeader: React.FC<PublicHeaderProps> = ({
 
                 {/* DESKTOP ACTIONS */}
                 <div className="epic-public-nav-actions">
-                    {!hideThemeSwitcher && <LuxuryThemeSwitcher variant="header" />}
+                    
 
                     <button
                         type="button"

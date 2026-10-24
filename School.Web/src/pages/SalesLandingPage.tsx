@@ -15,7 +15,6 @@ import {
 } from "../services/landingPageContent";
 import { PromoVideoPlayer } from "../components/PromoVideoPlayer";
 import { THEME_CHANGED_EVENT, type ColorTheme } from "../services/themeEngine";
-import LuxuryThemeSwitcher from "../components/LuxuryThemeSwitcher";
 import {
     getPublicSchoolEvents,
     getPublicSchoolAnnouncements,
@@ -746,7 +745,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
 
                     {/* Actions Right */}
                     <div className="ub-header-actions">
-                        <LuxuryThemeSwitcher variant="header" />
+                        
 
                         <button
                             className="ub-btn-portal-student"

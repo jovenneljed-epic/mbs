@@ -406,11 +406,8 @@ export const getLandingPageContent = (): LandingPageContent => {
             }
             const mergedScenes: PromoScene[] = Array.isArray(promo.scenes) ? promo.scenes : [];
 
-            const parsedTheme = parsed.colorTheme || {};
-            const resolvedTheme: ColorThemeSettings = {
-                ...DEFAULT_COLOR_THEME,
-                ...parsedTheme,
-            };
+            // Institutional global theme is permanently locked to Seminary Maroon & Gold
+            const resolvedTheme: ColorThemeSettings = DEFAULT_COLOR_THEME;
 
             const parsedFooter = parsed.footer || {};
             const resolvedFooter: FooterSettings = {
@@ -451,36 +448,10 @@ import {
 
 export { initGlobalThemeEngine, setThemeMode, setThemePreset, getThemeMode, LUXURY_THEME_PRESETS };
 
-export const applyGlobalTheme = (theme?: ColorThemeSettings): void => {
+export const applyGlobalTheme = (_theme?: ColorThemeSettings): void => {
     try {
-        if (theme) {
-            engineApplyTheme({
-                id: theme.themeId,
-                name: theme.name,
-                badge: theme.badge,
-                tagline: theme.description,
-                description: theme.description,
-                category: theme.themeId === "daylight-ivory" ? "light" : "royal",
-                primary: theme.primary,
-                primaryHover: theme.primaryHover,
-                secondary: theme.secondary,
-                secondaryHover: theme.secondary,
-                glow: theme.glow,
-                heroGlow: theme.heroGlow,
-                heroBgStart: theme.heroBgStart,
-                heroBgEnd: theme.heroBgEnd,
-                surfaceBg: theme.heroBgEnd,
-                surfaceGlass: `${theme.heroBgEnd}e6`,
-                borderColor: theme.cardAccent || `${theme.secondary}33`,
-                borderHighlight: theme.secondary,
-                textColor: theme.themeId === "daylight-ivory" ? "#0F172A" : "#FFFFFF",
-                textMuted: theme.themeId === "daylight-ivory" ? "#475569" : "#CBD5E1",
-                gradient: theme.gradient,
-                cardAccent: theme.cardAccent,
-            }, "preset");
-        } else {
-            engineApplyTheme();
-        }
+        // Enforce the permanent official MBS Seminary Maroon & 24K Gold global theme
+        engineApplyTheme();
     } catch (e) {
         console.warn("Failed to apply global theme:", e);
     }

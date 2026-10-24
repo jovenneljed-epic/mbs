@@ -40,7 +40,6 @@ import {
 
 import SalesLandingPage from "./pages/SalesLandingPage";
 import { applyGlobalTheme } from "./services/landingPageContent";
-import LuxuryThemeSwitcher from "./components/LuxuryThemeSwitcher";
 import AboutPage from "./pages/public/AboutPage";
 import ContactPage from "./pages/public/ContactPage";
 import MinistriesPage from "./pages/public/MinistriesPage";
@@ -3934,7 +3933,7 @@ if(
                     </div>
 
                     <div className="epic-topbar-right">
-                        <LuxuryThemeSwitcher variant="header" />
+                        
 
                         <button
                             type="button"
