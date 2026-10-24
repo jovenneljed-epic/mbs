@@ -196,6 +196,43 @@ export function getSchoolEventsCache(): SchoolEventItem[] | null {
 }
 
 // ------------------------------------------------------------
+export const ANNOUNCEMENTS_CACHE_KEY = "mbs_school_announcements_cache";
+
+export function notifySchoolAnnouncementsUpdated(announcements?: SchoolAnnouncementItem[]): void {
+    if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("mbs:school-announcements-updated", { detail: announcements }));
+    }
+}
+
+export function saveSchoolAnnouncementsCache(announcements: SchoolAnnouncementItem[]): void {
+    try {
+        if (typeof window !== "undefined") {
+            localStorage.setItem(ANNOUNCEMENTS_CACHE_KEY, JSON.stringify(announcements));
+            notifySchoolAnnouncementsUpdated(announcements);
+        }
+    } catch (e) {
+        console.warn("Failed to cache school announcements in localStorage:", e);
+    }
+}
+
+export function getSchoolAnnouncementsCache(): SchoolAnnouncementItem[] | null {
+    try {
+        if (typeof window !== "undefined") {
+            const raw = localStorage.getItem(ANNOUNCEMENTS_CACHE_KEY);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed) && parsed.length > 0) {
+                    return parsed;
+                }
+            }
+        }
+    } catch (e) {
+        console.warn("Failed to read school announcements cache:", e);
+    }
+    return null;
+}
+
+// ------------------------------------------------------------
 // Public Events Fetcher (Connected directly to SMS)
 // ------------------------------------------------------------
 export async function getPublicSchoolEvents(): Promise<SchoolEventItem[]> {
@@ -301,7 +338,7 @@ export async function getPublicSchoolAnnouncements(): Promise<SchoolAnnouncement
                 : [];
 
             if (raw.length > 0) {
-                return raw.map((a, idx) => {
+                const mappedAnnouncements = raw.map((a, idx) => {
                     const pubDate = a.publishDate || a.createdDate || a.date || "";
                     return {
                         id: a.id || idx + 1,
@@ -313,10 +350,18 @@ export async function getPublicSchoolAnnouncements(): Promise<SchoolAnnouncement
                         imageUrl: a.imageUrl || null
                     };
                 });
+
+                saveSchoolAnnouncementsCache(mappedAnnouncements);
+                return mappedAnnouncements;
             }
         }
     } catch (err) {
         console.warn("SMS announcements endpoint unavailable, using cached defaults:", err);
+    }
+
+    const cached = getSchoolAnnouncementsCache();
+    if (cached && cached.length > 0) {
+        return cached;
     }
 
     return DEFAULT_SCHOOL_ANNOUNCEMENTS;
