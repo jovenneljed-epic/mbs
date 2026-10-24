@@ -105,6 +105,14 @@ var memberPhotoFolder =
 Directory.CreateDirectory(
     memberPhotoFolder);
 
+var galleryPhotoFolder =
+    Path.Combine(
+        app.Environment.ContentRootPath,
+        "root-uploads-gallery");
+
+Directory.CreateDirectory(
+    galleryPhotoFolder);
+
 
 // ============================================================
 // SWAGGER
@@ -144,6 +152,17 @@ app.UseStaticFiles(
 
         RequestPath =
             "/member-photos"
+    });
+
+app.UseStaticFiles(
+    new StaticFileOptions
+    {
+        FileProvider =
+            new PhysicalFileProvider(
+                galleryPhotoFolder),
+
+        RequestPath =
+            "/gallery-photos"
     });
 
 

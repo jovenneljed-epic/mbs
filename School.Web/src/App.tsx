@@ -1089,6 +1089,11 @@ const isPublicPath = (
         PUBLIC_ROUTES.announcements,
 
         PUBLIC_ROUTES.gallery,
+        "/gallery",
+        "/school-gallery",
+        "/campus-gallery",
+        "/photos",
+        "/campus-life",
 
         PUBLIC_ROUTES["epic-system"],
 
@@ -1582,8 +1587,12 @@ const App: React.FC = () => {
         PUBLIC_ROUTES.announcements;
 
     const isGalleryPublicPage =
-        normalizedPath ===
-        PUBLIC_ROUTES.gallery;
+        normalizedPath === PUBLIC_ROUTES.gallery ||
+        normalizedPath === "/gallery" ||
+        normalizedPath === "/school-gallery" ||
+        normalizedPath === "/campus-gallery" ||
+        normalizedPath === "/photos" ||
+        normalizedPath === "/campus-life";
 
     const isClientPaymentPage =
         normalizedPath ===
@@ -2149,6 +2158,10 @@ useCallback(
                 break;
 
             case "gallery":
+            case "school-gallery":
+            case "campus-gallery":
+            case "photos":
+            case "campus-life":
                 navigatePublic("gallery");
                 break;
 
