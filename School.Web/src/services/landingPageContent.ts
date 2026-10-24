@@ -213,7 +213,7 @@ export const COLOR_THEME_PRESETS: Record<string, ColorThemeSettings> = {
     },
 };
 
-export const DEFAULT_COLOR_THEME: ColorThemeSettings = COLOR_THEME_PRESETS["seminary-maroon"];
+export const DEFAULT_COLOR_THEME: ColorThemeSettings = COLOR_THEME_PRESETS["emerald-academic"];
 
 export interface FooterSettings {
     schoolName?: string;
@@ -413,7 +413,7 @@ export const getLandingPageContent = (): LandingPageContent => {
                     const storedAdminTheme = localStorage.getItem("mbs_admin_global_theme");
                     if (storedAdminTheme) {
                         const parsedAdmin = JSON.parse(storedAdminTheme);
-                        if (parsedAdmin?.primary) {
+                        if (parsedAdmin?.primary && parsedAdmin?.themeId !== "seminary-maroon") {
                             defaultTheme = parsedAdmin;
                         }
                     }
@@ -502,7 +502,7 @@ export const applyGlobalTheme = (theme?: ColorThemeSettings, skipBroadcast = fal
             } catch {}
         }
 
-        if (!activeTheme || !activeTheme.primary) {
+        if (!activeTheme || !activeTheme.primary || activeTheme.themeId === "seminary-maroon") {
             activeTheme = DEFAULT_COLOR_THEME;
         }
 

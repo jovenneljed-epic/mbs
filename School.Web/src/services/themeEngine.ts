@@ -259,7 +259,7 @@ export const LUXURY_THEME_PRESETS: Record<string, ColorTheme> = {
     }
 };
 
-export const DEFAULT_THEME_ID = "seminary-maroon";
+export const DEFAULT_THEME_ID = "emerald-academic";
 
 export function getAutoThemeId(): string {
     return DEFAULT_THEME_ID;
@@ -313,29 +313,29 @@ export function applyGlobalTheme(targetTheme?: any, skipBroadcast = false): void
             }
         }
 
-        // Fallback to default
-        if (!active || !active.primary) {
+        // Fallback to default, auto-healing legacy seminary-maroon to emerald
+        if (!active || !active.primary || active.themeId === "seminary-maroon" || active.id === "seminary-maroon") {
             active = LUXURY_THEME_PRESETS[DEFAULT_THEME_ID];
         }
 
         const root = document.documentElement;
 
-        const primary = active.primary || "#7A1526";
-        const primaryHover = active.primaryHover || primary;
-        const secondary = active.secondary || "#F59E0B";
-        const secondaryHover = active.secondaryHover || secondary;
+        const primary = active.primary || "#10b981";
+        const primaryHover = active.primaryHover || "#059669";
+        const secondary = active.secondary || "#34d399";
+        const secondaryHover = active.secondaryHover || "#059669";
         const glow = active.glow || `${primary}45`;
         const heroGlow = active.heroGlow || `${secondary}26`;
-        const heroBgStart = active.heroBgStart || "#380710";
-        const heroBgEnd = active.heroBgEnd || "#120205";
+        const heroBgStart = active.heroBgStart || "#020f0a";
+        const heroBgEnd = active.heroBgEnd || "#051b12";
         const surfaceBg = active.surfaceBg || heroBgEnd;
-        const surfaceGlass = active.surfaceGlass || `${heroBgEnd}e6`;
-        const borderColor = active.borderColor || active.cardAccent || `${secondary}33`;
+        const surfaceGlass = active.surfaceGlass || "rgba(5, 27, 18, 0.85)";
+        const borderColor = active.borderColor || active.cardAccent || "rgba(16, 185, 129, 0.25)";
         const borderHighlight = active.borderHighlight || secondary;
-        const textColor = active.textColor || (active.themeId === "daylight-ivory" ? "#0F172A" : "#FFFFFF");
-        const textMuted = active.textMuted || (active.themeId === "daylight-ivory" ? "#475569" : "#CBD5E1");
-        const gradient = active.gradient || `linear-gradient(135deg, #ffffff 20%, ${secondary} 65%, ${primary} 100%)`;
-        const cardAccent = active.cardAccent || `${primary}33`;
+        const textColor = active.textColor || "#FFFFFF";
+        const textMuted = active.textMuted || "#A7F3D0";
+        const gradient = active.gradient || "linear-gradient(180deg, #ffffff 20%, #a7f3d0 65%, #10b981 100%)";
+        const cardAccent = active.cardAccent || "rgba(16, 185, 129, 0.2)";
 
         if (!root.style.getPropertyValue("--theme-transition")) {
             root.style.setProperty("--theme-transition", "background 0.35s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease");
