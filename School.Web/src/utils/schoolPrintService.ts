@@ -1216,7 +1216,7 @@ export class SchoolPrintService {
                     <div>
                         <h1 class="school-title">MOBILE BIBLE SCHOOL & THEOLOGICAL SEMINARY</h1>
                         <div class="school-sub">Office of the University Bursar & Student Financial Services</div>
-                        <div class="school-contact">San Vicente Campus • Baguio City • Tel: (074) 442-0199 • billing@mobilebibleschool.edu</div>
+                        <div class="school-contact">Main Seminary Campus • Baguio City • Tel: (074) 442-0199 • billing@mobilebibleschool.edu</div>
                     </div>
                     <div class="receipt-meta">
                         <div class="receipt-badge">OFFICIAL RECEIPT</div>

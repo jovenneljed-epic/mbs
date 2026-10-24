@@ -1513,7 +1513,7 @@ const MemberAttendanceReport: React.FC<
                             <div>
 
                                  <div class="brand-name">
-                                    SAN VICENTE ACADEMY
+                                    MOBILE BIBLE SCHOOL
                                 </div>
 
                                 <div class="brand-subtitle">

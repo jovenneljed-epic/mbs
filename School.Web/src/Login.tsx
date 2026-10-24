@@ -1164,11 +1164,11 @@ const Login: React.FC<LoginProps> = ({
                     </div>
 
                     <div className="epic-brand-name">
-                        SCHOOL MANAGEMENT
+                        SCHOOL MANAGEMENT SYSTEM
                     </div>
 
                     <div className="epic-brand-system">
-                        ACADEMIC SYSTEM
+                        MOBILE BIBLE SCHOOL MAIN CAMPUS
                     </div>
 
                     <div className="epic-brand-divider" />
@@ -1192,7 +1192,7 @@ const Login: React.FC<LoginProps> = ({
                         <div>
 
                             <strong>
-                                San Vicente Academy
+                                Mobile Bible School
                             </strong>
 
                             <span>
@@ -1249,7 +1249,7 @@ const Login: React.FC<LoginProps> = ({
                             style={{
                                 background: "none",
                                 border: "none",
-                                color: "#1877f2",
+                                color: "var(--theme-primary, #10b981)",
                                 cursor: "pointer",
                                 display: "inline-flex",
                                 alignItems: "center",
@@ -1472,7 +1472,7 @@ const Login: React.FC<LoginProps> = ({
                         <div>
 
                             <strong>
-                                San Vicente Academy
+                                Mobile Bible School
                             </strong>
 
                             <span>

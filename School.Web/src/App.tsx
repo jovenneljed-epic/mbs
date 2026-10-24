@@ -3766,11 +3766,11 @@ if(
 
                     <div className="epic-brand-text">
                         <div className="epic-brand-title">
-                            SCHOOL MANAGEMENT
+                            SCHOOL MANAGEMENT SYSTEM
                         </div>
 
                         <div className="epic-brand-subtitle">
-                            ACADEMIC SYSTEM
+                            MOBILE BIBLE SCHOOL MAIN CAMPUS
                         </div>
                     </div>
                 </div>
@@ -4020,7 +4020,7 @@ if(
                     </span>
 
                     <span>
-                        San Vicente Academy • Excellence in Education
+                        Mobile Bible School Main Campus • Excellence in Education
                     </span>
                 </footer>
             </main>

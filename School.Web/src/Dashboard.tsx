@@ -1621,7 +1621,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                 </div>
 
                 <span>
-                    San Vicente Academy • Excellence in Education
+                    Mobile Bible School Main Campus • Excellence in Education
                 </span>
 
                 {data.generatedAt && (
