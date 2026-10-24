@@ -4,13 +4,14 @@
 /* ============================================================ */
 
 :root {
-    --mbs-maroon: #7A1526;
-    --mbs-maroon-dark: #580d1b;
-    --mbs-maroon-deep: #3c0812;
-    --mbs-maroon-light: #941e32;
-    --mbs-gold: #F59E0B;
-    --mbs-gold-dark: #D97706;
-    --mbs-gold-light: #FDE68A;
+    --mbs-maroon: var(--theme-primary, #7A1526);
+    --mbs-maroon-dark: var(--theme-primary-hover, #580d1b);
+    --mbs-maroon-deep: var(--theme-bg-start, #3c0812);
+    --mbs-maroon-light: var(--theme-primary, #941e32);
+    --mbs-gold: var(--theme-secondary, #F59E0B);
+    --mbs-gold-dark: var(--theme-secondary-hover, #D97706);
+    --mbs-gold-light: var(--theme-border-highlight, #FDE68A);
+    --mbs-gold-subtle: var(--theme-glow, rgba(245, 158, 11, 0.15));
     --mbs-cream: #FAF9F6;
     --mbs-slate-900: #0F172A;
     --mbs-slate-800: #1E293B;

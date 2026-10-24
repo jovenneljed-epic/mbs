@@ -14,6 +14,7 @@ import {
     type LandingPageContent
 } from "../services/landingPageContent";
 import { PromoVideoPlayer } from "../components/PromoVideoPlayer";
+import { THEME_CHANGED_EVENT, type ColorTheme } from "../services/themeEngine";
 import LuxuryThemeSwitcher from "../components/LuxuryThemeSwitcher";
 import {
     getPublicSchoolEvents,
@@ -50,6 +51,7 @@ import {
 
 interface SalesLandingPageProps {
     onNavigate?: (page: string) => void;
+    onLogin?: () => void;
 }
 
 interface AdmissionFormData {
@@ -72,13 +74,16 @@ interface NewsArticle {
     image: string;
 }
 
-export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }) => {
+export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, onLogin }) => {
     // ------------------------------------------------------------
     // Real-time CMS Content from LandingPageEditor
     // ------------------------------------------------------------
     const [content, setContent] = useState<LandingPageContent>(getLandingPageContent);
 
     useEffect(() => {
+        document.title = "Mobile Bible School & Theological Seminary | Official Admissions & Academic Portal";
+        window.scrollTo(0, 0);
+
         const initial = getLandingPageContent();
         setContent(initial);
         if (initial.colorTheme) {
@@ -100,8 +105,34 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
             }
         };
 
+        const handleThemeChanged = (e: any) => {
+            if (e && e.detail) {
+                const theme = e.detail as ColorTheme;
+                setContent(prev => ({
+                    ...prev,
+                    colorTheme: {
+                        themeId: theme.id,
+                        name: theme.name,
+                        badge: theme.badge,
+                        description: theme.description,
+                        primary: theme.primary,
+                        primaryHover: theme.primaryHover,
+                        secondary: theme.secondary,
+                        glow: theme.glow,
+                        heroGlow: theme.heroGlow,
+                        heroBgStart: theme.heroBgStart,
+                        heroBgEnd: theme.heroBgEnd,
+                        gradient: theme.gradient,
+                        cardAccent: theme.cardAccent
+                    }
+                }));
+            }
+        };
+
+        window.addEventListener(THEME_CHANGED_EVENT, handleThemeChanged);
         window.addEventListener(LANDING_CONTENT_EVENT, handleContentUpdate);
         return () => {
+            window.removeEventListener(THEME_CHANGED_EVENT, handleThemeChanged);
             window.removeEventListener(LANDING_CONTENT_EVENT, handleContentUpdate);
         };
     }, []);
@@ -266,7 +297,8 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
         }
 
         if (clean === "login" || clean === "admin-login") {
-            if (onNavigate) onNavigate("login");
+            if (onLogin) onLogin();
+            else if (onNavigate) onNavigate("login");
             else window.location.href = "/login";
             return;
         }
@@ -343,7 +375,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate }
         setAdmissionError(null);
 
         try {
-            const res = await fetch(`${API_BASE_URL}/api/DemoRequests`, {
+            const res = await fetch(`${API_BASE_URL}/DemoRequests`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

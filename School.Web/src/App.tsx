@@ -41,7 +41,6 @@ import {
 import SalesLandingPage from "./pages/SalesLandingPage";
 import { applyGlobalTheme } from "./services/landingPageContent";
 import LuxuryThemeSwitcher from "./components/LuxuryThemeSwitcher";
-import LandingPage from "./pages/LandingPage";
 import AboutPage from "./pages/public/AboutPage";
 import ContactPage from "./pages/public/ContactPage";
 import MinistriesPage from "./pages/public/MinistriesPage";
@@ -3222,30 +3221,14 @@ case "attendance-by-date-report":
     }
 
     // =====================================================
-    // SALES FUNNEL — ENTRY
+    // MOBILE BIBLE SCHOOL SALES & ACADEMIC PORTAL (/, /landing, /home)
     // =====================================================
 
     if (
-        isLandingPage
+        isLandingPage || isHomePage
     ) {
         return (
             <SalesLandingPage
-                onNavigate={
-                    handlePublicNavigate
-                }
-            />
-        );
-    }
-
-    // =====================================================
-    // EXISTING EPIC WEBSITE
-    // =====================================================
-
-    if (
-        isHomePage
-    ) {
-        return (
-            <LandingPage
                 onLogin={
                     handleLandingLogin
                 }
