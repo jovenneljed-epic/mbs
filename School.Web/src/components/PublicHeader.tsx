@@ -5,12 +5,19 @@ import LuxuryThemeSwitcher from "./LuxuryThemeSwitcher";
 
 interface PublicHeaderProps {
     onNavigate?: (page: string) => void;
+    hideAbout?: boolean;
+    hideThemeSwitcher?: boolean;
 }
 
 const PublicHeader: React.FC<PublicHeaderProps> = ({
     onNavigate,
+    hideAbout = false,
+    hideThemeSwitcher = false,
 }) => {
     const [menuOpen, setMenuOpen] = useState(false);
+
+    const isAboutPath = typeof window !== "undefined" && (window.location.pathname === "/about" || window.location.pathname.startsWith("/about/"));
+    const shouldHideAbout = hideAbout || isAboutPath;
 
     const navigateTo = useCallback(
         (page: string) => {
@@ -63,12 +70,14 @@ const PublicHeader: React.FC<PublicHeaderProps> = ({
                         Home
                     </button>
 
-                    <button
-                        type="button"
-                        onClick={() => navigateTo("about")}
-                    >
-                        About
-                    </button>
+                    {!shouldHideAbout && (
+                        <button
+                            type="button"
+                            onClick={() => navigateTo("about")}
+                        >
+                            About
+                        </button>
+                    )}
 
                     <button
                         type="button"
@@ -131,7 +140,7 @@ const PublicHeader: React.FC<PublicHeaderProps> = ({
 
                 {/* DESKTOP ACTIONS */}
                 <div className="epic-public-nav-actions">
-                    <LuxuryThemeSwitcher variant="header" />
+                    {!hideThemeSwitcher && <LuxuryThemeSwitcher variant="header" />}
 
                     <button
                         type="button"

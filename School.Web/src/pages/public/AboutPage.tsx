@@ -244,7 +244,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, initialTab = "
 
     return (
         <div className="mbs-about-root">
-            <PublicHeader onNavigate={onNavigate} />
+            <PublicHeader onNavigate={onNavigate} hideAbout={true} hideThemeSwitcher={true} />
 
             {/* ============================================================ */}
             {/* HERO BANNER SECTION                                          */}
@@ -270,19 +270,19 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, initialTab = "
 
                     <div className="mbs-hero-trust-chips">
                         <span className="mbs-trust-chip">
-                            <CheckCircle2 size={13} color="#F59E0B" />
+                            <CheckCircle2 size={13} color="var(--theme-secondary, #F59E0B)" />
                             <span>100% Inerrantist Stance</span>
                         </span>
                         <span className="mbs-trust-chip">
-                            <ShieldCheck size={13} color="#F59E0B" />
+                            <ShieldCheck size={13} color="var(--theme-secondary, #F59E0B)" />
                             <span>ACTS &amp; CCHE Accredited</span>
                         </span>
                         <span className="mbs-trust-chip">
-                            <BookOpen size={13} color="#F59E0B" />
+                            <BookOpen size={13} color="var(--theme-secondary, #F59E0B)" />
                             <span>Original Languages Exegesis</span>
                         </span>
                         <span className="mbs-trust-chip">
-                            <MapPin size={13} color="#F59E0B" />
+                            <MapPin size={13} color="var(--theme-secondary, #F59E0B)" />
                             <span>35+ Provincial Hubs</span>
                         </span>
                     </div>
@@ -351,7 +351,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, initialTab = "
                         <div className="mbs-chancellor-card">
                             <div className="mbs-chancellor-meta">
                                 <div className="mbs-crest-box">
-                                    <BookOpen size={28} color="#F59E0B" />
+                                    <BookOpen size={28} color="var(--theme-secondary, #F59E0B)" />
                                 </div>
                                 <div>
                                     <span className="mbs-label-eyebrow">A MESSAGE FROM THE CHANCELLOR</span>
@@ -372,7 +372,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, initialTab = "
                         <div className="mbs-pillars-grid">
                             <div className="mbs-pillar-card">
                                 <div className="mbs-pillar-icon-box">
-                                    <BookOpen size={22} color="#F59E0B" />
+                                    <BookOpen size={22} color="var(--theme-secondary, #F59E0B)" />
                                 </div>
                                 <h4>Biblical Inerrancy</h4>
                                 <p>We affirm without reservation the verbal plenary inspiration and total inerrancy of Holy Scripture as the sole rule of faith and conduct.</p>
@@ -380,7 +380,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, initialTab = "
 
                             <div className="mbs-pillar-card">
                                 <div className="mbs-pillar-icon-box">
-                                    <ScrollText size={22} color="#F59E0B" />
+                                    <ScrollText size={22} color="var(--theme-secondary, #F59E0B)" />
                                 </div>
                                 <h4>Expository Rigor</h4>
                                 <p>Pastors are trained in Greek and Hebrew grammatical-historical exegesis to preach the full counsel of God with accuracy and authority.</p>
@@ -388,7 +388,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, initialTab = "
 
                             <div className="mbs-pillar-card">
                                 <div className="mbs-pillar-icon-box">
-                                    <GraduationCap size={22} color="#F59E0B" />
+                                    <GraduationCap size={22} color="var(--theme-secondary, #F59E0B)" />
                                 </div>
                                 <h4>Modular Accessibility</h4>
                                 <p>Our mobile modular schedule allows bi-vocational pastors and rural church workers to earn accredited degrees without leaving their pulpits.</p>
@@ -396,7 +396,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, initialTab = "
 
                             <div className="mbs-pillar-card">
                                 <div className="mbs-pillar-icon-box">
-                                    <Users size={22} color="#F59E0B" />
+                                    <Users size={22} color="var(--theme-secondary, #F59E0B)" />
                                 </div>
                                 <h4>Pastoral Mentorship</h4>
                                 <p>Every student is paired with experienced senior shepherd-scholars for spiritual accountability, moral formation, and pulpit evaluation.</p>
@@ -443,7 +443,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, initialTab = "
                         <div className="mbs-section-intro-card">
                             <div className="mbs-intro-header">
                                 <div className="mbs-crest-box">
-                                    <ScrollText size={26} color="#F59E0B" />
+                                    <ScrollText size={26} color="var(--theme-secondary, #F59E0B)" />
                                 </div>
                                 <div>
                                     <span className="mbs-label-eyebrow">CONFESSIONAL STANDARDS</span>
@@ -511,7 +511,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, initialTab = "
                         <div className="mbs-section-intro-card">
                             <div className="mbs-intro-header">
                                 <div className="mbs-crest-box">
-                                    <Award size={26} color="#F59E0B" />
+                                    <Award size={26} color="var(--theme-secondary, #F59E0B)" />
                                 </div>
                                 <div>
                                     <span className="mbs-label-eyebrow">ACADEMIC ROSTER &amp; CHAIRS</span>
@@ -621,7 +621,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, initialTab = "
                         <div className="mbs-section-intro-card">
                             <div className="mbs-intro-header">
                                 <div className="mbs-crest-box">
-                                    <ShieldCheck size={26} color="#F59E0B" />
+                                    <ShieldCheck size={26} color="var(--theme-secondary, #F59E0B)" />
                                 </div>
                                 <div>
                                     <span className="mbs-label-eyebrow">INSTITUTIONAL VALIDATION</span>
@@ -665,7 +665,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, initialTab = "
                         {/* Ordination & Transferability Card */}
                         <div className="mbs-transfer-card">
                             <div className="mbs-transfer-header">
-                                <GraduationCap size={24} color="#F59E0B" />
+                                <GraduationCap size={24} color="var(--theme-secondary, #F59E0B)" />
                                 <div>
                                     <h4>Ordination &amp; Graduate Credit Transferability</h4>
                                     <p>Degrees awarded by Mobile Bible School &amp; Theological Seminary qualify graduates for formal ordination examinations and pastoral credentialing.</p>
@@ -700,7 +700,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, initialTab = "
                         <div className="mbs-section-intro-card">
                             <div className="mbs-intro-header">
                                 <div className="mbs-crest-box">
-                                    <MapPin size={26} color="#F59E0B" />
+                                    <MapPin size={26} color="var(--theme-secondary, #F59E0B)" />
                                 </div>
                                 <div>
                                     <span className="mbs-label-eyebrow">CENTERS &amp; TRAINING FACILITIES</span>
@@ -718,7 +718,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, initialTab = "
                                 <div className="mbs-campus-badge">MAIN INSTITUTIONAL HEADQUARTERS</div>
                                 <h3>Metro Manila Seminary Campus &amp; Library Commons</h3>
                                 <p className="mbs-campus-location">
-                                    <MapPin size={14} color="#F59E0B" />
+                                    <MapPin size={14} color="var(--theme-secondary, #F59E0B)" />
                                     <span>Main Seminary Campus • Metro Manila, Philippines</span>
                                 </p>
                             </div>
@@ -729,28 +729,28 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, initialTab = "
 
                             <div className="mbs-facilities-grid">
                                 <div className="mbs-facility-item">
-                                    <Landmark size={18} color="#F59E0B" />
+                                    <Landmark size={18} color="var(--theme-secondary, #F59E0B)" />
                                     <div>
                                         <strong>500-Seat Chapel Auditorium</strong>
                                         <small>Weekly chapel worship, ordination convocations, and annual pastor colloquiums.</small>
                                     </div>
                                 </div>
                                 <div className="mbs-facility-item">
-                                    <BookOpen size={18} color="#F59E0B" />
+                                    <BookOpen size={18} color="var(--theme-secondary, #F59E0B)" />
                                     <div>
                                         <strong>Theological Research Library</strong>
                                         <small>15,000+ print volumes, ATLA Religion Database access, and Greek/Hebrew study desks.</small>
                                     </div>
                                 </div>
                                 <div className="mbs-facility-item">
-                                    <Building2 size={18} color="#F59E0B" />
+                                    <Building2 size={18} color="var(--theme-secondary, #F59E0B)" />
                                     <div>
                                         <strong>Multimedia Lecture Halls</strong>
                                         <small>Four smart lecture halls equipped with HD streaming cameras for modular broadcasts.</small>
                                     </div>
                                 </div>
                                 <div className="mbs-facility-item">
-                                    <Users size={18} color="#F59E0B" />
+                                    <Users size={18} color="var(--theme-secondary, #F59E0B)" />
                                     <div>
                                         <strong>Admissions &amp; Registrar Center</strong>
                                         <small>Full student services, student records, enrollment counseling, and bookshop.</small>
@@ -789,7 +789,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, initialTab = "
                         {/* Online Extension */}
                         <div className="mbs-online-ext-card">
                             <div className="mbs-online-icon-box">
-                                <Globe size={26} color="#F59E0B" />
+                                <Globe size={26} color="var(--theme-secondary, #F59E0B)" />
                             </div>
                             <div className="mbs-online-text">
                                 <h4>MBS Global Online Extension (Theological LMS 3.0)</h4>
