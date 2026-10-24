@@ -8,7 +8,6 @@ import React, { useState, useEffect, useMemo, useRef, useCallback } from "react"
 import PublicHeader from "../../components/PublicHeader";
 import "./GalleryPage.css";
 import "./PublicUnisonTheme.css";
-import { applyGlobalTheme } from "../../services/landingPageContent";
 import {
     getGalleryPhotos,
     addGalleryPhoto,
@@ -105,7 +104,6 @@ const GalleryPage: React.FC<GalleryPageProps> = ({ onNavigate }) => {
         }
 
         document.title = "Campus Photo Gallery & Student Life | Mobile Bible School & Theological Seminary";
-        applyGlobalTheme();
 
         // Check Admin privilege
         const adminStatus = isUserAdmin();

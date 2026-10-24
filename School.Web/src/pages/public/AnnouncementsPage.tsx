@@ -9,7 +9,6 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import PublicHeader from "../../components/PublicHeader";
 import "./AnnouncementsPage.css";
 import "./PublicUnisonTheme.css";
-import { applyGlobalTheme } from "../../services/landingPageContent";
 import {
     getPublicSchoolAnnouncements,
     type SchoolAnnouncementItem
@@ -105,7 +104,6 @@ const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onNavigate }) => 
         }
 
         document.title = "Campus Bulletins & Academic Announcements | Mobile Bible School";
-        applyGlobalTheme();
 
         fetchAnnouncementsData();
 

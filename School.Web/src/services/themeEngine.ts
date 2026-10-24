@@ -283,8 +283,12 @@ export function getThemePresetId(): string {
 // Dynamically changing ALL pages of the entire system immediately.
 // ============================================================
 
-export function applyGlobalTheme(targetTheme?: any): void {
+let isApplyingTheme = false;
+
+export function applyGlobalTheme(targetTheme?: any, skipBroadcast = false): void {
     if (typeof document === "undefined") return;
+    if (isApplyingTheme) return;
+    isApplyingTheme = true;
 
     try {
         let active = targetTheme;
@@ -388,7 +392,7 @@ export function applyGlobalTheme(targetTheme?: any): void {
         root.setAttribute("data-color-scheme", themeId === "daylight-ivory" ? "light" : "dark");
 
         // Broadcast to all active components
-        if (typeof window !== "undefined") {
+        if (!skipBroadcast && typeof window !== "undefined") {
             window.dispatchEvent(
                 new CustomEvent(THEME_CHANGED_EVENT, {
                     detail: {
@@ -400,6 +404,8 @@ export function applyGlobalTheme(targetTheme?: any): void {
         }
     } catch (err) {
         console.warn("ThemeEngine: Failed to apply global theme:", err);
+    } finally {
+        isApplyingTheme = false;
     }
 }
 

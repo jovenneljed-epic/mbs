@@ -5,7 +5,6 @@
 // ============================================================
 
 import React, { useState, useEffect } from "react";
-import { applyGlobalTheme } from "../../services/landingPageContent";
 import PublicHeader from "../../components/PublicHeader";
 import "./ContactPage.css";
 import "./PublicUnisonTheme.css";
@@ -59,7 +58,6 @@ const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
             window.scrollTo(0, 0);
         }
         document.title = "Contact & Campus Inquiries | Mobile Bible School & Theological Seminary";
-        applyGlobalTheme();
     }, []);
 
     const [form, setForm] = useState<ContactFormData>({

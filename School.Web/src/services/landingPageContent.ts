@@ -452,10 +452,10 @@ import {
 
 export { initGlobalThemeEngine, setThemeMode, setThemePreset, getThemeMode, LUXURY_THEME_PRESETS };
 
-export const applyGlobalTheme = (theme?: ColorThemeSettings): void => {
+export const applyGlobalTheme = (theme?: ColorThemeSettings, skipBroadcast = false): void => {
     try {
         const activeTheme = theme || getLandingPageContent().colorTheme || DEFAULT_COLOR_THEME;
-        engineApplyTheme(activeTheme);
+        engineApplyTheme(activeTheme, skipBroadcast);
         if (typeof window !== "undefined") {
             try {
                 localStorage.setItem("mbs_admin_global_theme", JSON.stringify(activeTheme));
