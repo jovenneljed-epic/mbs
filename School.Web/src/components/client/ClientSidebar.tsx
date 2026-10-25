@@ -50,6 +50,12 @@ const navigationItems: NavigationItem[] = [
         moduleName: "Learning",
     },
     {
+        id: "mbs-support",
+        label: "MBS Support & Library",
+        icon: "🛟",
+        moduleName: "Learning",
+    },
+    {
         id: "church-profile",
         label: "Seminary Profile",
         icon: "◈",

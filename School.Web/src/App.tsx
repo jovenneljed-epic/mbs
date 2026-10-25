@@ -22,6 +22,7 @@ import {
     TrendingDown,
     Settings as SettingsIcon,
     FileEdit,
+    LifeBuoy,
     LogOut,
     Menu,
     School,
@@ -109,6 +110,7 @@ import BlogDetailPage from "./pages/public/business/BlogDetailPage";
 import BlogManagement from "./pages/admin/BlogManagement";
 import BlogPage from "./pages/public/BlogPage";
 import LandingPageEditor from "./pages/admin/LandingPageEditor";
+import MbsSupportManager from "./pages/admin/MbsSupportManager";
 import { CourseSubjectManager } from "./pages/admin/CourseSubjectManager";
 import NotificationBellDropdown from "./components/NotificationBellDropdown";
 import AdminNotificationPopup from "./components/AdminNotificationPopup";
@@ -164,7 +166,8 @@ type Page =
     | "income"
     | "expenses"
     | "settings"
-    | "blog-management";
+    | "blog-management"
+    | "mbs-support";
 
 
 type PublicPage =
@@ -242,6 +245,7 @@ const PAGE_ROUTES: Record<Page, string> = {
     income: "/income",
     expenses: "/expenses",
     settings: "/settings",
+    "mbs-support": "/admin/mbs-support",
     
 };
 
@@ -364,6 +368,8 @@ const PAGE_TITLES: Record<Page, string> = {
         "School Settings",
     "blog-management":
         "Notification Automation Management",
+    "mbs-support":
+        "MBS Support Center & Media Repository",
 
 };
 
@@ -448,6 +454,8 @@ const PAGE_SUBTITLES: Record<Page, string> = {
         "Manage school profile, academic calendar and system configuration",
   "blog-management":
         "Manage school news and campus announcements",
+    "mbs-support":
+        "Upload and manage support documents, theological PDFs, video masterclasses, and ministry toolkits",
 
 };
 
@@ -1292,6 +1300,12 @@ const NAVIGATION_SECTIONS: NavigationSection[] = [
                 page: "landing-editor",
                 label: "Edit Landing Page",
                 icon: <FileEdit size={18} strokeWidth={2} />,
+                permission: "Dashboard",
+            },
+            {
+                page: "mbs-support",
+                label: "MBS Support Center",
+                icon: <LifeBuoy size={18} strokeWidth={2} />,
                 permission: "Dashboard",
             },
             {
@@ -2886,6 +2900,13 @@ if (
             return (
                 <LandingPageEditor
                     onNavigateToSite={() => handlePublicNavigate("landing")}
+                />
+            );
+
+        case "mbs-support":
+            return (
+                <MbsSupportManager
+                    onNavigateToSite={() => handlePublicNavigate("home")}
                 />
             );
 

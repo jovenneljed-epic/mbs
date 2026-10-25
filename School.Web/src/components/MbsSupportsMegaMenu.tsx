@@ -5,7 +5,8 @@
 // Mobile Bible School & Theological Seminary
 // ============================================================
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { getMbsSupportResources, MBS_SUPPORTS_UPDATED_EVENT } from "../services/mbsSupportService";
 import { createPortal } from "react-dom";
 import {
     FileText,
@@ -36,6 +37,8 @@ export interface MbsResourceItem {
     fullDetails: string[];
     downloadUrl?: string;
     videoUrl?: string;
+    fileName?: string;
+    fileData?: string;
     isFeatured?: boolean;
 }
 
@@ -309,8 +312,17 @@ export const MbsSupportsMegaMenu: React.FC<MbsSupportsMegaMenuProps> = ({
     onNavigate,
     onOpenAdmission
 }) => {
+    const [resources, setResources] = useState<MbsResourceItem[]>(getMbsSupportResources);
     const [selectedResource, setSelectedResource] = useState<MbsResourceItem | null>(null);
     const [downloadSuccess, setDownloadSuccess] = useState<string | null>(null);
+
+    useEffect(() => {
+        const handleUpdate = () => {
+            setResources(getMbsSupportResources());
+        };
+        window.addEventListener(MBS_SUPPORTS_UPDATED_EVENT, handleUpdate);
+        return () => window.removeEventListener(MBS_SUPPORTS_UPDATED_EVENT, handleUpdate);
+    }, []);
 
     const handleSelectResource = (resource: MbsResourceItem) => {
         onClose();
@@ -319,27 +331,34 @@ export const MbsSupportsMegaMenu: React.FC<MbsSupportsMegaMenuProps> = ({
     };
 
     const handleSimulatedDownload = (resource: MbsResourceItem) => {
-        // Create an informational simulated download alert/blob
-        const filename = `${resource.title.replace(/[^a-zA-Z0-9]/g, "_")}.${resource.category === "toolkit" ? "zip" : "pdf"}`;
+        const filename = resource.fileName || `${resource.title.replace(/[^a-zA-Z0-9]/g, "_")}.${resource.category === "toolkit" ? "zip" : "pdf"}`;
         setDownloadSuccess(`Initiating direct download for: ${filename} (${resource.fileSize || "Free Resource"})`);
         
         setTimeout(() => {
-            // Trigger browser download feedback
-            const blob = new Blob([
-                `MOBILE BIBLE SCHOOL & THEOLOGICAL SEMINARY - RESOURCE DOWNLOAD\n\nTitle: ${resource.title}\nCategory: ${resource.categoryBadge}\nAuthor: ${resource.author}\nFile Size: ${resource.fileSize || "N/A"}\nFormat: ${resource.fileFormat || "N/A"}\n\nDESCRIPTION:\n${resource.description}\n\nDETAILS:\n${resource.fullDetails.join("\n")}\n\nFor more accredited theological resources and modular degree programs, visit https://mbs-portal.onrender.com or contact admissions at registrar@mobilebibleschool.edu.ph`
-            ], { type: "text/plain;charset=utf-8" });
-            
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            if (resource.fileData) {
+                const a = document.createElement("a");
+                a.href = resource.fileData;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            } else {
+                const blob = new Blob([
+                    `MOBILE BIBLE SCHOOL & THEOLOGICAL SEMINARY - RESOURCE DOWNLOAD\n\nTitle: ${resource.title}\nCategory: ${resource.categoryBadge}\nAuthor: ${resource.author}\nFile Size: ${resource.fileSize || "N/A"}\nFormat: ${resource.fileFormat || "N/A"}\n\nDESCRIPTION:\n${resource.description}\n\nDETAILS:\n${resource.fullDetails.join("\n")}\n\nFor more accredited theological resources and modular degree programs, visit https://mbs-portal.onrender.com or contact admissions at registrar@mobilebibleschool.edu.ph`
+                ], { type: "text/plain;charset=utf-8" });
+                
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
             
             setDownloadSuccess(`Downloaded "${resource.title}" successfully! Check your downloads folder.`);
-        }, 600);
+        }, 500);
     };
 
     return (
@@ -364,7 +383,7 @@ export const MbsSupportsMegaMenu: React.FC<MbsSupportsMegaMenuProps> = ({
                             <div
                                 className="apple-hero-card supports-hero-card"
                                 onClick={() => {
-                                    const pastoral = DEFAULT_MBS_RESOURCES.find(r => r.id === "pdf-pastoral-handbook");
+                                    const pastoral = resources.find(r => r.id === "pdf-pastoral-handbook") || resources[0];
                                     if (pastoral) handleSelectResource(pastoral);
                                 }}
                                 title="Click to view and download Pastoral Ministry Handbook"
@@ -380,7 +399,7 @@ export const MbsSupportsMegaMenu: React.FC<MbsSupportsMegaMenuProps> = ({
                             </div>
 
                             <div className="apple-link-list">
-                                {DEFAULT_MBS_RESOURCES.filter(r => r.category === "pdf" && r.id !== "pdf-pastoral-handbook").map(item => (
+                                {resources.filter(r => r.category === "pdf" && r.id !== "pdf-pastoral-handbook").map(item => (
                                     <button
                                         key={item.id}
                                         type="button"
@@ -405,7 +424,7 @@ export const MbsSupportsMegaMenu: React.FC<MbsSupportsMegaMenuProps> = ({
                             <div
                                 className="apple-hero-card supports-hero-card"
                                 onClick={() => {
-                                    const expository = DEFAULT_MBS_RESOURCES.find(r => r.id === "vid-expository-preaching");
+                                    const expository = resources.find(r => r.id === "vid-expository-preaching") || resources.find(r => r.category === "video");
                                     if (expository) handleSelectResource(expository);
                                 }}
                                 title="Click to watch Expository Preaching Masterclass video"
@@ -421,7 +440,7 @@ export const MbsSupportsMegaMenu: React.FC<MbsSupportsMegaMenuProps> = ({
                             </div>
 
                             <div className="apple-link-list">
-                                {DEFAULT_MBS_RESOURCES.filter(r => r.category === "video" && r.id !== "vid-expository-preaching").map(item => (
+                                {resources.filter(r => r.category === "video" && r.id !== "vid-expository-preaching").map(item => (
                                     <button
                                         key={item.id}
                                         type="button"
@@ -444,7 +463,7 @@ export const MbsSupportsMegaMenu: React.FC<MbsSupportsMegaMenuProps> = ({
                             </div>
 
                             <div className="satellite-formats-stack">
-                                {DEFAULT_MBS_RESOURCES.filter(r => r.category === "toolkit").map(tool => (
+                                {resources.filter(r => r.category === "toolkit").map(tool => (
                                     <div
                                         key={tool.id}
                                         className="satellite-format-card supports-format-card"
@@ -557,7 +576,7 @@ export const MbsSupportsMegaMenu: React.FC<MbsSupportsMegaMenuProps> = ({
                             type="button"
                             className="apple-mega-cta-btn supports-cta-btn"
                             onClick={() => {
-                                const firstPdf = DEFAULT_MBS_RESOURCES.find(r => r.category === "pdf");
+                                const firstPdf = resources.find(r => r.category === "pdf");
                                 if (firstPdf) handleSelectResource(firstPdf);
                             }}
                         >

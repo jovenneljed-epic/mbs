@@ -20,6 +20,7 @@ import ClientAttendance from "./ClientAttendance";
 import ClientChurchServices from "./ClientChurchServices";
 import GivingManagementPage from "./GivingManagementPage";
 import StudentLearningArea from "./learning/StudentLearningArea";
+import MbsSupportManager from "./admin/MbsSupportManager";
 import StudentDashboard from "./client/StudentDashboard";
 
 
@@ -1123,6 +1124,13 @@ const ClientPortal: React.FC<ClientPortalProps> = ({
                         activePage ===
                         "learning" && (
                             <StudentLearningArea />
+                        )
+                    }
+
+                    {
+                        activePage ===
+                        "mbs-support" && (
+                            <MbsSupportManager />
                         )
                     }
 
