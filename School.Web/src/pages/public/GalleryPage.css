@@ -917,14 +917,146 @@
     background: rgba(255, 255, 255, 0.14);
 }
 
-.mbs-btn-share {
+.mbs-btn-share,
+.mbs-btn-share-main {
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.12);
     color: #f1f5f9;
 }
 
-.mbs-btn-share:hover {
-    background: rgba(255, 255, 255, 0.14);
+.mbs-btn-share:hover,
+.mbs-btn-share-main:hover {
+    background: rgba(245, 158, 11, 0.15);
+    border-color: rgba(245, 158, 11, 0.4);
+    color: #FDE68A;
+}
+
+.mbs-btn-share-main {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(217, 119, 6, 0.06) 100%);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    color: #FDE68A;
+    font-weight: 700;
+}
+
+/* Actions Container & Quick Social Strip */
+.mbs-lightbox-actions-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mbs-lightbox-actions-container .mbs-lightbox-actions {
+    border-top: none;
+    padding-top: 0;
+}
+
+.mbs-quick-social-strip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    padding: 8px 12px;
+}
+
+.mbs-quick-social-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #94a3b8;
+}
+
+.mbs-quick-social-buttons {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.mbs-quick-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 9px;
+    border-radius: 6px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid transparent;
+}
+
+.mbs-quick-btn.fb {
+    background: rgba(24, 119, 242, 0.14);
+    border-color: rgba(24, 119, 242, 0.35);
+    color: #60a5fa;
+}
+
+.mbs-quick-btn.fb:hover {
+    background: #1877F2;
+    border-color: #1877F2;
+    color: #ffffff;
+    transform: translateY(-1px);
+}
+
+.mbs-quick-btn.tw {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.16);
+    color: #f1f5f9;
+}
+
+.mbs-quick-btn.tw:hover {
+    background: #ffffff;
+    border-color: #ffffff;
+    color: #0b0f19;
+    transform: translateY(-1px);
+}
+
+.mbs-quick-btn.tt {
+    background: rgba(254, 44, 85, 0.12);
+    border-color: rgba(254, 44, 85, 0.35);
+    color: #ff5b79;
+}
+
+.mbs-quick-btn.tt:hover {
+    background: linear-gradient(135deg, #FE2C55 0%, #25F4EE 100%);
+    border-color: transparent;
+    color: #000000;
+    font-weight: 700;
+    transform: translateY(-1px);
+}
+
+.mbs-quick-btn.wa {
+    background: rgba(37, 211, 102, 0.12);
+    border-color: rgba(37, 211, 102, 0.35);
+    color: #4ade80;
+}
+
+.mbs-quick-btn.wa:hover {
+    background: #25D366;
+    border-color: #25D366;
+    color: #0b0f19;
+    font-weight: 700;
+    transform: translateY(-1px);
+}
+
+.mbs-quick-btn.copy {
+    background: rgba(245, 158, 11, 0.12);
+    border-color: rgba(245, 158, 11, 0.3);
+    color: #FDE68A;
+}
+
+.mbs-quick-btn.copy:hover {
+    background: #F59E0B;
+    border-color: #F59E0B;
+    color: #0b0f19;
+    font-weight: 700;
+    transform: translateY(-1px);
 }
 
 .mbs-btn-admin-trash {
@@ -943,6 +1075,392 @@
     font-size: 0.74rem;
     color: #64748b;
     text-align: right;
+}
+
+/* ============================================================
+   SOCIAL MEDIA SHARE DIALOG MODAL
+   ============================================================ */
+
+.mbs-share-dialog {
+    position: relative;
+    width: 100%;
+    max-width: 580px;
+    background: #111827;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 25px 65px rgba(0, 0, 0, 0.85);
+    animation: mbsModalFadeIn 0.22s ease-out;
+}
+
+.mbs-share-dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(15, 23, 42, 0.7);
+}
+
+.mbs-share-title-box {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.mbs-share-crest-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mbs-share-title-box h3 {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0;
+}
+
+.mbs-share-title-box small {
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+.mbs-share-dialog-body {
+    padding: 22px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+/* Preview Card */
+.mbs-share-preview-card {
+    display: flex;
+    gap: 14px;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 12px;
+    padding: 12px;
+    align-items: center;
+}
+
+.mbs-share-preview-card img {
+    width: 80px;
+    height: 60px;
+    border-radius: 8px;
+    object-fit: cover;
+    background: #000000;
+    flex-shrink: 0;
+}
+
+.mbs-share-preview-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.mbs-share-preview-top {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+}
+
+.mbs-share-preview-info h4 {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mbs-share-preview-info p {
+    font-size: 0.74rem;
+    color: #94a3b8;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Channels Section */
+.mbs-share-section-title {
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #cbd5e1;
+}
+
+.mbs-share-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+@media (max-width: 520px) {
+    .mbs-share-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.mbs-share-tile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: rgba(15, 23, 42, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mbs-share-tile:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.mbs-tile-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+}
+
+.mbs-share-tile:hover .mbs-tile-icon {
+    transform: scale(1.08);
+}
+
+.mbs-tile-icon.fb {
+    background: rgba(24, 119, 242, 0.15);
+    color: #1877F2;
+    border: 1px solid rgba(24, 119, 242, 0.3);
+}
+
+.mbs-share-tile.fb:hover {
+    border-color: #1877F2;
+    background: rgba(24, 119, 242, 0.12);
+}
+
+.mbs-tile-icon.tw {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.mbs-share-tile.tw:hover {
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.mbs-tile-icon.tt {
+    background: rgba(254, 44, 85, 0.12);
+    color: #FE2C55;
+    border: 1px solid rgba(254, 44, 85, 0.3);
+}
+
+.mbs-share-tile.tt:hover {
+    border-color: #FE2C55;
+    background: rgba(254, 44, 85, 0.14);
+}
+
+.mbs-tile-icon.wa {
+    background: rgba(37, 211, 102, 0.12);
+    color: #25D366;
+    border: 1px solid rgba(37, 211, 102, 0.3);
+}
+
+.mbs-share-tile.wa:hover {
+    border-color: #25D366;
+    background: rgba(37, 211, 102, 0.14);
+}
+
+.mbs-tile-icon.li {
+    background: rgba(10, 102, 194, 0.12);
+    color: #0A66C2;
+    border: 1px solid rgba(10, 102, 194, 0.3);
+}
+
+.mbs-share-tile.li:hover {
+    border-color: #0A66C2;
+    background: rgba(10, 102, 194, 0.14);
+}
+
+.mbs-tile-icon.native {
+    background: rgba(245, 158, 11, 0.12);
+    color: #F59E0B;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.mbs-share-tile.native:hover {
+    border-color: #F59E0B;
+    background: rgba(245, 158, 11, 0.14);
+}
+
+.mbs-tile-meta {
+    display: flex;
+    flex-direction: column;
+}
+
+.mbs-tile-meta strong {
+    font-size: 0.86rem;
+    color: #ffffff;
+}
+
+.mbs-tile-meta span {
+    font-size: 0.72rem;
+    color: #94a3b8;
+}
+
+/* Direct Link Section */
+.mbs-share-link-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mbs-share-link-section label {
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #cbd5e1;
+}
+
+.mbs-share-link-input-wrap {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.mbs-share-link-input-wrap input {
+    flex: 1;
+    background: #0b0f19;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.82rem;
+    color: #94a3b8;
+    outline: none;
+    font-family: monospace;
+}
+
+.mbs-share-link-input-wrap input:focus {
+    border-color: #F59E0B;
+    color: #ffffff;
+}
+
+.mbs-copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+    border-radius: 10px;
+    color: #FDE68A;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+
+.mbs-copy-btn:hover {
+    background: #F59E0B;
+    color: #0b0f19;
+}
+
+.mbs-copy-btn.copied {
+    background: #10B981;
+    border-color: #10B981;
+    color: #ffffff;
+}
+
+/* TikTok & Instagram Caption Box */
+.mbs-tiktok-caption-section {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(254, 44, 85, 0.25);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mbs-tiktok-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.mbs-tiktok-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #ff5b79;
+}
+
+.mbs-copy-caption-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    background: rgba(254, 44, 85, 0.15);
+    border: 1px solid rgba(254, 44, 85, 0.35);
+    border-radius: 8px;
+    color: #ff7f99;
+    font-size: 0.74rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mbs-copy-caption-btn:hover {
+    background: #FE2C55;
+    color: #ffffff;
+}
+
+.mbs-tiktok-caption-preview {
+    background: #090d16;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    padding: 10px 12px;
+    max-height: 90px;
+    overflow-y: auto;
+}
+
+.mbs-tiktok-caption-preview code {
+    font-size: 0.74rem;
+    color: #cbd5e1;
+    font-family: inherit;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.mbs-tiktok-help {
+    font-size: 0.72rem;
+    color: #94a3b8;
+    line-height: 1.4;
 }
 
 /* ============================================================
