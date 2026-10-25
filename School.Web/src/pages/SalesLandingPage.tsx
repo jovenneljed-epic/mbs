@@ -45,8 +45,22 @@ import {
     Image as ImageIcon,
     Bell,
     Sparkles,
-    Phone
+    Phone,
+    Edit2,
+    Trash2,
+    Plus,
+    Check
 } from "lucide-react";
+import {
+    getAlumniData,
+    saveAlumniData,
+    resetAlumniData,
+    isUserAdmin,
+    ALUMNI_UPDATED_EVENT,
+    DEFAULT_ALUMNI_SECTION
+} from "../services/alumniService";
+import type { AlumniSectionConfig } from "../services/alumniService";
+import AlumniEditorModal from "../components/AlumniEditorModal";
 
 interface SalesLandingPageProps {
     onNavigate?: (page: string) => void;
@@ -130,9 +144,26 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
 
         window.addEventListener(THEME_CHANGED_EVENT, handleThemeChanged);
         window.addEventListener(LANDING_CONTENT_EVENT, handleContentUpdate);
+
+        // Check Admin privilege & load live Alumni
+        setIsAdmin(isUserAdmin());
+        getAlumniData().then(data => {
+            if (data && data.items) {
+                setAlumniConfig(data);
+            }
+        }).catch(err => console.warn("Failed to load live alumni:", err));
+
+        const handleAlumniUpdate = (e: any) => {
+            if (e && e.detail) {
+                setAlumniConfig(e.detail);
+            }
+        };
+        window.addEventListener(ALUMNI_UPDATED_EVENT as any, handleAlumniUpdate);
+
         return () => {
             window.removeEventListener(THEME_CHANGED_EVENT, handleThemeChanged);
             window.removeEventListener(LANDING_CONTENT_EVENT, handleContentUpdate);
+            window.removeEventListener(ALUMNI_UPDATED_EVENT as any, handleAlumniUpdate);
         };
     }, []);
 
@@ -266,7 +297,6 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
 
     // Achievers pagination state
     const [achieverPage, setAchieverPage] = useState(1);
-    const totalAchieverPages = 3;
 
     const [formData, setFormData] = useState<AdmissionFormData>({
         fullName: "",
@@ -553,105 +583,40 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
         }
     ], []);
 
-    // Alumni & Achievers Database across 3 pages
-    const achieversData = useMemo(() => ({
-        1: [
-            {
-                id: "1",
-                category: "BACHELOR OF THEOLOGY (B.TH.)",
-                rate: "100% ORDAINED",
-                title: "Rev. David S. Morales, B.Th.",
-                role: "Senior Pastor & Church Planter",
-                honors: "Batch 2021 Summa Cum Laude",
-                achievement: "Successfully planted 3 daughter churches and equipped 45 lay preachers across Southern Tagalog.",
-                initials: "DM"
-            },
-            {
-                id: "2",
-                category: "MASTER OF MINISTRY (M.MIN.)",
-                rate: "DISTINGUISHED ALUMNA",
-                title: "Dr. Rebecca L. Santos, M.Min.",
-                role: "Director of Biblical Counseling & Family Ministry",
-                honors: "Batch 2019 Valedictorian",
-                achievement: "Author of pastoral counseling manuals used across 80+ partner churches in Metro Manila.",
-                initials: "RS"
-            },
-            {
-                id: "3",
-                category: "MASTER OF THEOLOGY (M.TH.)",
-                rate: "EXPOSITOR & SCHOLAR",
-                title: "Pastor Jonathan M. Cruz, M.Th.",
-                role: "Dean of Biblical Languages & Exegesis",
-                honors: "Batch 2016 High Distinction",
-                achievement: "Lecturer in New Testament Greek, mentoring 120+ pastors in expository verse-by-verse pulpit ministry.",
-                initials: "JC"
-            }
-        ],
-        2: [
-            {
-                id: "4",
-                category: "DIPLOMA IN PASTORAL STUDIES (DPS)",
-                rate: "CHURCH REVITALIZER",
-                title: "Pastor Timothy A. Bautista, DPS",
-                role: "Lead Pastor & Youth Evangelist",
-                honors: "Batch 2022 Magna Cum Laude",
-                achievement: "Revitalized a struggling municipal congregation, growing active Sunday attendance from 30 to over 280 members.",
-                initials: "TB"
-            },
-            {
-                id: "5",
-                category: "CROSS-CULTURAL MISSIONS",
-                rate: "FRONTIER MISSIONARY",
-                title: "Missionary Sarah G. Ramos, B.Th.",
-                role: "Indigenous Church Planter",
-                honors: "Batch 2020 Leadership Award",
-                achievement: "Established 4 tribal Bible study fellowship hubs with translated hymnody and children's catechisms.",
-                initials: "SR"
-            },
-            {
-                id: "6",
-                category: "DOCTOR OF THEOLOGY (D.TH.)",
-                rate: "THEOLOGICAL PROFESSOR",
-                title: "Dr. Benjamin K. Lee, D.Th.",
-                role: "Professor of Systematic Theology",
-                honors: "Batch 2014 Doctoral Fellow",
-                achievement: "Published 3 peer-reviewed theological treatises on Reformation Ecclesiology and Expository Preaching.",
-                initials: "BL"
-            }
-        ],
-        3: [
-            {
-                id: "7",
-                category: "CERTIFICATE IN BIBLICAL STUDIES (CBS)",
-                rate: "LAY MINISTRY LEADER",
-                title: "Sister Mary Grace Torres, CBS",
-                role: "Director of Children's Ministry & VBS",
-                honors: "Batch 2023 Exemplary Service",
-                achievement: "Trained 200+ Sunday school teachers and coordinated Vacation Bible Schools reaching 1,500 children.",
-                initials: "MT"
-            },
-            {
-                id: "8",
-                category: "BACHELOR OF THEOLOGY (B.TH.)",
-                rate: "CAMPUS CHAPLAIN",
-                title: "Pastor Emmanuel R. Reyes, B.Th.",
-                role: "Collegiate Chaplain & Discipleship Mentor",
-                honors: "Batch 2018 Academic Excellence",
-                achievement: "Founded collegiate Christian fellowships across 5 university campuses in central Luzon.",
-                initials: "ER"
-            },
-            {
-                id: "9",
-                category: "MASTER OF MINISTRY (M.MIN.)",
-                rate: "WORSHIP DIRECTOR",
-                title: "Pastor Nathaniel O. Castro, M.Min.",
-                role: "Dean of Church Music & Hymnology",
-                honors: "Batch 2017 Ministry Distinction",
-                achievement: "Mentored over 60 church choirs and praise ensembles in Christ-centered, scripture-rich liturgical worship.",
-                initials: "NC"
-            }
-        ]
-    }), []);
+    // Alumni & Achievers Live Data (CMS-driven, editable by Admin, view-only for others)
+    const [alumniConfig, setAlumniConfig] = useState<AlumniSectionConfig>(DEFAULT_ALUMNI_SECTION);
+    const [isAdmin, setIsAdmin] = useState<boolean>(false);
+    const [isAlumniModalOpen, setIsAlumniModalOpen] = useState<boolean>(false);
+    const [editingAlumniId, setEditingAlumniId] = useState<string | null>(null);
+    const [alumniToast, setAlumniToast] = useState<string | null>(null);
+
+    const handleSaveAlumniConfig = async (updated: AlumniSectionConfig): Promise<boolean> => {
+        const ok = await saveAlumniData(updated);
+        if (ok) {
+            setAlumniConfig(updated);
+            showAlumniToast("Alumni showcase updated and published successfully!");
+        }
+        return ok;
+    };
+
+    const handleResetAlumniConfig = async () => {
+        const def = await resetAlumniData();
+        setAlumniConfig(def);
+        showAlumniToast("Restored official seminary alumni defaults.");
+    };
+
+    const handleDeleteSingleAlumnus = async (id: string, name: string) => {
+        if (window.confirm(`Delete "${name}" from alumni showcase?`)) {
+            const newItems = alumniConfig.items.filter(it => it.id !== id);
+            const updated: AlumniSectionConfig = { ...alumniConfig, items: newItems };
+            await handleSaveAlumniConfig(updated);
+        }
+    };
+
+    const showAlumniToast = (msg: string) => {
+        setAlumniToast(msg);
+        setTimeout(() => setAlumniToast(null), 3000);
+    };
 
     // Filtered portals
     const filteredPortals = useMemo(() => {
@@ -1281,86 +1246,158 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
             {/* ============================================================ */}
             {/* LICENSURE & ORDAINED ACHIEVERS SHOWCASE                      */}
             {/* ============================================================ */}
-            <section className="ub-achievers-section">
-                <div className="ub-portals-container">
-                    <div className="ub-section-header">
-                        <span className="ub-section-tag">FAITHFUL ALUMNI & GOSPEL IMPACT</span>
-                        <h2 className="ub-section-title">Ordained Alumni & Ministry Achievers</h2>
-                        <div className="ub-title-line" />
-                        <p className="ub-section-lead">
-                            Celebrating our graduates who are faithfully planting churches, shepherding congregations,
-                            and leading cross-cultural ministries worldwide.
-                        </p>
-                    </div>
+            {(() => {
+                const totalPages = Math.max(1, Math.ceil(alumniConfig.items.length / 3));
+                const activePage = Math.min(achieverPage, totalPages);
+                const currentBatch = alumniConfig.items.slice((activePage - 1) * 3, activePage * 3);
 
-                    <div className="ub-achievers-grid">
-                        {(achieversData[achieverPage as keyof typeof achieversData] || achieversData[1]).map((achiever) => (
-                            <div key={achiever.id} className="ub-achiever-card">
-                                <div className="ub-achiever-banner">
-                                    <span className="ub-achiever-rate-tag">{achiever.rate}</span>
-                                    <span className="ub-achiever-dept">{achiever.category}</span>
-                                </div>
-
-                                <div className="ub-achiever-body">
-                                    <div className="ub-achiever-avatar">
-                                        <div className="ub-avatar-circle">
-                                            <span>{achiever.initials}</span>
-                                        </div>
-                                        <div className="ub-avatar-medal">
-                                            <Award className="w-4 h-4 text-amber-900" />
+                return (
+                    <section className="ub-achievers-section">
+                        <div className="ub-portals-container">
+                            {/* ADMINISTRATOR CMS CONTROL BAR (Visible to Admin Only) */}
+                            {isAdmin && (
+                                <div className="ub-alumni-admin-bar">
+                                    <div className="ub-alumni-admin-badge">
+                                        <ShieldCheck size={18} color="#10B981" />
+                                        <div>
+                                            <strong>Administrator Mode Active • Faithful Alumni CMS</strong>
+                                            <small>You have authorized administrative privilege to edit headers, add alumni, and manage achiever profiles.</small>
                                         </div>
                                     </div>
-
-                                    <h3 className="ub-achiever-name">{achiever.title}</h3>
-                                    <p className="ub-achiever-role">{achiever.role}</p>
-                                    <p className="ub-achiever-honors">{achiever.honors}</p>
-
-                                    <div className="ub-achiever-quote">
-                                        "{achiever.achievement}"
+                                    <div className="ub-alumni-admin-actions">
+                                        <button
+                                            type="button"
+                                            className="ub-btn-alumni-edit"
+                                            onClick={() => {
+                                                setEditingAlumniId(null);
+                                                setIsAlumniModalOpen(true);
+                                            }}
+                                        >
+                                            <Edit2 size={13} />
+                                            <span>Edit Section &amp; Roster</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="ub-btn-alumni-edit"
+                                            style={{ background: "#059669" }}
+                                            onClick={() => {
+                                                setEditingAlumniId("new");
+                                                setIsAlumniModalOpen(true);
+                                            }}
+                                        >
+                                            <Plus size={13} />
+                                            <span>Add Alumnus</span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="ub-btn-alumni-reset"
+                                            onClick={handleResetAlumniConfig}
+                                            title="Restore default curated alumni profiles"
+                                        >
+                                            <span>Reset Defaults</span>
+                                        </button>
                                     </div>
                                 </div>
+                            )}
+
+                            <div className="ub-section-header">
+                                <span className="ub-section-tag">{alumniConfig.tag}</span>
+                                <h2 className="ub-section-title">{alumniConfig.title}</h2>
+                                <div className="ub-title-line" />
+                                <p className="ub-section-lead">{alumniConfig.lead}</p>
                             </div>
-                        ))}
-                    </div>
 
-                    {/* Pagination bar with real page switching */}
-                    <div className="ub-pagination-bar">
-                        <button
-                            className="ub-page-nav"
-                            disabled={achieverPage === 1}
-                            onClick={() => setAchieverPage(p => Math.max(1, p - 1))}
-                        >
-                            &lt; Previous
-                        </button>
-                        <button
-                            className={`ub-page-number ${achieverPage === 1 ? "active" : ""}`}
-                            onClick={() => setAchieverPage(1)}
-                        >
-                            1
-                        </button>
-                        <button
-                            className={`ub-page-number ${achieverPage === 2 ? "active" : ""}`}
-                            onClick={() => setAchieverPage(2)}
-                        >
-                            2
-                        </button>
-                        <button
-                            className={`ub-page-number ${achieverPage === 3 ? "active" : ""}`}
-                            onClick={() => setAchieverPage(3)}
-                        >
-                            3
-                        </button>
-                        <span className="ub-page-ellipsis">...</span>
-                        <button
-                            className="ub-page-nav"
-                            disabled={achieverPage === totalAchieverPages}
-                            onClick={() => setAchieverPage(p => Math.min(totalAchieverPages, p + 1))}
-                        >
-                            Next &gt;
-                        </button>
-                    </div>
-                </div>
-            </section>
+                            <div className="ub-achievers-grid">
+                                {currentBatch.map((achiever) => (
+                                    <div key={achiever.id} className="ub-achiever-card">
+                                        <div className="ub-achiever-banner">
+                                            <span className="ub-achiever-rate-tag">{achiever.rate}</span>
+                                            <span className="ub-achiever-dept">{achiever.category}</span>
+
+                                            {/* ADMIN EDIT / DELETE SHORTCUTS */}
+                                            {isAdmin && (
+                                                <div className="ub-card-admin-actions">
+                                                    <button
+                                                        type="button"
+                                                        className="ub-btn-card-action"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setEditingAlumniId(achiever.id);
+                                                            setIsAlumniModalOpen(true);
+                                                        }}
+                                                        title="Edit this alumnus"
+                                                    >
+                                                        <Edit2 size={12} />
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className="ub-btn-card-action delete"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleDeleteSingleAlumnus(achiever.id, achiever.title);
+                                                        }}
+                                                        title="Delete this alumnus"
+                                                    >
+                                                        <Trash2 size={12} />
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="ub-achiever-body">
+                                            <div className="ub-achiever-avatar">
+                                                <div className="ub-avatar-circle">
+                                                    <span>{achiever.initials}</span>
+                                                </div>
+                                                <div className="ub-avatar-medal">
+                                                    <Award className="w-4 h-4 text-amber-900" />
+                                                </div>
+                                            </div>
+
+                                            <h3 className="ub-achiever-name">{achiever.title}</h3>
+                                            <p className="ub-achiever-role">{achiever.role}</p>
+                                            <p className="ub-achiever-honors">{achiever.honors}</p>
+
+                                            <div className="ub-achiever-quote">
+                                                &ldquo;{achiever.achievement}&rdquo;
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Pagination bar with dynamic pages */}
+                            {totalPages > 1 && (
+                                <div className="ub-pagination-bar">
+                                    <button
+                                        className="ub-page-nav"
+                                        disabled={activePage === 1}
+                                        onClick={() => setAchieverPage(p => Math.max(1, p - 1))}
+                                    >
+                                        &lt; Previous
+                                    </button>
+                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+                                        <button
+                                            key={pageNum}
+                                            className={`ub-page-number ${activePage === pageNum ? "active" : ""}`}
+                                            onClick={() => setAchieverPage(pageNum)}
+                                        >
+                                            {pageNum}
+                                        </button>
+                                    ))}
+                                    <button
+                                        className="ub-page-nav"
+                                        disabled={activePage === totalPages}
+                                        onClick={() => setAchieverPage(p => Math.min(totalPages, p + 1))}
+                                    >
+                                        Next &gt;
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </section>
+                );
+            })()}
 
             {/* ============================================================ */}
             {/* NEWS & FEATURES SECTION                                     */}
@@ -1842,6 +1879,28 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
                             </button>
                         </div>
                     </div>
+                </div>
+            )}
+            {/* ALUMNI CMS MODAL (ADMIN ONLY) */}
+            {isAdmin && (
+                <AlumniEditorModal
+                    isOpen={isAlumniModalOpen}
+                    config={alumniConfig}
+                    editingItemId={editingAlumniId === "new" ? null : editingAlumniId}
+                    onSave={handleSaveAlumniConfig}
+                    onReset={handleResetAlumniConfig}
+                    onClose={() => {
+                        setIsAlumniModalOpen(false);
+                        setEditingAlumniId(null);
+                    }}
+                />
+            )}
+
+            {/* ALUMNI TOAST FEEDBACK */}
+            {alumniToast && (
+                <div className="ub-alumni-toast">
+                    <Check size={18} color="#10b981" />
+                    <span>{alumniToast}</span>
                 </div>
             )}
         </div>
