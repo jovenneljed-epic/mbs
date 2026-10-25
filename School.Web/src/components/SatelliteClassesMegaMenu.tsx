@@ -5,6 +5,7 @@
 // ============================================================
 
 import React, { useState } from "react";
+import { createPortal } from "react-dom";
 import {
     MapPin,
     Globe,
@@ -402,9 +403,15 @@ export const SatelliteClassesMegaMenu: React.FC<SatelliteClassesMegaMenuProps> =
                 </div>
             </div>
 
-            {/* SATELLITE CAMPUS DETAILS MODAL */}
-            {selectedCampus && (
-                <div className="ub-modal-overlay" onClick={() => setSelectedCampus(null)}>
+            {/* SATELLITE CAMPUS DETAILS MODAL - RENDERED VIA PORTAL TO BODY FOR FLAWLESS CENTERING */}
+            {selectedCampus && typeof document !== "undefined" && createPortal(
+                <div 
+                    className="ub-modal-overlay satellite-modal-overlay" 
+                    onClick={() => setSelectedCampus(null)}
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="satellite-modal-title"
+                >
                     <div className="ub-event-modal satellite-modal-card" onClick={e => e.stopPropagation()}>
                         <button
                             type="button"
@@ -412,24 +419,24 @@ export const SatelliteClassesMegaMenu: React.FC<SatelliteClassesMegaMenuProps> =
                             onClick={() => setSelectedCampus(null)}
                             aria-label="Close Satellite Modal"
                         >
-                            <X className="w-5 h-5" />
+                            <X size={18} />
                         </button>
 
                         <span className="ub-event-modal-badge satellite-badge-region">
                             {selectedCampus.regionBadge}
                         </span>
-                        <h2 className="ub-event-modal-title">{selectedCampus.name}</h2>
+                        <h2 id="satellite-modal-title" className="ub-event-modal-title">{selectedCampus.name}</h2>
 
                         <div className="ub-event-modal-meta-grid">
                             <div className="ub-event-meta-cell">
-                                <MapPin size={16} className="ub-event-meta-icon" />
+                                <MapPin size={16} className="ub-event-meta-icon sat-icon" />
                                 <div>
                                     <p className="ub-event-meta-label">Campus Location</p>
                                     <p className="ub-event-meta-val">{selectedCampus.location}</p>
                                 </div>
                             </div>
                             <div className="ub-event-meta-cell">
-                                <Clock size={16} className="ub-event-meta-icon" />
+                                <Clock size={16} className="ub-event-meta-icon sat-icon" />
                                 <div>
                                     <p className="ub-event-meta-label">Class Schedule</p>
                                     <p className="ub-event-meta-val">{selectedCampus.schedule}</p>
@@ -459,10 +466,10 @@ export const SatelliteClassesMegaMenu: React.FC<SatelliteClassesMegaMenuProps> =
                             </div>
                         </div>
 
-                        <div className="ub-event-modal-actions">
+                        <div className="ub-event-modal-actions satellite-modal-actions">
                             <button
                                 type="button"
-                                className="ub-btn-primary"
+                                className="ub-btn-primary satellite-btn-primary"
                                 onClick={() => {
                                     const campusName = selectedCampus.name;
                                     setSelectedCampus(null);
@@ -474,7 +481,7 @@ export const SatelliteClassesMegaMenu: React.FC<SatelliteClassesMegaMenuProps> =
                             </button>
                             <button
                                 type="button"
-                                className="ub-btn-secondary"
+                                className="ub-btn-secondary satellite-btn-secondary"
                                 onClick={() => {
                                     setSelectedCampus(null);
                                     onNavigate("learning");
@@ -485,7 +492,8 @@ export const SatelliteClassesMegaMenu: React.FC<SatelliteClassesMegaMenuProps> =
                             </button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </>
     );
