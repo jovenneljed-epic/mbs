@@ -62,6 +62,7 @@ import {
 import type { AlumniSectionConfig } from "../services/alumniService";
 import AlumniEditorModal from "../components/AlumniEditorModal";
 import SatelliteClassesMegaMenu from "../components/SatelliteClassesMegaMenu";
+import MbsSupportsMegaMenu from "../components/MbsSupportsMegaMenu";
 
 interface SalesLandingPageProps {
     onNavigate?: (page: string) => void;
@@ -211,6 +212,8 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
     const closeTimeoutRef = useRef<any>(null);
     const [isSatelliteMenuOpen, setIsSatelliteMenuOpen] = useState(false);
     const satelliteTimeoutRef = useRef<any>(null);
+    const [isSupportsMenuOpen, setIsSupportsMenuOpen] = useState(false);
+    const supportsTimeoutRef = useRef<any>(null);
     const [schoolEvents, setSchoolEvents] = useState<SchoolEventItem[]>(DEFAULT_SCHOOL_EVENTS);
     const [schoolAnnouncements, setSchoolAnnouncements] = useState<SchoolAnnouncementItem[]>(DEFAULT_SCHOOL_ANNOUNCEMENTS);
     const [isLoadingEvents, setIsLoadingEvents] = useState(false);
@@ -259,7 +262,9 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
     const handleMouseEnterCampus = () => {
         if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
         if (satelliteTimeoutRef.current) clearTimeout(satelliteTimeoutRef.current);
+        if (supportsTimeoutRef.current) clearTimeout(supportsTimeoutRef.current);
         setIsSatelliteMenuOpen(false);
+        setIsSupportsMenuOpen(false);
         setIsCampusMenuOpen(true);
     };
 
@@ -271,6 +276,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
 
     const toggleCampusMenu = () => {
         setIsSatelliteMenuOpen(false);
+        setIsSupportsMenuOpen(false);
         setIsCampusMenuOpen(prev => !prev);
     };
 
@@ -283,7 +289,9 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
     const handleMouseEnterSatellite = () => {
         if (satelliteTimeoutRef.current) clearTimeout(satelliteTimeoutRef.current);
         if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+        if (supportsTimeoutRef.current) clearTimeout(supportsTimeoutRef.current);
         setIsCampusMenuOpen(false);
+        setIsSupportsMenuOpen(false);
         setIsSatelliteMenuOpen(true);
     };
 
@@ -295,6 +303,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
 
     const toggleSatelliteMenu = () => {
         setIsCampusMenuOpen(false);
+        setIsSupportsMenuOpen(false);
         setIsSatelliteMenuOpen(prev => !prev);
     };
 
@@ -303,12 +312,40 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
         setIsSatelliteMenuOpen(false);
     };
 
+    // Graceful Apple-style hover delay handlers for MBS Supports
+    const handleMouseEnterSupports = () => {
+        if (supportsTimeoutRef.current) clearTimeout(supportsTimeoutRef.current);
+        if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+        if (satelliteTimeoutRef.current) clearTimeout(satelliteTimeoutRef.current);
+        setIsCampusMenuOpen(false);
+        setIsSatelliteMenuOpen(false);
+        setIsSupportsMenuOpen(true);
+    };
+
+    const handleMouseLeaveSupports = () => {
+        supportsTimeoutRef.current = setTimeout(() => {
+            setIsSupportsMenuOpen(false);
+        }, 220);
+    };
+
+    const toggleSupportsMenu = () => {
+        setIsCampusMenuOpen(false);
+        setIsSatelliteMenuOpen(false);
+        setIsSupportsMenuOpen(prev => !prev);
+    };
+
+    const closeSupportsMenu = () => {
+        if (supportsTimeoutRef.current) clearTimeout(supportsTimeoutRef.current);
+        setIsSupportsMenuOpen(false);
+    };
+
     // Close menu & modals on Escape key
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === "Escape") {
                 setIsCampusMenuOpen(false);
                 setIsSatelliteMenuOpen(false);
+                setIsSupportsMenuOpen(false);
                 setSelectedEvent(null);
                 setSelectedAnnouncement(null);
             }
@@ -733,16 +770,22 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
                                 <ChevronDown size={13} className={`ub-campus-chevron ${isSatelliteMenuOpen ? "rotated" : ""}`} />
                             </button>
                         </div>
-                        <a
-                            href="#academic-programs"
-                            className="ub-nav-link"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                document.getElementById("academic-programs")?.scrollIntoView({ behavior: "smooth" });
-                            }}
+                        <div
+                            className="ub-campus-trigger-wrapper"
+                            onMouseEnter={handleMouseEnterSupports}
+                            onMouseLeave={handleMouseLeaveSupports}
                         >
-                            ACADEMIC PROGRAMS
-                        </a>
+                            <button
+                                type="button"
+                                className={`ub-nav-link-campus ${isSupportsMenuOpen ? "active" : ""}`}
+                                onClick={toggleSupportsMenu}
+                                aria-expanded={isSupportsMenuOpen}
+                                aria-haspopup="true"
+                            >
+                                <span>MBS SUPPORTS</span>
+                                <ChevronDown size={13} className={`ub-campus-chevron ${isSupportsMenuOpen ? "rotated" : ""}`} />
+                            </button>
+                        </div>
                     </nav>
 
                     {/* Actions Right */}
@@ -1080,6 +1123,18 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
                 onMouseEnter={handleMouseEnterSatellite}
                 onMouseLeave={handleMouseLeaveSatellite}
                 onClose={closeSatelliteMenu}
+                onNavigate={navigateTo}
+                onOpenAdmission={(prog) => openAdmissionWithProgram(prog || "Bachelor of Theology (B.Th.)")}
+            />
+
+            {/* ============================================================ */}
+            {/* APPLE-STYLE MBS SUPPORTS MEGA-MENU DROPDOWN                  */}
+            {/* ============================================================ */}
+            <MbsSupportsMegaMenu
+                isOpen={isSupportsMenuOpen}
+                onMouseEnter={handleMouseEnterSupports}
+                onMouseLeave={handleMouseLeaveSupports}
+                onClose={closeSupportsMenu}
                 onNavigate={navigateTo}
                 onOpenAdmission={(prog) => openAdmissionWithProgram(prog || "Bachelor of Theology (B.Th.)")}
             />
@@ -1799,10 +1854,11 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
             {/* FULLSCREEN DIMMED BACKDROP FOR APPLE DROPDOWN                */}
             {/* ============================================================ */}
             <div
-                className={`apple-nav-backdrop ${isCampusMenuOpen || isSatelliteMenuOpen ? "active" : ""}`}
+                className={`apple-nav-backdrop ${isCampusMenuOpen || isSatelliteMenuOpen || isSupportsMenuOpen ? "active" : ""}`}
                 onClick={() => {
                     closeCampusMenu();
                     closeSatelliteMenu();
+                    closeSupportsMenu();
                 }}
                 aria-hidden="true"
             />
