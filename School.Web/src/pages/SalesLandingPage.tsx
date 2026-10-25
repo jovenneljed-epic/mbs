@@ -61,6 +61,7 @@ import {
 } from "../services/alumniService";
 import type { AlumniSectionConfig } from "../services/alumniService";
 import AlumniEditorModal from "../components/AlumniEditorModal";
+import SatelliteClassesMegaMenu from "../components/SatelliteClassesMegaMenu";
 
 interface SalesLandingPageProps {
     onNavigate?: (page: string) => void;
@@ -208,6 +209,8 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
     // ============================================================
     const [isCampusMenuOpen, setIsCampusMenuOpen] = useState(false);
     const closeTimeoutRef = useRef<any>(null);
+    const [isSatelliteMenuOpen, setIsSatelliteMenuOpen] = useState(false);
+    const satelliteTimeoutRef = useRef<any>(null);
     const [schoolEvents, setSchoolEvents] = useState<SchoolEventItem[]>(DEFAULT_SCHOOL_EVENTS);
     const [schoolAnnouncements, setSchoolAnnouncements] = useState<SchoolAnnouncementItem[]>(DEFAULT_SCHOOL_ANNOUNCEMENTS);
     const [isLoadingEvents, setIsLoadingEvents] = useState(false);
@@ -255,6 +258,8 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
     // Graceful Apple-style hover delay handlers
     const handleMouseEnterCampus = () => {
         if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+        if (satelliteTimeoutRef.current) clearTimeout(satelliteTimeoutRef.current);
+        setIsSatelliteMenuOpen(false);
         setIsCampusMenuOpen(true);
     };
 
@@ -265,6 +270,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
     };
 
     const toggleCampusMenu = () => {
+        setIsSatelliteMenuOpen(false);
         setIsCampusMenuOpen(prev => !prev);
     };
 
@@ -273,11 +279,36 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
         setIsCampusMenuOpen(false);
     };
 
+    // Graceful Apple-style hover delay handlers for Satellite Classes
+    const handleMouseEnterSatellite = () => {
+        if (satelliteTimeoutRef.current) clearTimeout(satelliteTimeoutRef.current);
+        if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+        setIsCampusMenuOpen(false);
+        setIsSatelliteMenuOpen(true);
+    };
+
+    const handleMouseLeaveSatellite = () => {
+        satelliteTimeoutRef.current = setTimeout(() => {
+            setIsSatelliteMenuOpen(false);
+        }, 220);
+    };
+
+    const toggleSatelliteMenu = () => {
+        setIsCampusMenuOpen(false);
+        setIsSatelliteMenuOpen(prev => !prev);
+    };
+
+    const closeSatelliteMenu = () => {
+        if (satelliteTimeoutRef.current) clearTimeout(satelliteTimeoutRef.current);
+        setIsSatelliteMenuOpen(false);
+    };
+
     // Close menu & modals on Escape key
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === "Escape") {
                 setIsCampusMenuOpen(false);
+                setIsSatelliteMenuOpen(false);
                 setSelectedEvent(null);
                 setSelectedAnnouncement(null);
             }
@@ -686,16 +717,22 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
                                 <ChevronDown size={13} className={`ub-campus-chevron ${isCampusMenuOpen ? "rotated" : ""}`} />
                             </button>
                         </div>
-                        <a
-                            href="#learning"
-                            className="ub-nav-link"
-                            onClick={(e) => {
-                                e.preventDefault();
-                                navigateTo("learning");
-                            }}
+                        <div
+                            className="ub-campus-trigger-wrapper"
+                            onMouseEnter={handleMouseEnterSatellite}
+                            onMouseLeave={handleMouseLeaveSatellite}
                         >
-                            ONLINE EXTENSION
-                        </a>
+                            <button
+                                type="button"
+                                className={`ub-nav-link-campus ${isSatelliteMenuOpen ? "active" : ""}`}
+                                onClick={toggleSatelliteMenu}
+                                aria-expanded={isSatelliteMenuOpen}
+                                aria-haspopup="true"
+                            >
+                                <span>SATELLITE CLASSES</span>
+                                <ChevronDown size={13} className={`ub-campus-chevron ${isSatelliteMenuOpen ? "rotated" : ""}`} />
+                            </button>
+                        </div>
                         <a
                             href="#academic-programs"
                             className="ub-nav-link"
@@ -1034,6 +1071,18 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
                     </div>
                 </div>
             </div>
+
+            {/* ============================================================ */}
+            {/* APPLE-STYLE SATELLITE CLASSES MEGA-MENU DROPDOWN             */}
+            {/* ============================================================ */}
+            <SatelliteClassesMegaMenu
+                isOpen={isSatelliteMenuOpen}
+                onMouseEnter={handleMouseEnterSatellite}
+                onMouseLeave={handleMouseLeaveSatellite}
+                onClose={closeSatelliteMenu}
+                onNavigate={navigateTo}
+                onOpenAdmission={(prog) => openAdmissionWithProgram(prog || "Bachelor of Theology (B.Th.)")}
+            />
             </div>
 
             {/* ============================================================ */}
@@ -1471,7 +1520,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
                             <ul className="ub-footer-list">
                                 <li><strong>Main Seminary Campus:</strong> {content.footer?.mainCampus || "Metro Manila, Philippines"}</li>
                                 <li><strong>Regional Modular Centers:</strong> {content.footer?.regionalCenters || "Luzon • Visayas • Mindanao"}</li>
-                                <li><strong>Online Extension:</strong> {content.footer?.onlineExtension || "Global Classroom Access"}</li>
+                                <li><strong>Satellite Classes:</strong> {content.footer?.onlineExtension || "Regional Extension Campuses & Cohorts"}</li>
                                 <li><strong>Admissions Inquiries:</strong> {content.footer?.inquiriesPhone || "+63 (02) 8800-BIBLE"}</li>
                                 <li><strong>Direct Mobile:</strong> {content.footer?.directMobile || "+63 917 123 4567"}</li>
                             </ul>
@@ -1750,8 +1799,11 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
             {/* FULLSCREEN DIMMED BACKDROP FOR APPLE DROPDOWN                */}
             {/* ============================================================ */}
             <div
-                className={`apple-nav-backdrop ${isCampusMenuOpen ? "active" : ""}`}
-                onClick={closeCampusMenu}
+                className={`apple-nav-backdrop ${isCampusMenuOpen || isSatelliteMenuOpen ? "active" : ""}`}
+                onClick={() => {
+                    closeCampusMenu();
+                    closeSatelliteMenu();
+                }}
                 aria-hidden="true"
             />
 
