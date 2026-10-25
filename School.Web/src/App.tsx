@@ -110,6 +110,8 @@ import BlogManagement from "./pages/admin/BlogManagement";
 import BlogPage from "./pages/public/BlogPage";
 import LandingPageEditor from "./pages/admin/LandingPageEditor";
 import { CourseSubjectManager } from "./pages/admin/CourseSubjectManager";
+import NotificationBellDropdown from "./components/NotificationBellDropdown";
+import AdminNotificationPopup from "./components/AdminNotificationPopup";
 // =========================================================
 // REPORTS
 // =========================================================
@@ -3743,6 +3745,8 @@ if(
                     : "sidebar-closed"
             }`}
         >
+            {/* REAL-TIME PORTAL NOTIFICATIONS POPUP */}
+            <AdminNotificationPopup onNavigate={(p: any) => navigate(p)} />
             {/* MOBILE OVERLAY */}
 
             {sidebarOpen && (
@@ -3971,15 +3975,7 @@ if(
                             <MessageSquare size={18} strokeWidth={2.2} />
                         </button>
 
-                        <button
-                            type="button"
-                            className="fb-circle-action-btn"
-                            title="Campus Notifications"
-                            onClick={() => navigate("events")}
-                        >
-                            <Bell size={18} strokeWidth={2.2} />
-                            <span className="fb-badge-count">3</span>
-                        </button>
+                        <NotificationBellDropdown onNavigate={(p: any) => navigate(p)} />
 
                         <div className="epic-top-user">
                             <div className="epic-top-avatar fb-avatar-wrap">

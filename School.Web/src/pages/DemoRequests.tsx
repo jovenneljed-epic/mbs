@@ -292,7 +292,27 @@ const DemoRequests: React.FC = () => {
             }
 
             const data = await res.json();
-            setInquiries(Array.isArray(data) ? data : []);
+            const list = Array.isArray(data) ? data : [];
+            setInquiries(list);
+
+            // Auto-open inquiry if clicked from notification
+            try {
+                const targetId = sessionStorage.getItem("sms_open_inquiry_id");
+                if (targetId && list.length > 0) {
+                    const found = list.find((x: InquiryRecord) => String(x.demoRequestId) === String(targetId));
+                    if (found) {
+                        setSelectedInquiry(found);
+                        setEditingStatus(found.status || "Pending");
+                        setAdminNotes(found.adminNotes || "");
+                        setContactedDate(toDateTimeLocal(found.contactedDate));
+                        setDemoDate(toDateTimeLocal(found.demoDate));
+                        setCopiedEmail(false);
+                        sessionStorage.removeItem("sms_open_inquiry_id");
+                    }
+                }
+            } catch {
+                // ignore
+            }
         } catch (err: unknown) {
             const e = err as Error;
             console.error("Inquiries load error:", e);

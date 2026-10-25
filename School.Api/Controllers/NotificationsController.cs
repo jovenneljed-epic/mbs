@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -349,11 +350,220 @@ namespace School.Api.Controllers
                 message = "Mobile device token registered with MBS Push Gateway."
             });
         }
+
+        // =========================================================
+        // REAL-TIME PORTAL NOTIFICATION FEED
+        // Inquiries, Requests, Incoming Messages, Admissions & New Student Inquiries
+        // GET: /api/Notifications/portal-feed
+        // =========================================================
+        [HttpGet("portal-feed")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetPortalNotificationFeed()
+        {
+            var items = new List<PortalNotificationItemDto>();
+
+            // 1. Fetch Landing Page & Contact Desk Inquiries, Admissions, and Requests
+            var inquiries = await _context.DemoRequests
+                .AsNoTracking()
+                .OrderByDescending(r => r.CreatedDate)
+                .Take(50)
+                .ToListAsync();
+
+            foreach (var r in inquiries)
+            {
+                var pos = r.Position ?? "";
+                var msg = r.Message ?? "";
+                var notes = r.AdminNotes ?? "";
+
+                bool isAdmission = pos.Contains("Admission", StringComparison.OrdinalIgnoreCase) ||
+                                   pos.Contains("Enroll", StringComparison.OrdinalIgnoreCase) ||
+                                   msg.Contains("Admission", StringComparison.OrdinalIgnoreCase) ||
+                                   msg.Contains("Application", StringComparison.OrdinalIgnoreCase) ||
+                                   notes.Contains("Admission Application", StringComparison.OrdinalIgnoreCase);
+
+                bool isVisit = pos.Contains("Tour", StringComparison.OrdinalIgnoreCase) ||
+                               pos.Contains("Visit", StringComparison.OrdinalIgnoreCase) ||
+                               pos.Contains("Demo", StringComparison.OrdinalIgnoreCase);
+
+                string type = isAdmission ? "admission" : (isVisit ? "request" : (pos.Contains("Inquir", StringComparison.OrdinalIgnoreCase) ? "inquiry" : "message"));
+                string source = isAdmission ? "Front Landing Page • Online Admission" : (isVisit ? "Public Campus Tour Request" : "Front Contact Desk • Incoming Inquiry");
+                string title = isAdmission
+                    ? $"New Student Admission Application: {r.FullName}"
+                    : (isVisit
+                        ? $"Campus Visit / Demo Request from {r.FullName}"
+                        : $"New Message from {r.FullName}: {(!string.IsNullOrWhiteSpace(r.Position) ? r.Position : "General Inquiry")}");
+
+                string summary = !string.IsNullOrWhiteSpace(r.Message) ? r.Message : $"Contact inquiry submitted from front landing page by {r.FullName}";
+                bool isPending = string.Equals(r.Status, "Pending", StringComparison.OrdinalIgnoreCase);
+
+                items.Add(new PortalNotificationItemDto
+                {
+                    Id = $"inq-{r.DemoRequestId}",
+                    Type = type,
+                    Title = title,
+                    Summary = summary,
+                    Source = source,
+                    SenderName = r.FullName,
+                    SenderEmail = r.Email,
+                    SenderPhone = r.Phone,
+                    Affiliation = r.ChurchName,
+                    Category = !string.IsNullOrWhiteSpace(r.Position) ? r.Position : (isAdmission ? "Admissions & Enrollment" : "General Inquiries"),
+                    Timestamp = r.CreatedDate,
+                    Status = r.Status,
+                    IsPending = isPending,
+                    Priority = isAdmission || isPending ? "high" : "normal",
+                    ActionUrl = "demo-requests",
+                    ReferenceId = r.DemoRequestId.ToString()
+                });
+            }
+
+            // 2. Fetch Recent Enrolled Members / Student Profiles
+            try
+            {
+                var members = await _context.Members
+                    .AsNoTracking()
+                    .OrderByDescending(m => m.CreatedDate)
+                    .Take(10)
+                    .ToListAsync();
+
+                foreach (var m in members)
+                {
+                    items.Add(new PortalNotificationItemDto
+                    {
+                        Id = $"mem-{m.MemberId}",
+                        Type = "student",
+                        Title = $"New Student Profile: {m.FirstName} {m.LastName}",
+                        Summary = $"Student Code: {m.MemberCode} • Cohort: {m.Ministry ?? "Theological Department"}",
+                        Source = "Seminary Student Roster",
+                        SenderName = $"{m.FirstName} {m.LastName}",
+                        SenderEmail = null,
+                        SenderPhone = m.ContactNumber,
+                        Affiliation = m.Address ?? "MBS Seminary Main Campus",
+                        Category = "Student Enrollment",
+                        Timestamp = m.CreatedDate,
+                        Status = m.Status ?? "Active",
+                        IsPending = false,
+                        Priority = "normal",
+                        ActionUrl = "members",
+                        ReferenceId = m.MemberId.ToString()
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Notifications] Note reading members: {ex.Message}");
+            }
+
+            // 3. Fetch Recent Community Discussions from LMS if available
+            try
+            {
+                var discussionsPath = Path.Combine(AppContext.BaseDirectory, "App_Data", "lms_discussions.json");
+                if (System.IO.File.Exists(discussionsPath))
+                {
+                    var json = await System.IO.File.ReadAllTextAsync(discussionsPath);
+                    var discussions = JsonSerializer.Deserialize<List<JsonElement>>(json);
+                    if (discussions != null)
+                    {
+                        foreach (var d in discussions.Take(5))
+                        {
+                            string dId = d.TryGetProperty("id", out var pId) ? pId.GetString() ?? "" : "";
+                            string dTitle = d.TryGetProperty("title", out var pTitle) ? pTitle.GetString() ?? "" : "Community Discussion";
+                            string dContent = d.TryGetProperty("content", out var pContent) ? pContent.GetString() ?? "" : "";
+                            string dAuthor = d.TryGetProperty("authorName", out var pAuthor) ? pAuthor.GetString() ?? "Student" : "Student";
+                            string dSchoolNo = d.TryGetProperty("schoolNumber", out var pSchoolNo) ? pSchoolNo.GetString() ?? "" : "";
+                            string dCreatedAt = d.TryGetProperty("createdAt", out var pCreated) ? pCreated.GetString() ?? "" : "";
+                            DateTime.TryParse(dCreatedAt, out var dt);
+
+                            items.Add(new PortalNotificationItemDto
+                            {
+                                Id = $"lms-{dId}",
+                                Type = "discussion",
+                                Title = $"LMS Student Discussion: {dTitle}",
+                                Summary = dContent,
+                                Source = $"Classroom Community Chat ({dSchoolNo})",
+                                SenderName = dAuthor,
+                                SenderEmail = "",
+                                SenderPhone = null,
+                                Affiliation = dSchoolNo,
+                                Category = "Community Chat",
+                                Timestamp = dt != DateTime.MinValue ? dt : DateTime.UtcNow,
+                                Status = "Open",
+                                IsPending = false,
+                                Priority = "normal",
+                                ActionUrl = "learning",
+                                ReferenceId = dId
+                            });
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Notifications] Note reading LMS discussions: {ex.Message}");
+            }
+
+            // Order all items by newest first
+            var ordered = items.OrderByDescending(x => x.Timestamp).ToList();
+
+            int totalCount = ordered.Count;
+            int unreadCount = ordered.Count(x => x.IsPending);
+            int admissionsCount = ordered.Count(x => x.Type == "admission" && x.IsPending);
+            int inquiriesCount = ordered.Count(x => (x.Type == "inquiry" || x.Type == "message") && x.IsPending);
+            int requestsCount = ordered.Count(x => x.Type == "request" && x.IsPending);
+
+            var latestPending = ordered.FirstOrDefault(x => x.IsPending);
+
+            return Ok(new PortalNotificationFeedDto
+            {
+                Success = true,
+                TotalCount = totalCount,
+                UnreadCount = unreadCount,
+                AdmissionsCount = admissionsCount,
+                InquiriesCount = inquiriesCount,
+                RequestsCount = requestsCount,
+                Notifications = ordered,
+                LatestPending = latestPending,
+                RetrievedAt = DateTime.UtcNow
+            });
+        }
     }
 
     // =========================================================
     // DTO MODELS
     // =========================================================
+
+    public class PortalNotificationItemDto
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Type { get; set; } = "inquiry";
+        public string Title { get; set; } = string.Empty;
+        public string Summary { get; set; } = string.Empty;
+        public string Source { get; set; } = string.Empty;
+        public string SenderName { get; set; } = string.Empty;
+        public string? SenderEmail { get; set; }
+        public string? SenderPhone { get; set; }
+        public string? Affiliation { get; set; }
+        public string? Category { get; set; }
+        public DateTime Timestamp { get; set; }
+        public string Status { get; set; } = "Pending";
+        public bool IsPending { get; set; }
+        public string Priority { get; set; } = "normal";
+        public string ActionUrl { get; set; } = "demo-requests";
+        public string ReferenceId { get; set; } = string.Empty;
+    }
+
+    public class PortalNotificationFeedDto
+    {
+        public bool Success { get; set; } = true;
+        public int TotalCount { get; set; }
+        public int UnreadCount { get; set; }
+        public int AdmissionsCount { get; set; }
+        public int InquiriesCount { get; set; }
+        public int RequestsCount { get; set; }
+        public List<PortalNotificationItemDto> Notifications { get; set; } = new();
+        public PortalNotificationItemDto? LatestPending { get; set; }
+        public DateTime RetrievedAt { get; set; } = DateTime.UtcNow;
+    }
 
     public class BroadcastRequestDto
     {
