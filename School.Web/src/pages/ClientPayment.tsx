@@ -142,6 +142,7 @@ interface EpicUser {
 }
 
 type PaymentMethod =
+    | "PayMongo"
     | "GCash"
     | "Maya"
     | "BankTransfer"
@@ -172,6 +173,12 @@ const PAYMENT_METHODS: Array<{
     description: string;
     icon: string;
 }> = [
+    {
+        value: "PayMongo",
+        label: "PayMongo Checkout",
+        description: "Instant GCash, Maya, Card & QR Ph",
+        icon: "⚡",
+    },
     {
         value: "GCash",
         label: "GCash",
@@ -411,7 +418,7 @@ const ClientPayment: React.FC<
         paymentMethod,
         setPaymentMethod,
     ] = useState<PaymentMethod>(
-        "GCash"
+        "PayMongo"
     );
 
     const [
@@ -1329,28 +1336,70 @@ const ClientPayment: React.FC<
         return (
             <div className="client-payment-page">
 
-                <div className="client-payment-error-card">
+                <div className="client-payment-error-card" style={{ maxWidth: "580px" }}>
 
-                    <div className="error-icon">
-                        !
+                    <div className="error-icon" style={{ background: "#E0F2FE", color: "#0284C7" }}>
+                        ⚡
                     </div>
 
                     <h2>
-                        Payment Information Unavailable
+                        Online Payment &amp; Checkout Portal
                     </h2>
 
                     <p>
-                        {
-                            error ||
-                            "No subscription was selected."
-                        }
+                        {error ? error : "No active subscription was selected from the dashboard."}
                     </p>
 
-                    <small>
-                        Please return to your subscription
-                        page and select the subscription
-                        you want to pay.
-                    </small>
+                    <p style={{ fontSize: "14px", color: "#64748B", margin: "10px 0 20px" }}>
+                        You can make a direct modular tuition or institutional fee payment using PayMongo (GCash, Maya, Cards, QR Ph), or choose a destination below:
+                    </p>
+
+                    <div style={{ display: "flex", flexDirection: "column", gap: "10px", textAlign: "left" }}>
+                        <button
+                            type="button"
+                            className="payment-primary-button"
+                            style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "14px", width: "100%" }}
+                            onClick={() => {
+                                setSubscription({
+                                    subscriptionId: 1,
+                                    customerId: 1,
+                                    churchName: "Mobile Bible School - Online Payment",
+                                    contactName: "Student / Member",
+                                    contactEmail: "student@mbs.edu.ph",
+                                    contactPhone: "+63 917 123 4567",
+                                    subscriptionPlanId: 1,
+                                    planName: "Modular Tuition / Institutional Fee",
+                                    billingCycle: "Monthly",
+                                    amount: 2500,
+                                    currency: "PHP",
+                                    status: "PENDING",
+                                    startDate: getToday()
+                                });
+                            }}
+                        >
+                            <span>💳 Pay Direct Tuition (PayMongo, GCash &amp; Maya)</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "1px solid #CBD5E1", background: "#F8FAFC", color: "#334155", cursor: "pointer", fontWeight: 600, fontSize: "14px" }}
+                            onClick={() => window.location.href = "/subscription-dashboard"}
+                        >
+                            <span>📋 View Subscriptions Dashboard</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "1px solid #CBD5E1", background: "#F8FAFC", color: "#334155", cursor: "pointer", fontWeight: 600, fontSize: "14px" }}
+                            onClick={() => window.location.href = "/giving"}
+                        >
+                            <span>🎓 View Student Tuition &amp; Fees</span>
+                        </button>
+                    </div>
+
+                    <div style={{ marginTop: "24px", paddingTop: "14px", borderTop: "1px solid #E2E8F0", fontSize: "12px", color: "#94A3B8" }}>
+                        Integrated Gateways: <strong>PayMongo</strong> • GCash • Maya • Visa/Mastercard • QR Ph
+                    </div>
 
                 </div>
 
