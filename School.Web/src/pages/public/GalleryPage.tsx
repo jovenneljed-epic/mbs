@@ -47,6 +47,21 @@ import {
     ExternalLink
 } from "lucide-react";
 
+// High-availability fallback image and offline SVG placeholder
+const FALLBACK_PHOTO_URL = "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1200&q=80";
+const PLACEHOLDER_SVG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='800' viewBox='0 0 1200 800'%3E%3Crect width='100%25' height='100%25' fill='%230f172a'/%3E%3Cg transform='translate(600, 370)' text-anchor='middle'%3E%3Ccircle r='52' fill='%231e293b' stroke='%23f59e0b' stroke-width='3'/%3E%3Cpath d='M-18 -10 L0 -26 L18 -10 L18 16 L-18 16 Z' fill='none' stroke='%23f59e0b' stroke-width='2.5' stroke-linejoin='round'/%3E%3Ctext y='95' fill='%23ffffff' font-family='sans-serif' font-size='24' font-weight='700'%3EMOBILE BIBLE SCHOOL%3C/text%3E%3Ctext y='126' fill='%2394a3b8' font-family='sans-serif' font-size='16'%3ETheological Seminary Visual Chronicles%3C/text%3E%3C/g%3E%3C/svg%3E";
+
+const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    const target = e.currentTarget;
+    if (target.dataset.triedFallback !== "true") {
+        target.dataset.triedFallback = "true";
+        target.src = FALLBACK_PHOTO_URL;
+    } else {
+        target.onerror = null;
+        target.src = PLACEHOLDER_SVG;
+    }
+};
+
 interface GalleryPageProps {
     onNavigate?: (page: string) => void;
 }
@@ -266,6 +281,32 @@ const GalleryPage: React.FC<GalleryPageProps> = ({ onNavigate }) => {
             setCopiedShare(true);
             setTimeout(() => setCopiedShare(false), 2500);
         }
+    };
+
+    // ------------------------------------------------------------
+    // HIGH-RES DOWNLOAD HANDLER
+    // ------------------------------------------------------------
+    const handleDownloadPhoto = async (e: React.MouseEvent, photo: GalleryPhoto) => {
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+            const res = await fetch(photo.imageUrl, { mode: "cors" });
+            if (res.ok) {
+                const blob = await res.blob();
+                const blobUrl = window.URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = blobUrl;
+                link.download = `${photo.title.replace(/[^a-zA-Z0-9_-]/g, "_")}.jpg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(blobUrl);
+                return;
+            }
+        } catch {
+            // Fallback if cross-origin fetch is prevented
+        }
+        window.open(photo.imageUrl, "_blank", "noopener,noreferrer");
     };
 
     // ------------------------------------------------------------
@@ -624,11 +665,9 @@ const GalleryPage: React.FC<GalleryPageProps> = ({ onNavigate }) => {
                                                 src={photo.imageUrl}
                                                 alt={photo.title}
                                                 loading="lazy"
-                                                onError={(e) => {
-                                                    // Fallback image if broken link
-                                                    (e.target as HTMLImageElement).src =
-                                                        "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&w=1200&q=80";
-                                                }}
+                                                referrerPolicy="no-referrer"
+                                                crossOrigin="anonymous"
+                                                onError={handleImageError}
                                             />
 
                                             <div className="mbs-photo-overlay">
@@ -757,6 +796,9 @@ const GalleryPage: React.FC<GalleryPageProps> = ({ onNavigate }) => {
                                 <img
                                     src={activePhoto.imageUrl}
                                     alt={activePhoto.title}
+                                    referrerPolicy="no-referrer"
+                                    crossOrigin="anonymous"
+                                    onError={handleImageError}
                                 />
                             </div>
 
@@ -813,16 +855,15 @@ const GalleryPage: React.FC<GalleryPageProps> = ({ onNavigate }) => {
                                         <span>{activePhoto.likesCount || 0} Appreciations</span>
                                     </button>
 
-                                    <a
-                                        href={activePhoto.imageUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
+                                    <button
+                                        type="button"
                                         className="mbs-btn-download"
-                                        download
+                                        onClick={(e) => handleDownloadPhoto(e, activePhoto)}
+                                        title="Download high-resolution chronicle"
                                     >
                                         <Download size={15} />
                                         <span>Download High-Res</span>
-                                    </a>
+                                    </button>
 
                                     <button
                                         type="button"

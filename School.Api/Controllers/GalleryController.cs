@@ -235,7 +235,32 @@ namespace School.Api.Controllers
                 {
                     PropertyNameCaseInsensitive = true
                 });
-                return list ?? GetInitialSeedPhotos();
+
+                if (list != null && list.Count > 0)
+                {
+                    bool mutated = false;
+                    foreach (var p in list)
+                    {
+                        if (p.ImageUrl == "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80")
+                        {
+                            p.ImageUrl = "https://images.unsplash.com/photo-1627556704290-2b1f5853ff78?auto=format&fit=crop&w=1200&q=80";
+                            mutated = true;
+                        }
+                        else if (p.ImageUrl == "https://images.unsplash.com/photo-1532012164546-f432f2e3dd42?auto=format&fit=crop&w=1200&q=80")
+                        {
+                            p.ImageUrl = "https://images.unsplash.com/photo-1505664194779-8beaceb93744?auto=format&fit=crop&w=1200&q=80";
+                            mutated = true;
+                        }
+                    }
+
+                    if (mutated)
+                    {
+                        await SavePhotosAsync(list);
+                    }
+                    return list;
+                }
+
+                return GetInitialSeedPhotos();
             }
             catch
             {
@@ -262,7 +287,7 @@ namespace School.Api.Controllers
                     Title = "39th Annual Baccalaureate & Pastoral Ordination Convocation",
                     Category = "ORDINATION",
                     Description = "Conferring of the Bachelor of Theology (B.Th.) and Master of Divinity (M.Div.) degrees upon 64 ministerial candidates by the Seminary Faculty Council.",
-                    ImageUrl = "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80",
+                    ImageUrl = "https://images.unsplash.com/photo-1627556704290-2b1f5853ff78?auto=format&fit=crop&w=1200&q=80",
                     Location = "Main Campus Auditorium, Manila",
                     Date = "October 2026",
                     Tags = "Graduation, B.Th., Ordination, Faculty Council",
@@ -405,7 +430,7 @@ namespace School.Api.Controllers
                     Title = "Hermeneutics Practicum: Scripture Translation & Textual Criticism",
                     Category = "ACADEMIC",
                     Description = "Advanced students engaged in textual criticism of Hebrew Masoretic texts and Septuagint variants under faculty supervision.",
-                    ImageUrl = "https://images.unsplash.com/photo-1532012164546-f432f2e3dd42?auto=format&fit=crop&w=1200&q=80",
+                    ImageUrl = "https://images.unsplash.com/photo-1505664194779-8beaceb93744?auto=format&fit=crop&w=1200&q=80",
                     Location = "Manuscript Study Room",
                     Date = "October 2026",
                     Tags = "Hebrew, Textual Criticism, Hermeneutics, Exegesis",

@@ -21,8 +21,17 @@ export interface GalleryPhoto {
     createdAt?: string;
 }
 
-const STORAGE_KEY = "mbs_campus_gallery_photos";
+const STORAGE_KEY = "mbs_campus_gallery_photos_v2";
+const LEGACY_STORAGE_KEY = "mbs_campus_gallery_photos";
 export const GALLERY_UPDATED_EVENT = "mbs-gallery-updated";
+
+// Map known dead/404 CDN links to verified high-availability photos
+const BROKEN_URL_MAP: Record<string, string> = {
+    "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80":
+        "https://images.unsplash.com/photo-1627556704290-2b1f5853ff78?auto=format&fit=crop&w=1200&q=80",
+    "https://images.unsplash.com/photo-1532012164546-f432f2e3dd42?auto=format&fit=crop&w=1200&q=80":
+        "https://images.unsplash.com/photo-1505664194779-8beaceb93744?auto=format&fit=crop&w=1200&q=80"
+};
 
 export const GALLERY_CATEGORIES = [
     { id: "ALL", label: "All Chronicles", description: "Comprehensive archive of seminary life, worship, and scholarship." },
@@ -40,7 +49,7 @@ export const DEFAULT_GALLERY_PHOTOS: GalleryPhoto[] = [
         title: "39th Annual Baccalaureate & Pastoral Ordination Convocation",
         category: "ORDINATION",
         description: "Conferring of the Bachelor of Theology (B.Th.) and Master of Divinity (M.Div.) degrees upon 64 ministerial candidates by the Seminary Faculty Council.",
-        imageUrl: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80",
+        imageUrl: "https://images.unsplash.com/photo-1627556704290-2b1f5853ff78?auto=format&fit=crop&w=1200&q=80",
         location: "Main Campus Auditorium, Manila",
         date: "October 2026",
         tags: "Graduation, B.Th., Ordination, Faculty Council",
@@ -172,7 +181,7 @@ export const DEFAULT_GALLERY_PHOTOS: GalleryPhoto[] = [
         title: "Hermeneutics Practicum: Scripture Translation & Textual Criticism",
         category: "ACADEMIC",
         description: "Advanced students engaged in textual criticism of Hebrew Masoretic texts and Septuagint variants under faculty supervision.",
-        imageUrl: "https://images.unsplash.com/photo-1532012164546-f432f2e3dd42?auto=format&fit=crop&w=1200&q=80",
+        imageUrl: "https://images.unsplash.com/photo-1505664194779-8beaceb93744?auto=format&fit=crop&w=1200&q=80",
         location: "Manuscript Study Room",
         date: "October 2026",
         tags: "Hebrew, Textual Criticism, Hermeneutics, Exegesis",
@@ -207,8 +216,34 @@ export function isUserAdmin(): boolean {
     return false;
 }
 
+// Helper: Auto-repair photo URLs that are known to return 404 or dead links
+export function sanitizeGalleryPhotos(photos: GalleryPhoto[]): GalleryPhoto[] {
+    if (!Array.isArray(photos)) return DEFAULT_GALLERY_PHOTOS;
+    return photos.map((p) => {
+        let currentUrl = p.imageUrl || "";
+        if (BROKEN_URL_MAP[currentUrl]) {
+            currentUrl = BROKEN_URL_MAP[currentUrl];
+        }
+        return {
+            ...p,
+            imageUrl: currentUrl
+        };
+    });
+}
+
 // Fetch all gallery photos (API with localStorage fallback)
 export async function getGalleryPhotos(): Promise<GalleryPhoto[]> {
+    // 0. Clean legacy storage if present
+    if (typeof window !== "undefined") {
+        try {
+            if (localStorage.getItem(LEGACY_STORAGE_KEY)) {
+                localStorage.removeItem(LEGACY_STORAGE_KEY);
+            }
+        } catch {
+            // Ignore
+        }
+    }
+
     // 1. Try fetching from live backend
     try {
         const response = await fetch(`${API_BASE_URL}/Gallery`, {
@@ -219,9 +254,10 @@ export async function getGalleryPhotos(): Promise<GalleryPhoto[]> {
         if (response.ok) {
             const data: GalleryPhoto[] = await response.json();
             if (Array.isArray(data) && data.length > 0) {
+                const sanitized = sanitizeGalleryPhotos(data);
                 // Cache locally
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-                return data;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitized));
+                return sanitized;
             }
         }
     } catch (err) {
@@ -234,7 +270,9 @@ export async function getGalleryPhotos(): Promise<GalleryPhoto[]> {
         if (cached) {
             const parsed = JSON.parse(cached);
             if (Array.isArray(parsed) && parsed.length > 0) {
-                return parsed;
+                const sanitized = sanitizeGalleryPhotos(parsed);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(sanitized));
+                return sanitized;
             }
         }
     } catch (e) {
@@ -242,8 +280,13 @@ export async function getGalleryPhotos(): Promise<GalleryPhoto[]> {
     }
 
     // 3. Ultimate Fallback to Default Seed Photos
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_GALLERY_PHOTOS));
-    return DEFAULT_GALLERY_PHOTOS;
+    const cleanDefaults = sanitizeGalleryPhotos(DEFAULT_GALLERY_PHOTOS);
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanDefaults));
+    } catch {
+        // Ignore
+    }
+    return cleanDefaults;
 }
 
 // Add a new photo (Admin only)
