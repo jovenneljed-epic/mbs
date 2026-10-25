@@ -1,0 +1,649 @@
+/* ============================================================
+   AboutEditorModal.css
+   Modern, luxury modal styling for Institutional Dossier CMS
+   ============================================================ */
+
+.mbs-editor-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(3, 10, 8, 0.82);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: mbsEditorFadeIn 0.22s ease-out forwards;
+}
+
+@keyframes mbsEditorFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.mbs-editor-modal {
+    background: #091310;
+    border: 1px solid rgba(16, 185, 129, 0.28);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 960px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8),
+                0 0 40px rgba(16, 185, 129, 0.12);
+    overflow: hidden;
+    animation: mbsModalSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes mbsModalSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+
+.mbs-editor-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    background: #0d1a15;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mbs-editor-title-group {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.mbs-editor-icon-badge {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mbs-editor-title-group h2 {
+    font-size: 1.18rem;
+    font-weight: 700;
+    color: #f8fafc;
+    margin: 0;
+}
+
+.mbs-editor-title-group p {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin: 3px 0 0;
+}
+
+.mbs-editor-close-btn {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.mbs-editor-close-btn:hover {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.35);
+    color: #ef4444;
+}
+
+/* ============================================================
+   TABS
+   ============================================================ */
+
+.mbs-editor-tabs {
+    display: flex;
+    background: #070e0c;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    overflow-x: auto;
+    padding: 0 16px;
+}
+
+.mbs-editor-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 18px;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: #94a3b8;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.18s ease;
+}
+
+.mbs-editor-tab:hover {
+    color: #f1f5f9;
+}
+
+.mbs-editor-tab.active {
+    color: #10b981;
+    border-bottom-color: #10b981;
+    background: rgba(16, 185, 129, 0.05);
+}
+
+/* ============================================================
+   BODY & SECTIONS
+   ============================================================ */
+
+.mbs-editor-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    background: #091310;
+}
+
+.mbs-editor-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.mbs-editor-group-title {
+    margin-bottom: 8px;
+}
+
+.mbs-editor-group-title h3 {
+    font-size: 1.02rem;
+    font-weight: 700;
+    color: #e2e8f0;
+    margin: 0;
+}
+
+.mbs-editor-group-title h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #cbd5e1;
+    margin: 0;
+}
+
+.mbs-editor-group-title p {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin: 3px 0 0;
+}
+
+/* ============================================================
+   FORM FIELDS
+   ============================================================ */
+
+.mbs-form-row {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.mbs-form-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.mbs-form-label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+}
+
+.mbs-form-label span {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.mbs-form-input,
+.mbs-form-textarea,
+.mbs-form-select {
+    width: 100%;
+    background: #0f1d18;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: #f1f5f9;
+    font-size: 0.88rem;
+    font-family: inherit;
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.mbs-form-input:focus,
+.mbs-form-textarea:focus,
+.mbs-form-select:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+    background: #13241e;
+}
+
+.mbs-form-input.bold {
+    font-weight: 700;
+}
+
+.mbs-form-textarea {
+    resize: vertical;
+    line-height: 1.5;
+}
+
+.mbs-form-textarea.small {
+    font-size: 0.82rem;
+}
+
+.flex-1 { flex: 1; }
+.flex-2 { flex: 2; }
+
+/* ============================================================
+   LISTS & CARDS
+   ============================================================ */
+
+.mbs-editor-list-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.mbs-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mbs-item-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #0e1c17;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 14px 18px;
+    gap: 16px;
+    transition: all 0.18s ease;
+}
+
+.mbs-item-row:hover {
+    border-color: rgba(16, 185, 129, 0.3);
+    background: #11231d;
+}
+
+.mbs-item-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    min-width: 0;
+    flex: 1;
+}
+
+.mbs-item-badge {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #10b981;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+
+.mbs-faculty-initials-badge {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    color: #f59e0b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.mbs-item-info strong {
+    display: block;
+    font-size: 0.94rem;
+    color: #f8fafc;
+}
+
+.mbs-item-info p {
+    font-size: 0.82rem;
+    color: #94a3b8;
+    margin: 3px 0 0;
+    line-height: 1.4;
+}
+
+.mbs-item-info small {
+    display: block;
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-top: 4px;
+}
+
+.mbs-dept-sub-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #34d399;
+    background: rgba(52, 211, 153, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin: 2px 0 4px;
+}
+
+.mbs-item-meta-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.mbs-meta-chip {
+    font-size: 0.7rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #cbd5e1;
+    padding: 2px 7px;
+    border-radius: 4px;
+}
+
+.mbs-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.mbs-action-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    color: #94a3b8;
+    transition: all 0.18s ease;
+}
+
+.mbs-action-btn.edit:hover {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.4);
+    color: #10b981;
+}
+
+.mbs-action-btn.delete:hover {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.4);
+    color: #ef4444;
+}
+
+/* ============================================================
+   SUBFORM BOX
+   ============================================================ */
+
+.mbs-subform-box {
+    background: #0e1c17;
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    animation: mbsEditorFadeIn 0.2s ease-out;
+}
+
+.mbs-subform-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 12px;
+}
+
+.mbs-subform-header h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #f1f5f9;
+    margin: 0;
+}
+
+.mbs-subform-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 6px;
+}
+
+/* ============================================================
+   FACILITIES & REGIONAL EDIT
+   ============================================================ */
+
+.mbs-items-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.mbs-facility-edit-box {
+    background: #0e1c17;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.mbs-regional-edit-card,
+.mbs-accred-edit-card {
+    background: #0e1c17;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.mbs-hub-items-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.mbs-hub-edit-row {
+    display: flex;
+    gap: 10px;
+}
+
+/* ============================================================
+   ALERTS
+   ============================================================ */
+
+.mbs-editor-alert {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    margin-bottom: 16px;
+}
+
+.mbs-editor-alert.success {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    color: #34d399;
+}
+
+.mbs-editor-alert.error {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #f87171;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+
+.mbs-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #10b981;
+    color: #021f14;
+    font-size: 0.84rem;
+    font-weight: 700;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.mbs-btn-primary:hover {
+    background: #34d399;
+    transform: translateY(-1px);
+}
+
+.mbs-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #cbd5e1;
+    font-size: 0.84rem;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.mbs-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+
+.mbs-editor-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    background: #0d1a15;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mbs-btn-reset {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+    font-size: 0.82rem;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.mbs-btn-reset:hover {
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.08);
+}
+
+.mbs-footer-right-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.mbs-btn-save-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    font-size: 0.88rem;
+    font-weight: 700;
+    padding: 10px 22px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+    transition: all 0.18s ease;
+}
+
+.mbs-btn-save-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+}
+
+.mbs-btn-save-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+    .mbs-form-grid-2,
+    .mbs-items-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .mbs-editor-modal {
+        max-height: 95vh;
+    }
+}

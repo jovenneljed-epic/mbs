@@ -1359,3 +1359,193 @@
         font-size: 0.8rem;
     }
 }
+
+/* ============================================================ */
+/* ADMIN ROLE BAR & INLINE EDIT CONTROLS                        */
+/* ============================================================ */
+.mbs-about-role-bar {
+    background: #081410;
+    border-bottom: 1px solid rgba(16, 185, 129, 0.3);
+    padding: 10px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 999;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+}
+
+.mbs-about-role-bar-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.mbs-about-role-badge {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.mbs-about-role-badge strong {
+    font-size: 0.88rem;
+    color: #10b981;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.mbs-about-role-badge small {
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+.mbs-about-role-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.mbs-btn-admin-edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff;
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 7px 14px;
+    border-radius: 7px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(16, 185, 129, 0.3);
+    transition: all 0.18s ease;
+}
+
+.mbs-btn-admin-edit:hover {
+    background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+}
+
+.mbs-btn-admin-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #cbd5e1;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.mbs-btn-admin-outline:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+.mbs-btn-admin-preview-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    color: #f59e0b;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.mbs-btn-admin-preview-toggle:hover {
+    background: rgba(245, 158, 11, 0.22);
+    color: #fde68a;
+}
+
+.mbs-visitor-preview-banner {
+    background: #78350f;
+    color: #fef3c7;
+    padding: 10px 20px;
+    text-align: center;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.35);
+}
+
+.mbs-btn-exit-preview {
+    background: #f59e0b;
+    color: #1a0f02;
+    border: none;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.mbs-btn-exit-preview:hover {
+    background: #fbbf24;
+}
+
+.mbs-section-edit-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    color: #10b981;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+}
+
+.mbs-section-edit-trigger:hover {
+    background: #10b981;
+    color: #021f14;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.mbs-header-with-edit {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 16px;
+}
+
+.mbs-toast-alert {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #062b1e;
+    border: 1px solid #10b981;
+    color: #f1f5f9;
+    padding: 12px 20px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    z-index: 999999;
+    animation: mbsEditorFadeIn 0.25s ease-out;
+}
