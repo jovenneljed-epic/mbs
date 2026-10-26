@@ -1249,7 +1249,7 @@ const Login: React.FC<LoginProps> = ({
                             style={{
                                 background: "none",
                                 border: "none",
-                                color: "var(--theme-primary, #10b981)",
+                                color: "var(--theme-primary, #7A1526)",
                                 cursor: "pointer",
                                 display: "inline-flex",
                                 alignItems: "center",
@@ -1268,11 +1268,11 @@ const Login: React.FC<LoginProps> = ({
                         </div>
 
                         <h2>
-                            Sign in to SMS Portal
+                            Sign in to MBS Portal
                         </h2>
 
                         <p>
-                            Access your school management dashboard.
+                            Access your Mobile Bible School &amp; Theological Seminary dashboard.
                         </p>
 
                     </div>
@@ -1456,7 +1456,7 @@ const Login: React.FC<LoginProps> = ({
                         <span />
 
                         <small>
-                            SCHOOL MANAGEMENT SYSTEM
+                            MOBILE BIBLE SCHOOL &amp; THEOLOGICAL SEMINARY
                         </small>
 
                         <span />

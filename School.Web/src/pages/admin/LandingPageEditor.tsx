@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "./LandingPageEditor.css";
 import {
     getLandingPageContent,
+    fetchLandingPageContentFromServer,
     saveLandingPageContent,
     resetLandingPageContent,
     DEFAULT_FOOTER_SETTINGS,
@@ -48,6 +49,11 @@ export const LandingPageEditor: React.FC<LandingPageEditorProps> = ({ onNavigate
 
     useEffect(() => {
         setContent(getLandingPageContent());
+        fetchLandingPageContentFromServer().then(serverContent => {
+            if (serverContent) {
+                setContent(serverContent);
+            }
+        });
     }, []);
 
     const handleChange = (field: keyof LandingPageContent, value: string) => {

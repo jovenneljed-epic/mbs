@@ -537,6 +537,40 @@ export const applyGlobalTheme = (theme?: ColorThemeSettings, skipBroadcast = fal
     }
 };
 
+export const fetchLandingPageContentFromServer = async (): Promise<LandingPageContent | null> => {
+    if (typeof window === "undefined") return null;
+    try {
+        const res = await fetch(`${API_BASE_URL}/LandingContent`);
+        if (res.ok && res.status !== 204) {
+            const serverContent = await res.json();
+            if (serverContent && typeof serverContent === "object" && (serverContent.schoolName || serverContent.heroBadge)) {
+                const merged: LandingPageContent = {
+                    ...DEFAULT_LANDING_CONTENT,
+                    ...serverContent,
+                    footer: {
+                        ...DEFAULT_FOOTER_SETTINGS,
+                        ...(serverContent.footer || {}),
+                    },
+                    colorTheme: {
+                        ...DEFAULT_COLOR_THEME,
+                        ...(serverContent.colorTheme || {}),
+                    }
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+                if (merged.colorTheme) {
+                    localStorage.setItem("mbs_admin_global_theme", JSON.stringify(merged.colorTheme));
+                    applyGlobalTheme(merged.colorTheme, true);
+                }
+                window.dispatchEvent(new CustomEvent(LANDING_CONTENT_EVENT, { detail: merged }));
+                return merged;
+            }
+        }
+    } catch {
+        // Fallback to local
+    }
+    return null;
+};
+
 export const saveLandingPageContent = (content: LandingPageContent): void => {
     try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(content));
@@ -563,6 +597,22 @@ export const saveLandingPageContent = (content: LandingPageContent): void => {
                 }
             }
         }
+
+        // Also persist entire landing page content to backend so all devices across the world sync
+        if (typeof window !== "undefined") {
+            try {
+                fetch(`${API_BASE_URL}/LandingContent`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(content)
+                }).catch(err => console.warn("Failed to sync landing content to backend:", err));
+            } catch {
+                // ignore
+            }
+        }
+
         window.dispatchEvent(new CustomEvent(LANDING_CONTENT_EVENT, { detail: content }));
     } catch (e) {
         console.error("Failed to save landing page content:", e);
@@ -587,6 +637,14 @@ export const resetLandingPageContent = (): LandingPageContent => {
                         ...(token ? { Authorization: `Bearer ${token}` } : {})
                     },
                     body: JSON.stringify(DEFAULT_COLOR_THEME)
+                }).catch(() => {});
+
+                fetch(`${API_BASE_URL}/LandingContent`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(DEFAULT_LANDING_CONTENT)
                 }).catch(() => {});
             } catch {}
         }

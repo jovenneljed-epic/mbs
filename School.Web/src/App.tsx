@@ -3791,11 +3791,11 @@ if(
 
                     <div className="epic-brand-text">
                         <div className="epic-brand-title">
-                            SCHOOL MANAGEMENT SYSTEM
+                            MOBILE BIBLE SCHOOL
                         </div>
 
                         <div className="epic-brand-subtitle">
-                            MOBILE BIBLE SCHOOL MAIN CAMPUS
+                            THEOLOGICAL SEMINARY &amp; INSTITUTE
                         </div>
                     </div>
                 </div>
@@ -4033,11 +4033,11 @@ if(
                     <span>
                         ©{" "}
                         {new Date().getFullYear()}{" "}
-                        School Management System
+                        Mobile Bible School &amp; Theological Seminary
                     </span>
 
                     <span>
-                        Mobile Bible School Main Campus • Excellence in Education
+                        Main Campus &amp; Extension Campuses • Excellence in Education
                     </span>
                 </footer>
             </main>

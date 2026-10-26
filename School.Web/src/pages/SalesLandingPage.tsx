@@ -9,6 +9,7 @@ import "./SalesLandingPage.css";
 import { API_BASE_URL } from "../config";
 import {
     getLandingPageContent,
+    fetchLandingPageContentFromServer,
     LANDING_CONTENT_EVENT,
     applyGlobalTheme,
     type LandingPageContent
@@ -105,6 +106,15 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
         if (initial.colorTheme) {
             applyGlobalTheme(initial.colorTheme);
         }
+
+        fetchLandingPageContentFromServer().then(serverContent => {
+            if (serverContent) {
+                setContent(serverContent);
+                if (serverContent.colorTheme) {
+                    applyGlobalTheme(serverContent.colorTheme);
+                }
+            }
+        });
 
         const handleContentUpdate = (e: any) => {
             if (e && e.detail) {
