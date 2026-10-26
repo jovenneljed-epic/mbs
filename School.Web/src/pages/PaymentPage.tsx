@@ -8,13 +8,13 @@ interface PaymentPageProps {
     onNavigate: (page: string) => void;
 }
 
-type PaymentMethod = "gcash" | "gotyme";
+type PaymentMethod = "paymongo" | "gcash" | "gotyme";
 
 const PaymentPage: React.FC<PaymentPageProps> = ({
     onNavigate,
 }) => {
     const [paymentMethod, setPaymentMethod] =
-        useState<PaymentMethod>("gcash");
+        useState<PaymentMethod>("paymongo");
 
     const [referenceNumber, setReferenceNumber] =
         useState("");
@@ -46,9 +46,57 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
         setErrorMessage("");
     };
 
+    const handlePayMongoDirect = async () => {
+        setIsSubmitting(true);
+        setErrorMessage("");
+        try {
+            const subscriptionId = Number(localStorage.getItem("epicSubscriptionId")) || null;
+            const churchName = localStorage.getItem("epicChurchName") || "Mobile Bible School";
+            const contactName = localStorage.getItem("epicContactName") || "Student";
+            const contactEmail = localStorage.getItem("epicEmail") || "student@mbs.edu.ph";
+            const contactPhone = localStorage.getItem("epicPhone") || "";
+            const planAmount = Number(localStorage.getItem("epicPlanAmount")) || 2500;
+            const planName = localStorage.getItem("epicPlanName") || "MBS Modular Course Tuition";
+
+            const successUrl = `${window.location.origin}/thank-you?status=success&session_id={CHECKOUT_SESSION_ID}`;
+            const cancelUrl = `${window.location.origin}/payment?status=cancelled`;
+
+            const response = await fetch(`${API_BASE_URL}/PayMongo/checkout`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    amount: planAmount,
+                    title: planName,
+                    description: `Modular Tuition Fee for ${churchName}`,
+                    customerName: contactName,
+                    customerEmail: contactEmail,
+                    customerPhone: contactPhone,
+                    subscriptionId: subscriptionId,
+                    successUrl,
+                    cancelUrl
+                })
+            });
+
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok || !data.success || !data.checkoutUrl) {
+                throw new Error(data.message || "Unable to initiate PayMongo checkout session.");
+            }
+
+            window.location.href = data.checkoutUrl;
+        } catch (err) {
+            setErrorMessage(err instanceof Error ? err.message : "Unable to initiate PayMongo checkout.");
+            setIsSubmitting(false);
+        }
+    };
+
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setErrorMessage("");
+
+        if (paymentMethod === "paymongo") {
+            await handlePayMongoDirect();
+            return;
+        }
 
         const subscriptionId = Number(localStorage.getItem("epicSubscriptionId"));
         if (!subscriptionId) return setErrorMessage("Your subscription session is missing. Please return to checkout and try again.");
@@ -174,6 +222,43 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
                                     type="button"
                                     className={`epic-payment-method ${
                                         paymentMethod ===
+                                        "paymongo"
+                                            ? "active"
+                                            : ""
+                                    }`}
+                                    onClick={() => {
+                                        setPaymentMethod(
+                                            "paymongo"
+                                        );
+                                        setErrorMessage("");
+                                    }}
+                                >
+                                    <span className="epic-method-icon" style={{ background: "#059669", color: "#fff" }}>
+                                        ⚡
+                                    </span>
+
+                                    <span className="epic-method-content">
+                                        <strong>
+                                            PayMongo Instant
+                                        </strong>
+
+                                        <small>
+                                            GCash, Maya, Cards, QR Ph
+                                        </small>
+                                    </span>
+
+                                    <span className="epic-method-check">
+                                        {paymentMethod ===
+                                        "paymongo"
+                                            ? "✓"
+                                            : ""}
+                                    </span>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    className={`epic-payment-method ${
+                                        paymentMethod ===
                                         "gcash"
                                             ? "active"
                                             : ""
@@ -247,8 +332,46 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
                             </div>
                         </div>
 
-                        {/* QR CODE */}
+                        {/* QR CODE / PAYMONGO INFO */}
 
+                        {paymentMethod === "paymongo" ? (
+                            <div style={{
+                                background: "linear-gradient(135deg, #F0FDF4 0%, #ECFDF5 100%)",
+                                border: "1.5px solid #10B981",
+                                borderRadius: "14px",
+                                padding: "24px",
+                                margin: "20px 0"
+                            }}>
+                                <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "12px" }}>
+                                    <div style={{ width: "42px", height: "42px", borderRadius: "50%", background: "#D1FAE5", color: "#059669", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "22px" }}>
+                                        ⚡
+                                    </div>
+                                    <div>
+                                        <strong style={{ fontSize: "16px", color: "#065F46", display: "block" }}>
+                                            PayMongo Automated Live Checkout
+                                        </strong>
+                                        <span style={{ fontSize: "13px", color: "#047857" }}>
+                                            Authorized Merchant: <strong>Kezjed Solutions</strong> (Ronnel Mislang)
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <p style={{ fontSize: "14px", color: "#065F46", margin: "10px 0 16px", lineHeight: "1.5" }}>
+                                    Pay directly via your GCash, Maya, Visa/Mastercard Debit/Credit Cards, or QR Ph. Your payment is verified instantly with zero waiting time!
+                                </p>
+
+                                <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "14px" }}>
+                                    <span style={{ background: "#007DFE", color: "#fff", padding: "6px 14px", borderRadius: "8px", fontSize: "12px", fontWeight: 700 }}>GCASH</span>
+                                    <span style={{ background: "#000000", color: "#fff", padding: "6px 14px", borderRadius: "8px", fontSize: "12px", fontWeight: 700 }}>MAYA</span>
+                                    <span style={{ background: "#1A1F71", color: "#fff", padding: "6px 14px", borderRadius: "8px", fontSize: "12px", fontWeight: 700 }}>VISA / MASTERCARD</span>
+                                    <span style={{ background: "#C2410C", color: "#fff", padding: "6px 14px", borderRadius: "8px", fontSize: "12px", fontWeight: 700 }}>QR PH</span>
+                                </div>
+
+                                <p style={{ fontSize: "12px", color: "#047857", margin: "0" }}>
+                                    🔒 Safe &amp; PCI-DSS Level 1 Compliant. No manual screenshot upload required.
+                                </p>
+                            </div>
+                        ) : (
                         <div className="epic-qr-section">
 
                             <div className="epic-qr-heading">
@@ -397,6 +520,7 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
                             </div>
 
                         </div>
+                        )}
 
                         {/* PAYMENT DETAILS */}
 
@@ -411,6 +535,8 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
                                     Payment Details
                                 </h2>
 
+                                {paymentMethod !== "paymongo" && (
+                                <>
                                 <div className="epic-form-group">
 
                                     <label htmlFor="referenceNumber">
@@ -476,6 +602,8 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
                                     />
 
                                 </div>
+                                </>
+                                )}
 
                                 {errorMessage && (
                                     <div className="epic-payment-error">
@@ -493,15 +621,16 @@ const PaymentPage: React.FC<PaymentPageProps> = ({
                                     disabled={
                                         isSubmitting
                                     }
+                                    style={paymentMethod === "paymongo" ? { background: "#059669", borderColor: "#047857" } : undefined}
                                 >
                                     {isSubmitting ? (
                                         <>
                                             <span className="epic-spinner" />
-                                            Submitting Payment...
+                                            {paymentMethod === "paymongo" ? "Connecting to PayMongo Checkout..." : "Submitting Payment..."}
                                         </>
                                     ) : (
                                         <>
-                                            ✓ Submit Payment
+                                            {paymentMethod === "paymongo" ? "💳 Proceed to PayMongo Checkout →" : "✓ Submit Payment"}
                                         </>
                                     )}
                                 </button>

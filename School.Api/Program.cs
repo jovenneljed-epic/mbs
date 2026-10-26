@@ -260,6 +260,13 @@ static void ConfigureApplicationServices(
 
 
     // --------------------------------------------------------
+    // PAYMONGO PAYMENT GATEWAY (GCash, Maya, Cards, QR Ph)
+    // --------------------------------------------------------
+
+    builder.Services.AddHttpClient<IPayMongoService, PayMongoService>();
+
+
+    // --------------------------------------------------------
     // GENERAL PERMISSIONS
     // --------------------------------------------------------
 

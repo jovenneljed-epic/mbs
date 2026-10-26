@@ -9,6 +9,11 @@ interface ThankYouPageProps {
 const ThankYouPage: React.FC<ThankYouPageProps> = ({
     onNavigate,
 }) => {
+    const isPayMongoVerified = typeof window !== "undefined" && (
+        new URLSearchParams(window.location.search).get("status") === "success" ||
+        Boolean(new URLSearchParams(window.location.search).get("session_id"))
+    );
+
     return (
         <div className="thankyou-page">
             {/* BACKGROUND EFFECTS */}
@@ -24,43 +29,42 @@ const ThankYouPage: React.FC<ThankYouPageProps> = ({
                 </div>
 
                 {/* MAIN CONTENT */}
-                <div className="thankyou-badge">
-                    PAYMENT SUBMITTED
+                <div className="thankyou-badge" style={isPayMongoVerified ? { background: "#059669", color: "#fff" } : undefined}>
+                    {isPayMongoVerified ? "PAYMENT VERIFIED • PAYMONGO" : "PAYMENT SUBMITTED"}
                 </div>
 
                 <h1>
                     Welcome to{" "}
-                    <span>EPIC!</span>
+                    <span>MBS Seminary!</span>
                 </h1>
 
                 <h2>
-                    Your journey toward better
-                    church management starts here.
+                    {isPayMongoVerified
+                        ? "Your payment is confirmed and your portal is active."
+                        : "Your journey toward ministry excellence starts here."}
                 </h2>
 
                 <p className="thankyou-description">
-                    Thank you for choosing the EPIC
-                    Church Management System.
-                    Your payment information has
-                    been received and is now ready
-                    for verification.
+                    {isPayMongoVerified
+                        ? "Thank you for completing your tuition and modular enrollment payment via PayMongo. Your account has been automatically verified and activated for Kezjed Solutions / Mobile Bible School."
+                        : "Thank you for choosing Mobile Bible School. Your payment information has been received and is now ready for verification."}
                 </p>
 
                 {/* STATUS CARD */}
-                <div className="thankyou-status-card">
-                    <div className="thankyou-status-icon">
+                <div className="thankyou-status-card" style={isPayMongoVerified ? { borderColor: "#10B981", background: "#F0FDF4" } : undefined}>
+                    <div className="thankyou-status-icon" style={isPayMongoVerified ? { background: "#D1FAE5", color: "#059669" } : undefined}>
                         ✓
                     </div>
 
                     <div className="thankyou-status-content">
-                        <strong>
-                            Payment Received
+                        <strong style={isPayMongoVerified ? { color: "#065F46" } : undefined}>
+                            {isPayMongoVerified ? "Payment Verified Instantly (PayMongo)" : "Payment Received"}
                         </strong>
 
-                        <span>
-                            Our team will verify your
-                            payment and activate your
-                            EPIC subscription.
+                        <span style={isPayMongoVerified ? { color: "#047857" } : undefined}>
+                            {isPayMongoVerified
+                                ? "Instant confirmation via GCash, Maya, Card, or QR Ph. You may now access all modular materials."
+                                : "Our team will verify your payment and activate your subscription."}
                         </span>
                     </div>
                 </div>

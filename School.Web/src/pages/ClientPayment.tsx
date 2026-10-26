@@ -1089,6 +1089,89 @@ const ClientPayment: React.FC<
     ]);
 
     // =====================================================
+    // PAYMONGO CHECKOUT REDIRECT & VERIFICATION
+    // =====================================================
+
+    const handlePayMongoCheckout = useCallback(async (): Promise<void> => {
+        try {
+            setSubmitting(true);
+            setError("");
+
+            const successUrl = `${window.location.origin}/client-payment?status=success&session_id={CHECKOUT_SESSION_ID}`;
+            const cancelUrl = `${window.location.origin}/client-payment?status=cancelled`;
+
+            const targetAmount = Number(subscription?.amount) || 2500;
+            const targetTitle = subscription?.planName || "MBS Modular Course Tuition Fee";
+            const targetDesc = `Modular Tuition payment for ${subscription?.churchName || subscription?.contactName || "Mobile Bible School"}`;
+
+            const response = await axios.post(`${API_BASE_URL}/PayMongo/checkout`, {
+                amount: targetAmount,
+                title: targetTitle,
+                description: targetDesc,
+                customerName: subscription?.contactName || "Student / Member",
+                customerEmail: subscription?.contactEmail || "student@mbs.edu.ph",
+                customerPhone: subscription?.contactPhone || "",
+                subscriptionId: subscription?.subscriptionId || resolvedSubscriptionId,
+                successUrl,
+                cancelUrl
+            });
+
+            if (response.data?.success && response.data?.checkoutUrl) {
+                window.location.href = response.data.checkoutUrl;
+            } else {
+                throw new Error(response.data?.message || "Failed to create PayMongo checkout session.");
+            }
+        } catch (err: any) {
+            console.error("PayMongo checkout error:", err);
+            setError(err.response?.data?.message || err.message || "Failed to launch PayMongo checkout session.");
+            setSubmitting(false);
+        }
+    }, [subscription, resolvedSubscriptionId]);
+
+    // Check URL query parameters if returning from PayMongo checkout
+    useEffect(() => {
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const statusParam = urlParams.get("status");
+            const sessionId = urlParams.get("session_id");
+
+            if (statusParam === "success" && sessionId) {
+                setSubmitting(true);
+                axios.get(`${API_BASE_URL}/PayMongo/session/${sessionId}`)
+                    .then(res => {
+                        if (res.data?.success && res.data?.isPaid) {
+                            setSubmittedPayment({
+                                success: true,
+                                message: "Payment successfully received and verified via PayMongo!",
+                                paymentId: Date.now(),
+                                subscriptionId: resolvedSubscriptionId || 1,
+                                amount: res.data.amount || (subscription ? Number(subscription.amount) : 2500),
+                                currency: "PHP",
+                                paymentMethod: `PayMongo (${(res.data.paymentMethod || "GCASH/MAYA/CARD").toUpperCase()})`,
+                                status: "PAID",
+                                referenceNumber: res.data.paymentId || sessionId,
+                                createdDate: new Date().toISOString()
+                            });
+                            setStep("SUCCESS");
+                        } else {
+                            setError("PayMongo session detected, but payment is still being processed. Please wait a moment or check your receipt.");
+                        }
+                    })
+                    .catch(err => {
+                        console.error("PayMongo verify session error:", err);
+                    })
+                    .finally(() => {
+                        setSubmitting(false);
+                    });
+            } else if (statusParam === "cancelled") {
+                setError("Your PayMongo checkout session was cancelled. You can retry whenever you are ready.");
+            }
+        } catch (e) {
+            console.error("PayMongo query check error:", e);
+        }
+    }, [resolvedSubscriptionId, subscription]);
+
+    // =====================================================
     // SUBMIT PAYMENT
     // =====================================================
 
@@ -1107,6 +1190,11 @@ const ClientPayment: React.FC<
                         "Subscription information is unavailable."
                     );
 
+                    return;
+                }
+
+                if (paymentMethod === "PayMongo") {
+                    await handlePayMongoCheckout();
                     return;
                 }
 
@@ -1843,158 +1931,208 @@ const ClientPayment: React.FC<
                             </div>
 
                             {/* =================================================
-                                REFERENCE NUMBER
+                                PAYMONGO OR MANUAL FORM FIELDS
                             ================================================= */}
+                            {paymentMethod === "PayMongo" ? (
+                                <div style={{
+                                    background: "linear-gradient(135deg, #F0FDF4 0%, #ECFDF5 100%)",
+                                    border: "1.5px solid #10B981",
+                                    borderRadius: "14px",
+                                    padding: "24px",
+                                    marginBottom: "20px",
+                                    textAlign: "center"
+                                }}>
+                                    <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "48px", height: "48px", borderRadius: "50%", background: "#D1FAE5", color: "#059669", fontSize: "24px", marginBottom: "12px" }}>
+                                        ⚡
+                                    </div>
+                                    <h3 style={{ margin: "0 0 6px", fontSize: "18px", color: "#065F46", fontWeight: 700 }}>
+                                        Official PayMongo Live Checkout
+                                    </h3>
+                                    <p style={{ margin: "0 0 16px", fontSize: "14px", color: "#047857", lineHeight: 1.5 }}>
+                                        Instant payment verification for <strong>Kezjed Solutions</strong>. Choose your preferred channel at checkout:
+                                    </p>
 
-                            <div className="form-section">
+                                    <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "8px", marginBottom: "20px" }}>
+                                        <span style={{ background: "#007DFE", color: "#fff", padding: "6px 14px", borderRadius: "8px", fontSize: "12px", fontWeight: 700, letterSpacing: "0.5px" }}>
+                                            GCASH
+                                        </span>
+                                        <span style={{ background: "#000000", color: "#fff", padding: "6px 14px", borderRadius: "8px", fontSize: "12px", fontWeight: 700, letterSpacing: "0.5px" }}>
+                                            MAYA
+                                        </span>
+                                        <span style={{ background: "#1A1F71", color: "#fff", padding: "6px 14px", borderRadius: "8px", fontSize: "12px", fontWeight: 700, letterSpacing: "0.5px" }}>
+                                            VISA / MASTERCARD
+                                        </span>
+                                        <span style={{ background: "#C2410C", color: "#fff", padding: "6px 14px", borderRadius: "8px", fontSize: "12px", fontWeight: 700, letterSpacing: "0.5px" }}>
+                                            QR PH
+                                        </span>
+                                        <span style={{ background: "#4338CA", color: "#fff", padding: "6px 14px", borderRadius: "8px", fontSize: "12px", fontWeight: 700, letterSpacing: "0.5px" }}>
+                                            ONLINE BANKING
+                                        </span>
+                                    </div>
 
-                                <label
-                                    htmlFor="referenceNumber"
-                                    className="form-label"
-                                >
-                                    Payment Reference Number
-                                </label>
+                                    <button
+                                        type="button"
+                                        className="payment-primary-button"
+                                        style={{
+                                            background: "#059669",
+                                            borderColor: "#047857",
+                                            width: "100%",
+                                            padding: "16px",
+                                            fontSize: "16px",
+                                            fontWeight: 700,
+                                            boxShadow: "0 4px 14px rgba(5, 150, 105, 0.3)"
+                                        }}
+                                        onClick={handlePayMongoCheckout}
+                                        disabled={submitting}
+                                    >
+                                        {submitting ? "Redirecting to PayMongo Checkout..." : `💳 Pay ${formatCurrency(subscription.amount, subscription.currency)} via PayMongo`}
+                                    </button>
 
-                                <input
-                                    id="referenceNumber"
-                                    type="text"
-                                    value={
-                                        referenceNumber
-                                    }
-                                    onChange={
-                                        event =>
-                                            setReferenceNumber(
-                                                event.target.value
+                                    <p style={{ margin: "14px 0 0", fontSize: "12px", color: "#065F46" }}>
+                                        🔒 256-bit SSL encrypted. Payment is instantly verified and credited upon completion.
+                                    </p>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="form-section">
+
+                                        <label
+                                            htmlFor="referenceNumber"
+                                            className="form-label"
+                                        >
+                                            Payment Reference Number
+                                        </label>
+
+                                        <input
+                                            id="referenceNumber"
+                                            type="text"
+                                            value={
+                                                referenceNumber
+                                            }
+                                            onChange={
+                                                event =>
+                                                    setReferenceNumber(
+                                                        event.target.value
+                                                    )
+                                            }
+                                            placeholder={
+                                                referencePlaceholder
+                                            }
+                                            autoComplete="off"
+                                            maxLength={100}
+                                            required
+                                            disabled={
+                                                submitting ||
+                                                Boolean(
+                                                    pendingPayment
+                                                )
+                                            }
+                                        />
+
+                                        <small className="form-help">
+                                            Enter the reference number
+                                            shown on your payment
+                                            confirmation.
+                                        </small>
+
+                                    </div>
+
+                                    <div className="form-section">
+
+                                        <label
+                                            htmlFor="paymentDate"
+                                            className="form-label"
+                                        >
+                                            Payment Date
+                                        </label>
+
+                                        <input
+                                            id="paymentDate"
+                                            type="date"
+                                            value={
+                                                paymentDate
+                                            }
+                                            onChange={
+                                                event =>
+                                                    setPaymentDate(
+                                                        event.target.value
+                                                    )
+                                            }
+                                            max={
+                                                getToday()
+                                            }
+                                            required
+                                            disabled={
+                                                submitting ||
+                                                Boolean(
+                                                    pendingPayment
+                                                )
+                                            }
+                                        />
+
+                                    </div>
+
+                                    <div className="form-section">
+
+                                        <label
+                                            htmlFor="paymentNotes"
+                                            className="form-label"
+                                        >
+                                            Additional Notes
+
+                                            <span>
+                                                Optional
+                                            </span>
+                                        </label>
+
+                                        <textarea
+                                            id="paymentNotes"
+                                            value={
+                                                notes
+                                            }
+                                            onChange={
+                                                event =>
+                                                    setNotes(
+                                                        event.target.value
+                                                    )
+                                            }
+                                            rows={4}
+                                            maxLength={1000}
+                                            placeholder="Add any additional information about your payment..."
+                                            disabled={
+                                                submitting ||
+                                                Boolean(
+                                                    pendingPayment
+                                                )
+                                            }
+                                        />
+
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        className="payment-primary-button"
+                                        disabled={
+                                            submitting ||
+                                            !referenceNumber.trim() ||
+                                            Boolean(
+                                                pendingPayment
                                             )
-                                    }
-                                    placeholder={
-                                        referencePlaceholder
-                                    }
-                                    autoComplete="off"
-                                    maxLength={100}
-                                    required
-                                    disabled={
-                                        submitting ||
-                                        Boolean(
-                                            pendingPayment
-                                        )
-                                    }
-                                />
+                                        }
+                                    >
 
-                                <small className="form-help">
-                                    Enter the reference number
-                                    shown on your payment
-                                    confirmation.
-                                </small>
+                                        {submitting
+                                            ? "Submitting Payment..."
+                                            : pendingPayment
+                                                ? "Payment Verification Pending"
+                                                : `Submit Payment — ${formatCurrency(
+                                                      subscription.amount,
+                                                      subscription.currency
+                                                  )}`}
 
-                            </div>
-
-                            {/* =================================================
-                                PAYMENT DATE
-                            ================================================= */}
-
-                            <div className="form-section">
-
-                                <label
-                                    htmlFor="paymentDate"
-                                    className="form-label"
-                                >
-                                    Payment Date
-                                </label>
-
-                                <input
-                                    id="paymentDate"
-                                    type="date"
-                                    value={
-                                        paymentDate
-                                    }
-                                    onChange={
-                                        event =>
-                                            setPaymentDate(
-                                                event.target.value
-                                            )
-                                    }
-                                    max={
-                                        getToday()
-                                    }
-                                    required
-                                    disabled={
-                                        submitting ||
-                                        Boolean(
-                                            pendingPayment
-                                        )
-                                    }
-                                />
-
-                            </div>
-
-                            {/* =================================================
-                                NOTES
-                            ================================================= */}
-
-                            <div className="form-section">
-
-                                <label
-                                    htmlFor="paymentNotes"
-                                    className="form-label"
-                                >
-                                    Additional Notes
-
-                                    <span>
-                                        Optional
-                                    </span>
-                                </label>
-
-                                <textarea
-                                    id="paymentNotes"
-                                    value={
-                                        notes
-                                    }
-                                    onChange={
-                                        event =>
-                                            setNotes(
-                                                event.target.value
-                                            )
-                                    }
-                                    rows={4}
-                                    maxLength={1000}
-                                    placeholder="Add any additional information about your payment..."
-                                    disabled={
-                                        submitting ||
-                                        Boolean(
-                                            pendingPayment
-                                        )
-                                    }
-                                />
-
-                            </div>
-
-                            {/* =================================================
-                                SUBMIT
-                            ================================================= */}
-
-                            <button
-                                type="submit"
-                                className="payment-primary-button"
-                                disabled={
-                                    submitting ||
-                                    !referenceNumber.trim() ||
-                                    Boolean(
-                                        pendingPayment
-                                    )
-                                }
-                            >
-
-                                {submitting
-                                    ? "Submitting Payment..."
-                                    : pendingPayment
-                                        ? "Payment Verification Pending"
-                                        : `Submit Payment — ${formatCurrency(
-                                              subscription.amount,
-                                              subscription.currency
-                                          )}`}
-
-                            </button>
+                                    </button>
+                                </>
+                            )}
 
                             <p className="payment-security-note">
 
