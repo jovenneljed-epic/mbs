@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import PublicHeader from "../../components/PublicHeader";
+import PublicFooter from "../../components/PublicFooter";
 import "./AnnouncementsPage.css";
 import "./PublicUnisonTheme.css";
 import {
@@ -640,6 +641,14 @@ const AnnouncementsPage: React.FC<AnnouncementsPageProps> = ({ onNavigate }) => 
                     </div>
                 </div>
             </section>
+
+            {/* =========================================================
+                UNIFIED INSTITUTIONAL FOOTER
+            ========================================================= */}
+            <PublicFooter
+                onNavigate={handleNavigate}
+                onOpenAdmission={() => handleNavigate("contact")}
+            />
         </div>
     );
 };

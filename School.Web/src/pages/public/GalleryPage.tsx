@@ -6,6 +6,7 @@
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import PublicHeader from "../../components/PublicHeader";
+import PublicFooter from "../../components/PublicFooter";
 import "./GalleryPage.css";
 import "./PublicUnisonTheme.css";
 import {
@@ -40,7 +41,6 @@ import {
     ArrowRight,
     Image as ImageIcon,
     Sparkles,
-    BookOpen,
     Eye,
     RotateCcw,
     Lock,
@@ -1657,37 +1657,12 @@ const GalleryPage: React.FC<GalleryPageProps> = ({ onNavigate }) => {
             </section>
 
             {/* =========================================================
-                FOOTER
+                UNIFIED INSTITUTIONAL FOOTER
             ========================================================= */}
-            <footer className="mbs-gallery-footer">
-                <div className="mbs-gallery-container">
-                    <div className="mbs-footer-top">
-                        <div className="mbs-footer-brand">
-                            <div className="mbs-footer-crest">
-                                <BookOpen size={20} color="#FFFFFF" />
-                            </div>
-                            <div>
-                                <h4>Mobile Bible School &amp; Theological Seminary</h4>
-                                <small>Visual Media Archives &amp; Institutional Documentation</small>
-                            </div>
-                        </div>
-
-                        <div className="mbs-footer-links">
-                            <button type="button" onClick={() => handleNavigate("home")}>Home</button>
-                            <button type="button" onClick={() => handleNavigate("about")}>About</button>
-                            <button type="button" onClick={() => handleNavigate("events")}>Events</button>
-                            <button type="button" onClick={() => handleNavigate("announcements")}>Announcements</button>
-                            <button type="button" onClick={() => handleNavigate("learning")}>Theological LMS</button>
-                            <button type="button" onClick={() => handleNavigate("contact")}>Contact</button>
-                        </div>
-                    </div>
-
-                    <div className="mbs-footer-bottom">
-                        <span>© {new Date().getFullYear()} Mobile Bible School &amp; Theological Seminary. All rights reserved.</span>
-                        <span>Equipping Pastors • Advancing Scholarship • Proclaiming Christ</span>
-                    </div>
-                </div>
-            </footer>
+            <PublicFooter
+                onNavigate={handleNavigate}
+                onOpenAdmission={() => handleNavigate("contact")}
+            />
         </div>
     );
 };

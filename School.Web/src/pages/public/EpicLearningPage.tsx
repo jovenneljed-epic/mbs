@@ -6,6 +6,7 @@
 
 import React, { useState, useEffect } from "react";
 import PublicHeader from "../../components/PublicHeader";
+import PublicFooter from "../../components/PublicFooter";
 import SchoolNumberAuthModal from "../../components/SchoolNumberAuthModal";
 import {
     getLmsDiscussions,
@@ -1113,6 +1114,12 @@ export const EpicLearningPage: React.FC<EpicLearningPageProps> = ({ onNavigate }
                         onNavigate?.("login");
                     }
                 }}
+            />
+
+            {/* UNIFIED INSTITUTIONAL FOOTER */}
+            <PublicFooter
+                onNavigate={onNavigate}
+                onOpenAdmission={() => onNavigate?.("contact")}
             />
         </div>
     );

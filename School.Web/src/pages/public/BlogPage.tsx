@@ -3,6 +3,7 @@ import {
     useEffect,
     useState
 } from "react";
+import PublicFooter from "../../components/PublicFooter";
 
 import {
     getPublicBlogs
@@ -450,6 +451,11 @@ loadBlogs();
 
             </section>
 
+            {/* UNIFIED INSTITUTIONAL FOOTER */}
+            <PublicFooter
+                onNavigate={handleNavigate}
+                onOpenAdmission={() => handleNavigate("contact")}
+            />
         </div>
     );
 };

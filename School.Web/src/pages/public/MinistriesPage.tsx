@@ -1,6 +1,7 @@
 
 import React from "react";
 import PublicHeader from "../../components/PublicHeader";
+import PublicFooter from "../../components/PublicFooter";
 import "./MinistriesPage.css";
 import "./PublicUnisonTheme.css";
 
@@ -638,6 +639,11 @@ const MinistriesPage: React.FC<MinistriesPageProps> = ({
 
             </section>
 
+            {/* UNIFIED INSTITUTIONAL FOOTER */}
+            <PublicFooter
+                onNavigate={handleNavigate}
+                onOpenAdmission={() => handleNavigate("contact")}
+            />
         </div>
     );
 };

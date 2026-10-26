@@ -2,18 +2,18 @@ namespace School.Api.Models
 {
     public class GlobalThemeDto
     {
-        public string? ThemeId { get; set; } = "emerald-academic";
-        public string? Name { get; set; } = "Living Word Emerald";
+        public string? ThemeId { get; set; } = "seminary-maroon";
+        public string? Name { get; set; } = "Seminary Maroon & 24K Gold";
         public string? Badge { get; set; } = "OFFICIAL MBS";
-        public string? Description { get; set; } = "Deep botanical forest greens & bright mint symbolizing spiritual fruitfulness and life.";
-        public string? Primary { get; set; } = "#10b981";
-        public string? PrimaryHover { get; set; } = "#059669";
-        public string? Secondary { get; set; } = "#34d399";
-        public string? Glow { get; set; } = "rgba(16, 185, 129, 0.35)";
-        public string? HeroGlow { get; set; } = "rgba(16, 185, 129, 0.16)";
-        public string? HeroBgStart { get; set; } = "#020f0a";
-        public string? HeroBgEnd { get; set; } = "#051b12";
-        public string? Gradient { get; set; } = "linear-gradient(180deg, #ffffff 20%, #a7f3d0 65%, #10b981 100%)";
-        public string? CardAccent { get; set; } = "rgba(16, 185, 129, 0.2)";
+        public string? Description { get; set; } = "Deep collegiate velvet maroon, lustrous 24K gold accents, and imperial mahogany obsidian.";
+        public string? Primary { get; set; } = "#7A1526";
+        public string? PrimaryHover { get; set; } = "#580d1b";
+        public string? Secondary { get; set; } = "#F59E0B";
+        public string? Glow { get; set; } = "rgba(122, 21, 38, 0.42)";
+        public string? HeroGlow { get; set; } = "rgba(245, 158, 11, 0.22)";
+        public string? HeroBgStart { get; set; } = "#380710";
+        public string? HeroBgEnd { get; set; } = "#120205";
+        public string? Gradient { get; set; } = "linear-gradient(135deg, #FFFFFF 20%, #FDE68A 65%, #F59E0B 100%)";
+        public string? CardAccent { get; set; } = "rgba(122, 21, 38, 0.35)";
     }
 }

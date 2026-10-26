@@ -52,6 +52,13 @@ namespace School.Api.Controllers
                     });
                     if (theme != null)
                     {
+                        // Auto-heal legacy emerald to official seminary maroon
+                        if (theme.ThemeId == "emerald-academic")
+                        {
+                            theme = new GlobalThemeDto();
+                            var updatedJson = JsonSerializer.Serialize(theme, new JsonSerializerOptions { WriteIndented = true });
+                            await System.IO.File.WriteAllTextAsync(_themeFilePath, updatedJson);
+                        }
                         _cachedTheme = theme;
                         return Ok(theme);
                     }

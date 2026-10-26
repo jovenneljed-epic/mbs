@@ -213,7 +213,7 @@ export const COLOR_THEME_PRESETS: Record<string, ColorThemeSettings> = {
     },
 };
 
-export const DEFAULT_COLOR_THEME: ColorThemeSettings = COLOR_THEME_PRESETS["emerald-academic"];
+export const DEFAULT_COLOR_THEME: ColorThemeSettings = COLOR_THEME_PRESETS["seminary-maroon"];
 
 export interface FooterSettings {
     schoolName?: string;
@@ -258,7 +258,7 @@ export const DEFAULT_FOOTER_SETTINGS: FooterSettings = {
     column2Heading: "Campuses & Training Centers",
     mainCampus: "Metro Manila, Philippines",
     regionalCenters: "Luzon • Visayas • Mindanao",
-    onlineExtension: "Global Classroom Access",
+    onlineExtension: "Regional Extension Campuses & Cohorts",
     inquiriesPhone: "+63 (02) 8800-BIBLE",
     directMobile: "+63 917 123 4567",
     

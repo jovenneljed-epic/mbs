@@ -6,6 +6,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import PublicHeader from "../../components/PublicHeader";
+import PublicFooter from "../../components/PublicFooter";
 import {
     getPublicSchoolEvents,
     getPublicSchoolAnnouncements,
@@ -18,7 +19,6 @@ import {
     MapPin,
     User,
     Search,
-    BookOpen,
     Bell,
     CheckCircle2,
     X,
@@ -693,46 +693,11 @@ export const EventsPage: React.FC<EventsPageProps> = ({ onNavigate }) => {
                 </div>
             )}
 
-            {/* INSTITUTIONAL FOOTER */}
-            <footer className="mbs-events-footer">
-                <div className="mbs-footer-inner">
-                    <div className="mbs-footer-col">
-                        <div className="mbs-footer-brand">
-                            <div className="mbs-footer-crest">
-                                <BookOpen size={18} color="#FFFFFF" />
-                            </div>
-                            <div>
-                                <h4>Mobile Bible School</h4>
-                                <small>Theological Seminary &amp; Ministerial Institute</small>
-                            </div>
-                        </div>
-                        <p className="mbs-footer-motto">
-                            &quot;Preach the word; be ready in season and out of season; reprove, rebuke, and exhort, with complete patience and teaching.&quot; — 2 Timothy 4:2
-                        </p>
-                    </div>
-
-                    <div className="mbs-footer-col">
-                        <h5>Direct Portals</h5>
-                        <ul>
-                            <li><button type="button" onClick={() => handleNavigate("client-login")}>Student Portal (My MBS)</button></li>
-                            <li><button type="button" onClick={() => handleNavigate("login")}>Admin &amp; Faculty Portal</button></li>
-                            <li><button type="button" onClick={() => handleNavigate("learning")}>Theological LMS</button></li>
-                            <li><button type="button" onClick={() => handleNavigate("contact")}>Admissions Desk</button></li>
-                        </ul>
-                    </div>
-
-                    <div className="mbs-footer-col">
-                        <h5>Headquarters &amp; Hubs</h5>
-                        <p>📍 Metro Manila Seminary Campus, Philippines</p>
-                        <p>📞 Inquiries: +63 (02) 8800-BIBLE</p>
-                        <p>📱 Direct Hotline: +63 917 123 4567</p>
-                    </div>
-                </div>
-
-                <div className="mbs-footer-bottom">
-                    <p>© {new Date().getFullYear()} Mobile Bible School &amp; Theological Seminary. All Rights Reserved.</p>
-                </div>
-            </footer>
+            {/* UNIFIED INSTITUTIONAL FOOTER */}
+            <PublicFooter
+                onNavigate={handleNavigate}
+                onOpenAdmission={() => handleNavigate("contact")}
+            />
         </div>
     );
 };

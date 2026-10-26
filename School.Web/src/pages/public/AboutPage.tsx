@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect } from "react";
 import PublicHeader from "../../components/PublicHeader";
+import PublicFooter from "../../components/PublicFooter";
 import "./AboutPage.css";
 import {
     getAboutContent,
@@ -880,6 +881,14 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, initialTab = "
                     <span>{toastMessage}</span>
                 </div>
             )}
+
+            {/* ============================================================ */}
+            {/* UNIFIED INSTITUTIONAL FOOTER                                 */}
+            {/* ============================================================ */}
+            <PublicFooter
+                onNavigate={navigateTo}
+                onOpenAdmission={() => navigateTo("contact")}
+            />
         </div>
     );
 };

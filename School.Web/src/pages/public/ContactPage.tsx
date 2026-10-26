@@ -6,6 +6,7 @@
 
 import React, { useState, useEffect } from "react";
 import PublicHeader from "../../components/PublicHeader";
+import PublicFooter from "../../components/PublicFooter";
 import { applyGlobalTheme } from "../../services/landingPageContent";
 import "./ContactPage.css";
 import "./PublicUnisonTheme.css";
@@ -590,34 +591,12 @@ const ContactPage: React.FC<ContactPageProps> = ({ onNavigate }) => {
             </main>
 
             {/* =========================================================
-                FOOTER
+                UNIFIED INSTITUTIONAL FOOTER
             ========================================================= */}
-            <footer className="mbs-contact-footer">
-                <div className="mbs-contact-container">
-                    <div className="mbs-footer-content-row">
-                        <div className="mbs-footer-brand-box">
-                            <div className="mbs-footer-crest">
-                                <BookOpen size={18} color="#FFFFFF" />
-                            </div>
-                            <div>
-                                <h4>Mobile Bible School &amp; Theological Seminary</h4>
-                                <small>Academic Portal &amp; Campus Communication System</small>
-                            </div>
-                        </div>
-                        <div className="mbs-footer-nav">
-                            <button type="button" onClick={() => onNavigate ? onNavigate("home") : window.location.href = "/home"}>Home</button>
-                            <button type="button" onClick={() => onNavigate ? onNavigate("about") : window.location.href = "/about"}>About</button>
-                            <button type="button" onClick={() => onNavigate ? onNavigate("events") : window.location.href = "/events"}>Events</button>
-                            <button type="button" onClick={() => onNavigate ? onNavigate("announcements") : window.location.href = "/announcements"}>Announcements</button>
-                            <button type="button" onClick={() => onNavigate ? onNavigate("learning") : window.location.href = "/learning"}>Theological LMS</button>
-                        </div>
-                    </div>
-                    <div className="mbs-footer-bottom-row">
-                        <span>© {new Date().getFullYear()} Mobile Bible School &amp; Theological Seminary. All rights reserved.</span>
-                        <span>Equipping Disciples • Advancing Theological Scholarship • Proclaiming Truth</span>
-                    </div>
-                </div>
-            </footer>
+            <PublicFooter
+                onNavigate={onNavigate}
+                onOpenAdmission={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            />
         </div>
     );
 };
