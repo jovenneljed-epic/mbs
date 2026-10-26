@@ -62,6 +62,8 @@ import {
 } from "../services/alumniService";
 import type { AlumniSectionConfig } from "../services/alumniService";
 import AlumniEditorModal from "../components/AlumniEditorModal";
+import SatelliteClassesMegaMenu from "../components/SatelliteClassesMegaMenu";
+import MbsSupportsMegaMenu from "../components/MbsSupportsMegaMenu";
 import PublicFooter from "../components/PublicFooter";
 
 interface SalesLandingPageProps {
@@ -219,6 +221,10 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
     // ============================================================
     const [isCampusMenuOpen, setIsCampusMenuOpen] = useState(false);
     const closeTimeoutRef = useRef<any>(null);
+    const [isSatelliteMenuOpen, setIsSatelliteMenuOpen] = useState(false);
+    const satelliteTimeoutRef = useRef<any>(null);
+    const [isSupportsMenuOpen, setIsSupportsMenuOpen] = useState(false);
+    const supportsTimeoutRef = useRef<any>(null);
     const [schoolEvents, setSchoolEvents] = useState<SchoolEventItem[]>(DEFAULT_SCHOOL_EVENTS);
     const [schoolAnnouncements, setSchoolAnnouncements] = useState<SchoolAnnouncementItem[]>(DEFAULT_SCHOOL_ANNOUNCEMENTS);
     const [isLoadingEvents, setIsLoadingEvents] = useState(false);
@@ -266,6 +272,10 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
     // Graceful Apple-style hover delay handlers
     const handleMouseEnterCampus = () => {
         if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+        if (satelliteTimeoutRef.current) clearTimeout(satelliteTimeoutRef.current);
+        if (supportsTimeoutRef.current) clearTimeout(supportsTimeoutRef.current);
+        setIsSatelliteMenuOpen(false);
+        setIsSupportsMenuOpen(false);
         setIsCampusMenuOpen(true);
     };
 
@@ -276,6 +286,8 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
     };
 
     const toggleCampusMenu = () => {
+        setIsSatelliteMenuOpen(false);
+        setIsSupportsMenuOpen(false);
         setIsCampusMenuOpen(prev => !prev);
     };
 
@@ -284,6 +296,59 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
         setIsCampusMenuOpen(false);
     };
 
+    // Graceful Apple-style hover delay handlers for Satellite Classes
+    const handleMouseEnterSatellite = () => {
+        if (satelliteTimeoutRef.current) clearTimeout(satelliteTimeoutRef.current);
+        if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+        if (supportsTimeoutRef.current) clearTimeout(supportsTimeoutRef.current);
+        setIsCampusMenuOpen(false);
+        setIsSupportsMenuOpen(false);
+        setIsSatelliteMenuOpen(true);
+    };
+
+    const handleMouseLeaveSatellite = () => {
+        satelliteTimeoutRef.current = setTimeout(() => {
+            setIsSatelliteMenuOpen(false);
+        }, 220);
+    };
+
+    const toggleSatelliteMenu = () => {
+        setIsCampusMenuOpen(false);
+        setIsSupportsMenuOpen(false);
+        setIsSatelliteMenuOpen(prev => !prev);
+    };
+
+    const closeSatelliteMenu = () => {
+        if (satelliteTimeoutRef.current) clearTimeout(satelliteTimeoutRef.current);
+        setIsSatelliteMenuOpen(false);
+    };
+
+    // Graceful Apple-style hover delay handlers for MBS Supports
+    const handleMouseEnterSupports = () => {
+        if (supportsTimeoutRef.current) clearTimeout(supportsTimeoutRef.current);
+        if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+        if (satelliteTimeoutRef.current) clearTimeout(satelliteTimeoutRef.current);
+        setIsCampusMenuOpen(false);
+        setIsSatelliteMenuOpen(false);
+        setIsSupportsMenuOpen(true);
+    };
+
+    const handleMouseLeaveSupports = () => {
+        supportsTimeoutRef.current = setTimeout(() => {
+            setIsSupportsMenuOpen(false);
+        }, 220);
+    };
+
+    const toggleSupportsMenu = () => {
+        setIsCampusMenuOpen(false);
+        setIsSatelliteMenuOpen(false);
+        setIsSupportsMenuOpen(prev => !prev);
+    };
+
+    const closeSupportsMenu = () => {
+        if (supportsTimeoutRef.current) clearTimeout(supportsTimeoutRef.current);
+        setIsSupportsMenuOpen(false);
+    };
 
     // Mobile Navigation Drawer State
     const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
@@ -294,12 +359,29 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
             if (e.key === "Escape") {
                 setIsMobileNavOpen(false);
                 setIsCampusMenuOpen(false);
+                setIsSatelliteMenuOpen(false);
+                setIsSupportsMenuOpen(false);
                 setSelectedEvent(null);
                 setSelectedAnnouncement(null);
             }
         };
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
+    }, []);
+
+    // Check URL parameters / hash to auto-open satellite or supports modal
+    useEffect(() => {
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const hash = window.location.hash;
+            if (urlParams.get("tab") === "satellites" || hash === "#satellites" || urlParams.get("section") === "satellites") {
+                setIsSatelliteMenuOpen(true);
+            } else if (urlParams.get("tab") === "supports" || hash === "#supports" || urlParams.get("section") === "supports") {
+                setIsSupportsMenuOpen(true);
+            }
+        } catch {
+            // Ignore in environments without window.location
+        }
     }, []);
 
     // Admissions Modal State
@@ -335,8 +417,20 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
     const navigateTo = (route: string) => {
         setIsMobileNavOpen(false);
         setIsCampusMenuOpen(false);
+        setIsSatelliteMenuOpen(false);
+        setIsSupportsMenuOpen(false);
 
         const clean = route.startsWith("/") ? route.replace(/^\/+/, "") : route;
+
+        if (clean.includes("satellites")) {
+            setIsSatelliteMenuOpen(true);
+            return;
+        }
+
+        if (clean.includes("supports")) {
+            setIsSupportsMenuOpen(true);
+            return;
+        }
 
         if (clean === "client-login" || clean === "student-portal") {
             if (onNavigate) onNavigate("client-login");
@@ -705,6 +799,38 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
                                 <ChevronDown size={13} className={`ub-campus-chevron ${isCampusMenuOpen ? "rotated" : ""}`} />
                             </button>
                         </div>
+                        <div
+                            className="ub-campus-trigger-wrapper"
+                            onMouseEnter={handleMouseEnterSatellite}
+                            onMouseLeave={handleMouseLeaveSatellite}
+                        >
+                            <button
+                                type="button"
+                                className={`ub-nav-link-campus ${isSatelliteMenuOpen ? "active" : ""}`}
+                                onClick={toggleSatelliteMenu}
+                                aria-expanded={isSatelliteMenuOpen}
+                                aria-haspopup="true"
+                            >
+                                <span>SATELLITE CLASSES</span>
+                                <ChevronDown size={13} className={`ub-campus-chevron ${isSatelliteMenuOpen ? "rotated" : ""}`} />
+                            </button>
+                        </div>
+                        <div
+                            className="ub-campus-trigger-wrapper"
+                            onMouseEnter={handleMouseEnterSupports}
+                            onMouseLeave={handleMouseLeaveSupports}
+                        >
+                            <button
+                                type="button"
+                                className={`ub-nav-link-campus ${isSupportsMenuOpen ? "active" : ""}`}
+                                onClick={toggleSupportsMenu}
+                                aria-expanded={isSupportsMenuOpen}
+                                aria-haspopup="true"
+                            >
+                                <span>MBS SUPPORTS</span>
+                                <ChevronDown size={13} className={`ub-campus-chevron ${isSupportsMenuOpen ? "rotated" : ""}`} />
+                            </button>
+                        </div>
                     </nav>
 
                     {/* Actions Right (Desktop) */}
@@ -820,6 +946,44 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
                             >
                                 <Mail size={15} className="ub-mobile-link-icon" />
                                 <span>Admissions &amp; Contact Desk</span>
+                            </button>
+                        </div>
+
+                        {/* REGIONAL SATELLITE CLASSES & SUPPORTS */}
+                        <div className="ub-mobile-drawer-group">
+                            <span className="ub-mobile-drawer-label">REGIONAL &amp; RESOURCE HUBS</span>
+                            <button
+                                type="button"
+                                className="ub-mobile-drawer-highlight sat-highlight"
+                                onClick={() => {
+                                    setIsMobileNavOpen(false);
+                                    setIsCampusMenuOpen(false);
+                                    setIsSupportsMenuOpen(false);
+                                    setIsSatelliteMenuOpen(true);
+                                }}
+                            >
+                                <MapPin size={17} />
+                                <div className="ub-mobile-highlight-text">
+                                    <strong>Satellite Classes (7 Regions)</strong>
+                                    <small>Luzon, Visayas, Mindanao Modular Hubs</small>
+                                </div>
+                            </button>
+
+                            <button
+                                type="button"
+                                className="ub-mobile-drawer-highlight supports-highlight"
+                                onClick={() => {
+                                    setIsMobileNavOpen(false);
+                                    setIsCampusMenuOpen(false);
+                                    setIsSatelliteMenuOpen(false);
+                                    setIsSupportsMenuOpen(true);
+                                }}
+                            >
+                                <Sparkles size={17} />
+                                <div className="ub-mobile-highlight-text">
+                                    <strong>MBS Supports &amp; Resources</strong>
+                                    <small>Downloadable PDFs, Church Videos &amp; Manuals</small>
+                                </div>
                             </button>
                         </div>
 
@@ -1152,6 +1316,29 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
                 </div>
             </div>
 
+            {/* ============================================================ */}
+            {/* APPLE-STYLE SATELLITE CLASSES MEGA-MENU DROPDOWN             */}
+            {/* ============================================================ */}
+            <SatelliteClassesMegaMenu
+                isOpen={isSatelliteMenuOpen}
+                onMouseEnter={handleMouseEnterSatellite}
+                onMouseLeave={handleMouseLeaveSatellite}
+                onClose={closeSatelliteMenu}
+                onNavigate={navigateTo}
+                onOpenAdmission={(prog) => openAdmissionWithProgram(prog || "Bachelor of Theology (B.Th.)")}
+            />
+
+            {/* ============================================================ */}
+            {/* APPLE-STYLE MBS SUPPORTS MEGA-MENU DROPDOWN                  */}
+            {/* ============================================================ */}
+            <MbsSupportsMegaMenu
+                isOpen={isSupportsMenuOpen}
+                onMouseEnter={handleMouseEnterSupports}
+                onMouseLeave={handleMouseLeaveSupports}
+                onClose={closeSupportsMenu}
+                onNavigate={navigateTo}
+                onOpenAdmission={(prog) => openAdmissionWithProgram(prog || "Bachelor of Theology (B.Th.)")}
+            />
             </div>
 
             {/* ============================================================ */}
@@ -1786,9 +1973,11 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
             {/* FULLSCREEN DIMMED BACKDROP FOR APPLE DROPDOWN                */}
             {/* ============================================================ */}
             <div
-                className={`apple-nav-backdrop ${isCampusMenuOpen ? "active" : ""}`}
+                className={`apple-nav-backdrop ${isCampusMenuOpen || isSatelliteMenuOpen || isSupportsMenuOpen ? "active" : ""}`}
                 onClick={() => {
                     closeCampusMenu();
+                    closeSatelliteMenu();
+                    closeSupportsMenu();
                 }}
                 aria-hidden="true"
             />
