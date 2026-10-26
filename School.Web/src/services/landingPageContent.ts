@@ -253,14 +253,14 @@ export interface FooterSettings {
 export const DEFAULT_FOOTER_SETTINGS: FooterSettings = {
     scriptureMotto: '"Preach the word; be ready in season and out of season; reprove, rebuke, and exhort, with complete patience and teaching." — 2 Timothy 4:2',
     accreditation1: "ACTS ACCREDITED",
-    accreditation2: "CCHE RECOGNIZED",
+    accreditation2: "CHED RECOGNIZED",
     
     column2Heading: "Campuses & Training Centers",
-    mainCampus: "Metro Manila, Philippines",
+    mainCampus: "Lupao Nueva Ecija, Philippines",
     regionalCenters: "Luzon • Visayas • Mindanao",
-    onlineExtension: "Regional Extension Campuses & Cohorts",
+    onlineExtension: "Global Classroom Access",
     inquiriesPhone: "+63 (02) 8800-BIBLE",
-    directMobile: "+63 917 123 4567",
+    directMobile: "09913114163",
     
     column3Heading: "MBS Direct Portals",
     portal1Label: "Student Portal (My MBS)",
@@ -273,7 +273,7 @@ export const DEFAULT_FOOTER_SETTINGS: FooterSettings = {
     admissionsBlurb: "Accepting applications for the upcoming academic semester. Open to pastors, church workers, and theological scholars.",
     admissionsCtaText: "Apply for Admission",
     
-    copyrightText: "© 2026 Mobile Bible School & Theological Seminary. All Rights Reserved.",
+    copyrightText: "© 2026 Mobile Bible School & Theological Seminary Powered by KEZJED Solutions. All Rights Reserved.",
     legalLink1Text: "Privacy Policy",
     legalLink2Text: "Academic Policies",
     legalLink3Text: "Admissions Desk",
@@ -303,19 +303,19 @@ export interface LandingPageContent {
 }
 
 export const DEFAULT_LANDING_CONTENT: LandingPageContent = {
-    ribbonText: "Now Accepting Applications for Academic Year 2026-2027. Modular Pastoral Intensives & Global Online Seminary Studies.",
-    ribbonCta: "Apply for Admission",
+    ribbonText: "Spring & Summer 2027 Mobile Modular Cohorts. Bring accredited biblical education directly to your local church or province.",
+    ribbonCta: "Host a Mobile Cohort",
     schoolName: "Mobile Bible School",
-    brandTagline: "Theological Seminary & Ministerial Institute",
-    heroBadge: "CHRIST-CENTERED THEOLOGICAL EDUCATION • ACCREDITED SEMINARY",
-    heroTitleWhite: "Equipping Servants of the Word",
-    heroTitleGradient: "for God's Global Kingdom",
-    heroSubtitle: "Rooted in biblical inerrancy, sound theological scholarship, expository preaching, and pastoral ministry. Nurturing gospel-driven ministers equipped to preach the Truth and shepherd the flock with integrity.",
+    brandTagline: "INTERNATIONAL",
+    heroBadge: "ACCREDITED THEOLOGICAL EDUCATION • ZERO RELOCATION",
+    heroTitleWhite: "Deep Biblical Truth.",
+    heroTitleGradient: "Everywhere You Are Called.",
+    heroSubtitle: "Mobile Bible School delivers rigorous, Christ-centered seminary instruction directly to local churches, mission frontiers, and bi-vocational ministers. Study where you serve.",
     ctaPrimary: "Apply for Admission",
-    ctaSecondary: "Access MBS Portals",
-    guarantee1: "5,000+ Alumni Leaders",
-    guarantee2: "100% Ministry Placement",
-    guarantee3: "35+ Church Plants & Hubs",
+    ctaSecondary: "Explore Field Modules",
+    guarantee1: "100% MOBILE & MODULAR",
+    guarantee2: "Keep WORKING FULL-TIME",
+    guarantee3: "80% SUBSIDIZED TUITION",
     carouselEyebrow: "CURRICULUM & DEGREES",
     carouselHeadline: "Academic & Ministerial Programs",
     carouselSubheadline: "Comprehensive biblical instruction combining exegetical precision, systematic theology, and practical pastoral ministry training.",
@@ -433,7 +433,7 @@ export const getLandingPageContent = (): LandingPageContent => {
             };
 
             const parsedFooter = parsed.footer || {};
-            // Auto-heal legacy footer cached fields from older sessions
+            // Auto-heal legacy footer cached fields from older placeholder sessions
             if (
                 !parsedFooter.onlineExtension ||
                 parsedFooter.onlineExtension === "Online Extension & Distance Education" ||
@@ -441,15 +441,42 @@ export const getLandingPageContent = (): LandingPageContent => {
             ) {
                 parsedFooter.onlineExtension = DEFAULT_FOOTER_SETTINGS.onlineExtension;
             }
+            if (!parsedFooter.mainCampus || parsedFooter.mainCampus.includes("Metro Manila")) {
+                parsedFooter.mainCampus = DEFAULT_FOOTER_SETTINGS.mainCampus;
+            }
+            if (!parsedFooter.directMobile || parsedFooter.directMobile.includes("123 4567")) {
+                parsedFooter.directMobile = DEFAULT_FOOTER_SETTINGS.directMobile;
+            }
+            if (!parsedFooter.accreditation2 || parsedFooter.accreditation2 === "CCHE RECOGNIZED") {
+                parsedFooter.accreditation2 = DEFAULT_FOOTER_SETTINGS.accreditation2;
+            }
 
             const resolvedFooter: FooterSettings = {
                 ...DEFAULT_FOOTER_SETTINGS,
                 ...parsedFooter,
             };
 
+            // Auto-heal legacy placeholder hero content
+            const autoHealedContent = { ...parsed };
+            if (autoHealedContent.heroTitleWhite && autoHealedContent.heroTitleWhite.includes("Equipping Servants")) {
+                autoHealedContent.heroTitleWhite = DEFAULT_LANDING_CONTENT.heroTitleWhite;
+                autoHealedContent.heroTitleGradient = DEFAULT_LANDING_CONTENT.heroTitleGradient;
+                autoHealedContent.heroSubtitle = DEFAULT_LANDING_CONTENT.heroSubtitle;
+                autoHealedContent.heroBadge = DEFAULT_LANDING_CONTENT.heroBadge;
+                autoHealedContent.ribbonText = DEFAULT_LANDING_CONTENT.ribbonText;
+                autoHealedContent.ribbonCta = DEFAULT_LANDING_CONTENT.ribbonCta;
+                autoHealedContent.ctaSecondary = DEFAULT_LANDING_CONTENT.ctaSecondary;
+                autoHealedContent.guarantee1 = DEFAULT_LANDING_CONTENT.guarantee1;
+                autoHealedContent.guarantee2 = DEFAULT_LANDING_CONTENT.guarantee2;
+                autoHealedContent.guarantee3 = DEFAULT_LANDING_CONTENT.guarantee3;
+            }
+            if (autoHealedContent.brandTagline && autoHealedContent.brandTagline.includes("Theological Seminary & Ministerial Institute")) {
+                autoHealedContent.brandTagline = DEFAULT_LANDING_CONTENT.brandTagline;
+            }
+
             return {
                 ...DEFAULT_LANDING_CONTENT,
-                ...parsed,
+                ...autoHealedContent,
                 carouselEyebrow: parsed.carouselEyebrow || DEFAULT_LANDING_CONTENT.carouselEyebrow,
                 carouselHeadline: parsed.carouselHeadline || DEFAULT_LANDING_CONTENT.carouselHeadline,
                 carouselSubheadline: parsed.carouselSubheadline || DEFAULT_LANDING_CONTENT.carouselSubheadline,
