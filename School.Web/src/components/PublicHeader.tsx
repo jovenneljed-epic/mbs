@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from "react";
 import "./PublicHeader.css";
-import { BookOpen, User, ShieldCheck, Calendar, Bell, Image as ImageIcon, GraduationCap, MapPin, Sparkles } from "lucide-react";
+import { BookOpen, User, ShieldCheck, Calendar, Bell, Image as ImageIcon, GraduationCap } from "lucide-react";
 
 interface PublicHeaderProps {
     onNavigate?: (page: string) => void;
@@ -113,22 +113,6 @@ const PublicHeader: React.FC<PublicHeaderProps> = ({
                         onClick={() => navigateTo("learning")}
                     >
                         Theological LMS
-                    </button>
-
-                    <button
-                        type="button"
-                        onClick={() => navigateTo("home?tab=satellites")}
-                    >
-                        <MapPin size={13} style={{ display: "inline", marginRight: 4, verticalAlign: -1 }} />
-                        Satellite Classes
-                    </button>
-
-                    <button
-                        type="button"
-                        onClick={() => navigateTo("home?tab=supports")}
-                    >
-                        <Sparkles size={13} style={{ display: "inline", marginRight: 4, verticalAlign: -1 }} />
-                        MBS Supports
                     </button>
 
                     <button
