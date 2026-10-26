@@ -350,10 +350,14 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
         setIsSupportsMenuOpen(false);
     };
 
+    // Mobile Navigation Drawer State
+    const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+
     // Close menu & modals on Escape key
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === "Escape") {
+                setIsMobileNavOpen(false);
                 setIsCampusMenuOpen(false);
                 setIsSatelliteMenuOpen(false);
                 setIsSupportsMenuOpen(false);
@@ -363,6 +367,21 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
         };
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
+    }, []);
+
+    // Check URL parameters / hash to auto-open satellite or supports modal
+    useEffect(() => {
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const hash = window.location.hash;
+            if (urlParams.get("tab") === "satellites" || hash === "#satellites" || urlParams.get("section") === "satellites") {
+                setIsSatelliteMenuOpen(true);
+            } else if (urlParams.get("tab") === "supports" || hash === "#supports" || urlParams.get("section") === "supports") {
+                setIsSupportsMenuOpen(true);
+            }
+        } catch {
+            // Ignore in environments without window.location
+        }
     }, []);
 
     // Admissions Modal State
@@ -396,7 +415,22 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
 
     // Centralized Bulletproof Navigation
     const navigateTo = (route: string) => {
+        setIsMobileNavOpen(false);
+        setIsCampusMenuOpen(false);
+        setIsSatelliteMenuOpen(false);
+        setIsSupportsMenuOpen(false);
+
         const clean = route.startsWith("/") ? route.replace(/^\/+/, "") : route;
+
+        if (clean.includes("satellites")) {
+            setIsSatelliteMenuOpen(true);
+            return;
+        }
+
+        if (clean.includes("supports")) {
+            setIsSupportsMenuOpen(true);
+            return;
+        }
 
         if (clean === "client-login" || clean === "student-portal") {
             if (onNavigate) onNavigate("client-login");
@@ -799,10 +833,8 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
                         </div>
                     </nav>
 
-                    {/* Actions Right */}
+                    {/* Actions Right (Desktop) */}
                     <div className="ub-header-actions">
-                        
-
                         <button
                             className="ub-btn-portal-student"
                             onClick={() => navigateTo("client-login")}
@@ -828,6 +860,164 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
                         >
                             {content.ctaPrimary || "Apply Now"}
                         </button>
+                    </div>
+
+                    {/* Mobile Header Actions (Mobile & Tablet) */}
+                    <div className="ub-mobile-header-actions">
+                        <button
+                            type="button"
+                            className="ub-btn-apply ub-btn-apply-mobile"
+                            onClick={() => openAdmissionWithProgram("Bachelor of Theology (B.Th.)")}
+                            title="Open Online Admissions Application"
+                        >
+                            {content.ctaPrimary || "Apply"}
+                        </button>
+
+                        <button
+                            type="button"
+                            className="ub-mobile-menu-toggle"
+                            onClick={() => setIsMobileNavOpen(prev => !prev)}
+                            aria-label={isMobileNavOpen ? "Close navigation menu" : "Open navigation menu"}
+                            aria-expanded={isMobileNavOpen}
+                        >
+                            {isMobileNavOpen ? <X size={20} /> : <span style={{ fontSize: 20, lineHeight: 1 }}>☰</span>}
+                        </button>
+                    </div>
+                </div>
+
+                {/* Mobile Navigation Drawer */}
+                <div className={`ub-mobile-drawer ${isMobileNavOpen ? "open" : ""}`}>
+                    <div className="ub-mobile-drawer-inner">
+                        {/* MAIN CAMPUS GROUP */}
+                        <div className="ub-mobile-drawer-group">
+                            <span className="ub-mobile-drawer-label">MAIN CAMPUS</span>
+                            <button
+                                type="button"
+                                className="ub-mobile-drawer-link"
+                                onClick={() => { setIsMobileNavOpen(false); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                            >
+                                <BookOpen size={15} className="ub-mobile-link-icon" />
+                                <span>Home</span>
+                            </button>
+                            <button
+                                type="button"
+                                className="ub-mobile-drawer-link"
+                                onClick={() => { setIsMobileNavOpen(false); navigateTo("about"); }}
+                            >
+                                <Building2 size={15} className="ub-mobile-link-icon" />
+                                <span>About Mobile Bible School</span>
+                            </button>
+                            <button
+                                type="button"
+                                className="ub-mobile-drawer-link"
+                                onClick={() => { setIsMobileNavOpen(false); navigateTo("events"); }}
+                            >
+                                <Calendar size={15} className="ub-mobile-link-icon" />
+                                <span>Events &amp; Conferences</span>
+                            </button>
+                            <button
+                                type="button"
+                                className="ub-mobile-drawer-link"
+                                onClick={() => { setIsMobileNavOpen(false); navigateTo("announcements"); }}
+                            >
+                                <Bell size={15} className="ub-mobile-link-icon" />
+                                <span>Announcements</span>
+                            </button>
+                            <button
+                                type="button"
+                                className="ub-mobile-drawer-link"
+                                onClick={() => { setIsMobileNavOpen(false); navigateTo("gallery"); }}
+                            >
+                                <ImageIcon size={15} className="ub-mobile-link-icon" />
+                                <span>Campus &amp; Ministry Gallery</span>
+                            </button>
+                            <button
+                                type="button"
+                                className="ub-mobile-drawer-link"
+                                onClick={() => { setIsMobileNavOpen(false); navigateTo("learning"); }}
+                            >
+                                <GraduationCap size={15} className="ub-mobile-link-icon" />
+                                <span>Theological LMS</span>
+                            </button>
+                            <button
+                                type="button"
+                                className="ub-mobile-drawer-link"
+                                onClick={() => { setIsMobileNavOpen(false); navigateTo("contact"); }}
+                            >
+                                <Mail size={15} className="ub-mobile-link-icon" />
+                                <span>Admissions &amp; Contact Desk</span>
+                            </button>
+                        </div>
+
+                        {/* REGIONAL SATELLITE CLASSES & SUPPORTS */}
+                        <div className="ub-mobile-drawer-group">
+                            <span className="ub-mobile-drawer-label">REGIONAL &amp; RESOURCE HUBS</span>
+                            <button
+                                type="button"
+                                className="ub-mobile-drawer-highlight sat-highlight"
+                                onClick={() => {
+                                    setIsMobileNavOpen(false);
+                                    setIsCampusMenuOpen(false);
+                                    setIsSupportsMenuOpen(false);
+                                    setIsSatelliteMenuOpen(true);
+                                }}
+                            >
+                                <MapPin size={17} />
+                                <div className="ub-mobile-highlight-text">
+                                    <strong>Satellite Classes (7 Regions)</strong>
+                                    <small>Luzon, Visayas, Mindanao Modular Hubs</small>
+                                </div>
+                            </button>
+
+                            <button
+                                type="button"
+                                className="ub-mobile-drawer-highlight supports-highlight"
+                                onClick={() => {
+                                    setIsMobileNavOpen(false);
+                                    setIsCampusMenuOpen(false);
+                                    setIsSatelliteMenuOpen(false);
+                                    setIsSupportsMenuOpen(true);
+                                }}
+                            >
+                                <Sparkles size={17} />
+                                <div className="ub-mobile-highlight-text">
+                                    <strong>MBS Supports &amp; Resources</strong>
+                                    <small>Downloadable PDFs, Church Videos &amp; Manuals</small>
+                                </div>
+                            </button>
+                        </div>
+
+                        {/* PORTALS & ADMISSIONS */}
+                        <div className="ub-mobile-drawer-group">
+                            <span className="ub-mobile-drawer-label">DIRECT PORTALS</span>
+                            <button
+                                type="button"
+                                className="ub-mobile-portal-btn ub-mobile-portal-student"
+                                onClick={() => { setIsMobileNavOpen(false); navigateTo("client-login"); }}
+                            >
+                                <User size={15} />
+                                <span>Student Portal</span>
+                            </button>
+                            <button
+                                type="button"
+                                className="ub-mobile-portal-btn ub-mobile-portal-admin"
+                                onClick={() => { setIsMobileNavOpen(false); navigateTo("login"); }}
+                            >
+                                <ShieldCheck size={15} />
+                                <span>Admin Portal</span>
+                            </button>
+                            <button
+                                type="button"
+                                className="ub-mobile-portal-btn ub-mobile-portal-apply"
+                                onClick={() => {
+                                    setIsMobileNavOpen(false);
+                                    openAdmissionWithProgram("Bachelor of Theology (B.Th.)");
+                                }}
+                            >
+                                <Award size={15} />
+                                <span>Apply for Admission</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </header>

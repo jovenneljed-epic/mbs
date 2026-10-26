@@ -208,17 +208,17 @@
 }
 
 .epic-nav-cta {
-    color: #fff !important;
-    background: var(--theme-gradient, linear-gradient(135deg, var(--theme-primary, #047857), var(--theme-secondary, #10b981))) !important;
-    border: 1px solid var(--theme-secondary, rgba(255, 255, 255, 0.2)) !important;
-    box-shadow: 0 4px 16px var(--theme-glow, rgba(16, 185, 129, 0.35)) !important;
-    font-weight: 700;
+    color: #450A0A !important;
+    background: var(--theme-gradient, linear-gradient(135deg, var(--theme-secondary, #F59E0B), var(--theme-secondary-hover, #D97706))) !important;
+    border: 1px solid var(--theme-secondary-light, rgba(253, 230, 138, 0.4)) !important;
+    box-shadow: 0 4px 16px var(--theme-glow, rgba(245, 158, 11, 0.35)) !important;
+    font-weight: 800;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .epic-nav-cta:hover {
-    background: var(--theme-primary-hover, #059669) !important;
-    box-shadow: 0 6px 20px var(--theme-glow, rgba(16, 185, 129, 0.5)) !important;
+    background: var(--theme-secondary-hover, #D97706) !important;
+    box-shadow: 0 6px 20px var(--theme-glow, rgba(245, 158, 11, 0.5)) !important;
     transform: translateY(-1px);
 }
 
@@ -337,7 +337,10 @@
     }
 
     .epic-public-logo-text small {
-        display: none;
+        display: block;
+        font-size: 8.5px;
+        color: var(--theme-secondary, #FDE68A);
+        letter-spacing: 0.03em;
     }
 
 
@@ -394,15 +397,20 @@
 
         gap: 4px;
 
-        padding: 12px 16px 18px;
+        padding: 14px 18px 22px;
 
-        background: rgba(5, 14, 26, 0.98);
+        background: linear-gradient(180deg, var(--theme-bg-start, #7A1526) 0%, var(--theme-bg-end, #450A0A) 100%);
 
         border-bottom:
-            1px solid rgba(255, 255, 255, 0.08);
+            3px solid var(--theme-secondary, #F59E0B);
+        border-top:
+            1px solid rgba(255, 255, 255, 0.1);
 
         box-shadow:
-            0 12px 35px rgba(0, 0, 0, 0.3);
+            0 16px 40px rgba(0, 0, 0, 0.6);
+        max-height: 80vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .epic-public-nav-links.open {
@@ -417,11 +425,18 @@
 
         text-align: left;
 
-        padding: 13px 14px;
+        padding: 12px 14px;
 
         border-radius: 9px;
 
-        font-size: 13px;
+        font-size: 13.5px;
+        color: #F8FAFC;
+    }
+
+    .epic-public-nav-links button:hover,
+    .epic-public-nav-links button:active {
+        background: rgba(255, 255, 255, 0.12);
+        color: #FFFFFF;
     }
 
 
@@ -436,12 +451,13 @@
 
         gap: 7px;
 
-        margin-top: 8px;
+        margin-top: 10px;
 
-        color: #fff !important;
-        background: var(--theme-gradient, linear-gradient(135deg, var(--theme-primary, #047857), var(--theme-secondary, #10b981))) !important;
-        border: 1px solid var(--theme-secondary, rgba(255, 255, 255, 0.2)) !important;
-        box-shadow: 0 4px 16px var(--theme-glow, rgba(16, 185, 129, 0.35)) !important;
+        color: #450A0A !important;
+        background: linear-gradient(135deg, var(--theme-secondary, #F59E0B) 0%, var(--theme-secondary-hover, #D97706) 100%) !important;
+        border: 1px solid var(--theme-secondary-light, rgba(253, 230, 138, 0.4)) !important;
+        box-shadow: 0 4px 16px var(--theme-glow, rgba(245, 158, 11, 0.35)) !important;
+        font-weight: 800 !important;
     }
 
 
@@ -454,15 +470,16 @@
 
         justify-content: center;
 
-        margin-top: 2px;
+        margin-top: 4px;
 
-        color: #d8e4ef !important;
+        color: #FFFFFF !important;
 
         border:
-            1px solid rgba(255, 255, 255, 0.1) !important;
+            1px solid rgba(255, 255, 255, 0.22) !important;
 
         background:
-            rgba(255, 255, 255, 0.05) !important;
+            rgba(255, 255, 255, 0.1) !important;
+        font-weight: 700 !important;
     }
 }
 

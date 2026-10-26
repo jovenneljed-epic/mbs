@@ -389,10 +389,10 @@
   .ministries-hero,
   .system-hero,
   .learning-public-hero,
-  .epic-contact-hero { min-height:520px !important; }
+  .epic-contact-hero { min-height:380px !important; }
   .about-hero h1,
   .ministries-hero h1,
   .system-hero h1,
   .learning-public-hero h1,
-  .epic-contact-hero h1 { font-size:clamp(42px,13vw,62px) !important; }
+  .epic-contact-hero h1 { font-size:clamp(26px,7.5vw,40px) !important; line-height:1.15 !important; word-break:break-word !important; }
 }
