@@ -1,2483 +1,974 @@
 import React, {
-    useCallback,
     useEffect,
     useMemo,
     useState,
 } from "react";
-
-import type {
-    FormEvent,
-} from "react";
-
+import type { FormEvent } from "react";
 import axios from "axios";
-
-import type {
-    AxiosError,
-    AxiosRequestConfig,
-} from "axios";
+import {
+    ShieldCheck,
+    Lock,
+    CheckCircle2,
+    Sparkles,
+    GraduationCap,
+    Printer,
+    RefreshCw,
+    AlertCircle,
+    ArrowRight,
+    Phone,
+    Mail,
+    User,
+    X,
+    Building2,
+    FileText
+} from "lucide-react";
 
 import { API_BASE_URL } from "../config";
-
 import "./ClientPayment.css";
 
 // =========================================================
 // TYPES
 // =========================================================
 
-interface Subscription {
-    subscriptionId: number;
-    customerId: number;
-
-    churchName: string;
-    contactName: string;
-    contactEmail: string;
-    contactPhone: string;
-
-    subscriptionPlanId: number;
-    planName?: string | null;
-
-    billingCycle: string;
-
+export interface TuitionPreset {
+    id: string;
+    title: string;
     amount: number;
-    currency: string;
-
-    status: string;
-
-    startDate: string;
-
-    trialEndsAt?: string | null;
-    nextBillingDate?: string | null;
-
-    endDate?: string | null;
-    cancelledDate?: string | null;
-
-    notes?: string | null;
-}
-
-interface Payment {
-    paymentId: number;
-    subscriptionId: number;
-
-    churchName?: string | null;
-    planName?: string | null;
-
-    amount: number;
-    currency: string;
-
-    paymentMethod: string;
-    status: string;
-
-    referenceNumber?: string | null;
-
-    gatewayPaymentId?: string | null;
-    gatewayCheckoutId?: string | null;
-    gatewayCustomerId?: string | null;
-
-    invoiceNumber?: string | null;
-    receiptNumber?: string | null;
-
-    billingPeriodStart?: string | null;
-    billingPeriodEnd?: string | null;
-
-    paidDate?: string | null;
-    failedDate?: string | null;
-
-    failureReason?: string | null;
-    notes?: string | null;
-
-    createdDate: string;
-    updatedDate?: string | null;
-}
-
-interface PaymentInformationResponse {
-    success: boolean;
-    subscription: Subscription;
-}
-
-interface PaymentResponse {
-    success: boolean;
-    message: string;
-
-    paymentId: number;
-    subscriptionId: number;
-
-    churchName?: string | null;
-    planName?: string | null;
-
-    amount: number;
-    currency: string;
-
-    paymentMethod: string;
-    status: string;
-
-    referenceNumber?: string | null;
-
-    billingPeriodStart?: string | null;
-    billingPeriodEnd?: string | null;
-
-    invoiceNumber?: string | null;
-    receiptNumber?: string | null;
-
-    createdDate: string;
-}
-
-interface PaymentHistoryResponse {
-    success: boolean;
-    payments: Payment[];
-}
-
-interface ApiErrorResponse {
-    message?: string;
-    title?: string;
-    detail?: string;
-    errors?: Record<string, string[]>;
-}
-
-interface EpicUser {
-    userId?: number;
-    username?: string;
-    fullName?: string;
-    role?: string;
-    token?: string;
-}
-
-type PaymentMethod =
-    | "PayMongo"
-    | "GCash"
-    | "Maya"
-    | "BankTransfer"
-    | "Manual";
-
-type PaymentStep =
-    | "FORM"
-    | "SUCCESS";
-
-// =========================================================
-// PROPS
-// =========================================================
-
-interface ClientPaymentProps {
-    subscriptionId?: number;
-}
-
-// =========================================================
-// CONSTANTS
-// =========================================================
-
-const CLIENT_PAYMENTS_ENDPOINT =
-    `${API_BASE_URL}/ClientPayments`;
-
-const PAYMENT_METHODS: Array<{
-    value: PaymentMethod;
-    label: string;
     description: string;
+    badge?: string;
     icon: string;
-}> = [
+    highlight?: boolean;
+}
+
+export interface VerifiedReceiptData {
+    receiptNumber: string;
+    sessionId: string;
+    paymentId?: string | null;
+    studentName: string;
+    studentEmail: string;
+    studentPhone?: string;
+    feeTitle: string;
+    amount: number;
+    currency: string;
+    paymentMethod: string;
+    date: string;
+    notes?: string;
+}
+
+export interface ClientPaymentProps {
+    subscriptionId?: number | null;
+}
+
+// Preset options for Mobile Bible School modular tuition & fees
+const TUITION_PRESETS: TuitionPreset[] = [
     {
-        value: "PayMongo",
-        label: "PayMongo Checkout",
-        description: "Instant GCash, Maya, Card & QR Ph",
-        icon: "⚡",
+        id: "modular_single",
+        title: "Modular Course Tuition Fee",
+        amount: 2500,
+        description: "1 Full Accredited Subject Module, Syllabus, Professor Guidance & Transcript Credit",
+        badge: "MOST POPULAR",
+        icon: "🎓",
+        highlight: true
     },
     {
-        value: "GCash",
-        label: "GCash",
-        description: "Mobile wallet",
-        icon: "G",
+        id: "full_semester",
+        title: "Full Semester Package (3 Modules)",
+        amount: 7500,
+        description: "Complete Term Enrollment (e.g. Systematic Theology, Hermeneutics, Pastoral Ministry)",
+        badge: "SAVE ₱500",
+        icon: "📚",
     },
     {
-        value: "Maya",
-        label: "Maya",
-        description: "Mobile wallet",
-        icon: "M",
+        id: "matriculation",
+        title: "Matriculation & Institutional Fee",
+        amount: 1200,
+        description: "Student ID, Online Learning Studio Access, Academic Verification & Library",
+        badge: "NEW STUDENTS",
+        icon: "📜",
     },
     {
-        value: "BankTransfer",
-        label: "Bank Transfer",
-        description: "Bank deposit",
-        icon: "₱",
+        id: "graduation",
+        title: "Graduation & Pastoral Ordination",
+        amount: 3500,
+        description: "Diploma Parchment, Ministerial Ordination Clearance & Baccalaureate Package",
+        badge: "ASSESSMENT",
+        icon: "🎖️",
     },
     {
-        value: "Manual",
-        label: "Manual",
-        description: "Other payment",
-        icon: "✓",
-    },
+        id: "custom",
+        title: "Custom Modular Amount / Church Gift",
+        amount: 0,
+        description: "Specify any tuition or church partner sponsorship amount in Philippine Pesos",
+        badge: "FLEXIBLE",
+        icon: "✍️",
+    }
 ];
 
-// =========================================================
-// HELPERS
-// =========================================================
-
-const normalizeStatus = (
-    status?: string | null
-): string => {
-    return (
-        status
-            ?.trim()
-            .toUpperCase()
-            .replace(/\s+/g, "_") ||
-        "UNKNOWN"
-    );
-};
-
-const getToday = (): string => {
-    const today = new Date();
-
-    const year =
-        today.getFullYear();
-
-    const month =
-        String(
-            today.getMonth() + 1
-        ).padStart(2, "0");
-
-    const day =
-        String(
-            today.getDate()
-        ).padStart(2, "0");
-
-    return `${year}-${month}-${day}`;
-};
-
-// =========================================================
-// AUTH TOKEN
-// =========================================================
-
-const getAuthToken = (): string | null => {
-
-    const epicUserRaw =
-        localStorage.getItem("epicUser");
-
-    if (epicUserRaw) {
-
-        try {
-
-            const epicUser =
-                JSON.parse(
-                    epicUserRaw
-                ) as EpicUser;
-
-            if (
-                typeof epicUser?.token ===
-                    "string" &&
-                epicUser.token.trim()
-            ) {
-                return epicUser.token.trim();
-            }
-
-        } catch (error) {
-
-            console.error(
-                "ClientPayment: invalid epicUser:",
-                error
-            );
-        }
-    }
-
-    const fallbackKeys = [
-        "token",
-        "accessToken",
-        "jwt",
-        "authToken",
-        "epicToken",
-    ];
-
-    for (const key of fallbackKeys) {
-
-        const token =
-            localStorage.getItem(key);
-
-        if (
-            token &&
-            token.trim()
-        ) {
-            return token.trim();
-        }
-    }
-
-    return null;
-};
-
-// =========================================================
-// SUBSCRIPTION ID
-// =========================================================
-
-const getSubscriptionIdFromUrl =
-    (): number | null => {
-
-        const params =
-            new URLSearchParams(
-                window.location.search
-            );
-
-        const value =
-            params.get(
-                "subscriptionId"
-            );
-
-        if (!value) {
-            return null;
-        }
-
-        const parsed =
-            Number(value);
-
-        return (
-            Number.isFinite(parsed) &&
-            parsed > 0
-        )
-            ? parsed
-            : null;
-    };
-
-const getStoredSubscriptionId =
-    (): number | null => {
-
-        const value =
-            localStorage.getItem(
-                "subscriptionId"
-            );
-
-        if (!value) {
-            return null;
-        }
-
-        const parsed =
-            Number(value);
-
-        return (
-            Number.isFinite(parsed) &&
-            parsed > 0
-        )
-            ? parsed
-            : null;
-    };
-
-// =========================================================
-// COMPONENT
-// =========================================================
-
-const ClientPayment: React.FC<
-    ClientPaymentProps
-> = ({
-    subscriptionId,
-}) => {
-
-    // =====================================================
-    // STATE
-    // =====================================================
-
-    const [
-        subscription,
-        setSubscription,
-    ] = useState<Subscription | null>(
-        null
-    );
-
-    const [
-        paymentHistory,
-        setPaymentHistory,
-    ] = useState<Payment[]>([]);
-
-    const [
-        loading,
-        setLoading,
-    ] = useState(true);
-
-    const [
-        historyLoading,
-        setHistoryLoading,
-    ] = useState(false);
-
-    const [
-        submitting,
-        setSubmitting,
-    ] = useState(false);
-
-    const [
-        error,
-        setError,
-    ] = useState("");
-
-    const [
-        step,
-        setStep,
-    ] = useState<PaymentStep>(
-        "FORM"
-    );
-
-    const [
-        submittedPayment,
-        setSubmittedPayment,
-    ] = useState<PaymentResponse | null>(
-        null
-    );
-
-    const [
-        paymentMethod,
-        setPaymentMethod,
-    ] = useState<PaymentMethod>(
-        "PayMongo"
-    );
-
-    const [
-        referenceNumber,
-        setReferenceNumber,
-    ] = useState("");
-
-    const [
-        paymentDate,
-        setPaymentDate,
-    ] = useState(
-        getToday()
-    );
-
-    const [
-        notes,
-        setNotes,
-    ] = useState("");
-
-    // =====================================================
-    // RESOLVE SUBSCRIPTION ID
-    // =====================================================
-
-    const resolvedSubscriptionId =
-        useMemo(() => {
-
-            if (
-                typeof subscriptionId ===
-                    "number" &&
-                subscriptionId > 0
-            ) {
-                return subscriptionId;
-            }
-
-            return (
-                getSubscriptionIdFromUrl() ??
-                getStoredSubscriptionId()
-            );
-
-        }, [
-            subscriptionId,
-        ]);
-
-    // =====================================================
-    // AUTH CONFIG
-    // =====================================================
-
-    const getAuthConfig =
-        useCallback((): AxiosRequestConfig => {
-
-            const token =
-                getAuthToken();
-
-            if (!token) {
-                throw new Error(
-                    "Authentication token not found. Please log in again."
-                );
-            }
-
-            return {
-                headers: {
-                    Authorization:
-                        `Bearer ${token}`,
-                    "Content-Type":
-                        "application/json",
-                },
-            };
-
-        }, []);
-
-    // =====================================================
-    // ERROR HANDLER
-    // =====================================================
-
-    const getErrorMessage =
-        useCallback(
-            (
-                value: unknown,
-                fallback: string
-            ): string => {
-
-                if (
-                    axios.isAxiosError(value)
-                ) {
-
-                    const axiosError =
-                        value as AxiosError<
-                            ApiErrorResponse
-                        >;
-
-                    const status =
-                        axiosError.response?.status;
-
-                    if (
-                        status === 401
-                    ) {
-                        return (
-                            "Your login session has expired or is not authorized. Please log in again."
-                        );
-                    }
-
-                    if (
-                        status === 403
-                    ) {
-                        return (
-                            "You do not have permission to submit this payment."
-                        );
-                    }
-
-                    if (
-                        status === 404
-                    ) {
-                        return (
-                            "The subscription or payment endpoint was not found."
-                        );
-                    }
-
-                    if (
-                        status === 409
-                    ) {
-                        return (
-                            axiosError.response?.data?.message ||
-                            "A payment with this reference already exists."
-                        );
-                    }
-
-                    const data =
-                        axiosError.response?.data;
-
-                    if (
-                        data?.message
-                    ) {
-                        return data.message;
-                    }
-
-                    if (
-                        data?.detail
-                    ) {
-                        return data.detail;
-                    }
-
-                    if (
-                        data?.title
-                    ) {
-                        return data.title;
-                    }
-
-                    if (
-                        data?.errors
-                    ) {
-
-                        const messages =
-                            Object.values(
-                                data.errors
-                            ).flat();
-
-                        if (
-                            messages.length
-                        ) {
-                            return messages.join(
-                                " "
-                            );
-                        }
-                    }
-
-                    return (
-                        axiosError.message ||
-                        fallback
-                    );
-                }
-
-                if (
-                    value instanceof Error
-                ) {
-                    return value.message;
-                }
-
-                return fallback;
-            },
-            []
-        );
-
-    // =====================================================
-    // FORMAT CURRENCY
-    // =====================================================
-
-    const formatCurrency =
-        useCallback(
-            (
-                amount:
-                    number |
-                    null |
-                    undefined,
-                currency = "PHP"
-            ): string => {
-
-                const numericAmount =
-                    Number(amount ?? 0);
-
-                try {
-
-                    return new Intl.NumberFormat(
-                        "en-PH",
-                        {
-                            style: "currency",
-                            currency,
-                        }
-                    ).format(
-                        numericAmount
-                    );
-
-                } catch {
-
-                    return `₱${numericAmount.toLocaleString(
-                        "en-PH",
-                        {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                        }
-                    )}`;
-                }
-            },
-            []
-        );
-
-    // =====================================================
-    // FORMAT DATE
-    // =====================================================
-
-    const formatDate =
-        useCallback(
-            (
-                value?:
-                    string |
-                    null
-            ): string => {
-
-                if (!value) {
-                    return "—";
-                }
-
-                const date =
-                    new Date(value);
-
-                if (
-                    Number.isNaN(
-                        date.getTime()
-                    )
-                ) {
-                    return "—";
-                }
-
-                return date.toLocaleDateString(
-                    "en-PH",
-                    {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                    }
-                );
-
-            },
-            []
-        );
-
-    // =====================================================
-    // FORMAT DATETIME
-    // =====================================================
-
-    const formatDateTime =
-        useCallback(
-            (
-                value?:
-                    string |
-                    null
-            ): string => {
-
-                if (!value) {
-                    return "—";
-                }
-
-                const date =
-                    new Date(value);
-
-                if (
-                    Number.isNaN(
-                        date.getTime()
-                    )
-                ) {
-                    return "—";
-                }
-
-                return date.toLocaleString(
-                    "en-PH",
-                    {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                        hour: "numeric",
-                        minute: "2-digit",
-                    }
-                );
-
-            },
-            []
-        );
-
-    // =====================================================
-    // STATUS
-    // =====================================================
-
-    const getStatusClass =
-        useCallback(
-            (
-                status?:
-                    string |
-                    null
-            ): string => {
-
-                return normalizeStatus(
-                    status
-                )
-                    .toLowerCase()
-                    .replace(
-                        /_/g,
-                        "-"
-                    );
-            },
-            []
-        );
-
-    const getStatusLabel =
-        useCallback(
-            (
-                status?:
-                    string |
-                    null
-            ): string => {
-
-                const normalized =
-                    normalizeStatus(
-                        status
-                    );
-
-                const labels:
-                    Record<
-                        string,
-                        string
-                    > = {
-                        TRIAL:
-                            "Trial",
-                        ACTIVE:
-                            "Active",
-                        PAST_DUE:
-                            "Past Due",
-                        SUSPENDED:
-                            "Suspended",
-                        EXPIRED:
-                            "Expired",
-                        CANCELLED:
-                            "Cancelled",
-                        PENDING:
-                            "Pending",
-                        PAID:
-                            "Paid",
-                        FAILED:
-                            "Failed",
-                        REFUNDED:
-                            "Refunded",
-                    };
-
-                return (
-                    labels[normalized] ||
-                    normalized
-                );
-            },
-            []
-        );
-
-    // =====================================================
-    // PAYMENT METHOD PLACEHOLDER
-    // =====================================================
-
-    const referencePlaceholder =
-        useMemo(() => {
-
-            switch (
-                paymentMethod
-            ) {
-
-                case "GCash":
-                    return (
-                        "Enter GCash reference number"
-                    );
-
-                case "Maya":
-                    return (
-                        "Enter Maya reference number"
-                    );
-
-                case "BankTransfer":
-                    return (
-                        "Enter bank transaction reference"
-                    );
-
-                case "Manual":
-                    return (
-                        "Enter payment reference number"
-                    );
-
-                default:
-                    return (
-                        "Enter payment reference number"
-                    );
-            }
-
-        }, [
-            paymentMethod,
-        ]);
-
-    // =====================================================
-    // PAYMENT INSTRUCTIONS
-    // =====================================================
-
-    const paymentInstructions =
-        useMemo(() => {
-
-            switch (
-                paymentMethod
-            ) {
-
-                case "GCash":
-                    return [
-                        "Send the exact amount to the official EPIC CMS GCash account.",
-                        "Complete the transaction.",
-                        "Copy the GCash reference number.",
-                        "Enter the reference number and submit.",
-                    ];
-
-                case "Maya":
-                    return [
-                        "Send the exact amount to the official EPIC CMS Maya account.",
-                        "Complete the transaction.",
-                        "Copy the Maya reference number.",
-                        "Enter the reference number and submit.",
-                    ];
-
-                case "BankTransfer":
-                    return [
-                        "Transfer the exact amount to the official EPIC CMS bank account.",
-                        "Keep your bank transaction receipt.",
-                        "Copy the transaction reference number.",
-                        "Enter the transaction reference number and submit.",
-                    ];
-
-                case "Manual":
-                default:
-                    return [
-                        "Complete your payment using the agreed payment method.",
-                        "Keep your payment receipt.",
-                        "Enter the payment reference number.",
-                        "Submit the payment for verification.",
-                    ];
-            }
-
-        }, [
-            paymentMethod,
-        ]);
-
-    // =====================================================
-    // CHECK PENDING PAYMENT
-    // =====================================================
-
-    const pendingPayment =
-        useMemo(() => {
-
-            return paymentHistory.find(
-                payment =>
-                    normalizeStatus(
-                        payment.status
-                    ) === "PENDING"
-            ) ?? null;
-
-        }, [
-            paymentHistory,
-        ]);
-
-    // =====================================================
-    // LOAD SUBSCRIPTION
-    // =====================================================
-
-    const loadSubscription =
-        useCallback(
-            async (): Promise<void> => {
-
-                if (
-                    !resolvedSubscriptionId
-                ) {
-
-                    setSubscription(null);
-
-                    setError(
-                        "No subscription was selected."
-                    );
-
-                    setLoading(false);
-
-                    return;
-                }
-
-                try {
-
-                    setLoading(true);
-                    setError("");
-
-                    const config =
-                        getAuthConfig();
-
-                    const response =
-                        await axios.get<
-                            PaymentInformationResponse
-                        >(
-                            `${CLIENT_PAYMENTS_ENDPOINT}/subscription/${resolvedSubscriptionId}`,
-                            config
-                        );
-
-                    const data =
-                        response.data;
-
-                    if (
-                        !data?.success ||
-                        !data.subscription
-                    ) {
-
-                        throw new Error(
-                            "Subscription information was not found."
-                        );
-                    }
-
-                    setSubscription(
-                        data.subscription
-                    );
-
-                } catch (
-                    requestError
-                ) {
-
-                    console.error(
-                        "ClientPayment: subscription load failed:",
-                        requestError
-                    );
-
-                    setSubscription(null);
-
-                    setError(
-                        getErrorMessage(
-                            requestError,
-                            "Unable to load subscription information."
-                        )
-                    );
-
-                } finally {
-
-                    setLoading(false);
-                }
-
-            },
-            [
-                resolvedSubscriptionId,
-                getAuthConfig,
-                getErrorMessage,
-            ]
-        );
-
-    // =====================================================
-    // LOAD PAYMENT HISTORY
-    // =====================================================
-
-    const loadPaymentHistory =
-        useCallback(
-            async (): Promise<void> => {
-
-                if (
-                    !resolvedSubscriptionId
-                ) {
-                    setPaymentHistory([]);
-                    return;
-                }
-
-                try {
-
-                    setHistoryLoading(
-                        true
-                    );
-
-                    const config =
-                        getAuthConfig();
-
-                    const response =
-                        await axios.get<
-                            PaymentHistoryResponse
-                        >(
-                            `${CLIENT_PAYMENTS_ENDPOINT}/subscription/${resolvedSubscriptionId}/history`,
-                            config
-                        );
-
-                    const payments =
-                        response.data?.payments;
-
-                    setPaymentHistory(
-                        Array.isArray(
-                            payments
-                        )
-                            ? payments
-                            : []
-                    );
-
-                } catch (
-                    requestError
-                ) {
-
-                    console.error(
-                        "ClientPayment: payment history failed:",
-                        requestError
-                    );
-
-                    setPaymentHistory([]);
-
-                } finally {
-
-                    setHistoryLoading(
-                        false
-                    );
-                }
-
-            },
-            [
-                resolvedSubscriptionId,
-                getAuthConfig,
-            ]
-        );
-
-    // =====================================================
-    // INITIAL LOAD
-    // =====================================================
-
+export const ClientPayment: React.FC<ClientPaymentProps> = ({ subscriptionId }) => {
+    // ---------------------------------------------------------
+    // FORM STATE
+    // ---------------------------------------------------------
+    const [selectedPresetId, setSelectedPresetId] = useState<string>("modular_single");
+    const [customAmount, setCustomAmount] = useState<string>("2500");
+    const [studentName, setStudentName] = useState<string>("");
+    const [studentEmail, setStudentEmail] = useState<string>("");
+    const [studentPhone, setStudentPhone] = useState<string>("");
+    const [courseProgram, setCourseProgram] = useState<string>("Bachelor of Ministry / Modular Study");
+    const [notes, setNotes] = useState<string>("");
+
+    // Payment Mode: "paymongo" (instant online) or "manual" (bank deposit reference)
+    const [paymentMode, setPaymentMode] = useState<"paymongo" | "manual">("paymongo");
+    const [manualReference, setManualReference] = useState<string>("");
+
+    // UI Feedback
+    const [submitting, setSubmitting] = useState<boolean>(false);
+    const [verifyingSession, setVerifyingSession] = useState<boolean>(false);
+    const [errorMessage, setErrorMessage] = useState<string>("");
+    const [cancelledNotice, setCancelledNotice] = useState<boolean>(false);
+
+    // Verified Receipt View
+    const [receipt, setReceipt] = useState<VerifiedReceiptData | null>(null);
+
+    // ---------------------------------------------------------
+    // LOAD USER PROFILE / SUBSCRIPTION IF AVAILABLE
+    // ---------------------------------------------------------
     useEffect(() => {
-
-        void loadSubscription();
-
-    }, [
-        loadSubscription,
-    ]);
-
-    // =====================================================
-    // LOAD HISTORY AFTER SUBSCRIPTION
-    // =====================================================
-
-    useEffect(() => {
-
-        if (subscription) {
-            void loadPaymentHistory();
-        }
-
-    }, [
-        subscription,
-        loadPaymentHistory,
-    ]);
-
-    // =====================================================
-    // PAYMONGO CHECKOUT REDIRECT & VERIFICATION
-    // =====================================================
-
-    const handlePayMongoCheckout = useCallback(async (): Promise<void> => {
+        // 1. Prefill from localStorage if student is logged in
         try {
-            setSubmitting(true);
-            setError("");
-
-            const successUrl = `${window.location.origin}/client-payment?status=success&session_id={CHECKOUT_SESSION_ID}`;
-            const cancelUrl = `${window.location.origin}/client-payment?status=cancelled`;
-
-            const targetAmount = Number(subscription?.amount) || 2500;
-            const targetTitle = subscription?.planName || "MBS Modular Course Tuition Fee";
-            const targetDesc = `Modular Tuition payment for ${subscription?.churchName || subscription?.contactName || "Mobile Bible School"}`;
-
-            const response = await axios.post(`${API_BASE_URL}/PayMongo/checkout`, {
-                amount: targetAmount,
-                title: targetTitle,
-                description: targetDesc,
-                customerName: subscription?.contactName || "Student / Member",
-                customerEmail: subscription?.contactEmail || "student@mbs.edu.ph",
-                customerPhone: subscription?.contactPhone || "",
-                subscriptionId: subscription?.subscriptionId || resolvedSubscriptionId,
-                successUrl,
-                cancelUrl
-            });
-
-            if (response.data?.success && response.data?.checkoutUrl) {
-                window.location.href = response.data.checkoutUrl;
-            } else {
-                throw new Error(response.data?.message || "Failed to create PayMongo checkout session.");
+            const userRaw = localStorage.getItem("epicUser");
+            if (userRaw) {
+                const u = JSON.parse(userRaw);
+                if (u.fullName && !studentName) setStudentName(u.fullName);
+                if (u.username && u.username.includes("@") && !studentEmail) setStudentEmail(u.username);
             }
-        } catch (err: any) {
-            console.error("PayMongo checkout error:", err);
-            setError(err.response?.data?.message || err.message || "Failed to launch PayMongo checkout session.");
-            setSubmitting(false);
-        }
-    }, [subscription, resolvedSubscriptionId]);
+            const storedEmail = localStorage.getItem("epicEmail");
+            if (storedEmail && !studentEmail) setStudentEmail(storedEmail);
+            const storedContact = localStorage.getItem("epicContactName");
+            if (storedContact && !studentName) setStudentName(storedContact);
+            const storedPhone = localStorage.getItem("epicPhone");
+            if (storedPhone && !studentPhone) setStudentPhone(storedPhone);
+        } catch { }
 
-    // Check URL query parameters if returning from PayMongo checkout
-    useEffect(() => {
+        // 2. Check URL query parameters for cancel or success
         try {
-            const urlParams = new URLSearchParams(window.location.search);
-            const statusParam = urlParams.get("status");
-            const sessionId = urlParams.get("session_id");
+            const params = new URLSearchParams(window.location.search);
+            const statusParam = params.get("status");
+            const sessionId = params.get("session_id");
+
+            if (statusParam === "cancelled") {
+                setCancelledNotice(true);
+            }
 
             if (statusParam === "success" && sessionId) {
-                setSubmitting(true);
+                setVerifyingSession(true);
                 axios.get(`${API_BASE_URL}/PayMongo/session/${sessionId}`)
                     .then(res => {
                         if (res.data?.success && res.data?.isPaid) {
-                            setSubmittedPayment({
-                                success: true,
-                                message: "Payment successfully received and verified via PayMongo!",
-                                paymentId: Date.now(),
-                                subscriptionId: resolvedSubscriptionId || 1,
-                                amount: res.data.amount || (subscription ? Number(subscription.amount) : 2500),
+                            setReceipt({
+                                receiptNumber: res.data.paymentId || `MBS-OR-${Date.now().toString().slice(-6)}`,
+                                sessionId: sessionId,
+                                paymentId: res.data.paymentId,
+                                studentName: studentName || "MBS Student",
+                                studentEmail: studentEmail || "student@mbs.edu.ph",
+                                studentPhone: studentPhone,
+                                feeTitle: "Modular Course Tuition Fee",
+                                amount: res.data.amount || 2500,
                                 currency: "PHP",
                                 paymentMethod: `PayMongo (${(res.data.paymentMethod || "GCASH/MAYA/CARD").toUpperCase()})`,
-                                status: "PAID",
-                                referenceNumber: res.data.paymentId || sessionId,
-                                createdDate: new Date().toISOString()
+                                date: new Date().toLocaleDateString("en-PH", {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                    hour: "2-digit",
+                                    minute: "2-digit"
+                                })
                             });
-                            setStep("SUCCESS");
                         } else {
-                            setError("PayMongo session detected, but payment is still being processed. Please wait a moment or check your receipt.");
+                            setErrorMessage("PayMongo session detected, but payment is still pending. If you just paid, please refresh in a moment.");
                         }
                     })
                     .catch(err => {
                         console.error("PayMongo verify session error:", err);
+                        setErrorMessage("Unable to verify PayMongo checkout session automatically. If your account was charged, please contact school admin.");
                     })
                     .finally(() => {
-                        setSubmitting(false);
+                        setVerifyingSession(false);
                     });
-            } else if (statusParam === "cancelled") {
-                setError("Your PayMongo checkout session was cancelled. You can retry whenever you are ready.");
             }
-        } catch (e) {
-            console.error("PayMongo query check error:", e);
+        } catch { }
+    }, [studentName, studentEmail, studentPhone]);
+
+    // ---------------------------------------------------------
+    // CALCULATE EFFECTIVE AMOUNT & TITLE
+    // ---------------------------------------------------------
+    const activePreset = useMemo(() => {
+        return TUITION_PRESETS.find(p => p.id === selectedPresetId) || TUITION_PRESETS[0];
+    }, [selectedPresetId]);
+
+    const effectiveAmount = useMemo(() => {
+        if (selectedPresetId === "custom") {
+            const parsed = parseFloat(customAmount);
+            return isNaN(parsed) || parsed < 0 ? 0 : parsed;
         }
-    }, [resolvedSubscriptionId, subscription]);
+        return activePreset.amount;
+    }, [selectedPresetId, customAmount, activePreset]);
 
-    // =====================================================
-    // SUBMIT PAYMENT
-    // =====================================================
+    const formatCurrency = (amount: number): string => {
+        return new Intl.NumberFormat("en-PH", {
+            style: "currency",
+            currency: "PHP",
+            minimumFractionDigits: 2,
+        }).format(amount);
+    };
 
-    const handleSubmit =
-        useCallback(
-            async (
-                event:
-                    FormEvent<HTMLFormElement>
-            ): Promise<void> => {
+    // ---------------------------------------------------------
+    // LAUNCH PAYMONGO CHECKOUT
+    // ---------------------------------------------------------
+    const handleLaunchPayMongoCheckout = async (e?: FormEvent) => {
+        if (e) e.preventDefault();
+        setErrorMessage("");
 
-                event.preventDefault();
+        // Validation
+        if (!studentName.trim()) {
+            setErrorMessage("Please enter the Student or Payer Name.");
+            return;
+        }
+        if (!studentEmail.trim() || !studentEmail.includes("@")) {
+            setErrorMessage("Please enter a valid email address to receive your official payment receipt.");
+            return;
+        }
+        if (effectiveAmount < 20) {
+            setErrorMessage("Payment amount must be at least ₱20.00 for online checkout.");
+            return;
+        }
 
-                if (!subscription) {
+        try {
+            setSubmitting(true);
 
-                    setError(
-                        "Subscription information is unavailable."
-                    );
+            const successUrl = `${window.location.origin}/client-payment?status=success&session_id={CHECKOUT_SESSION_ID}`;
+            const cancelUrl = `${window.location.origin}/client-payment?status=cancelled`;
 
-                    return;
-                }
+            const payload = {
+                amount: effectiveAmount,
+                title: activePreset.id === "custom" ? "MBS Custom Tuition / Ministry Offering" : activePreset.title,
+                description: `${activePreset.title} - ${studentName} (${courseProgram || "MBS Seminary"})`,
+                customerName: studentName.trim(),
+                customerEmail: studentEmail.trim(),
+                customerPhone: studentPhone.trim() || undefined,
+                subscriptionId: subscriptionId || null,
+                successUrl,
+                cancelUrl
+            };
 
-                if (paymentMethod === "PayMongo") {
-                    await handlePayMongoCheckout();
-                    return;
-                }
+            const response = await axios.post(`${API_BASE_URL}/PayMongo/checkout`, payload);
 
-                const reference =
-                    referenceNumber.trim();
+            if (response.data?.success && response.data?.checkoutUrl) {
+                // Redirect student directly to PayMongo's secure live checkout
+                window.location.href = response.data.checkoutUrl;
+            } else {
+                throw new Error(response.data?.message || "Failed to initialize PayMongo checkout session.");
+            }
+        } catch (err: any) {
+            console.error("PayMongo checkout launch error:", err);
+            setErrorMessage(err.response?.data?.message || err.message || "Failed to connect to PayMongo checkout. Please try again.");
+            setSubmitting(false);
+        }
+    };
 
-                if (!reference) {
+    // ---------------------------------------------------------
+    // HANDLE MANUAL REFERENCE SUBMISSION (OPTIONAL COUNTER DEPOSIT)
+    // ---------------------------------------------------------
+    const handleManualSubmit = async (e: FormEvent) => {
+        e.preventDefault();
+        setErrorMessage("");
 
-                    setError(
-                        "Please enter your payment reference number."
-                    );
+        if (!studentName.trim()) return setErrorMessage("Please enter Student Name.");
+        if (!manualReference.trim()) return setErrorMessage("Please enter your bank or counter deposit reference number.");
 
-                    return;
-                }
+        try {
+            setSubmitting(true);
+            const token = localStorage.getItem("epicUserToken");
+            const config = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
 
-                /*
-                 * Prevent accidental duplicate
-                 * submissions when there is already
-                 * a pending payment.
-                 */
-                if (pendingPayment) {
+            await axios.post(`${API_BASE_URL}/ClientPayments/subscription/${subscriptionId || 1}`, {
+                paymentMethod: "BankTransfer",
+                referenceNumber: manualReference.trim(),
+                notes: `Student: ${studentName}\nEmail: ${studentEmail}\nProgram: ${courseProgram}\nFee: ${activePreset.title}\nAmount: ${effectiveAmount}\n${notes}`
+            }, config);
 
-                    setError(
-                        `You already have a pending payment (${pendingPayment.referenceNumber || `#${pendingPayment.paymentId}`}). Please wait for administrator verification.`
-                    );
+            setReceipt({
+                receiptNumber: `MBS-MAN-${Date.now().toString().slice(-6)}`,
+                sessionId: manualReference.trim(),
+                studentName: studentName.trim(),
+                studentEmail: studentEmail.trim(),
+                studentPhone: studentPhone,
+                feeTitle: activePreset.title,
+                amount: effectiveAmount,
+                currency: "PHP",
+                paymentMethod: "Bank Deposit / Manual Verification",
+                date: new Date().toLocaleDateString("en-PH", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit"
+                }),
+                notes: "Submitted for manual verification by MBS administration."
+            });
+        } catch (err: any) {
+            setErrorMessage(err.response?.data?.message || "Failed to submit manual payment reference.");
+        } finally {
+            setSubmitting(false);
+        }
+    };
 
-                    return;
-                }
-
-                const amount =
-                    Number(
-                        subscription.amount
-                    ) || 0;
-
-                const currency =
-                    subscription.currency ||
-                    "PHP";
-
-                const confirmed =
-                    window.confirm(
-                        `Submit your ${paymentMethod} payment of ${formatCurrency(
-                            amount,
-                            currency
-                        )}?`
-                    );
-
-                if (!confirmed) {
-                    return;
-                }
-
-                try {
-
-                    setSubmitting(true);
-                    setError("");
-
-                    const paymentNotes = [
-                        notes.trim(),
-                        `Payment date: ${paymentDate}`,
-                    ]
-                        .filter(Boolean)
-                        .join("\n");
-
-                    const payload = {
-                        paymentMethod,
-                        referenceNumber:
-                            reference,
-                        notes:
-                            paymentNotes ||
-                            null,
-                    };
-
-                    const response =
-                        await axios.post<
-                            PaymentResponse
-                        >(
-                            `${CLIENT_PAYMENTS_ENDPOINT}/subscription/${subscription.subscriptionId}`,
-                            payload,
-                            getAuthConfig()
-                        );
-
-                    const data =
-                        response.data;
-
-                    if (
-                        !data?.success
-                    ) {
-
-                        throw new Error(
-                            data?.message ||
-                            "Payment submission failed."
-                        );
-                    }
-
-                    setSubmittedPayment(
-                        data
-                    );
-
-                    setStep(
-                        "SUCCESS"
-                    );
-
-                    await loadPaymentHistory();
-
-                } catch (
-                    requestError
-                ) {
-
-                    console.error(
-                        "ClientPayment: payment submission failed:",
-                        requestError
-                    );
-
-                    setError(
-                        getErrorMessage(
-                            requestError,
-                            "Unable to submit payment."
-                        )
-                    );
-
-                } finally {
-
-                    setSubmitting(
-                        false
-                    );
-                }
-
-            },
-            [
-                subscription,
-                referenceNumber,
-                pendingPayment,
-                paymentMethod,
-                notes,
-                paymentDate,
-                formatCurrency,
-                getAuthConfig,
-                getErrorMessage,
-                loadPaymentHistory,
-            ]
-        );
-
-    // =====================================================
-    // SUBMIT ANOTHER PAYMENT
-    // =====================================================
-
-    const handleSubmitAnother =
-        useCallback(() => {
-
-            setStep("FORM");
-
-            setSubmittedPayment(
-                null
-            );
-
-            setReferenceNumber(
-                ""
-            );
-
-            setNotes(
-                ""
-            );
-
-            setPaymentDate(
-                getToday()
-            );
-
-            setError("");
-
-        }, []);
-
-    // =====================================================
-    // REFRESH
-    // =====================================================
-
-    const handleRefresh =
-        useCallback(
-            async (): Promise<void> => {
-
-                setError("");
-
-                await Promise.all([
-                    loadSubscription(),
-                    loadPaymentHistory(),
-                ]);
-
-            },
-            [
-                loadSubscription,
-                loadPaymentHistory,
-            ]
-        );
-
-    // =====================================================
-    // LOADING
-    // =====================================================
-
-    if (loading) {
-
+    // =========================================================
+    // RENDER: VERIFIED SUCCESS RECEIPT
+    // =========================================================
+    if (receipt) {
         return (
-            <div className="client-payment-page">
+            <div className="premium-checkout-page">
+                <div className="premium-receipt-wrapper">
+                    <div className="receipt-glass-card">
+                        {/* Top Celebration Badge */}
+                        <div className="receipt-success-badge">
+                            <CheckCircle2 className="receipt-success-icon" size={32} />
+                            <div>
+                                <h2>Payment Verified &amp; Confirmed</h2>
+                                <p>Official Mobile Bible School &amp; Theological Seminary Receipt</p>
+                            </div>
+                        </div>
 
-                <div className="client-payment-loading">
+                        {/* Seminary Header on Receipt */}
+                        <div className="receipt-school-header">
+                            <div className="receipt-logo-mark">MBS</div>
+                            <div>
+                                <h3>Mobile Bible School &amp; Theological Seminary</h3>
+                                <p>Lupao, Nueva Ecija, Philippines • CHED RECOGNIZED • CHED &amp; SEC ACCREDITED</p>
+                                <span className="receipt-merchant-pill">
+                                    Merchant Account: <strong>Kezjed Solutions (Ronnel Mislang)</strong>
+                                </span>
+                            </div>
+                        </div>
 
-                    <div className="payment-spinner" />
+                        <div className="receipt-divider" />
 
-                    <h2>
-                        Loading payment information...
-                    </h2>
+                        {/* Receipt Details Grid */}
+                        <div className="receipt-grid">
+                            <div className="receipt-item">
+                                <span className="receipt-label">Official Receipt No.</span>
+                                <strong className="receipt-value mono">{receipt.receiptNumber}</strong>
+                            </div>
+                            <div className="receipt-item">
+                                <span className="receipt-label">Date &amp; Time</span>
+                                <strong className="receipt-value">{receipt.date}</strong>
+                            </div>
+                            <div className="receipt-item">
+                                <span className="receipt-label">Student / Payer</span>
+                                <strong className="receipt-value">{receipt.studentName}</strong>
+                            </div>
+                            <div className="receipt-item">
+                                <span className="receipt-label">Electronic Receipt Sent To</span>
+                                <strong className="receipt-value">{receipt.studentEmail}</strong>
+                            </div>
+                            <div className="receipt-item full-width">
+                                <span className="receipt-label">Tuition / Modular Purpose</span>
+                                <strong className="receipt-value">{receipt.feeTitle}</strong>
+                            </div>
+                            <div className="receipt-item">
+                                <span className="receipt-label">Payment Gateway</span>
+                                <strong className="receipt-value highlight-green">{receipt.paymentMethod}</strong>
+                            </div>
+                            <div className="receipt-item">
+                                <span className="receipt-label">Gateway Reference</span>
+                                <strong className="receipt-value mono">{receipt.sessionId}</strong>
+                            </div>
+                        </div>
 
-                    <p>
-                        Please wait while we retrieve
-                        your subscription.
-                    </p>
+                        {/* Amount Box */}
+                        <div className="receipt-total-box">
+                            <div>
+                                <span className="receipt-total-label">Total Amount Paid</span>
+                                <span className="receipt-total-status">✓ Cleared &amp; Credited to School Account</span>
+                            </div>
+                            <div className="receipt-total-amount">
+                                {formatCurrency(receipt.amount)}
+                            </div>
+                        </div>
 
+                        {/* Receipt Actions */}
+                        <div className="receipt-actions no-print">
+                            <button
+                                type="button"
+                                className="receipt-btn secondary"
+                                onClick={() => window.print()}
+                            >
+                                <Printer size={16} />
+                                <span>Print Official Receipt</span>
+                            </button>
+                            <button
+                                type="button"
+                                className="receipt-btn primary"
+                                onClick={() => window.location.href = "/"}
+                            >
+                                <GraduationCap size={16} />
+                                <span>Enter Student Learning Studio</span>
+                            </button>
+                            <button
+                                type="button"
+                                className="receipt-btn outline"
+                                onClick={() => {
+                                    setReceipt(null);
+                                    window.history.replaceState({}, document.title, "/client-payment");
+                                }}
+                            >
+                                <RefreshCw size={14} />
+                                <span>Make Another Payment</span>
+                            </button>
+                        </div>
+
+                        <div className="receipt-security-footer">
+                            <ShieldCheck size={16} className="text-emerald" />
+                            <span>This is a computer-generated digital receipt certified by Mobile Bible School &amp; Kezjed Solutions. Zero physical stamp required.</span>
+                        </div>
+                    </div>
                 </div>
-
             </div>
         );
     }
 
-    // =====================================================
-    // NO SUBSCRIPTION
-    // =====================================================
-
-    if (!subscription) {
-
-        return (
-            <div className="client-payment-page">
-
-                <div className="client-payment-error-card" style={{ maxWidth: "580px" }}>
-
-                    <div className="error-icon" style={{ background: "#E0F2FE", color: "#0284C7" }}>
-                        ⚡
-                    </div>
-
-                    <h2>
-                        Online Payment &amp; Checkout Portal
-                    </h2>
-
-                    <p>
-                        {error ? error : "No active subscription was selected from the dashboard."}
-                    </p>
-
-                    <p style={{ fontSize: "14px", color: "#64748B", margin: "10px 0 20px" }}>
-                        You can make a direct modular tuition or institutional fee payment using PayMongo (GCash, Maya, Cards, QR Ph), or choose a destination below:
-                    </p>
-
-                    <div style={{ display: "flex", flexDirection: "column", gap: "10px", textAlign: "left" }}>
-                        <button
-                            type="button"
-                            className="payment-primary-button"
-                            style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "14px", width: "100%" }}
-                            onClick={() => {
-                                setSubscription({
-                                    subscriptionId: 1,
-                                    customerId: 1,
-                                    churchName: "Mobile Bible School - Online Payment",
-                                    contactName: "Student / Member",
-                                    contactEmail: "student@mbs.edu.ph",
-                                    contactPhone: "+63 917 123 4567",
-                                    subscriptionPlanId: 1,
-                                    planName: "Modular Tuition / Institutional Fee",
-                                    billingCycle: "Monthly",
-                                    amount: 2500,
-                                    currency: "PHP",
-                                    status: "PENDING",
-                                    startDate: getToday()
-                                });
-                            }}
-                        >
-                            <span>💳 Pay Direct Tuition (PayMongo, GCash &amp; Maya)</span>
-                        </button>
-
-                        <button
-                            type="button"
-                            style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "1px solid #CBD5E1", background: "#F8FAFC", color: "#334155", cursor: "pointer", fontWeight: 600, fontSize: "14px" }}
-                            onClick={() => window.location.href = "/subscription-dashboard"}
-                        >
-                            <span>📋 View Subscriptions Dashboard</span>
-                        </button>
-
-                        <button
-                            type="button"
-                            style={{ width: "100%", padding: "12px", borderRadius: "10px", border: "1px solid #CBD5E1", background: "#F8FAFC", color: "#334155", cursor: "pointer", fontWeight: 600, fontSize: "14px" }}
-                            onClick={() => window.location.href = "/giving"}
-                        >
-                            <span>🎓 View Student Tuition &amp; Fees</span>
-                        </button>
-                    </div>
-
-                    <div style={{ marginTop: "24px", paddingTop: "14px", borderTop: "1px solid #E2E8F0", fontSize: "12px", color: "#94A3B8" }}>
-                        Integrated Gateways: <strong>PayMongo</strong> • GCash • Maya • Visa/Mastercard • QR Ph
-                    </div>
-
-                </div>
-
-            </div>
-        );
-    }
-
-    // =====================================================
-    // SUCCESS
-    // =====================================================
-
-    if (
-        step === "SUCCESS" &&
-        submittedPayment
-    ) {
-
-        return (
-            <div className="client-payment-page">
-
-                <div className="client-payment-container">
-
-                    <div className="payment-success-card">
-
-                        <div className="success-icon">
-                            ✓
-                        </div>
-
-                        <div className="success-eyebrow">
-                            EPIC CMS
-                        </div>
-
-                        <h1>
-                            Payment Submitted
-                        </h1>
-
-                        <p className="success-message">
-                            Your payment has been submitted
-                            successfully and is now waiting
-                            for administrator verification.
-                        </p>
-
-                        <div className="success-status">
-
-                            <span>
-                                Status
-                            </span>
-
-                            <strong>
-                                {
-                                    getStatusLabel(
-                                        submittedPayment.status ||
-                                        "PENDING"
-                                    )
-                                }
-                            </strong>
-
-                        </div>
-
-                        <div className="success-details">
-
-                            <div>
-                                <span>
-                                    Payment ID
-                                </span>
-
-                                <strong>
-                                    #
-                                    {
-                                        submittedPayment.paymentId
-                                    }
-                                </strong>
-                            </div>
-
-                            <div>
-                                <span>
-                                    Church
-                                </span>
-
-                                <strong>
-                                    {
-                                        submittedPayment.churchName ||
-                                        subscription.churchName
-                                    }
-                                </strong>
-                            </div>
-
-                            <div>
-                                <span>
-                                    Plan
-                                </span>
-
-                                <strong>
-                                    {
-                                        submittedPayment.planName ||
-                                        subscription.planName ||
-                                        "—"
-                                    }
-                                </strong>
-                            </div>
-
-                            <div>
-                                <span>
-                                    Amount
-                                </span>
-
-                                <strong>
-                                    {
-                                        formatCurrency(
-                                            submittedPayment.amount,
-                                            submittedPayment.currency
-                                        )
-                                    }
-                                </strong>
-                            </div>
-
-                            <div>
-                                <span>
-                                    Payment Method
-                                </span>
-
-                                <strong>
-                                    {
-                                        submittedPayment.paymentMethod
-                                    }
-                                </strong>
-                            </div>
-
-                            <div>
-                                <span>
-                                    Reference
-                                </span>
-
-                                <strong>
-                                    {
-                                        submittedPayment.referenceNumber ||
-                                        "—"
-                                    }
-                                </strong>
-                            </div>
-
-                            {submittedPayment.invoiceNumber && (
-
-                                <div>
-                                    <span>
-                                        Invoice
-                                    </span>
-
-                                    <strong>
-                                        {
-                                            submittedPayment.invoiceNumber
-                                        }
-                                    </strong>
-                                </div>
-
-                            )}
-
-                            {submittedPayment.receiptNumber && (
-
-                                <div>
-                                    <span>
-                                        Receipt
-                                    </span>
-
-                                    <strong>
-                                        {
-                                            submittedPayment.receiptNumber
-                                        }
-                                    </strong>
-                                </div>
-
-                            )}
-
-                            <div>
-                                <span>
-                                    Submitted
-                                </span>
-
-                                <strong>
-                                    {
-                                        formatDateTime(
-                                            submittedPayment.createdDate
-                                        )
-                                    }
-                                </strong>
-                            </div>
-
-                        </div>
-
-                        <div className="success-notice">
-
-                            <strong>
-                                What happens next?
-                            </strong>
-
-                            <p>
-                                Your payment is now
-                                <strong>
-                                    {" "}PENDING
-                                </strong>.
-                                An EPIC CMS administrator
-                                will review your payment
-                                reference and receipt.
-                            </p>
-
-                            <p>
-                                Once approved, your
-                                subscription will be
-                                activated or renewed.
-                            </p>
-
-                        </div>
-
-                        <button
-                            type="button"
-                            className="payment-primary-button"
-                            onClick={
-                                handleSubmitAnother
-                            }
-                        >
-                            Back to Payment Form
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </div>
-        );
-    }
-
-    // =====================================================
-    // PAYMENT FORM
-    // =====================================================
-
+    // =========================================================
+    // RENDER: PREMIUM PAYMONGO CHECKOUT INTERFACE
+    // =========================================================
     return (
-        <div className="client-payment-page">
+        <div className="premium-checkout-page">
+            {/* Ambient Background Glows */}
+            <div className="ambient-glow glow-top" />
+            <div className="ambient-glow glow-bottom" />
 
-            <div className="client-payment-container">
-
-                {/* =================================================
-                    HEADER
-                ================================================= */}
-
-                <div className="client-payment-header">
-
-                    <div>
-
-                        <div className="payment-eyebrow">
-                            EPIC CMS
-                        </div>
-
-                        <h1>
-                            Complete Your Payment
-                        </h1>
-
-                        <p>
-                            Submit your payment information
-                            for verification.
-                        </p>
-
+            <div className="premium-checkout-container">
+                {/* -------------------------------------------------
+                    TOP TRUST RIBBON
+                ------------------------------------------------- */}
+                <div className="trust-ribbon">
+                    <div className="trust-ribbon-left">
+                        <Lock size={14} className="text-gold" />
+                        <span>256-BIT SSL ENCRYPTED GATEWAY</span>
+                        <span className="dot">•</span>
+                        <span>BSP REGULATED</span>
+                        <span className="dot">•</span>
+                        <span>OFFICIAL PAYMONGO PARTNER</span>
                     </div>
-
-                    <button
-                        type="button"
-                        className="payment-refresh-button"
-                        onClick={() =>
-                            void handleRefresh()
-                        }
-                        disabled={
-                            loading ||
-                            historyLoading
-                        }
-                    >
-                        {historyLoading
-                            ? "Refreshing..."
-                            : "↻ Refresh"}
-                    </button>
-
+                    <div className="trust-ribbon-right">
+                        <span className="live-status-pill">
+                            <span className="live-pulse" />
+                            LIVE PAYMONGO CHECKOUT ACTIVE
+                        </span>
+                    </div>
                 </div>
 
-                {/* =================================================
-                    ERROR
-                ================================================= */}
-
-                {error && (
-
-                    <div
-                        className="client-payment-error"
-                        role="alert"
-                    >
-                        {error}
-                    </div>
-
-                )}
-
-                {/* =================================================
-                    PENDING PAYMENT NOTICE
-                ================================================= */}
-
-                {pendingPayment && (
-
-                    <div className="pending-payment-notice">
-
-                        <div className="pending-payment-icon">
-                            !
+                {/* -------------------------------------------------
+                    INSTITUTIONAL HEADER
+                ------------------------------------------------- */}
+                <header className="checkout-masthead">
+                    <div className="masthead-brand">
+                        <div className="masthead-crest">
+                            <span className="crest-initials">MBS</span>
+                            <span className="crest-cross">✝</span>
                         </div>
-
                         <div>
-
-                            <strong>
-                                Payment verification pending
-                            </strong>
-
-                            <p>
-                                You already submitted a payment
-                                for this subscription.
-                                Reference:
-                                {" "}
-                                <strong>
-                                    {
-                                        pendingPayment.referenceNumber ||
-                                        `#${pendingPayment.paymentId}`
-                                    }
-                                </strong>
+                            <div className="masthead-eyebrow">
+                                <span className="eyebrow-tag gold">CHED RECOGNIZED</span>
+                                <span className="eyebrow-tag emerald">EST. 2026</span>
+                                <span className="eyebrow-tag">LUPAO, NUEVA ECIJA</span>
+                            </div>
+                            <h1 className="masthead-title">
+                                Mobile Bible School <span>&amp; Theological Seminary</span>
+                            </h1>
+                            <p className="masthead-tagline">
+                                Deep Biblical Truth. Everywhere You Are Called. Official Modular Tuition &amp; Fee Portal.
                             </p>
-
-                            <small>
-                                Please wait for an EPIC CMS
-                                administrator to verify your payment.
-                            </small>
-
                         </div>
-
                     </div>
 
+                    <div className="merchant-trust-card">
+                        <div className="merchant-header">
+                            <ShieldCheck size={18} className="text-emerald" />
+                            <span>Authorized PayMongo Merchant</span>
+                        </div>
+                        <div className="merchant-name">Kezjed Solutions</div>
+                        <div className="merchant-rep">Account Owner: Ronnel Mislang</div>
+                        <div className="merchant-channels">
+                            <span className="channel-pill gcash">GCash</span>
+                            <span className="channel-pill maya">Maya</span>
+                            <span className="channel-pill cards">Cards</span>
+                            <span className="channel-pill qrph">QR Ph</span>
+                        </div>
+                    </div>
+                </header>
+
+                {/* -------------------------------------------------
+                    CONTEXT NOTICES (CANCELLED / ERROR)
+                ------------------------------------------------- */}
+                {cancelledNotice && (
+                    <div className="checkout-notice-banner warning">
+                        <AlertCircle size={20} className="notice-icon" />
+                        <div className="notice-content">
+                            <strong>Checkout Session Cancelled</strong>
+                            <p>
+                                Your previous PayMongo checkout session was cancelled. No money was deducted from your account. You can review your details and re-launch your secure payment below whenever you are ready.
+                            </p>
+                        </div>
+                        <button
+                            type="button"
+                            className="notice-dismiss"
+                            onClick={() => setCancelledNotice(false)}
+                            aria-label="Dismiss"
+                        >
+                            <X size={16} />
+                        </button>
+                    </div>
                 )}
 
-                <div className="payment-layout">
-
-                    {/* =================================================
-                        MAIN FORM
-                    ================================================= */}
-
-                    <div className="payment-main">
-
-                        <form
-                            className="payment-form-card"
-                            onSubmit={
-                                handleSubmit
-                            }
+                {errorMessage && (
+                    <div className="checkout-notice-banner error">
+                        <AlertCircle size={20} className="notice-icon" />
+                        <div className="notice-content">
+                            <strong>Notice</strong>
+                            <p>{errorMessage}</p>
+                        </div>
+                        <button
+                            type="button"
+                            className="notice-dismiss"
+                            onClick={() => setErrorMessage("")}
+                            aria-label="Dismiss"
                         >
+                            <X size={16} />
+                        </button>
+                    </div>
+                )}
 
-                            <div className="payment-card-heading">
+                {verifyingSession && (
+                    <div className="checkout-notice-banner info">
+                        <RefreshCw size={20} className="notice-icon spinning" />
+                        <div className="notice-content">
+                            <strong>Verifying PayMongo Payment Session...</strong>
+                            <p>Connecting to PayMongo live servers to verify your transaction status.</p>
+                        </div>
+                    </div>
+                )}
 
+                {/* -------------------------------------------------
+                    MAIN 2-COLUMN CHECKOUT LAYOUT
+                ------------------------------------------------- */}
+                <div className="checkout-layout-grid">
+                    {/* LEFT COLUMN: OPTIONS & STUDENT DETAILS */}
+                    <main className="checkout-main-column">
+                        {/* 1. SELECT TUITION / FEE TYPE */}
+                        <section className="checkout-section-card">
+                            <div className="section-card-header">
+                                <div className="section-step-num">1</div>
                                 <div>
-
-                                    <h2>
-                                        Payment Details
-                                    </h2>
-
-                                    <p>
-                                        Choose how you paid
-                                        and provide your
-                                        payment reference.
+                                    <h2 className="section-title">Select Modular Course or School Fee</h2>
+                                    <p className="section-subtitle">
+                                        Choose the accredited degree module, semester tuition bundle, or institutional assessment you are paying for:
                                     </p>
-
                                 </div>
-
                             </div>
 
-                            {/* =================================================
-                                PAYMENT METHOD
-                            ================================================= */}
+                            <div className="tuition-preset-grid">
+                                {TUITION_PRESETS.map((preset) => {
+                                    const isSelected = selectedPresetId === preset.id;
+                                    return (
+                                        <div
+                                            key={preset.id}
+                                            className={`tuition-preset-card ${isSelected ? "selected" : ""} ${preset.highlight ? "highlight" : ""}`}
+                                            onClick={() => setSelectedPresetId(preset.id)}
+                                        >
+                                            <div className="preset-card-top">
+                                                <span className="preset-card-icon">{preset.icon}</span>
+                                                {preset.badge && (
+                                                    <span className={`preset-card-badge ${preset.highlight ? "gold" : ""}`}>
+                                                        {preset.badge}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <h3 className="preset-card-title">{preset.title}</h3>
+                                            <p className="preset-card-desc">{preset.description}</p>
+                                            <div className="preset-card-footer">
+                                                {preset.id === "custom" ? (
+                                                    <span className="preset-price-label">Custom PHP Amount</span>
+                                                ) : (
+                                                    <div className="preset-price-wrapper">
+                                                        <span className="preset-price">{formatCurrency(preset.amount)}</span>
+                                                        <span className="preset-price-period">/ Term</span>
+                                                    </div>
+                                                )}
+                                                <div className={`preset-radio-indicator ${isSelected ? "active" : ""}`}>
+                                                    {isSelected && <span className="radio-dot" />}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
 
-                            <div className="form-section">
-
-                                <label className="form-label">
-                                    Payment Method
-                                </label>
-
-                                <div className="payment-method-grid">
-
-                                    {PAYMENT_METHODS.map(
-                                        method => (
-
+                            {/* CUSTOM AMOUNT INPUT (IF CUSTOM SELECTED) */}
+                            {selectedPresetId === "custom" && (
+                                <div className="custom-amount-field-wrapper">
+                                    <label htmlFor="customAmountInput" className="input-label">
+                                        <span>Enter Custom Tuition / Ministry Gift Amount (PHP)</span>
+                                        <span className="text-muted">Minimum ₱20.00</span>
+                                    </label>
+                                    <div className="custom-amount-input-box">
+                                        <span className="currency-prefix">₱</span>
+                                        <input
+                                            id="customAmountInput"
+                                            type="number"
+                                            min="20"
+                                            step="50"
+                                            value={customAmount}
+                                            onChange={(e) => setCustomAmount(e.target.value)}
+                                            placeholder="e.g. 5000"
+                                            className="custom-amount-input"
+                                            autoFocus
+                                        />
+                                    </div>
+                                    <div className="quick-amount-pills">
+                                        {[1000, 2500, 5000, 10000].map((amt) => (
                                             <button
-                                                key={
-                                                    method.value
-                                                }
+                                                key={amt}
                                                 type="button"
-                                                className={
-                                                    `payment-method-option ${
-                                                        paymentMethod ===
-                                                        method.value
-                                                            ? "selected"
-                                                            : ""
-                                                    }`
-                                                }
-                                                onClick={() =>
-                                                    setPaymentMethod(
-                                                        method.value
-                                                    )
-                                                }
-                                                aria-pressed={
-                                                    paymentMethod ===
-                                                    method.value
-                                                }
-                                                disabled={
-                                                    submitting ||
-                                                    Boolean(
-                                                        pendingPayment
-                                                    )
-                                                }
+                                                className="quick-pill"
+                                                onClick={() => setCustomAmount(amt.toString())}
                                             >
-
-                                                <span className="method-icon">
-                                                    {
-                                                        method.icon
-                                                    }
-                                                </span>
-
-                                                <strong>
-                                                    {
-                                                        method.label
-                                                    }
-                                                </strong>
-
-                                                <small>
-                                                    {
-                                                        method.description
-                                                    }
-                                                </small>
-
+                                                + ₱{amt.toLocaleString()}
                                             </button>
-
-                                        )
-                                    )}
-
+                                        ))}
+                                    </div>
                                 </div>
+                            )}
+                        </section>
 
+                        {/* 2. STUDENT / PAYER DETAILS */}
+                        <section className="checkout-section-card">
+                            <div className="section-card-header">
+                                <div className="section-step-num">2</div>
+                                <div>
+                                    <h2 className="section-title">Student &amp; Payer Information</h2>
+                                    <p className="section-subtitle">
+                                        PayMongo will email your official verified payment receipt to this address:
+                                    </p>
+                                </div>
                             </div>
 
-                            {/* =================================================
-                                PAYMONGO OR MANUAL FORM FIELDS
-                            ================================================= */}
-                            {paymentMethod === "PayMongo" ? (
-                                <div style={{
-                                    background: "linear-gradient(135deg, #F0FDF4 0%, #ECFDF5 100%)",
-                                    border: "1.5px solid #10B981",
-                                    borderRadius: "14px",
-                                    padding: "24px",
-                                    marginBottom: "20px",
-                                    textAlign: "center"
-                                }}>
-                                    <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "48px", height: "48px", borderRadius: "50%", background: "#D1FAE5", color: "#059669", fontSize: "24px", marginBottom: "12px" }}>
-                                        ⚡
+                            <div className="form-fields-grid">
+                                <div className="form-field full-width">
+                                    <label className="input-label" htmlFor="studentNameInput">
+                                        <span>Student Full Name (or Church Representative) *</span>
+                                    </label>
+                                    <div className="input-icon-box">
+                                        <User size={18} className="field-icon" />
+                                        <input
+                                            id="studentNameInput"
+                                            type="text"
+                                            value={studentName}
+                                            onChange={(e) => setStudentName(e.target.value)}
+                                            placeholder="e.g. Pastor Ronnel Mislang / Juan Dela Cruz"
+                                            className="form-input"
+                                            required
+                                        />
                                     </div>
-                                    <h3 style={{ margin: "0 0 6px", fontSize: "18px", color: "#065F46", fontWeight: 700 }}>
-                                        Official PayMongo Live Checkout
-                                    </h3>
-                                    <p style={{ margin: "0 0 16px", fontSize: "14px", color: "#047857", lineHeight: 1.5 }}>
-                                        Instant payment verification for <strong>Kezjed Solutions</strong>. Choose your preferred channel at checkout:
-                                    </p>
+                                </div>
 
-                                    <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "8px", marginBottom: "20px" }}>
-                                        <span style={{ background: "#007DFE", color: "#fff", padding: "6px 14px", borderRadius: "8px", fontSize: "12px", fontWeight: 700, letterSpacing: "0.5px" }}>
-                                            GCASH
-                                        </span>
-                                        <span style={{ background: "#000000", color: "#fff", padding: "6px 14px", borderRadius: "8px", fontSize: "12px", fontWeight: 700, letterSpacing: "0.5px" }}>
-                                            MAYA
-                                        </span>
-                                        <span style={{ background: "#1A1F71", color: "#fff", padding: "6px 14px", borderRadius: "8px", fontSize: "12px", fontWeight: 700, letterSpacing: "0.5px" }}>
-                                            VISA / MASTERCARD
-                                        </span>
-                                        <span style={{ background: "#C2410C", color: "#fff", padding: "6px 14px", borderRadius: "8px", fontSize: "12px", fontWeight: 700, letterSpacing: "0.5px" }}>
-                                            QR PH
-                                        </span>
-                                        <span style={{ background: "#4338CA", color: "#fff", padding: "6px 14px", borderRadius: "8px", fontSize: "12px", fontWeight: 700, letterSpacing: "0.5px" }}>
-                                            ONLINE BANKING
-                                        </span>
+                                <div className="form-field">
+                                    <label className="input-label" htmlFor="studentEmailInput">
+                                        <span>Email Address for Receipt *</span>
+                                    </label>
+                                    <div className="input-icon-box">
+                                        <Mail size={18} className="field-icon" />
+                                        <input
+                                            id="studentEmailInput"
+                                            type="email"
+                                            value={studentEmail}
+                                            onChange={(e) => setStudentEmail(e.target.value)}
+                                            placeholder="e.g. student@mbs.edu.ph"
+                                            className="form-input"
+                                            required
+                                        />
                                     </div>
+                                </div>
 
-                                    <button
-                                        type="button"
-                                        className="payment-primary-button"
-                                        style={{
-                                            background: "#059669",
-                                            borderColor: "#047857",
-                                            width: "100%",
-                                            padding: "16px",
-                                            fontSize: "16px",
-                                            fontWeight: 700,
-                                            boxShadow: "0 4px 14px rgba(5, 150, 105, 0.3)"
-                                        }}
-                                        onClick={handlePayMongoCheckout}
-                                        disabled={submitting}
-                                    >
-                                        {submitting ? "Redirecting to PayMongo Checkout..." : `💳 Pay ${formatCurrency(subscription.amount, subscription.currency)} via PayMongo`}
-                                    </button>
+                                <div className="form-field">
+                                    <label className="input-label" htmlFor="studentPhoneInput">
+                                        <span>Mobile Number (GCash / SMS Alerts)</span>
+                                    </label>
+                                    <div className="input-icon-box">
+                                        <Phone size={18} className="field-icon" />
+                                        <input
+                                            id="studentPhoneInput"
+                                            type="tel"
+                                            value={studentPhone}
+                                            onChange={(e) => setStudentPhone(e.target.value)}
+                                            placeholder="e.g. 09913114163"
+                                            className="form-input"
+                                        />
+                                    </div>
+                                </div>
 
-                                    <p style={{ margin: "14px 0 0", fontSize: "12px", color: "#065F46" }}>
-                                        🔒 256-bit SSL encrypted. Payment is instantly verified and credited upon completion.
+                                <div className="form-field full-width">
+                                    <label className="input-label" htmlFor="programInput">
+                                        <span>Seminary Degree Program / Cohort (Optional)</span>
+                                    </label>
+                                    <div className="input-icon-box">
+                                        <GraduationCap size={18} className="field-icon" />
+                                        <input
+                                            id="programInput"
+                                            type="text"
+                                            value={courseProgram}
+                                            onChange={(e) => setCourseProgram(e.target.value)}
+                                            placeholder="e.g. Bachelor of Ministry / Pastoral Leadership / Certificate"
+                                            className="form-input"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="form-field full-width">
+                                    <label className="input-label" htmlFor="notesInput">
+                                        <span>Notes or Special Instructions (Optional)</span>
+                                    </label>
+                                    <div className="input-icon-box">
+                                        <FileText size={18} className="field-icon" />
+                                        <input
+                                            id="notesInput"
+                                            type="text"
+                                            value={notes}
+                                            onChange={(e) => setNotes(e.target.value)}
+                                            placeholder="e.g. Modular batch code, student ID, or sponsor reference"
+                                            className="form-input"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* 3. PAYMONGO LIVE PAYMENT GATEWAY OVERVIEW */}
+                        <section className="checkout-section-card">
+                            <div className="section-card-header">
+                                <div className="section-step-num">3</div>
+                                <div>
+                                    <h2 className="section-title">Official Payment Gateway: PayMongo Philippines</h2>
+                                    <p className="section-subtitle">
+                                        All major Philippine digital payment channels supported directly with instant automated verification:
                                     </p>
                                 </div>
-                            ) : (
-                                <>
-                                    <div className="form-section">
+                            </div>
 
-                                        <label
-                                            htmlFor="referenceNumber"
-                                            className="form-label"
-                                        >
-                                            Payment Reference Number
-                                        </label>
-
-                                        <input
-                                            id="referenceNumber"
-                                            type="text"
-                                            value={
-                                                referenceNumber
-                                            }
-                                            onChange={
-                                                event =>
-                                                    setReferenceNumber(
-                                                        event.target.value
-                                                    )
-                                            }
-                                            placeholder={
-                                                referencePlaceholder
-                                            }
-                                            autoComplete="off"
-                                            maxLength={100}
-                                            required
-                                            disabled={
-                                                submitting ||
-                                                Boolean(
-                                                    pendingPayment
-                                                )
-                                            }
-                                        />
-
-                                        <small className="form-help">
-                                            Enter the reference number
-                                            shown on your payment
-                                            confirmation.
-                                        </small>
-
+                            <div className="paymongo-channels-grid">
+                                <div className="channel-box">
+                                    <div className="channel-box-icon gcash">G</div>
+                                    <div>
+                                        <strong>GCash</strong>
+                                        <small>App Login or GCash QR</small>
                                     </div>
+                                </div>
 
-                                    <div className="form-section">
-
-                                        <label
-                                            htmlFor="paymentDate"
-                                            className="form-label"
-                                        >
-                                            Payment Date
-                                        </label>
-
-                                        <input
-                                            id="paymentDate"
-                                            type="date"
-                                            value={
-                                                paymentDate
-                                            }
-                                            onChange={
-                                                event =>
-                                                    setPaymentDate(
-                                                        event.target.value
-                                                    )
-                                            }
-                                            max={
-                                                getToday()
-                                            }
-                                            required
-                                            disabled={
-                                                submitting ||
-                                                Boolean(
-                                                    pendingPayment
-                                                )
-                                            }
-                                        />
-
+                                <div className="channel-box">
+                                    <div className="channel-box-icon maya">M</div>
+                                    <div>
+                                        <strong>Maya (PayMaya)</strong>
+                                        <small>Maya Wallet &amp; Maya QR</small>
                                     </div>
+                                </div>
 
-                                    <div className="form-section">
-
-                                        <label
-                                            htmlFor="paymentNotes"
-                                            className="form-label"
-                                        >
-                                            Additional Notes
-
-                                            <span>
-                                                Optional
-                                            </span>
-                                        </label>
-
-                                        <textarea
-                                            id="paymentNotes"
-                                            value={
-                                                notes
-                                            }
-                                            onChange={
-                                                event =>
-                                                    setNotes(
-                                                        event.target.value
-                                                    )
-                                            }
-                                            rows={4}
-                                            maxLength={1000}
-                                            placeholder="Add any additional information about your payment..."
-                                            disabled={
-                                                submitting ||
-                                                Boolean(
-                                                    pendingPayment
-                                                )
-                                            }
-                                        />
-
+                                <div className="channel-box">
+                                    <div className="channel-box-icon card">💳</div>
+                                    <div>
+                                        <strong>Credit &amp; Debit Cards</strong>
+                                        <small>Visa, Mastercard, JCB</small>
                                     </div>
+                                </div>
 
+                                <div className="channel-box">
+                                    <div className="channel-box-icon qrph">QR</div>
+                                    <div>
+                                        <strong>QR Ph Universal</strong>
+                                        <small>BDO, BPI, UnionBank &amp; All</small>
+                                    </div>
+                                </div>
+
+                                <div className="channel-box">
+                                    <div className="channel-box-icon bank">🏛️</div>
+                                    <div>
+                                        <strong>Direct Online Banking</strong>
+                                        <small>BPI, UnionBank Direct</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="paymongo-reassurance-box">
+                                <Sparkles size={16} className="text-gold" />
+                                <span>
+                                    No transaction convenience fee is passed to students. The seminary covers 100% of gateway processing costs.
+                                </span>
+                            </div>
+                        </section>
+
+                        {/* MANUAL COUNTER DEPOSIT TOGGLE (FOR SPECIAL CASES) */}
+                        <div className="manual-deposit-toggle-box">
+                            <button
+                                type="button"
+                                className="manual-toggle-btn"
+                                onClick={() => setPaymentMode(paymentMode === "paymongo" ? "manual" : "paymongo")}
+                            >
+                                {paymentMode === "paymongo"
+                                    ? "📋 Paying via Over-the-Counter Bank Deposit or Pastoral Grant? Click here to submit manual reference"
+                                    : "⚡ Return to Instant PayMongo Online Checkout"}
+                            </button>
+
+                            {paymentMode === "manual" && (
+                                <form onSubmit={handleManualSubmit} className="manual-deposit-subform">
+                                    <label className="input-label" htmlFor="manualRefInput">
+                                        Bank Deposit / Counter Reference Number *
+                                    </label>
+                                    <input
+                                        id="manualRefInput"
+                                        type="text"
+                                        value={manualReference}
+                                        onChange={(e) => setManualReference(e.target.value)}
+                                        placeholder="e.g. BDO-DEP-8021948 or Cashier Ref"
+                                        className="form-input"
+                                        required
+                                    />
                                     <button
                                         type="submit"
-                                        className="payment-primary-button"
-                                        disabled={
-                                            submitting ||
-                                            !referenceNumber.trim() ||
-                                            Boolean(
-                                                pendingPayment
-                                            )
-                                        }
+                                        disabled={submitting}
+                                        className="manual-submit-btn"
                                     >
-
-                                        {submitting
-                                            ? "Submitting Payment..."
-                                            : pendingPayment
-                                                ? "Payment Verification Pending"
-                                                : `Submit Payment — ${formatCurrency(
-                                                      subscription.amount,
-                                                      subscription.currency
-                                                  )}`}
-
+                                        {submitting ? "Submitting..." : "Submit Manual Reference for Verification"}
                                     </button>
-                                </>
+                                </form>
                             )}
+                        </div>
+                    </main>
 
-                            <p className="payment-security-note">
+                    {/* RIGHT COLUMN: STICKY ORDER SUMMARY & ACTION */}
+                    <aside className="checkout-summary-column">
+                        <div className="sticky-summary-card">
+                            <div className="summary-card-header">
+                                <span className="summary-header-tag">PAYMENT SUMMARY</span>
+                                <span className="summary-secure-badge">
+                                    <Lock size={12} /> SECURE
+                                </span>
+                            </div>
 
-                                Your payment will remain{" "}
+                            <div className="summary-institution-row">
+                                <Building2 size={16} className="text-emerald" />
+                                <div>
+                                    <strong>Mobile Bible School &amp; Theological Seminary</strong>
+                                    <span>Lupao, Nueva Ecija • Main Campus</span>
+                                </div>
+                            </div>
 
-                                <strong>
-                                    PENDING
-                                </strong>{" "}
+                            <div className="summary-divider" />
 
-                                until verified by an EPIC
-                                CMS administrator.
+                            <div className="summary-line-item">
+                                <span className="line-item-name">{activePreset.title}</span>
+                                <span className="line-item-price">{formatCurrency(effectiveAmount)}</span>
+                            </div>
 
+                            <div className="summary-line-item fee">
+                                <span>PayMongo Online Gateway Processing</span>
+                                <span className="free-tag">₱0.00 (WAIVED)</span>
+                            </div>
+
+                            <div className="summary-line-item fee">
+                                <span>Instant Accreditation &amp; Portal Credit</span>
+                                <span className="free-tag">INCLUDED</span>
+                            </div>
+
+                            <div className="summary-divider" />
+
+                            {/* TOTAL ROW */}
+                            <div className="summary-total-row">
+                                <div>
+                                    <span className="total-label">Total Amount Due</span>
+                                    <span className="total-currency">Philippine Pesos (PHP)</span>
+                                </div>
+                                <div className="total-number">
+                                    {formatCurrency(effectiveAmount)}
+                                </div>
+                            </div>
+
+                            {/* MAIN CHECKOUT CTA BUTTON */}
+                            <button
+                                type="button"
+                                className="paymongo-primary-cta"
+                                onClick={() => handleLaunchPayMongoCheckout()}
+                                disabled={submitting}
+                            >
+                                <span className="cta-glow" />
+                                <span className="cta-inner">
+                                    {submitting ? (
+                                        <>
+                                            <RefreshCw size={20} className="spinning" />
+                                            <span>Redirecting to PayMongo...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span>Pay {formatCurrency(effectiveAmount)} via PayMongo</span>
+                                            <ArrowRight size={20} className="cta-arrow" />
+                                        </>
+                                    )}
+                                </span>
+                            </button>
+
+                            <p className="summary-paymongo-disclaimer">
+                                You will be redirected to the official PayMongo checkout for <strong>Kezjed Solutions</strong> to complete your payment with GCash, Maya, Cards, or QR Ph.
                             </p>
 
-                        </form>
-
-                    </div>
-
-                    {/* =================================================
-                        SIDEBAR
-                    ================================================= */}
-
-                    <aside className="payment-sidebar">
-
-                        {/* =================================================
-                            SUBSCRIPTION SUMMARY
-                        ================================================= */}
-
-                        <div className="payment-summary-card">
-
-                            <div className="summary-eyebrow">
-                                SUBSCRIPTION
-                            </div>
-
-                            <h2>
-                                {
-                                    subscription.churchName ||
-                                    "Your Church"
-                                }
-                            </h2>
-
-                            <div className="summary-plan">
-
-                                <span>
-                                    Plan
-                                </span>
-
-                                <strong>
-                                    {
-                                        subscription.planName ||
-                                        `Plan #${subscription.subscriptionPlanId}`
-                                    }
-                                </strong>
-
-                            </div>
-
-                            <div className="summary-row">
-
-                                <span>
-                                    Billing
-                                </span>
-
-                                <strong>
-                                    {
-                                        subscription.billingCycle ||
-                                        "—"
-                                    }
-                                </strong>
-
-                            </div>
-
-                            <div className="summary-row">
-
-                                <span>
-                                    Status
-                                </span>
-
-                                <strong
-                                    className={
-                                        `summary-status ${getStatusClass(
-                                            subscription.status
-                                        )}`
-                                    }
-                                >
-                                    {
-                                        getStatusLabel(
-                                            subscription.status
-                                        )
-                                    }
-                                </strong>
-
-                            </div>
-
-                            {subscription.trialEndsAt && (
-
-                                <div className="summary-row">
-
-                                    <span>
-                                        Trial Ends
-                                    </span>
-
-                                    <strong>
-                                        {
-                                            formatDate(
-                                                subscription.trialEndsAt
-                                            )
-                                        }
-                                    </strong>
-
+                            {/* TRUST BADGES LIST */}
+                            <div className="summary-trust-checklist">
+                                <div className="trust-item">
+                                    <CheckCircle2 size={15} className="text-emerald" />
+                                    <span>Instant automated confirmation (No waiting)</span>
                                 </div>
-
-                            )}
-
-                            {subscription.nextBillingDate && (
-
-                                <div className="summary-row">
-
-                                    <span>
-                                        Next Billing
-                                    </span>
-
-                                    <strong>
-                                        {
-                                            formatDate(
-                                                subscription.nextBillingDate
-                                            )
-                                        }
-                                    </strong>
-
+                                <div className="trust-item">
+                                    <CheckCircle2 size={15} className="text-emerald" />
+                                    <span>Official electronic receipt sent to your email</span>
                                 </div>
-
-                            )}
-
-                            <div className="summary-total">
-
-                                <span>
-                                    Amount Due
-                                </span>
-
-                                <strong>
-                                    {
-                                        formatCurrency(
-                                            subscription.amount,
-                                            subscription.currency
-                                        )
-                                    }
-                                </strong>
-
+                                <div className="trust-item">
+                                    <CheckCircle2 size={15} className="text-emerald" />
+                                    <span>Bangko Sentral ng Pilipinas (BSP) Regulated</span>
+                                </div>
+                                <div className="trust-item">
+                                    <CheckCircle2 size={15} className="text-emerald" />
+                                    <span>256-Bit Bank-Grade Encryption &amp; 3D Secure</span>
+                                </div>
                             </div>
 
+                            <div className="summary-divider" />
+
+                            {/* FOOTER SHORTCUTS */}
+                            <div className="summary-quick-links">
+                                <a href="/subscription-dashboard" className="summary-link">
+                                    📋 Subscriptions Dashboard
+                                </a>
+                                <a href="/giving" className="summary-link">
+                                    🎓 Student Tuition Catalog
+                                </a>
+                                <a href="/" className="summary-link">
+                                    🏠 Return to MBS Website
+                                </a>
+                            </div>
+
+                            <div className="summary-support-note">
+                                Need assistance? Call Admin: <strong>09913114163</strong>
+                            </div>
                         </div>
-
-                        {/* =================================================
-                            PAYMENT INSTRUCTIONS
-                        ================================================= */}
-
-                        <div className="payment-instructions-card">
-
-                            <h3>
-                                Payment Instructions
-                            </h3>
-
-                            <ol>
-
-                                {paymentInstructions.map(
-                                    (
-                                        instruction,
-                                        index
-                                    ) => (
-
-                                        <li
-                                            key={
-                                                index
-                                            }
-                                        >
-                                            {
-                                                instruction
-                                            }
-                                        </li>
-
-                                    )
-                                )}
-
-                            </ol>
-
-                            <div className="verification-notice">
-
-                                <strong>
-                                    Verification required
-                                </strong>
-
-                                <p>
-                                    Payments are reviewed
-                                    by the EPIC CMS
-                                    administrator before
-                                    your subscription is
-                                    activated or renewed.
-                                </p>
-
-                            </div>
-
-                        </div>
-
-                        {/* =================================================
-                            PAYMENT HISTORY
-                        ================================================= */}
-
-                        <div className="payment-history-card">
-
-                            <div className="history-heading">
-
-                                <div>
-
-                                    <h3>
-                                        Recent Payments
-                                    </h3>
-
-                                    <small>
-                                        {
-                                            paymentHistory.length
-                                        } payment
-                                        {
-                                            paymentHistory.length !== 1
-                                                ? "s"
-                                                : ""
-                                        }
-                                    </small>
-
-                                </div>
-
-                                {historyLoading && (
-                                    <span>
-                                        Loading...
-                                    </span>
-                                )}
-
-                            </div>
-
-                            {paymentHistory.length ===
-                            0 ? (
-
-                                <p className="history-empty">
-                                    No payment history yet.
-                                </p>
-
-                            ) : (
-
-                                <div className="history-list">
-
-                                    {paymentHistory
-                                        .slice(0, 5)
-                                        .map(
-                                            payment => (
-
-                                                <div
-                                                    className="history-item"
-                                                    key={
-                                                        payment.paymentId
-                                                    }
-                                                >
-
-                                                    <div>
-
-                                                        <strong>
-                                                            {
-                                                                formatCurrency(
-                                                                    payment.amount,
-                                                                    payment.currency
-                                                                )
-                                                            }
-                                                        </strong>
-
-                                                        <small>
-                                                            {
-                                                                payment.paymentMethod
-                                                            }
-                                                        </small>
-
-                                                        {payment.referenceNumber && (
-
-                                                            <small>
-                                                                Ref:{" "}
-                                                                {
-                                                                    payment.referenceNumber
-                                                                }
-                                                            </small>
-
-                                                        )}
-
-                                                        {payment.invoiceNumber && (
-
-                                                            <small>
-                                                                Invoice:{" "}
-                                                                {
-                                                                    payment.invoiceNumber
-                                                                }
-                                                            </small>
-
-                                                        )}
-
-                                                    </div>
-
-                                                    <div>
-
-                                                        <span
-                                                            className={
-                                                                `history-status history-${getStatusClass(
-                                                                    payment.status
-                                                                )}`
-                                                            }
-                                                        >
-                                                            {
-                                                                getStatusLabel(
-                                                                    payment.status
-                                                                )
-                                                            }
-                                                        </span>
-
-                                                        <small>
-                                                            {
-                                                                formatDate(
-                                                                    payment.createdDate
-                                                                )
-                                                            }
-                                                        </small>
-
-                                                    </div>
-
-                                                </div>
-
-                                            )
-                                        )}
-
-                                </div>
-
-                            )}
-
-                        </div>
-
                     </aside>
-
                 </div>
-
             </div>
-
         </div>
     );
 };
