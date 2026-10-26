@@ -382,16 +382,7 @@
 .learning-public-final p,
 .epic-contact-final p { color:var(--epic-soft) !important; }
 
-/* Footer consistency */
-.epic-contact-footer,
-.epic-public-about footer,
-.epic-public-ministries footer,
-.epic-system-page footer,
-.epic-learning-public-page footer {
-  background:#050d18 !important;
-  color:#fff !important;
-  border-top:1px solid rgba(255,255,255,.08) !important;
-}
+/* Footer styling harmonized to PublicFooter */
 
 @media (max-width:760px) {
   .about-hero,

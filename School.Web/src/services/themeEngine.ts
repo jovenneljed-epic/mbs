@@ -314,8 +314,21 @@ export function applyGlobalTheme(targetTheme?: any, skipBroadcast = false): void
         }
 
         // Fallback to official default, auto-healing legacy emerald to official seminary maroon
-        if (!active || !active.primary || active.themeId === "emerald-academic" || active.id === "emerald-academic") {
+        if (
+            !active ||
+            !active.primary ||
+            active.themeId === "emerald-academic" ||
+            active.id === "emerald-academic" ||
+            active.primary === "#10b981" ||
+            active.primary === "#059669" ||
+            active.primary === "#047857"
+        ) {
             active = LUXURY_THEME_PRESETS[DEFAULT_THEME_ID];
+            try {
+                if (typeof window !== "undefined") {
+                    localStorage.removeItem(THEME_STORAGE_KEY);
+                }
+            } catch {}
         }
 
         const root = document.documentElement;

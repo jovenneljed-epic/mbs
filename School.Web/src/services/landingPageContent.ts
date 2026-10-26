@@ -413,20 +413,35 @@ export const getLandingPageContent = (): LandingPageContent => {
                     const storedAdminTheme = localStorage.getItem("mbs_admin_global_theme");
                     if (storedAdminTheme) {
                         const parsedAdmin = JSON.parse(storedAdminTheme);
-                        if (parsedAdmin?.primary && parsedAdmin?.themeId !== "seminary-maroon") {
+                        if (parsedAdmin?.themeId === "emerald-academic" || parsedAdmin?.primary === "#10b981") {
+                            localStorage.removeItem("mbs_admin_global_theme");
+                        } else if (parsedAdmin?.primary && parsedAdmin?.themeId !== "seminary-maroon") {
                             defaultTheme = parsedAdmin;
                         }
                     }
                 } catch {}
             }
 
-            const parsedTheme = parsed.colorTheme || {};
+            let parsedTheme = parsed.colorTheme || {};
+            if (parsedTheme?.themeId === "emerald-academic" || parsedTheme?.primary === "#10b981") {
+                parsedTheme = defaultTheme;
+            }
+
             const resolvedTheme: ColorThemeSettings = {
                 ...defaultTheme,
                 ...parsedTheme,
             };
 
             const parsedFooter = parsed.footer || {};
+            // Auto-heal legacy footer cached fields from older sessions
+            if (
+                !parsedFooter.onlineExtension ||
+                parsedFooter.onlineExtension === "Online Extension & Distance Education" ||
+                parsedFooter.onlineExtension.includes("Distance Education")
+            ) {
+                parsedFooter.onlineExtension = DEFAULT_FOOTER_SETTINGS.onlineExtension;
+            }
+
             const resolvedFooter: FooterSettings = {
                 ...DEFAULT_FOOTER_SETTINGS,
                 ...parsedFooter,
@@ -457,7 +472,9 @@ export const getLandingPageContent = (): LandingPageContent => {
             const storedAdminTheme = localStorage.getItem("mbs_admin_global_theme");
             if (storedAdminTheme) {
                 const parsedAdmin = JSON.parse(storedAdminTheme);
-                if (parsedAdmin?.primary) {
+                if (parsedAdmin?.themeId === "emerald-academic" || parsedAdmin?.primary === "#10b981") {
+                    localStorage.removeItem("mbs_admin_global_theme");
+                } else if (parsedAdmin?.primary) {
                     return {
                         ...DEFAULT_LANDING_CONTENT,
                         colorTheme: parsedAdmin

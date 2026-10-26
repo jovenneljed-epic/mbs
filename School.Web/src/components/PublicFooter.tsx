@@ -27,10 +27,14 @@ export const PublicFooter: React.FC<PublicFooterProps> = ({
 
         window.addEventListener("storage", updateContent);
         window.addEventListener("landingContentUpdated", updateContent);
+        window.addEventListener("sms_landing_content_updated", updateContent);
+        window.addEventListener("mbs:theme-changed", updateContent);
 
         return () => {
             window.removeEventListener("storage", updateContent);
             window.removeEventListener("landingContentUpdated", updateContent);
+            window.removeEventListener("sms_landing_content_updated", updateContent);
+            window.removeEventListener("mbs:theme-changed", updateContent);
         };
     }, []);
 
