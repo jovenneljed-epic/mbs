@@ -1,0 +1,33 @@
+services:
+  # ============================================================
+  # 1. MBS ASP.NET Core Web API (Docker Web Service)
+  # ============================================================
+  - type: web
+    name: mbs-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: singapore
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ConnectionStrings__EPICChurchDB
+        sync: false
+
+  # ============================================================
+  # 2. MBS Vite React Web Portal (Static Site)
+  # ============================================================
+  - type: web
+    name: mbs-portal
+    runtime: static
+    rootDir: School.Web
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    plan: free
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        value: https://mbs-tvr0.onrender.com/api
