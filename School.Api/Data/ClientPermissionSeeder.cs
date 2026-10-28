@@ -327,10 +327,10 @@ namespace School.Api.Data
             }
 
             // =====================================================
-            // CLIENT MEMBER
+            // CLIENT MEMBER / STUDENT
             // =====================================================
 
-            if (roleName == "CLIENT_MEMBER")
+            if (roleName == "CLIENT_MEMBER" || roleName == "STUDENT")
             {
                 switch (moduleName)
                 {
@@ -339,7 +339,7 @@ namespace School.Api.Data
                         break;
 
                     case "ChurchProfile":
-                        permission.CanView = true;
+                        permission.CanView = false;
                         break;
 
                     case "Learning":
@@ -363,7 +363,7 @@ namespace School.Api.Data
                         break;
 
                     case "Members":
-                        permission.CanView = true;
+                        permission.CanView = false;
                         break;
                 }
 

@@ -125,7 +125,7 @@ const ClientPortal: React.FC<ClientPortalProps> = ({
         useState<string>("");
 
     const [activePage, setActivePage] =
-        useState<string>("learning");
+        useState<string>("dashboard");
 
     // =========================================================
     // GET CLIENT TOKEN
@@ -488,7 +488,7 @@ const ClientPortal: React.FC<ClientPortalProps> = ({
             );
 
             // =================================================
-            // VERIFY DASHBOARD ACCESS
+            // VERIFY DASHBOARD ACCESS & STUDENT DEFAULT
             // =================================================
 
             const dashboardPermission =
@@ -500,24 +500,26 @@ const ClientPortal: React.FC<ClientPortalProps> = ({
                         "dashboard"
                 );
 
-            // -------------------------------------------------
-            // NO DASHBOARD ACCESS
-            // -------------------------------------------------
+            const isStudent =
+                clientData.role === "CLIENT" ||
+                clientData.clientRoleName === "CLIENT_MEMBER" ||
+                clientData.clientRoleName === "STUDENT" ||
+                Boolean(clientData.memberId);
 
-            if (
-                !dashboardPermission?.canView
-            ) {
-
+            // Students and users with Dashboard permission must ALWAYS default to Dashboard
+            if (isStudent || dashboardPermission?.canView) {
+                setActivePage("dashboard");
+            } else {
                 const firstAvailablePermission =
                     loadedPermissions.find(
                         (permission) =>
-                            permission.canView
+                            permission.canView &&
+                            permission.moduleName?.toLowerCase() !== "churchprofile"
                     );
 
                 if (
                     firstAvailablePermission
                 ) {
-
                     const firstPage =
                         Object.entries(
                             pageToModule
@@ -531,7 +533,6 @@ const ClientPortal: React.FC<ClientPortalProps> = ({
                         );
 
                     if (firstPage) {
-
                         setActivePage(
                             firstPage[0]
                         );
@@ -798,12 +799,12 @@ const ClientPortal: React.FC<ClientPortalProps> = ({
                 }
 
                 clientName={
-                    client.client
-                        ?.clientName ||
                     client.member
                         ?.fullName ||
                     client.username ||
-                    "Client"
+                    client.client
+                        ?.clientName ||
+                    "Student"
                 }
 
                 permissions={

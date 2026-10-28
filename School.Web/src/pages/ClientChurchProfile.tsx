@@ -264,9 +264,11 @@ const ClientChurchProfile: React.FC<ClientChurchProfileProps> = ({
 
     const clientInfo = client?.client;
 
+    const rawChurchName = clientInfo?.clientName || "";
     const churchName =
-        clientInfo?.clientName ||
-        "Church Name";
+        !rawChurchName || rawChurchName.toLowerCase().includes("san vicente") || rawChurchName === "Church Name"
+            ? "Mobile Bible School & Theological Seminary"
+            : rawChurchName;
 
     const accountStatus =
         clientInfo?.status ||
