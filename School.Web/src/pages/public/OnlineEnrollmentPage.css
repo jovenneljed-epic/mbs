@@ -1,0 +1,1220 @@
+/* ============================================================ */
+/* OnlineEnrollmentPage.css -> MOBILE BIBLE SCHOOL & SEMINARY   */
+/* Premium Adaptive Online Student Enrollment Styling           */
+/* ============================================================ */
+
+.mbs-enrollment-page-root {
+    min-height: 100vh;
+    background-color: #F8FAFC;
+    color: #1E293B;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    transition: background-color 0.4s ease, color 0.3s ease;
+}
+
+.mbs-enrollment-container {
+    max-width: 1240px;
+    width: 92%;
+    margin: 0 auto;
+}
+
+/* ============================================================ */
+/* HERO BANNER                                                  */
+/* ============================================================ */
+
+.mbs-enrollment-hero {
+    position: relative;
+    background: linear-gradient(135deg, var(--theme-bg-start, #7A1526) 0%, var(--theme-bg-end, #450A0A) 60%, var(--theme-surface, #1A0408) 100%);
+    border-bottom: 3px solid var(--theme-secondary, #F59E0B);
+    padding: 64px 24px 68px 24px;
+    color: #FFFFFF;
+    text-align: center;
+    overflow: hidden;
+}
+
+.mbs-enrollment-hero-glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 50% 25%, var(--theme-hero-glow, rgba(245, 158, 11, 0.16)), transparent 70%);
+    pointer-events: none;
+}
+
+.mbs-enrollment-hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 860px;
+    margin: 0 auto;
+}
+
+.mbs-enrollment-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    background: var(--theme-card-accent, rgba(245, 158, 11, 0.18));
+    color: var(--theme-secondary, #FDE68A);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    padding: 6px 16px;
+    border-radius: 9999px;
+    border: 1px solid var(--theme-border, rgba(245, 158, 11, 0.4));
+    margin-bottom: 18px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.mbs-enrollment-hero-title {
+    font-size: clamp(2.2rem, 4.4vw, 3.4rem);
+    font-weight: 900;
+    line-height: 1.15;
+    margin: 0 0 16px 0;
+    color: #FFFFFF;
+    letter-spacing: -0.02em;
+}
+
+.mbs-enrollment-hero-title span {
+    background: var(--theme-gradient, linear-gradient(180deg, #FFFFFF 20%, #FDE68A 65%, #F59E0B 100%));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.mbs-enrollment-hero-subtitle {
+    font-size: clamp(0.95rem, 1.8vw, 1.15rem);
+    color: #E2E8F0;
+    line-height: 1.6;
+    margin: 0 auto 28px auto;
+    max-width: 740px;
+}
+
+.mbs-enrollment-trust-strip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.mbs-enrollment-trust-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.28);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    padding: 6px 14px;
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    color: #FEF3C7;
+    backdrop-filter: blur(8px);
+}
+
+.mbs-enrollment-trust-pill .pill-icon {
+    color: var(--theme-secondary, #F59E0B);
+}
+
+/* ============================================================ */
+/* MAIN SECTION & LAYOUT                                        */
+/* ============================================================ */
+
+.mbs-enrollment-main-section {
+    padding: 48px 0 80px 0;
+    flex: 1;
+}
+
+.mbs-enrollment-layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 36px;
+    align-items: start;
+}
+
+/* ============================================================ */
+/* STEPPER HEADER                                               */
+/* ============================================================ */
+
+.mbs-stepper-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 16px 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.mbs-stepper-step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #64748B;
+    font-size: 0.86rem;
+    font-weight: 600;
+    transition: color 0.2s;
+}
+
+.mbs-stepper-step.active {
+    color: var(--theme-primary, #7A1526);
+    font-weight: 700;
+}
+
+.mbs-stepper-step.completed {
+    color: #10B981;
+}
+
+.step-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #F1F5F9;
+    color: #64748B;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.82rem;
+    font-weight: 700;
+    border: 1px solid #CBD5E1;
+}
+
+.mbs-stepper-step.active .step-badge {
+    background: var(--theme-primary, #7A1526);
+    color: #FFFFFF;
+    border-color: var(--theme-primary, #7A1526);
+    box-shadow: 0 2px 8px rgba(122, 21, 38, 0.35);
+}
+
+.mbs-stepper-step.completed .step-badge {
+    background: #10B981;
+    color: #FFFFFF;
+    border-color: #10B981;
+}
+
+.step-divider {
+    flex: 1;
+    height: 2px;
+    background: #E2E8F0;
+    margin: 0 14px;
+}
+
+/* ============================================================ */
+/* FORM CARD & STEP PANES                                       */
+/* ============================================================ */
+
+.mbs-enrollment-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 18px;
+    padding: 36px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+}
+
+.mbs-step-intro {
+    margin-bottom: 28px;
+    border-bottom: 1px solid #F1F5F9;
+    padding-bottom: 18px;
+}
+
+.step-counter-tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: var(--theme-primary, #7A1526);
+    background: rgba(122, 21, 38, 0.08);
+    padding: 3px 10px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+}
+
+.mbs-step-intro h3 {
+    margin: 0 0 6px 0;
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: #0F172A;
+}
+
+.mbs-step-intro p {
+    margin: 0;
+    font-size: 0.92rem;
+    color: #64748B;
+}
+
+.mbs-field-group {
+    margin-bottom: 22px;
+}
+
+.mbs-field-group label {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 8px;
+}
+
+.mbs-field-group label .req {
+    color: #EF4444;
+    margin-left: 2px;
+}
+
+.mbs-field-hint {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.78rem;
+    color: #64748B;
+}
+
+.mbs-input-icon-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.mbs-input-icon {
+    position: absolute;
+    left: 14px;
+    color: #94A3B8;
+    pointer-events: none;
+}
+
+.mbs-input-icon-wrap input {
+    padding-left: 42px !important;
+}
+
+.mbs-field-group input[type="text"],
+.mbs-field-group input[type="email"],
+.mbs-field-group input[type="tel"],
+.mbs-field-group select,
+.mbs-field-group textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid #CBD5E1;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    color: #0F172A;
+    background: #FFFFFF;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.mbs-field-group input:focus,
+.mbs-field-group select:focus,
+.mbs-field-group textarea:focus {
+    outline: none;
+    border-color: var(--theme-primary, #7A1526);
+    box-shadow: 0 0 0 3px rgba(122, 21, 38, 0.12);
+}
+
+.mbs-fields-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+/* ============================================================ */
+/* PROGRAM CARDS GRID                                           */
+/* ============================================================ */
+
+.mbs-program-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
+    margin-top: 8px;
+}
+
+.mbs-prog-card {
+    border: 1.5px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 16px;
+    background: #FAFAFA;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mbs-prog-card:hover {
+    border-color: var(--theme-secondary, #F59E0B);
+    background: #FFFFFF;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+}
+
+.mbs-prog-card.selected {
+    border-color: var(--theme-primary, #7A1526);
+    background: #FFFBEB;
+    box-shadow: 0 4px 14px rgba(122, 21, 38, 0.15);
+}
+
+.mbs-prog-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.mbs-prog-badge {
+    font-size: 0.68rem;
+    font-weight: 800;
+    background: rgba(122, 21, 38, 0.1);
+    color: var(--theme-primary, #7A1526);
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.mbs-prog-duration {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #64748B;
+}
+
+.mbs-prog-name {
+    display: block;
+    font-size: 0.96rem;
+    color: #0F172A;
+    margin-bottom: 6px;
+}
+
+.mbs-prog-desc {
+    font-size: 0.8rem;
+    color: #64748B;
+    line-height: 1.45;
+    margin: 0;
+}
+
+/* ============================================================ */
+/* DELIVERY OPTIONS STACK                                       */
+/* ============================================================ */
+
+.mbs-delivery-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.mbs-delivery-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 12px;
+    padding: 14px 18px;
+    background: #FAFAFA;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mbs-delivery-option:hover {
+    background: #FFFFFF;
+    border-color: #CBD5E1;
+}
+
+.mbs-delivery-option.selected {
+    border-color: var(--theme-primary, #7A1526);
+    background: #FFFBEB;
+}
+
+.mbs-delivery-option input[type="radio"] {
+    margin-top: 3px;
+    accent-color: var(--theme-primary, #7A1526);
+}
+
+.mbs-delivery-text strong {
+    display: block;
+    font-size: 0.94rem;
+    color: #0F172A;
+}
+
+.mbs-delivery-text small {
+    display: block;
+    font-size: 0.8rem;
+    color: #64748B;
+    margin-top: 2px;
+}
+
+/* ============================================================ */
+/* SUBJECTS CHECKBOX GRID                                       */
+/* ============================================================ */
+
+.mbs-subjects-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.mbs-subject-checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 10px;
+    padding: 12px 14px;
+    background: #FFFFFF;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.mbs-subject-checkbox-item:hover {
+    border-color: var(--theme-secondary, #F59E0B);
+}
+
+.mbs-subject-checkbox-item.checked {
+    border-color: var(--theme-primary, #7A1526);
+    background: #FEF3C7;
+}
+
+.mbs-subject-checkbox-item input[type="checkbox"] {
+    accent-color: var(--theme-primary, #7A1526);
+}
+
+.mbs-subject-checkbox-item span {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #1E293B;
+}
+
+/* ============================================================ */
+/* STEP 4: REVIEW & SUBMIT CARD                                 */
+/* ============================================================ */
+
+.mbs-review-card {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.mbs-review-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border-bottom: 1px solid #E2E8F0;
+    padding-bottom: 16px;
+    margin-bottom: 18px;
+}
+
+.mbs-review-header .review-icon {
+    color: var(--theme-primary, #7A1526);
+}
+
+.mbs-review-header strong {
+    font-size: 1.15rem;
+    color: #0F172A;
+    display: block;
+}
+
+.mbs-review-header small {
+    color: #64748B;
+    font-size: 0.84rem;
+}
+
+.mbs-review-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.review-label {
+    display: block;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #64748B;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 2px;
+}
+
+.mbs-review-grid strong {
+    font-size: 0.92rem;
+    color: #0F172A;
+}
+
+.text-gold {
+    color: #B45309 !important;
+}
+
+.mbs-review-endorsement {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+}
+
+.mbs-review-endorsement em {
+    display: block;
+    font-size: 0.88rem;
+    color: #334155;
+    margin-top: 4px;
+}
+
+.mbs-database-pipe-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: #EFF6FF;
+    border: 1px solid #BFDBFE;
+    color: #1E40AF;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+
+.mbs-database-pipe-note code {
+    background: rgba(30, 64, 175, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 700;
+}
+
+/* ============================================================ */
+/* STEP BUTTON ACTIONS                                          */
+/* ============================================================ */
+
+.mbs-step-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid #F1F5F9;
+    gap: 14px;
+}
+
+.mbs-step-actions.end-only {
+    justify-content: flex-end;
+}
+
+.mbs-btn-primary,
+.mbs-btn-submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, var(--theme-bg-start, #7A1526) 0%, var(--theme-bg-end, #580D1B) 100%);
+    color: #FFFFFF;
+    border: 1px solid var(--theme-secondary, #F59E0B);
+    padding: 13px 28px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 14px rgba(122, 21, 38, 0.25);
+}
+
+.mbs-btn-primary:hover,
+.mbs-btn-submit:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(122, 21, 38, 0.35);
+    background: linear-gradient(135deg, #8E1B2E 0%, #680F20 100%);
+}
+
+.mbs-btn-submit:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.mbs-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #FFFFFF;
+    color: #475569;
+    border: 1.5px solid #CBD5E1;
+    padding: 12px 22px;
+    border-radius: 10px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mbs-btn-secondary:hover:not(:disabled) {
+    background: #F8FAFC;
+    color: #0F172A;
+    border-color: #94A3B8;
+}
+
+.mbs-form-error-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #FEF2F2;
+    border: 1px solid #FCA5A5;
+    color: #991B1B;
+    padding: 12px 18px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+/* ============================================================ */
+/* SIDEBAR CARDS                                                */
+/* ============================================================ */
+
+.mbs-enrollment-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.mbs-sidebar-card {
+    background: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+}
+
+.mbs-sidebar-card-badge {
+    display: inline-block;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    background: #FEF3C7;
+    color: #92400E;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.mbs-sidebar-card h4 {
+    margin: 0 0 8px 0;
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #0F172A;
+}
+
+.mbs-sidebar-desc {
+    font-size: 0.84rem;
+    color: #64748B;
+    line-height: 1.5;
+    margin: 0 0 16px 0;
+}
+
+.mbs-subsidy-highlight {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: #FFFBEB;
+    border: 1.5px dashed #F59E0B;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 18px;
+}
+
+.subsidy-pct {
+    font-size: 1.45rem;
+    font-weight: 900;
+    color: #B45309;
+}
+
+.subsidy-text strong {
+    display: block;
+    font-size: 0.88rem;
+    color: #78350F;
+}
+
+.subsidy-text small {
+    display: block;
+    font-size: 0.74rem;
+    color: #92400E;
+}
+
+.mbs-subsidy-features {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.mbs-subsidy-features li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.82rem;
+    color: #334155;
+    line-height: 1.4;
+}
+
+.mbs-subsidy-features .check-icon {
+    color: #10B981;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.mbs-sidebar-contact-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.82rem;
+    color: #334155;
+    margin-bottom: 10px;
+    word-break: break-all;
+}
+
+.mbs-sidebar-contact-row svg {
+    color: var(--theme-primary, #7A1526);
+    flex-shrink: 0;
+}
+
+.mbs-sidebar-btn {
+    width: 100%;
+    margin-top: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #F1F5F9;
+    color: #1E293B;
+    border: 1px solid #CBD5E1;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mbs-sidebar-btn:hover {
+    background: #E2E8F0;
+}
+
+.mbs-payment-shortcut-card {
+    background: linear-gradient(135deg, #1E1B4B 0%, #0F172A 100%);
+    color: #FFFFFF;
+    border-color: rgba(245, 158, 11, 0.4);
+}
+
+.mbs-payment-shortcut-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+
+.mbs-payment-shortcut-header .shortcut-icon {
+    color: var(--theme-secondary, #F59E0B);
+}
+
+.mbs-payment-shortcut-header strong {
+    display: block;
+    font-size: 0.95rem;
+    color: #FFFFFF;
+}
+
+.mbs-payment-shortcut-header small {
+    color: #CBD5E1;
+    font-size: 0.78rem;
+}
+
+.mbs-sidebar-pay-btn {
+    width: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+    color: #78350F;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mbs-sidebar-pay-btn:hover {
+    background: linear-gradient(135deg, #FBBF24 0%, #F59E0B 100%);
+    transform: translateY(-1px);
+}
+
+/* ============================================================ */
+/* SUCCESS CONFIRMATION STATE                                   */
+/* ============================================================ */
+
+.mbs-enrollment-success-card {
+    background: #FFFFFF;
+    border: 2px solid #10B981;
+    border-radius: 20px;
+    padding: 42px;
+    box-shadow: 0 16px 40px rgba(16, 185, 129, 0.12);
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.mbs-success-banner {
+    text-align: center;
+    padding-bottom: 28px;
+    border-bottom: 1px solid #E2E8F0;
+    margin-bottom: 28px;
+}
+
+.mbs-success-icon-wrap {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: #DCFCE7;
+    color: #10B981;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px auto;
+}
+
+.mbs-success-tag {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: #065F46;
+    background: #D1FAE5;
+    padding: 4px 14px;
+    border-radius: 9999px;
+    margin-bottom: 12px;
+}
+
+.mbs-success-banner h2 {
+    font-size: 1.85rem;
+    font-weight: 900;
+    color: #0F172A;
+    margin: 0 0 10px 0;
+}
+
+.mbs-success-banner p {
+    font-size: 0.96rem;
+    color: #64748B;
+    margin: 0 0 20px 0;
+}
+
+.mbs-tracking-box {
+    background: #F8FAFC;
+    border: 2px dashed #CBD5E1;
+    border-radius: 14px;
+    padding: 16px 20px;
+    display: inline-block;
+    max-width: 480px;
+}
+
+.mbs-tracking-label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: #64748B;
+    margin-bottom: 6px;
+}
+
+.mbs-tracking-code-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.mbs-tracking-code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 1.45rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    color: var(--theme-primary, #7A1526);
+    background: #FFFFFF;
+    padding: 4px 14px;
+    border-radius: 8px;
+    border: 1px solid #CBD5E1;
+}
+
+.mbs-copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #0F172A;
+    color: #FFFFFF;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.mbs-copy-btn:hover {
+    background: #334155;
+}
+
+.mbs-tracking-hint {
+    display: block;
+    font-size: 0.74rem;
+    color: #64748B;
+    margin-top: 8px;
+}
+
+/* DOSSIER SUMMARY */
+.mbs-dossier-summary {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.mbs-dossier-summary h3 {
+    margin: 0 0 16px 0;
+    font-size: 1.12rem;
+    font-weight: 800;
+    color: #0F172A;
+}
+
+.mbs-dossier-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 18px;
+}
+
+.dossier-label {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #64748B;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 2px;
+}
+
+.mbs-dossier-item strong {
+    font-size: 0.92rem;
+    color: #0F172A;
+}
+
+.mbs-dossier-subjects {
+    border-top: 1px solid #E2E8F0;
+    padding-top: 14px;
+}
+
+.mbs-subject-tags-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.mbs-subject-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #FFFFFF;
+    border: 1px solid #CBD5E1;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #334155;
+}
+
+/* NEXT STEPS */
+.mbs-next-steps-card {
+    background: #FFFBEB;
+    border: 1.5px solid #FDE68A;
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 28px;
+}
+
+.mbs-next-steps-card h4 {
+    margin: 0 0 16px 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #78350F;
+}
+
+.mbs-steps-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.mbs-step-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+
+.step-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #F59E0B;
+    color: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.mbs-step-row strong {
+    display: block;
+    font-size: 0.92rem;
+    color: #78350F;
+    margin-bottom: 2px;
+}
+
+.mbs-step-row p {
+    margin: 0;
+    font-size: 0.82rem;
+    color: #92400E;
+    line-height: 1.45;
+}
+
+/* SUCCESS ACTIONS */
+.mbs-success-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.mbs-btn-payment-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    color: #FFFFFF;
+    border: none;
+    padding: 13px 26px;
+    border-radius: 10px;
+    font-size: 0.94rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+}
+
+.mbs-btn-payment-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4);
+}
+
+.mbs-btn-resend-action,
+.mbs-btn-print-action,
+.mbs-btn-home-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #FFFFFF;
+    color: #334155;
+    border: 1.5px solid #CBD5E1;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mbs-btn-resend-action:hover,
+.mbs-btn-print-action:hover,
+.mbs-btn-home-action:hover {
+    background: #F1F5F9;
+    border-color: #94A3B8;
+}
+
+.mbs-resend-status-box {
+    margin-top: 18px;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #065F46;
+    background: #D1FAE5;
+    padding: 10px 16px;
+    border-radius: 8px;
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* ============================================================ */
+/* RESPONSIVE BREAKPOINTS                                       */
+/* ============================================================ */
+
+@media (max-width: 960px) {
+    .mbs-enrollment-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .mbs-enrollment-sidebar {
+        order: 2;
+    }
+}
+
+@media (max-width: 640px) {
+    .mbs-enrollment-hero {
+        padding: 44px 16px 48px 16px;
+    }
+
+    .mbs-enrollment-card {
+        padding: 20px 16px;
+    }
+
+    .mbs-fields-row,
+    .mbs-subjects-grid,
+    .mbs-review-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .mbs-stepper-header {
+        padding: 12px 14px;
+    }
+
+    .step-text {
+        display: none;
+    }
+
+    .mbs-step-actions {
+        flex-direction: column-reverse;
+        width: 100%;
+    }
+
+    .mbs-btn-primary,
+    .mbs-btn-secondary,
+    .mbs-btn-submit {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Print stylesheet */
+@media print {
+    .mbs-enrollment-hero,
+    .mbs-next-steps-card,
+    .mbs-success-actions,
+    .epic-public-navbar,
+    .epic-public-footer {
+        display: none !important;
+    }
+
+    .mbs-enrollment-success-card {
+        border: 1px solid #000;
+        box-shadow: none;
+        padding: 0;
+    }
+}

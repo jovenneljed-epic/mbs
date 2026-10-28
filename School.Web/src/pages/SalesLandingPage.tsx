@@ -432,6 +432,12 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
             return;
         }
 
+        if (clean === "enrollment" || clean === "online-enrollment" || clean === "enroll") {
+            if (onNavigate) onNavigate("enrollment");
+            else window.location.href = "/enrollment";
+            return;
+        }
+
         if (clean === "client-login" || clean === "student-portal") {
             if (onNavigate) onNavigate("client-login");
             else window.location.href = "/client-login";
@@ -599,7 +605,7 @@ export const SalesLandingPage: React.FC<SalesLandingPageProps> = ({ onNavigate, 
             description: "Register for semester subjects, select class schedules, and verify curriculum load.",
             actionText: "Proceed to Enrollment",
             badge: "Active Term",
-            handler: () => navigateTo("client-login")
+            handler: () => navigateTo("enrollment")
         },
         {
             id: "payment",

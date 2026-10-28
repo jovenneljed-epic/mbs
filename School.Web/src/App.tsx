@@ -43,6 +43,7 @@ import SalesLandingPage from "./pages/SalesLandingPage";
 import { applyGlobalTheme } from "./services/landingPageContent";
 import AboutPage from "./pages/public/AboutPage";
 import ContactPage from "./pages/public/ContactPage";
+import OnlineEnrollmentPage from "./pages/public/OnlineEnrollmentPage";
 import MinistriesPage from "./pages/public/MinistriesPage";
 import EventsPage from "./pages/public/EventsPage";
 import AnnouncementsPage from "./pages/public/AnnouncementsPage";
@@ -186,6 +187,7 @@ type PublicPage =
     | "epic-system"
     | "learning"
     | "contact"
+    | "enrollment"
     | "business-home"
     | "platform"
     | "academy"
@@ -279,6 +281,7 @@ const PUBLIC_ROUTES: Record<PublicPage, string> = {
     "epic-system": "/epic-system",
     learning: "/learning",
     contact: "/contact",
+    enrollment: "/enrollment",
      platform: "/platform",
     academy: "/academy",
     store: "/store",
@@ -1587,6 +1590,12 @@ const App: React.FC = () => {
         normalizedPath ===
         PUBLIC_ROUTES.learning;
 
+    const isEnrollmentPage =
+        normalizedPath === PUBLIC_ROUTES.enrollment ||
+        normalizedPath === "/enrollment" ||
+        normalizedPath === "/online-enrollment" ||
+        normalizedPath === "/enroll";
+
     const isContactPage =
         normalizedPath === PUBLIC_ROUTES.contact ||
         normalizedPath === "/contact" ||
@@ -2175,6 +2184,17 @@ useCallback(
 
             case "learning":
                 navigatePublic("learning");
+                break;
+
+            case "enrollment":
+            case "online-enrollment":
+            case "enroll":
+                navigatePublic("enrollment");
+                try {
+                    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+                } catch {
+                    window.scrollTo(0, 0);
+                }
                 break;
 
             case "contact":
@@ -3566,6 +3586,23 @@ if (isThankYouPage) {
     if (isEpicLearningPage) {
         return (
             <EpicLearningPage
+                onNavigate={handlePublicNavigate}
+            />
+        );
+    }
+
+    // =====================================================
+    // PUBLIC CONTACT
+    // =====================================================
+
+    // =====================================================
+    // PUBLIC ONLINE ENROLLMENT
+    // =====================================================
+
+    if (isEnrollmentPage) {
+        return (
+            <OnlineEnrollmentPage
+                key="mbs-public-enrollment-page"
                 onNavigate={handlePublicNavigate}
             />
         );
