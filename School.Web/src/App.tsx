@@ -1111,6 +1111,11 @@ const isPublicPath = (
 
         PUBLIC_ROUTES.learning,
 
+        PUBLIC_ROUTES.enrollment,
+        "/enrollment",
+        "/online-enrollment",
+        "/enroll",
+
         PUBLIC_ROUTES.contact,
         "/contact",
         "/contact-us",
