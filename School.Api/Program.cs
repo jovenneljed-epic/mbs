@@ -839,6 +839,113 @@ static async Task SeedDatabaseAsync(
             context);
 
         // --------------------------------------------------------
+        // SEED STUDENT / CLIENT MEMBER ACCOUNTS (kezjed & student)
+        // --------------------------------------------------------
+        if (defaultCustId > 0)
+        {
+            var studentRole = await context.ClientRoles
+                .FirstOrDefaultAsync(cr => cr.RoleName == "CLIENT_MEMBER" || cr.RoleName == "STUDENT")
+                ?? await context.ClientRoles.OrderByDescending(cr => cr.ClientRoleId).FirstOrDefaultAsync();
+
+            if (studentRole != null)
+            {
+                // Ensure Member for kezjed
+                var kezjedMember = await context.Members
+                    .FirstOrDefaultAsync(m => m.MemberCode == "STD-2026-KEZJED");
+                if (kezjedMember == null)
+                {
+                    kezjedMember = new Member
+                    {
+                        CustomerId = defaultCustId,
+                        MemberCode = "STD-2026-KEZJED",
+                        FirstName = "Kezjed",
+                        LastName = "Solutions",
+                        Status = "ACTIVE",
+                        ContactNumber = "+63 917 123 4567",
+                        CreatedDate = DateTime.UtcNow
+                    };
+                    context.Members.Add(kezjedMember);
+                    await context.SaveChangesAsync();
+                }
+
+                // Ensure ClientMember for kezjed
+                var kezjedClient = await context.ClientMembers
+                    .FirstOrDefaultAsync(cm => cm.Username.ToLower() == "kezjed");
+                if (kezjedClient == null)
+                {
+                    kezjedClient = new ClientMember
+                    {
+                        CustomerId = defaultCustId,
+                        MemberId = kezjedMember.MemberId,
+                        ClientRoleId = studentRole.ClientRoleId,
+                        Username = "kezjed",
+                        Email = "kezjed@mbs.edu.ph",
+                        PasswordHash = BCrypt.Net.BCrypt.HashPassword("123456"),
+                        Status = "ACTIVE",
+                        IsActive = true,
+                        CreatedDate = DateTime.UtcNow
+                    };
+                    context.ClientMembers.Add(kezjedClient);
+                    await context.SaveChangesAsync();
+                }
+                else
+                {
+                    kezjedClient.IsActive = true;
+                    kezjedClient.Status = "ACTIVE";
+                    kezjedClient.PasswordHash = BCrypt.Net.BCrypt.HashPassword("123456");
+                    await context.SaveChangesAsync();
+                }
+
+                // Ensure Member for student demo
+                var demoMember = await context.Members
+                    .FirstOrDefaultAsync(m => m.MemberCode == "STD-2026-0001");
+                if (demoMember == null)
+                {
+                    demoMember = new Member
+                    {
+                        CustomerId = defaultCustId,
+                        MemberCode = "STD-2026-0001",
+                        FirstName = "Enrolled",
+                        LastName = "Student",
+                        Status = "ACTIVE",
+                        ContactNumber = "+63 917 123 4567",
+                        CreatedDate = DateTime.UtcNow
+                    };
+                    context.Members.Add(demoMember);
+                    await context.SaveChangesAsync();
+                }
+
+                // Ensure ClientMember for student demo
+                var demoClient = await context.ClientMembers
+                    .FirstOrDefaultAsync(cm => cm.Username.ToLower() == "student");
+                if (demoClient == null)
+                {
+                    demoClient = new ClientMember
+                    {
+                        CustomerId = defaultCustId,
+                        MemberId = demoMember.MemberId,
+                        ClientRoleId = studentRole.ClientRoleId,
+                        Username = "student",
+                        Email = "student@mbs.edu.ph",
+                        PasswordHash = BCrypt.Net.BCrypt.HashPassword("123456"),
+                        Status = "ACTIVE",
+                        IsActive = true,
+                        CreatedDate = DateTime.UtcNow
+                    };
+                    context.ClientMembers.Add(demoClient);
+                    await context.SaveChangesAsync();
+                }
+                else
+                {
+                    demoClient.IsActive = true;
+                    demoClient.Status = "ACTIVE";
+                    demoClient.PasswordHash = BCrypt.Net.BCrypt.HashPassword("123456");
+                    await context.SaveChangesAsync();
+                }
+            }
+        }
+
+        // --------------------------------------------------------
         // EVENTS SEEDING (MOBILE BIBLE SCHOOL & THEOLOGICAL SEMINARY)
         // --------------------------------------------------------
         if (!await context.Events.AnyAsync() && defaultCustId > 0)
