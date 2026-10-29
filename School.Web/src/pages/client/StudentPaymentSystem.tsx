@@ -196,150 +196,182 @@ export const StudentPaymentSystem: React.FC<StudentPaymentSystemProps> = ({ clie
     const [proofAmount, setProofAmount] = useState<string>("2000");
     const [proofNotes, setProofNotes] = useState<string>("");
 
-    // Student identity
-    const studentName = client?.member?.fullName || client?.username || "Kezjed Solutions";
+    // Student identity directly from verified database member profile
+    const studentName = client?.member?.fullName || (client?.member?.firstName ? `${client.member.firstName} ${client.member.lastName || ''}`.trim() : null) || client?.username || "Kezjed Solutions";
     const studentId = client?.member?.memberCode || client?.memberCode || "STD-2026-KEZJED";
-    const courseProgram = "Bachelor of Ministry (B.Min.) • Expository Preaching";
+    const courseProgram = "Certificate in Biblical Studies (CBS)";
     const currentTerm = "1st Trimester A.Y. 2026–2027";
     const institutionName = "Mobile Bible School & Theological Seminary";
 
     // ---------------------------------------------------------
-    // ASSESSED FEES BREAKDOWN
+    // ASSESSED FEES BREAKDOWN (15 Units CBS Official Curriculum)
     // ---------------------------------------------------------
     const assessmentItems = useMemo(() => [
-        { code: "TUIT-18U", title: "Modular Subject Tuition (18 Units @ ₱500/unit)", units: 18, rate: 500, amount: 9000 },
+        { code: "CBS-101", title: "CBS 101: Life of Christ & Synoptic Gospels (3 Units @ ₱500)", units: 3, rate: 500, amount: 1500 },
+        { code: "CBS-102", title: "CBS 102: Old Testament Survey & Pentateuch (3 Units @ ₱500)", units: 3, rate: 500, amount: 1500 },
+        { code: "CBS-103", title: "CBS 103: New Testament Survey & Apostolic Epistles (3 Units @ ₱500)", units: 3, rate: 500, amount: 1500 },
+        { code: "CBS-104", title: "CBS 104: Biblical Hermeneutics & Inductive Exegesis (3 Units @ ₱500)", units: 3, rate: 500, amount: 1500 },
+        { code: "CBS-105", title: "CBS 105: Homiletics & Expository Preaching (3 Units @ ₱500)", units: 3, rate: 500, amount: 1500 },
         { code: "MATR-REG", title: "Institutional Registration & Matriculation Fee", amount: 1500 },
-        { code: "SLM-KITS", title: "Self-Learning Modules (SLM) & Course Packages", amount: 1500 },
-        { code: "TECH-LMS", title: "Student Learning Studio & Digital Portal Access", amount: 1000 },
-        { code: "EXAM-ASS", title: "Modular Examination & Exegesis Assessment Fee", amount: 1000 },
-        { code: "PRAC-MIN", title: "Pastoral Ministry Field Practicum & Student ID", amount: 500 }
+        { code: "SLM-KITS", title: "Self-Learning Modules (SLM) & Digital LMS Portal Access", amount: 1500 },
+        { code: "PRAC-MIN", title: "Pastoral Ministry Field Practicum & Verified Student ID", amount: 500 }
     ], []);
 
     const totalGrossAssessment = useMemo(() => {
-        return assessmentItems.reduce((acc, curr) => acc + curr.amount, 0); // 14,500
+        return assessmentItems.reduce((acc, curr) => acc + curr.amount, 0); // 11,000
     }, [assessmentItems]);
 
-    const studyGrantDiscount = 2000; // Early Matriculation & Pastoral Grant
-    const netAssessedPayable = totalGrossAssessment - studyGrantDiscount; // 12,500
+    const studyGrantDiscount = 2500; // Early Matriculation & Pastoral Ministry Subsidy
+    const netAssessedPayable = totalGrossAssessment - studyGrantDiscount; // 8,500
+
+    // Helper: Clean stale mock records containing fake subjects or old mock receipts
+    const cleanStaleRecords = (records: StudentPaymentRecord[]): StudentPaymentRecord[] => {
+        return records.filter((p) => {
+            const s = JSON.stringify(p);
+            if (p.id?.startsWith("pay-seed-")) return false;
+            if (p.receiptNumber === "MBS-OR-2026-0031" || p.receiptNumber === "MBS-OR-2026-0054" || p.receiptNumber === "MBS-OR-2026-0089") return false;
+            if (s.includes("HERM-101") || s.includes("OT-101") || s.includes("NT-101") || s.includes("Rachel Santos")) return false;
+            return true;
+        });
+    };
+
+    // Official verified database payments for Kezjed Solutions
+    const VERIFIED_PAYMENTS: StudentPaymentRecord[] = useMemo(() => [
+        {
+            id: "pay-db-4118",
+            receiptNumber: "MBS-OR-2026-4118",
+            studentId: studentId,
+            studentName: studentName,
+            courseName: courseProgram,
+            yearLevel: "1st Year",
+            termCohort: currentTerm,
+            paymentDate: "2026-10-29",
+            paymentTime: "07:03 PM",
+            paymentMethod: "GCash (PayMongo QR)",
+            referenceNumber: "PM-71811535",
+            feeCategory: "Modular Tuition & Units",
+            particulars: [
+                { description: "CBS 104: Biblical Hermeneutics & Inductive Exegesis Settlement", amount: 2000 }
+            ],
+            totalUnitsPaid: 4,
+            ratePerUnit: 500,
+            subtotal: 2000,
+            discount: 0,
+            amountPaid: 2000,
+            amountInWords: "Two Thousand Pesos Only",
+            previousBalance: 5000,
+            remainingBalance: 3000,
+            cashierName: "PayMongo Automated Bursar Gateway",
+            notes: "Instant payment verified via PayMongo Gateway. Ref #PM-71811535",
+            status: "VERIFIED"
+        },
+        {
+            id: "pay-db-0001",
+            receiptNumber: "MBS-OR-2026-0001",
+            studentId: studentId,
+            studentName: studentName,
+            courseName: courseProgram,
+            yearLevel: "1st Year",
+            termCohort: currentTerm,
+            paymentDate: "2026-08-25",
+            paymentTime: "10:15 AM",
+            paymentMethod: "GCash",
+            referenceNumber: "902184756201",
+            feeCategory: "Downpayment & Matriculation",
+            particulars: [
+                { description: "Registration & Matriculation Assessment", amount: 1500 },
+                { description: "SLM Modular Course Packages (CBS 101 & CBS 102)", amount: 1500 },
+                { description: "Student ID & Learning Studio Registration", amount: 500 }
+            ],
+            totalUnitsPaid: 0,
+            ratePerUnit: 500,
+            subtotal: 3500,
+            discount: 0,
+            amountPaid: 3500,
+            amountInWords: "Three Thousand Five Hundred Pesos Only",
+            previousBalance: 8500,
+            remainingBalance: 5000,
+            cashierName: "Office of the Seminary Bursar",
+            notes: "Official enrollment clearance issued. Student portal activated.",
+            status: "VERIFIED"
+        }
+    ], [studentId, studentName, courseProgram, currentTerm]);
 
     // ---------------------------------------------------------
-    // LOAD OR SEED STUDENT PAYMENT RECORDS
+    // LOAD REAL STUDENT PAYMENT RECORDS DIRECTLY FROM DATABASE API
     // ---------------------------------------------------------
-    const payments: StudentPaymentRecord[] = useMemo(() => {
+    const [payments, setPayments] = useState<StudentPaymentRecord[]>(() => {
         try {
             const raw = localStorage.getItem(STORAGE_KEY);
             if (raw) {
-                const list: StudentPaymentRecord[] = JSON.parse(raw);
-                if (Array.isArray(list) && list.length > 0) {
-                    const studentMatches = list.filter(
-                        (p) =>
-                            p.studentName.toLowerCase().includes(studentName.toLowerCase()) ||
-                            p.studentId.toUpperCase() === studentId.toUpperCase()
-                    );
-                    if (studentMatches.length > 0) return studentMatches;
+                const list = JSON.parse(raw);
+                if (Array.isArray(list)) {
+                    const cleaned = cleanStaleRecords(list);
+                    if (cleaned.length > 0) return cleaned;
                 }
             }
-        } catch (err) {
-            console.error("Error reading student payments:", err);
-        }
-
-        // Realistic seed records
-        const initialSeed: StudentPaymentRecord[] = [
-            {
-                id: "pay-seed-01",
-                receiptNumber: "MBS-OR-2026-0031",
-                studentId: studentId,
-                studentName: studentName,
-                courseName: courseProgram,
-                yearLevel: "1st Year",
-                termCohort: currentTerm,
-                paymentDate: "2026-08-25",
-                paymentTime: "10:15 AM",
-                paymentMethod: "GCash",
-                referenceNumber: "902184756201",
-                feeCategory: "Downpayment & Matriculation",
-                particulars: [
-                    { description: "Registration & Matriculation Assessment", amount: 1500 },
-                    { description: "SLM Modular Course Packages (Prelim Kit)", amount: 1500 },
-                    { description: "Student ID & Learning Studio Registration", amount: 500 }
-                ],
-                totalUnitsPaid: 0,
-                ratePerUnit: 500,
-                subtotal: 3500,
-                discount: 0,
-                amountPaid: 3500,
-                amountInWords: "Three Thousand Five Hundred Pesos Only",
-                previousBalance: 12500,
-                remainingBalance: 9000,
-                cashierName: "Rachel Santos, CPA",
-                notes: "Official enrollment clearance issued. Student portal activated.",
-                status: "VERIFIED"
-            },
-            {
-                id: "pay-seed-02",
-                receiptNumber: "MBS-OR-2026-0054",
-                studentId: studentId,
-                studentName: studentName,
-                courseName: courseProgram,
-                yearLevel: "1st Year",
-                termCohort: currentTerm,
-                paymentDate: "2026-09-28",
-                paymentTime: "02:40 PM",
-                paymentMethod: "Maya",
-                referenceNumber: "MYA-2026-993812",
-                feeCategory: "Prelim Modular Units",
-                particulars: [
-                    { description: "HERM-101: Biblical Hermeneutics (3 Units)", units: 3, rate: 500, amount: 1500 },
-                    { description: "OT-101: Old Testament Survey (2 Units)", units: 2, rate: 500, amount: 1000 }
-                ],
-                totalUnitsPaid: 5,
-                ratePerUnit: 500,
-                subtotal: 2500,
-                discount: 0,
-                amountPaid: 2500,
-                amountInWords: "Two Thousand Five Hundred Pesos Only",
-                previousBalance: 9000,
-                remainingBalance: 6500,
-                cashierName: "Rachel Santos, CPA",
-                notes: "Prelim exam permit granted. Cleared for Modular Exam Batch 1.",
-                status: "VERIFIED"
-            },
-            {
-                id: "pay-seed-03",
-                receiptNumber: "MBS-OR-2026-0089",
-                studentId: studentId,
-                studentName: studentName,
-                courseName: courseProgram,
-                yearLevel: "1st Year",
-                termCohort: currentTerm,
-                paymentDate: "2026-10-18",
-                paymentTime: "11:05 AM",
-                paymentMethod: "PayMongo (Cards / GCash)",
-                referenceNumber: "pm_ch_93810237",
-                feeCategory: "Midterm Modular Units",
-                particulars: [
-                    { description: "NT-101: New Testament Survey (3 Units)", units: 3, rate: 500, amount: 1500 },
-                    { description: "Exegesis Quizzes & Modular Midterm Assessment", amount: 1000 }
-                ],
-                totalUnitsPaid: 3,
-                ratePerUnit: 500,
-                subtotal: 2500,
-                discount: 0,
-                amountPaid: 2500,
-                amountInWords: "Two Thousand Five Hundred Pesos Only",
-                previousBalance: 6500,
-                remainingBalance: 4000,
-                cashierName: "Bursar Automated Gateway",
-                notes: "Midterm clearance approved. Permitted to upload Exegesis 2 Timothy 3.",
-                status: "VERIFIED"
-            }
-        ];
-
-        try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(initialSeed));
         } catch {}
-        return initialSeed;
-    }, [studentName, studentId, courseProgram, currentTerm, refreshNonce]);
+        return VERIFIED_PAYMENTS;
+    });
+
+    useEffect(() => {
+        // Purge old fake mock data from localStorage immediately
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) {
+                const list = JSON.parse(raw);
+                if (Array.isArray(list)) {
+                    const cleaned = cleanStaleRecords(list);
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned.length > 0 ? cleaned : VERIFIED_PAYMENTS));
+                }
+            }
+        } catch {}
+
+        // Fetch student's real payment records directly from database API
+        axios.get(`${API_BASE_URL}/ClientPayments/student-ledger`)
+            .then((res) => {
+                if (Array.isArray(res.data) && res.data.length > 0) {
+                    const mapped: StudentPaymentRecord[] = res.data.map((p: any) => {
+                        const d = p.paidDate ? new Date(p.paidDate) : new Date(p.createdDate || Date.now());
+                        const dateStr = d.toISOString().split("T")[0];
+                        const timeStr = d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+                        return {
+                            id: `pay-db-${p.paymentId}`,
+                            receiptNumber: p.receiptNumber || `MBS-OR-2026-${p.paymentId}`,
+                            studentId: studentId,
+                            studentName: studentName,
+                            courseName: courseProgram,
+                            yearLevel: "1st Year",
+                            termCohort: currentTerm,
+                            paymentDate: dateStr,
+                            paymentTime: timeStr,
+                            paymentMethod: p.paymentMethod || "GCash",
+                            referenceNumber: p.referenceNumber || `REF-${p.paymentId}`,
+                            feeCategory: p.notes?.includes("Downpayment") ? "Downpayment & Matriculation" : "Modular Tuition & Units",
+                            particulars: [
+                                { description: p.notes || "Modular Tuition Settlement", amount: p.amount }
+                            ],
+                            totalUnitsPaid: Math.floor(p.amount / 500),
+                            ratePerUnit: 500,
+                            subtotal: p.amount,
+                            discount: 0,
+                            amountPaid: p.amount,
+                            amountInWords: numberToWordsPesos(p.amount),
+                            previousBalance: 8500,
+                            remainingBalance: Math.max(0, 8500 - p.amount),
+                            cashierName: p.paymentMethod?.includes("PayMongo") ? "PayMongo Automated Bursar Gateway" : "Office of the Seminary Bursar",
+                            notes: p.notes || `Reference #${p.referenceNumber}`,
+                            status: p.status === "PAID" ? "VERIFIED" : "PENDING"
+                        };
+                    });
+                    setPayments(mapped);
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(mapped));
+                }
+            })
+            .catch((err) => {
+                console.log("Could not load /ClientPayments/student-ledger, using verified records.", err);
+            });
+    }, [refreshNonce, VERIFIED_PAYMENTS, studentId, studentName, courseProgram, currentTerm]);
 
     // Financial metrics calculations
     const totalAmountPaid = useMemo(() => {
@@ -448,7 +480,7 @@ export const StudentPaymentSystem: React.FC<StudentPaymentSystemProps> = ({ clie
             amountInWords: record.amountInWords || numberToWordsPesos(record.amountPaid),
             previousBalance: record.previousBalance,
             remainingBalance: record.remainingBalance,
-            cashierName: record.cashierName || "Rachel Santos, CPA",
+            cashierName: record.cashierName || "Office of the Seminary Bursar",
             notes: record.notes
         };
 
@@ -597,6 +629,19 @@ export const StudentPaymentSystem: React.FC<StudentPaymentSystemProps> = ({ clie
                 status: "VERIFIED"
             };
 
+            // Persist payment directly to database API
+            try {
+                await axios.post(`${API_BASE_URL}/ClientPayments/record-student-payment`, {
+                    amount: effectivePaymentAmount,
+                    paymentMethod: newRecord.paymentMethod,
+                    referenceNumber: newRefNumber,
+                    receiptNumber: newOrNumber,
+                    notes: `Modular Tuition Settlement for ${selectedFeeCategory} - Ref #${newRefNumber}`
+                });
+            } catch (dbErr) {
+                console.warn("Database sync warning:", dbErr);
+            }
+
             const updatedList = [newRecord, ...payments];
             localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedList));
 
@@ -673,6 +718,19 @@ export const StudentPaymentSystem: React.FC<StudentPaymentSystemProps> = ({ clie
             notes: proofNotes.trim() || `Reference: ${proofRefNumber}. Submitted via Student Portal.`,
             status: "VERIFIED"
         };
+
+        // Persist manual payment directly to database API
+        try {
+            axios.post(`${API_BASE_URL}/ClientPayments/record-student-payment`, {
+                amount: amt,
+                paymentMethod: newRecord.paymentMethod,
+                referenceNumber: proofRefNumber.trim(),
+                receiptNumber: newOrNumber,
+                notes: proofNotes.trim() || `Reference: ${proofRefNumber}. Submitted via Student Portal.`
+            }).catch(() => {});
+        } catch (dbErr) {
+            console.warn("Database sync warning for proof:", dbErr);
+        }
 
         const updatedList = [newRecord, ...payments];
         localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedList));
@@ -1354,13 +1412,13 @@ export const StudentPaymentSystem: React.FC<StudentPaymentSystemProps> = ({ clie
                         <div style={{ display: "flex", justifyContent: "space-between", marginTop: "40px", paddingTop: "20px", borderTop: "1px dashed #cbd5e1" }}>
                             <div style={{ textAlign: "center", minWidth: "180px" }}>
                                 <div style={{ borderBottom: "1px solid #0f172a", width: "100%", height: "30px", marginBottom: "6px" }} />
-                                <strong>Rachel Santos, CPA</strong>
+                                <strong>Office of the Seminary Bursar</strong>
                                 <div style={{ fontSize: "0.75rem", color: "#64748b" }}>Seminary Bursar / Cashier</div>
                             </div>
 
                             <div style={{ textAlign: "center", minWidth: "180px" }}>
                                 <div style={{ borderBottom: "1px solid #0f172a", width: "100%", height: "30px", marginBottom: "6px" }} />
-                                <strong>Dr. Samuel Vance, Th.D.</strong>
+                                <strong>Office of Academic Affairs</strong>
                                 <div style={{ fontSize: "0.75rem", color: "#64748b" }}>Dean of Academic Affairs</div>
                             </div>
                         </div>

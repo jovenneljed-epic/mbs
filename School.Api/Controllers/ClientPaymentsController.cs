@@ -690,6 +690,100 @@ namespace School.Api.Controllers
                 : value.Trim();
         }
 
+                // =========================================================
+        // GET REAL STUDENT LEDGER PAYMENTS FROM DATABASE
+        // GET: api/ClientPayments/student-ledger
+        // =========================================================
+        [AllowAnonymous]
+        [HttpGet("student-ledger")]
+        public async Task<IActionResult> GetStudentLedger()
+        {
+            var payments = await _context.Payments
+                .AsNoTracking()
+                .OrderByDescending(p => p.PaidDate ?? p.CreatedDate)
+                .Select(p => new
+                {
+                    paymentId = p.PaymentId,
+                    amount = p.Amount,
+                    paymentMethod = p.PaymentMethod,
+                    status = p.Status,
+                    referenceNumber = p.ReferenceNumber,
+                    receiptNumber = p.ReceiptNumber,
+                    invoiceNumber = p.InvoiceNumber,
+                    paidDate = p.PaidDate,
+                    notes = p.Notes,
+                    createdDate = p.CreatedDate
+                })
+                .ToListAsync();
+
+            return Ok(payments);
+        }
+
+        // =========================================================
+        // RECORD REAL STUDENT PAYMENT INTO DATABASE
+        // POST: api/ClientPayments/record-student-payment
+        // =========================================================
+        [AllowAnonymous]
+        [HttpPost("record-student-payment")]
+        public async Task<IActionResult> RecordStudentPayment([FromBody] RecordStudentPaymentDto dto)
+        {
+            if (dto.Amount <= 0)
+            {
+                return BadRequest(new { success = false, message = "Amount must be greater than zero." });
+            }
+
+            var sub = await _context.Subscriptions.FirstOrDefaultAsync(s => s.CustomerId == 1);
+            int subId = sub?.SubscriptionId ?? 2;
+
+            var orNumber = dto.ReceiptNumber;
+            if (string.IsNullOrWhiteSpace(orNumber))
+            {
+                var rand = new Random().Next(1000, 9999);
+                orNumber = $"MBS-OR-2026-{rand}";
+            }
+
+            var payment = new Payment
+            {
+                SubscriptionId = subId,
+                Amount = dto.Amount,
+                Currency = "PHP",
+                PaymentMethod = dto.PaymentMethod ?? "GCash",
+                Status = "PAID",
+                ReferenceNumber = dto.ReferenceNumber,
+                ReceiptNumber = orNumber,
+                InvoiceNumber = $"INV-{DateTime.UtcNow:yyyyMMddHHmmss}",
+                PaidDate = DateTime.UtcNow,
+                Notes = dto.Notes ?? "Student Modular Tuition Settlement",
+                CreatedDate = DateTime.UtcNow
+            };
+
+            _context.Payments.Add(payment);
+
+            var income = new Income
+            {
+                CustomerId = 1,
+                Category = "Tuition & Fees",
+                Description = dto.Notes ?? $"Tuition Settlement - {orNumber}",
+                Amount = dto.Amount,
+                IncomeDate = DateTime.UtcNow,
+                PaymentMethod = dto.PaymentMethod ?? "Online",
+                ReferenceNumber = dto.ReferenceNumber,
+                RecordedBy = "Office of the Seminary Bursar",
+                RecordedDate = DateTime.UtcNow
+            };
+            _context.Incomes.Add(income);
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                success = true,
+                paymentId = payment.PaymentId,
+                receiptNumber = orNumber,
+                amount = payment.Amount
+            });
+        }
+
         private static DateTime
             CalculateBillingPeriodEnd(
                 string? billingCycle,
@@ -736,4 +830,13 @@ namespace School.Api.Controllers
 
         public string? Notes { get; set; }
     }
+    public class RecordStudentPaymentDto
+    {
+        public decimal Amount { get; set; }
+        public string? PaymentMethod { get; set; }
+        public string? ReferenceNumber { get; set; }
+        public string? ReceiptNumber { get; set; }
+        public string? Notes { get; set; }
+    }
+
 }
