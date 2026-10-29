@@ -839,7 +839,7 @@ static async Task SeedDatabaseAsync(
             context);
 
         // --------------------------------------------------------
-        // SEED STUDENT / CLIENT MEMBER ACCOUNTS (kezjed & student)
+        // SEED STUDENT / CLIENT MEMBER ACCOUNTS (student demo)
         // --------------------------------------------------------
         if (defaultCustId > 0)
         {
@@ -849,53 +849,6 @@ static async Task SeedDatabaseAsync(
 
             if (studentRole != null)
             {
-                // Ensure Member for kezjed
-                var kezjedMember = await context.Members
-                    .FirstOrDefaultAsync(m => m.MemberCode == "STD-2026-KEZJED");
-                if (kezjedMember == null)
-                {
-                    kezjedMember = new Member
-                    {
-                        CustomerId = defaultCustId,
-                        MemberCode = "STD-2026-KEZJED",
-                        FirstName = "Kezjed",
-                        LastName = "Solutions",
-                        Status = "ACTIVE",
-                        ContactNumber = "+63 917 123 4567",
-                        CreatedDate = DateTime.UtcNow
-                    };
-                    context.Members.Add(kezjedMember);
-                    await context.SaveChangesAsync();
-                }
-
-                // Ensure ClientMember for kezjed
-                var kezjedClient = await context.ClientMembers
-                    .FirstOrDefaultAsync(cm => cm.Username.ToLower() == "kezjed");
-                if (kezjedClient == null)
-                {
-                    kezjedClient = new ClientMember
-                    {
-                        CustomerId = defaultCustId,
-                        MemberId = kezjedMember.MemberId,
-                        ClientRoleId = studentRole.ClientRoleId,
-                        Username = "kezjed",
-                        Email = "kezjed@mbs.edu.ph",
-                        PasswordHash = BCrypt.Net.BCrypt.HashPassword("123456"),
-                        Status = "ACTIVE",
-                        IsActive = true,
-                        CreatedDate = DateTime.UtcNow
-                    };
-                    context.ClientMembers.Add(kezjedClient);
-                    await context.SaveChangesAsync();
-                }
-                else
-                {
-                    kezjedClient.IsActive = true;
-                    kezjedClient.Status = "ACTIVE";
-                    kezjedClient.PasswordHash = BCrypt.Net.BCrypt.HashPassword("123456");
-                    await context.SaveChangesAsync();
-                }
-
                 // Ensure Member for student demo
                 var demoMember = await context.Members
                     .FirstOrDefaultAsync(m => m.MemberCode == "STD-2026-0001");

@@ -373,11 +373,11 @@ namespace School.Api.Controllers
                     .Include(u => u.Member)
                     .FirstOrDefaultAsync(u => u.Username != null && u.Username.ToLower() == loginLower);
 
-                if (existingUser != null && (VerifyPassword(request.Password, existingUser.PasswordHash) || request.Password == "123456" || request.Password == "kezjed201610@@"))
+                if (existingUser != null && (VerifyPassword(request.Password, existingUser.PasswordHash) || request.Password == "123456"))
                 {
                     clientMember = await EnsureStudentAccountAsync(existingUser.Username ?? loginLower, request.Password);
                 }
-                else if (loginLower == "kezjed" || loginLower == "student")
+                else if (loginLower == "student")
                 {
                     // Auto-provision primary student / demo accounts
                     clientMember = await EnsureStudentAccountAsync(loginLower, request.Password);
@@ -399,10 +399,10 @@ namespace School.Api.Controllers
 
             bool passwordMatches = VerifyPassword(request.Password, clientMember.PasswordHash);
 
-            // Special fallback for kezjed/student accounts
-            if (!passwordMatches && (loginLower == "kezjed" || loginLower == "student"))
+            // Special fallback for student demo account
+            if (!passwordMatches && loginLower == "student")
             {
-                if (request.Password == "123456" || request.Password == "kezjed201610@@" || request.Password == "admin123")
+                if (request.Password == "123456" || request.Password == "admin123")
                 {
                     passwordMatches = true;
                     clientMember.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
@@ -976,7 +976,7 @@ namespace School.Api.Controllers
                 return true;
             }
 
-            if (password == "student123" || password == "admin123" || password == "123456" || password == "kezjed201610@@")
+            if (password == "student123" || password == "admin123" || password == "123456")
             {
                 return true;
             }
@@ -1263,7 +1263,7 @@ namespace School.Api.Controllers
                 .WriteToken(token);
         }
         // =========================================================
-        // ENSURE / AUTO-PROVISION STUDENT ACCOUNT (kezjed / student)
+        // ENSURE / AUTO-PROVISION STUDENT ACCOUNT (student)
         // =========================================================
 
         private async Task<ClientMember?> EnsureStudentAccountAsync(
@@ -1308,9 +1308,9 @@ namespace School.Api.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            var memberCode = usernameLower == "kezjed" ? "STD-2026-KEZJED" : "STD-2026-0001";
+            var memberCode = "STD-2026-0001";
             var member = await _context.Members
-                .FirstOrDefaultAsync(m => m.MemberCode == memberCode || (m.ContactNumber == "+63 917 123 4567" && m.FirstName == (usernameLower == "kezjed" ? "Kezjed" : "Enrolled")));
+                .FirstOrDefaultAsync(m => m.MemberCode == memberCode || (m.ContactNumber == "+63 917 123 4567" && m.FirstName == "Enrolled"));
 
             if (member == null)
             {
@@ -1318,8 +1318,8 @@ namespace School.Api.Controllers
                 {
                     CustomerId = customer.CustomerId,
                     MemberCode = memberCode,
-                    FirstName = usernameLower == "kezjed" ? "Kezjed" : "Enrolled",
-                    LastName = usernameLower == "kezjed" ? "Solutions" : "Student",
+                    FirstName = "Enrolled",
+                    LastName = "Student",
                     Status = "ACTIVE",
                     ContactNumber = "+63 917 123 4567",
                     CreatedDate = DateTime.UtcNow
