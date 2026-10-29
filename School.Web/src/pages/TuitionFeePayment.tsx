@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import {
     Receipt,
     DollarSign,
@@ -14,7 +14,9 @@ import {
     Wallet,
     BookOpen,
     Eye,
-    Layers
+    Layers,
+    RefreshCw,
+    Trash2
 } from "lucide-react";
 import { API_BASE_URL } from "../config";
 import { courseCurriculumService } from "../services/courseCurriculumService";
@@ -155,129 +157,17 @@ function numberToWordsPesos(amount: number): string {
     return result + " Only";
 }
 
-/* Initial realistic seminary tuition payment records */
-const DEFAULT_PAYMENT_RECORDS: StudentPaymentRecord[] = [
-    {
-        id: "pay-1",
-        receiptNumber: "MBS-OR-2026-0041",
-        studentId: "MBS-2026-0012",
-        studentName: "Joshua Mark Bautista",
-        courseId: "bmin",
-        courseName: "Bachelor of Ministry (B.Min.)",
-        yearLevel: "1st Year",
-        termCohort: "1st Trimester 2026",
-        paymentDate: new Date().toISOString().split("T")[0],
-        paymentTime: "09:30 AM",
-        paymentMethod: "GCash",
-        referenceNumber: "902184756201",
-        feeCategory: "Tuition & Subject Units",
-        subjectsPaid: [
-            { code: "HERM-101", title: "Biblical Hermeneutics", units: 3, ratePerUnit: 500, amount: 1500 },
-            { code: "THEO-101", title: "Systematic Theology 1", units: 3, ratePerUnit: 500, amount: 1500 }
-        ],
-        totalUnitsPaid: 6,
-        ratePerUnit: 500,
-        subtotal: 3000,
-        scholarshipDiscount: 0,
-        amountPaid: 3000,
-        amountInWords: "Three Thousand Pesos Only",
-        previousBalance: 6000,
-        remainingBalance: 3000,
-        cashierName: "Office of the Seminary Bursar",
-        notes: "Full payment for Prelim & Midterm Units (Hermeneutics & Systematic Theo)",
-        status: "PAID"
-    },
-    {
-        id: "pay-2",
-        receiptNumber: "MBS-OR-2026-0042",
-        studentId: "MBS-2026-0015",
-        studentName: "Hannah Grace Alcantara",
-        courseId: "tha",
-        courseName: "Associate in Theology (Th.A.)",
-        yearLevel: "1st Year",
-        termCohort: "1st Trimester 2026",
-        paymentDate: new Date().toISOString().split("T")[0],
-        paymentTime: "11:15 AM",
-        paymentMethod: "Cash",
-        referenceNumber: "CSH-2026-089",
-        feeCategory: "Tuition & Subject Units",
-        subjectsPaid: [
-            { code: "OT-101", title: "Old Testament Survey", units: 3, ratePerUnit: 500, amount: 1500 },
-            { code: "NT-101", title: "New Testament Survey", units: 3, ratePerUnit: 500, amount: 1500 }
-        ],
-        totalUnitsPaid: 6,
-        ratePerUnit: 500,
-        subtotal: 3000,
-        scholarshipDiscount: 500,
-        amountPaid: 2500,
-        amountInWords: "Two Thousand Five Hundred Pesos Only",
-        previousBalance: 4000,
-        remainingBalance: 1500,
-        cashTendered: 3000,
-        changeGiven: 500,
-        cashierName: "Office of the Seminary Bursar",
-        notes: "Granted ₱500 Pastoral Family Discount. Balance ₱1,500 due before Finals.",
-        status: "PAID"
-    },
-    {
-        id: "pay-3",
-        receiptNumber: "MBS-OR-2026-0043",
-        studentId: "MBS-2026-0018",
-        studentName: "Pastor Timothy Caleb Rivera",
-        courseId: "bmin",
-        courseName: "Bachelor of Ministry (B.Min.)",
-        yearLevel: "2nd Year",
-        termCohort: "Modular Weekend Cohort",
-        paymentDate: new Date(Date.now() - 86400000 * 2).toISOString().split("T")[0],
-        paymentTime: "02:45 PM",
-        paymentMethod: "Bank Transfer (BDO)",
-        referenceNumber: "BDO-DEP-994821",
-        feeCategory: "Tuition & Subject Units",
-        subjectsPaid: [
-            { code: "MIN-101", title: "Pastoral Ministry & Leadership", units: 3, ratePerUnit: 500, amount: 1500 },
-            { code: "LANG-101", title: "Biblical Greek & Hebrew Basics", units: 3, ratePerUnit: 500, amount: 1500 },
-            { code: "HIST-101", title: "Church History & Apostolic Era", units: 3, ratePerUnit: 500, amount: 1500 }
-        ],
-        totalUnitsPaid: 9,
-        ratePerUnit: 500,
-        subtotal: 4500,
-        scholarshipDiscount: 0,
-        amountPaid: 4500,
-        amountInWords: "Four Thousand Five Hundred Pesos Only",
-        previousBalance: 4500,
-        remainingBalance: 0,
-        cashierName: "Office of the Seminary Bursar",
-        notes: "Full payment of entire semester load (9 units). Account fully cleared.",
-        status: "PAID"
-    },
-    {
-        id: "pay-4",
-        receiptNumber: "MBS-OR-2026-0044",
-        studentId: "MBS-2026-0021",
-        studentName: "Ezekiel David Ramos",
-        courseId: "cbs",
-        courseName: "Certificate in Biblical Studies (CBS)",
-        yearLevel: "1st Year",
-        termCohort: "Online Cohort 2026",
-        paymentDate: new Date(Date.now() - 86400000 * 4).toISOString().split("T")[0],
-        paymentTime: "10:00 AM",
-        paymentMethod: "Pastoral Scholarship / Study Grant",
-        referenceNumber: "SCH-PROV-7701",
-        feeCategory: "Matriculation / Registration",
-        subjectsPaid: [],
-        totalUnitsPaid: 0,
-        ratePerUnit: 500,
-        subtotal: 2000,
-        scholarshipDiscount: 2000,
-        amountPaid: 2000,
-        amountInWords: "Two Thousand Pesos Only",
-        previousBalance: 2000,
-        remainingBalance: 0,
-        cashierName: "Office of the Seminary Bursar",
-        notes: "100% Sponsored by Northern Luzon Missions Board Grant.",
-        status: "PAID"
-    }
-];
+/* Authentic Seminary Tuition Payments (Zero Mock Data) */
+// Helper: Check if a record is from legacy hardcoded mock seeds
+const isMockRecord = (p: any): boolean => {
+    if (!p) return true;
+    const s = JSON.stringify(p);
+    if (p.id === "pay-1" || p.id === "pay-2" || p.id === "pay-3" || p.id === "pay-4" || p.id?.startsWith("pay-seed-")) return true;
+    if (s.includes("Joshua Mark Bautista") || s.includes("Hannah Grace Alcantara") || s.includes("Timothy Caleb Rivera") || s.includes("Ezekiel David Ramos")) return true;
+    if (s.includes("MBS-OR-2026-0041") || s.includes("MBS-OR-2026-0042") || s.includes("MBS-OR-2026-0043") || s.includes("MBS-OR-2026-0044")) return true;
+    if (s.includes("Rachel Santos")) return true;
+    return false;
+};
 
 const normalizePaymentRecord = (p: any): StudentPaymentRecord => {
     let subjectsPaid: PaidSubjectItem[] = [];
@@ -347,21 +237,28 @@ const getToken = (): string | null => {
 };
 
 export const TuitionFeePayment: React.FC = () => {
-    // Payment records state
+    // Payment records state (Zero fake records)
     const [payments, setPayments] = useState<StudentPaymentRecord[]>(() => {
         try {
             const raw = localStorage.getItem(STORAGE_KEY);
             if (raw) {
                 const parsed = JSON.parse(raw);
                 if (Array.isArray(parsed)) {
-                    return parsed.map(normalizePaymentRecord);
+                    const cleaned = parsed.filter(p => !isMockRecord(p)).map(normalizePaymentRecord);
+                    if (cleaned.length !== parsed.length) {
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
+                    }
+                    return cleaned;
                 }
             }
         } catch (e) {
             console.error("Failed to parse cached tuition payments:", e);
         }
-        return DEFAULT_PAYMENT_RECORDS.map(normalizePaymentRecord);
+        return [];
     });
+
+    const [isLoading, setIsLoading] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
     // Academic Registry
     const [students, setStudents] = useState<Member[]>([]);
@@ -380,7 +277,7 @@ export const TuitionFeePayment: React.FC = () => {
     // New Payment Form State
     const [formStudentId, setFormStudentId] = useState("");
     const [formStudentName, setFormStudentName] = useState("");
-    const [formCourseName, setFormCourseName] = useState("");
+    const [formCourseName, setFormCourseName] = useState("Bachelor of Ministry (B.Min.)");
     const [formYearLevel, setFormYearLevel] = useState("1st Year");
     const [formTermCohort, setFormTermCohort] = useState("1st Trimester 2026");
     const [formFeeCategory, setFormFeeCategory] = useState<FeeCategory>("Tuition & Subject Units");
@@ -394,6 +291,162 @@ export const TuitionFeePayment: React.FC = () => {
     const [formCashierName, setFormCashierName] = useState("Office of the Seminary Bursar");
     const [formNotes, setFormNotes] = useState("");
 
+    // Load authentic database payments and students from backend API
+    const loadRealData = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const baseUrl = API_BASE_URL.replace(/\/+$/, "");
+            const token = getToken();
+            const headers = new Headers();
+            if (token) headers.set("Authorization", `Bearer ${token}`);
+
+            // 1. Load curriculum courses
+            const loadedCourses = courseCurriculumService.getCourses();
+            setCourses(loadedCourses);
+
+            // 2. Load real students from database
+            let memberList: Member[] = [];
+            try {
+                const studResp = await fetch(`${baseUrl}/ClientPayments/student-list`);
+                if (studResp.ok) {
+                    const data = await studResp.json();
+                    if (Array.isArray(data)) memberList = data;
+                }
+            } catch (err) {
+                console.warn("Could not load /ClientPayments/student-list:", err);
+            }
+
+            if (memberList.length === 0) {
+                try {
+                    const resp = await fetch(`${baseUrl}/Members`, { headers });
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        const list = Array.isArray(data) ? data : data.members || data.data || [];
+                        memberList = list;
+                    }
+                } catch {}
+            }
+            setStudents(memberList);
+
+            // 3. Load real database payments
+            const payResp = await fetch(`${baseUrl}/ClientPayments/student-ledger`);
+            if (payResp.ok) {
+                const payData = await payResp.json();
+                if (Array.isArray(payData)) {
+                    const realList: StudentPaymentRecord[] = payData.map((p: any) => {
+                        let studentId = "STD-GENERAL";
+                        let studentName = "Enrolled Student";
+                        let courseName = "Bachelor of Ministry (B.Min.)";
+                        let yearLevel = "1st Year";
+                        let termCohort = "1st Trimester 2026";
+                        let feeCategory = "Tuition & Subject Units";
+                        let cashierName = "Office of the Seminary Bursar";
+                        let remarks = p.notes || "";
+                        let subjectsPaid: PaidSubjectItem[] = [];
+
+                        if (p.notes && typeof p.notes === "string" && p.notes.trim().startsWith("{")) {
+                            try {
+                                const parsed = JSON.parse(p.notes);
+                                if (parsed.studentId) studentId = parsed.studentId;
+                                if (parsed.studentName) studentName = parsed.studentName;
+                                if (parsed.courseName) courseName = parsed.courseName;
+                                if (parsed.yearLevel) yearLevel = parsed.yearLevel;
+                                if (parsed.termCohort) termCohort = parsed.termCohort;
+                                if (parsed.feeCategory) feeCategory = parsed.feeCategory;
+                                if (parsed.cashierName) cashierName = parsed.cashierName;
+                                if (parsed.remarks) remarks = parsed.remarks;
+                                if (parsed.particulars) {
+                                    const pt = typeof parsed.particulars === "string" ? JSON.parse(parsed.particulars) : parsed.particulars;
+                                    if (Array.isArray(pt) && pt.length > 0) {
+                                        subjectsPaid = pt.map((item: any) => ({
+                                            code: item.code || "CBS-MOD",
+                                            title: item.title || item.description || "Tuition Unit",
+                                            units: item.units || 3,
+                                            ratePerUnit: item.ratePerUnit || item.rate || 500,
+                                            amount: item.amount || (p.amount || 0)
+                                        }));
+                                    }
+                                }
+                            } catch {}
+                        } else if (p.notes) {
+                            remarks = p.notes;
+                            const matched = memberList.find(m =>
+                                (m.memberCode && p.notes.includes(m.memberCode)) ||
+                                (m.lastName && p.notes.includes(m.lastName))
+                            );
+                            if (matched) {
+                                studentId = matched.memberCode || `MBS-${matched.memberId}`;
+                                studentName = [matched.firstName, matched.lastName].filter(Boolean).join(" ");
+                                if (matched.ministry) courseName = matched.ministry;
+                            }
+                        }
+
+                        if (subjectsPaid.length === 0) {
+                            subjectsPaid = [
+                                {
+                                    code: "CBS-MOD",
+                                    title: remarks || feeCategory,
+                                    units: Math.floor(p.amount / 500) || 3,
+                                    ratePerUnit: 500,
+                                    amount: p.amount
+                                }
+                            ];
+                        }
+
+                        const d = p.paidDate ? new Date(p.paidDate) : new Date(p.createdDate || Date.now());
+                        const dateStr = d.toISOString().split("T")[0];
+                        const timeStr = d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+
+                        return {
+                            id: `pay-db-${p.paymentId}`,
+                            receiptNumber: p.receiptNumber || `MBS-OR-2026-${p.paymentId}`,
+                            studentId,
+                            studentName,
+                            courseName,
+                            yearLevel,
+                            termCohort,
+                            paymentDate: dateStr,
+                            paymentTime: timeStr,
+                            paymentMethod: p.paymentMethod || "Cash",
+                            referenceNumber: p.referenceNumber,
+                            feeCategory,
+                            subjectsPaid,
+                            particulars: subjectsPaid.map(s => ({
+                                code: s.code,
+                                description: `${s.code} - ${s.title}`,
+                                units: s.units,
+                                rate: s.ratePerUnit,
+                                amount: s.amount
+                            })),
+                            totalUnitsPaid: subjectsPaid.reduce((acc, s) => acc + (s.units || 0), 0),
+                            ratePerUnit: 500,
+                            subtotal: p.amount,
+                            scholarshipDiscount: 0,
+                            amountPaid: p.amount,
+                            amountInWords: numberToWordsPesos(p.amount),
+                            previousBalance: 0,
+                            remainingBalance: 0,
+                            cashierName,
+                            notes: remarks,
+                            status: p.status === "VOID" ? "VOID" : "PAID"
+                        };
+                    });
+
+                    setPayments(realList);
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(realList));
+                }
+            }
+        } catch (err) {
+            console.error("Failed to load authentic data:", err);
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        void loadRealData();
+    }, [loadRealData]);
+
     // Synchronize across tabs or local storage changes
     useEffect(() => {
         const handleSync = () => {
@@ -402,7 +455,7 @@ export const TuitionFeePayment: React.FC = () => {
                 if (raw) {
                     const parsed = JSON.parse(raw);
                     if (Array.isArray(parsed)) {
-                        setPayments(parsed.map(normalizePaymentRecord));
+                        setPayments(parsed.filter(p => !isMockRecord(p)).map(normalizePaymentRecord));
                     }
                 }
             } catch {}
@@ -418,37 +471,12 @@ export const TuitionFeePayment: React.FC = () => {
     // Save to LocalStorage
     useEffect(() => {
         try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(payments));
+            const cleanList = payments.filter(p => !isMockRecord(p));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanList));
         } catch (e) {
             console.error("Failed to save tuition payments to localStorage:", e);
         }
     }, [payments]);
-
-    // Load courses and enrolled students from backend/curriculum service
-    useEffect(() => {
-        const loadRegistry = async () => {
-            try {
-                const loadedCourses = courseCurriculumService.getCourses();
-                setCourses(loadedCourses);
-
-                const baseUrl = API_BASE_URL.replace(/\/+$/, "");
-                const token = getToken();
-                const headers = new Headers();
-                if (token) headers.set("Authorization", `Bearer ${token}`);
-
-                const resp = await fetch(`${baseUrl}/Members`, { headers });
-                if (resp.ok) {
-                    const data = await resp.json();
-                    const list = Array.isArray(data) ? data : data.members || data.data || [];
-                    setStudents(list);
-                }
-            } catch (err) {
-                console.error("Failed to load students in Tuition Module:", err);
-            }
-        };
-
-        void loadRegistry();
-    }, []);
 
     // Helper: Map all subjects from curriculum
     const allSubjects = useMemo(() => {
@@ -461,7 +489,7 @@ export const TuitionFeePayment: React.FC = () => {
         return Array.from(map.values());
     }, [courses]);
 
-    // Calculate Student Financial Summary across the entire registry
+    // Calculate Student Financial Summary across real registered students (Zero Fake Defaults)
     const studentFinancials = useMemo(() => {
         const map = new Map<string, {
             name: string;
@@ -474,12 +502,12 @@ export const TuitionFeePayment: React.FC = () => {
             balance: number;
         }>();
 
-        // 1. Populate from students
+        // 1. Populate only from real students in database
         students.forEach(std => {
-            const sid = std.memberCode || `MBS-${std.memberId}`;
-            const sname = [std.firstName, std.lastName].filter(Boolean).join(" ") || "Student";
+            const sid = std.memberCode || `STD-2026-${String(std.memberId).padStart(4, "0")}`;
+            const sname = [std.firstName, std.lastName].filter(Boolean).join(" ") || "Enrolled Student";
             let course = std.ministry || "Bachelor of Ministry (B.Min.)";
-            let subjectCodes: string[] = ["HERM-101", "THEO-101"]; // default 6 units
+            let subjectCodes: string[] = [];
 
             if (std.photoPath && std.photoPath.startsWith("{")) {
                 try {
@@ -491,13 +519,12 @@ export const TuitionFeePayment: React.FC = () => {
                 } catch {}
             }
 
-            // Calculate units
             const units = subjectCodes.reduce((sum, code) => {
                 const sub = courseCurriculumService.getSubjectByCode(code);
                 return sum + (sub ? sub.units : 3);
             }, 0);
 
-            const totalAssessment = units * 500 + 1000; // units * 500 + 1000 matriculation
+            const totalAssessment = units > 0 ? (units * 500 + 1000) : 0;
 
             map.set(sid, {
                 name: sname,
@@ -511,10 +538,23 @@ export const TuitionFeePayment: React.FC = () => {
             });
         });
 
-        // 2. Add payments made so far
+        // 2. Add real payments made so far
         payments.forEach(p => {
             if (p.status !== "VOID") {
-                const entry = map.get(p.studentId);
+                let entry = map.get(p.studentId);
+                if (!entry && p.studentName) {
+                    entry = {
+                        name: p.studentName,
+                        studentId: p.studentId,
+                        course: p.courseName,
+                        enrolledSubjectCodes: (p.subjectsPaid || []).map(s => s.code),
+                        totalUnits: p.totalUnitsPaid || 0,
+                        totalAssessment: p.amountPaid,
+                        totalPaid: 0,
+                        balance: 0
+                    };
+                    map.set(p.studentId, entry);
+                }
                 if (entry) {
                     entry.totalPaid += p.amountPaid;
                     entry.balance = Math.max(0, entry.totalAssessment - entry.totalPaid);
@@ -627,20 +667,34 @@ export const TuitionFeePayment: React.FC = () => {
         const paidItems: PaidSubjectItem[] = [];
 
         if (formFeeCategory === "Tuition & Subject Units") {
-            formSelectedSubjectCodes.forEach(code => {
-                const sub = courseCurriculumService.getSubjectByCode(code);
-                const u = sub ? sub.units : 3;
-                const amt = u * formRatePerUnit;
-                calculatedSubtotal += amt;
-                paidUnitsCount += u;
+            if (formSelectedSubjectCodes.length > 0) {
+                formSelectedSubjectCodes.forEach(code => {
+                    const sub = courseCurriculumService.getSubjectByCode(code);
+                    const u = sub ? sub.units : 3;
+                    const amt = u * formRatePerUnit;
+                    calculatedSubtotal += amt;
+                    paidUnitsCount += u;
+                    paidItems.push({
+                        code,
+                        title: sub ? sub.title : code,
+                        units: u,
+                        ratePerUnit: formRatePerUnit,
+                        amount: amt
+                    });
+                });
+            } else {
+                const amt = typeof formCustomAmount === "number" && formCustomAmount > 0 ? formCustomAmount : 1500;
+                const u = Math.floor(amt / formRatePerUnit) || 3;
+                calculatedSubtotal = amt;
+                paidUnitsCount = u;
                 paidItems.push({
-                    code,
-                    title: sub ? sub.title : code,
+                    code: "CBS-MOD",
+                    title: "Modular Tuition & Enrolled Units",
                     units: u,
                     ratePerUnit: formRatePerUnit,
                     amount: amt
                 });
-            });
+            }
         } else if (formFeeCategory === "Matriculation / Registration") {
             calculatedSubtotal = 1000;
             paidItems.push({
@@ -693,8 +747,17 @@ export const TuitionFeePayment: React.FC = () => {
     // Open Record Payment Modal
     const handleOpenPaymentModal = (presetStudentId?: string) => {
         const studentKeys = Array.from(studentFinancials.keys());
-        const targetSid = presetStudentId || (studentKeys.length > 0 ? studentKeys[0] : "MBS-2026-0012");
-        handleSelectStudentForPayment(targetSid);
+        if (presetStudentId && studentFinancials.has(presetStudentId)) {
+            handleSelectStudentForPayment(presetStudentId);
+        } else if (studentKeys.length > 0) {
+            handleSelectStudentForPayment(studentKeys[0]);
+        } else {
+            setFormStudentId("STD-2026-0001");
+            setFormStudentName("Enrolled Student");
+            setFormCourseName("Bachelor of Ministry (B.Min.)");
+            setFormSelectedSubjectCodes([]);
+            setFormCustomAmount("");
+        }
 
         setFormPaymentMethod("Cash");
         setFormReferenceNumber("");
@@ -705,54 +768,121 @@ export const TuitionFeePayment: React.FC = () => {
         setIsPaymentModalOpen(true);
     };
 
-    // Save Payment Record
-    const handleSavePayment = (autoPrint = false) => {
-        if (!formStudentName || modalCalculations.netAmount <= 0) {
-            alert("Please enter a valid student and payment amount.");
+    // Save Payment Record directly to SQL Server Database
+    const handleSavePayment = async (autoPrint = false) => {
+        if (!formStudentName.trim() || modalCalculations.netAmount <= 0) {
+            alert("Please provide a valid student name and payment amount.");
             return;
         }
 
-        const now = new Date();
-        const dateStr = now.toISOString().split("T")[0];
-        const timeStr = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
-        const newReceiptNum = `MBS-OR-2026-${String(payments.length + 45).padStart(4, "0")}`;
+        setIsSaving(true);
+        try {
+            const baseUrl = API_BASE_URL.replace(/\/+$/, "");
+            const newReceiptNum = `MBS-OR-2026-${Math.floor(1000 + Math.random() * 9000)}`;
 
-        const newRecord: StudentPaymentRecord = {
-            id: `pay-${Date.now()}`,
-            receiptNumber: newReceiptNum,
-            studentId: formStudentId,
-            studentName: formStudentName,
-            courseName: formCourseName,
-            yearLevel: formYearLevel,
-            termCohort: formTermCohort,
-            paymentDate: dateStr,
-            paymentTime: timeStr,
-            paymentMethod: formPaymentMethod,
-            referenceNumber: formReferenceNumber.trim() || undefined,
-            feeCategory: formFeeCategory,
-            subjectsPaid: modalCalculations.paidItems,
-            totalUnitsPaid: modalCalculations.paidUnitsCount,
-            ratePerUnit: formRatePerUnit,
-            subtotal: modalCalculations.subtotal,
-            scholarshipDiscount: formScholarshipDiscount,
-            amountPaid: modalCalculations.netAmount,
-            amountInWords: numberToWordsPesos(modalCalculations.netAmount),
-            previousBalance: modalCalculations.previousBalance,
-            remainingBalance: modalCalculations.newBalance,
-            cashTendered: typeof formCashTendered === "number" ? formCashTendered : undefined,
-            changeGiven: modalCalculations.change > 0 ? modalCalculations.change : undefined,
-            cashierName: formCashierName,
-            notes: formNotes.trim() || undefined,
-            status: "PAID"
-        };
+            const postBody = {
+                amount: modalCalculations.netAmount,
+                paymentMethod: formPaymentMethod,
+                referenceNumber: formReferenceNumber.trim() || (formPaymentMethod === "Cash" ? `CSH-${Date.now().toString().slice(-6)}` : undefined),
+                receiptNumber: newReceiptNum,
+                notes: formNotes.trim() || `${formFeeCategory} Settlement`,
+                studentId: formStudentId.trim() || "STD-2026-0001",
+                studentName: formStudentName.trim(),
+                courseName: formCourseName || "Bachelor of Ministry (B.Min.)",
+                yearLevel: formYearLevel,
+                termCohort: formTermCohort,
+                feeCategory: formFeeCategory,
+                particularsJson: JSON.stringify(modalCalculations.paidItems),
+                cashierName: formCashierName || "Office of the Seminary Bursar"
+            };
 
-        setPayments(prev => [newRecord, ...prev]);
-        setIsPaymentModalOpen(false);
+            const resp = await fetch(`${baseUrl}/ClientPayments/record-student-payment`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(postBody)
+            });
 
-        if (autoPrint) {
-            handlePrintReceipt(newRecord);
-        } else {
-            setSelectedReceipt(newRecord);
+            if (!resp.ok) {
+                const errData = await resp.json().catch(() => null);
+                throw new Error(errData?.message || `Failed to record payment (Status: ${resp.status})`);
+            }
+
+            const resData = await resp.json();
+            const actualReceipt = resData.receiptNumber || newReceiptNum;
+
+            const newRecord: StudentPaymentRecord = {
+                id: `pay-db-${resData.paymentId || Date.now()}`,
+                receiptNumber: actualReceipt,
+                studentId: postBody.studentId,
+                studentName: postBody.studentName,
+                courseName: postBody.courseName,
+                yearLevel: formYearLevel,
+                termCohort: formTermCohort,
+                paymentDate: new Date().toISOString().split("T")[0],
+                paymentTime: new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }),
+                paymentMethod: formPaymentMethod,
+                referenceNumber: postBody.referenceNumber,
+                feeCategory: formFeeCategory,
+                subjectsPaid: modalCalculations.paidItems,
+                particulars: modalCalculations.paidItems.map(s => ({
+                    code: s.code,
+                    description: `${s.code} - ${s.title}`,
+                    units: s.units,
+                    rate: s.ratePerUnit,
+                    amount: s.amount
+                })),
+                totalUnitsPaid: modalCalculations.paidUnitsCount,
+                ratePerUnit: formRatePerUnit,
+                subtotal: modalCalculations.subtotal,
+                scholarshipDiscount: formScholarshipDiscount,
+                amountPaid: modalCalculations.netAmount,
+                amountInWords: numberToWordsPesos(modalCalculations.netAmount),
+                previousBalance: modalCalculations.previousBalance,
+                remainingBalance: modalCalculations.newBalance,
+                cashTendered: typeof formCashTendered === "number" ? formCashTendered : undefined,
+                changeGiven: modalCalculations.change > 0 ? modalCalculations.change : undefined,
+                cashierName: formCashierName || "Office of the Seminary Bursar",
+                notes: formNotes.trim() || undefined,
+                status: "PAID"
+            };
+
+            setPayments(prev => [newRecord, ...prev.filter(p => p.id !== newRecord.id)]);
+            setIsPaymentModalOpen(false);
+            window.dispatchEvent(new Event("sms_tuition_updated"));
+
+            if (autoPrint) {
+                handlePrintReceipt(newRecord);
+            } else {
+                setSelectedReceipt(newRecord);
+            }
+        } catch (err: any) {
+            console.error("Error saving real payment to database:", err);
+            alert("Database Error: " + (err.message || "Failed to record payment to database."));
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    // Delete / Void payment transaction from database
+    const handleDeletePayment = async (rec: StudentPaymentRecord) => {
+        if (!window.confirm(`Are you sure you want to delete Official Receipt ${rec.receiptNumber} (₱${(rec.amountPaid || 0).toLocaleString()}) for ${rec.studentName}? This will permanently remove the record from SQL Server.`)) {
+            return;
+        }
+
+        try {
+            const baseUrl = API_BASE_URL.replace(/\/+$/, "");
+            const idNum = rec.id.replace(/^pay-db-/, "");
+            if (/^\d+$/.test(idNum)) {
+                await fetch(`${baseUrl}/ClientPayments/delete-student-payment/${idNum}`, {
+                    method: "DELETE"
+                });
+            }
+
+            setPayments(prev => prev.filter(p => p.id !== rec.id));
+            window.dispatchEvent(new Event("sms_tuition_updated"));
+        } catch (err) {
+            console.error("Failed to delete payment:", err);
+            alert("Failed to delete payment transaction from database.");
         }
     };
 
@@ -1005,6 +1135,18 @@ export const TuitionFeePayment: React.FC = () => {
                             <option value="Modular Study Materials">Modular Materials / Binders</option>
                             <option value="Graduation & Clearance">Graduation & Clearance</option>
                         </select>
+
+                        <button
+                            type="button"
+                            className="hero-btn secondary"
+                            style={{ padding: "8px 14px", fontSize: "12.5px", whiteSpace: "nowrap" }}
+                            onClick={() => loadRealData()}
+                            disabled={isLoading}
+                            title="Reload live ledger from database"
+                        >
+                            <RefreshCw size={14} className={isLoading ? "animate-spin" : ""} />
+                            <span>{isLoading ? "Syncing..." : "Refresh Ledger"}</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1028,9 +1170,27 @@ export const TuitionFeePayment: React.FC = () => {
                     <tbody>
                         {filteredPayments.length === 0 ? (
                             <tr>
-                                <td colSpan={9} style={{ textAlign: "center", padding: "40px 20px", color: "#64748b" }}>
-                                    <Receipt size={40} style={{ margin: "0 auto 10px auto", color: "#94a3b8", display: "block" }} />
-                                    No tuition payment records found matching your filter.
+                                <td colSpan={9} style={{ textAlign: "center", padding: "50px 20px", color: "#64748b" }}>
+                                    <div style={{ maxWidth: "440px", margin: "0 auto", textAlign: "center" }}>
+                                        <div style={{ width: "52px", height: "52px", borderRadius: "50%", background: "#f0fdf4", color: "#16a34a", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px auto" }}>
+                                            <Receipt size={26} />
+                                        </div>
+                                        <h3 style={{ fontSize: "16px", fontWeight: 700, color: "#0f172a", marginBottom: "6px" }}>
+                                            No Tuition Payments in Database
+                                        </h3>
+                                        <p style={{ fontSize: "13px", color: "#64748b", lineHeight: 1.5, marginBottom: "18px" }}>
+                                            Zero fake data. All records displayed here are loaded in real time from SQL Server. Click below to record an authentic student tuition or fee collection.
+                                        </p>
+                                        <button
+                                            type="button"
+                                            className="hero-btn primary"
+                                            style={{ margin: "0 auto", display: "inline-flex" }}
+                                            onClick={() => handleOpenPaymentModal()}
+                                        >
+                                            <Plus size={15} />
+                                            <span>+ Record Official Payment</span>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         ) : (
@@ -1109,6 +1269,15 @@ export const TuitionFeePayment: React.FC = () => {
                                             >
                                                 <Eye size={13} />
                                             </button>
+                                            <button
+                                                type="button"
+                                                className="tuition-btn-action danger"
+                                                style={{ color: "#ef4444" }}
+                                                onClick={() => handleDeletePayment(rec)}
+                                                title="Delete Payment Transaction"
+                                            >
+                                                <Trash2 size={13} />
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -1141,17 +1310,64 @@ export const TuitionFeePayment: React.FC = () => {
                         >
                             {/* Student Selection */}
                             <div className="tuition-form-group full">
-                                <label>Select Enrolled Student *</label>
+                                <label>Student Enrollee Information *</label>
+                                {studentFinancials.size > 0 ? (
+                                    <div style={{ marginBottom: "8px" }}>
+                                        <select
+                                            value={formStudentId}
+                                            onChange={e => handleSelectStudentForPayment(e.target.value)}
+                                        >
+                                            <option value="">-- Choose Registered Student from Database --</option>
+                                            {Array.from(studentFinancials.entries()).map(([sid, fin]) => (
+                                                <option key={sid} value={sid}>
+                                                    {fin.name} ({sid}) • {fin.course}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                ) : null}
+
+                                <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "10px" }}>
+                                    <div>
+                                        <label style={{ fontSize: "11px", color: "#64748b" }}>Student ID #</label>
+                                        <input
+                                            type="text"
+                                            placeholder="e.g. STD-2026-0001"
+                                            value={formStudentId}
+                                            onChange={e => setFormStudentId(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label style={{ fontSize: "11px", color: "#64748b" }}>Student Full Name</label>
+                                        <input
+                                            type="text"
+                                            placeholder="e.g. Bro. John Mark Santos"
+                                            value={formStudentName}
+                                            onChange={e => setFormStudentName(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="tuition-form-group full">
+                                <label>Academic Program / Course Degree *</label>
                                 <select
-                                    value={formStudentId}
-                                    onChange={e => handleSelectStudentForPayment(e.target.value)}
+                                    value={formCourseName}
+                                    onChange={e => setFormCourseName(e.target.value)}
                                     required
                                 >
-                                    {Array.from(studentFinancials.entries()).map(([sid, fin]) => (
-                                        <option key={sid} value={sid}>
-                                            {fin.name} ({sid}) • {fin.course} • Bal: ₱{fin.balance.toLocaleString()}
+                                    {courses.map(c => (
+                                        <option key={c.id} value={c.name}>
+                                            {c.name} ({c.code})
                                         </option>
                                     ))}
+                                    <option value="Bachelor of Ministry (B.Min.)">Bachelor of Ministry (B.Min.)</option>
+                                    <option value="Associate in Theology (Th.A.)">Associate in Theology (Th.A.)</option>
+                                    <option value="Certificate in Biblical Studies (CBS)">Certificate in Biblical Studies (CBS)</option>
+                                    <option value="Master of Divinity (M.Div.)">Master of Divinity (M.Div.)</option>
+                                    <option value="Diploma in Pastoral Leadership">Diploma in Pastoral Leadership</option>
                                 </select>
                             </div>
 
@@ -1392,14 +1608,15 @@ export const TuitionFeePayment: React.FC = () => {
                                     <X size={15} />
                                     <span>Cancel</span>
                                 </button>
-                                <button type="submit" className="btn-tuition-modal primary">
-                                    <CheckCircle2 size={15} />
-                                    <span>Save Payment Record</span>
+                                <button type="submit" className="btn-tuition-modal primary" disabled={isSaving}>
+                                    {isSaving ? <RefreshCw size={15} className="animate-spin" /> : <CheckCircle2 size={15} />}
+                                    <span>{isSaving ? "Saving to Database..." : "Save Payment Record"}</span>
                                 </button>
                                 <button
                                     type="button"
                                     className="btn-tuition-modal success"
                                     onClick={() => handleSavePayment(true)}
+                                    disabled={isSaving}
                                 >
                                     <Printer size={15} />
                                     <span>Save & Print Official Receipt</span>

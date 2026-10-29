@@ -1,4 +1,4 @@
-﻿using School.Api.Data;
+using School.Api.Data;
 using School.Api.Models;
 
 using Microsoft.AspNetCore.Authorization;
@@ -720,6 +720,57 @@ namespace School.Api.Controllers
         }
 
         // =========================================================
+        // GET REAL REGISTERED STUDENTS FOR BURSAR ENROLLMENT
+        // GET: api/ClientPayments/student-list
+        // =========================================================
+        [AllowAnonymous]
+        [HttpGet("student-list")]
+        public async Task<IActionResult> GetStudentList()
+        {
+            var students = await _context.Members
+                .AsNoTracking()
+                .Where(m => m.Status != "DELETED")
+                .OrderBy(m => m.LastName)
+                .Select(m => new
+                {
+                    memberId = m.MemberId,
+                    memberCode = m.MemberCode ?? $"STD-2026-{m.MemberId:D4}",
+                    firstName = m.FirstName ?? "",
+                    middleName = m.MiddleName ?? "",
+                    lastName = m.LastName ?? "",
+                    fullName = $"{m.FirstName} {m.LastName}".Trim(),
+                    ministry = m.Ministry ?? "Bachelor of Ministry (B.Min.)",
+                    status = m.Status ?? "ACTIVE",
+                    contactNumber = m.ContactNumber,
+                    address = m.Address,
+                    photoPath = m.PhotoPath
+                })
+                .ToListAsync();
+
+            return Ok(students);
+        }
+
+        // =========================================================
+        // DELETE / VOID REAL STUDENT PAYMENT FROM DATABASE
+        // DELETE: api/ClientPayments/delete-student-payment/{id}
+        // =========================================================
+        [AllowAnonymous]
+        [HttpDelete("delete-student-payment/{id:int}")]
+        public async Task<IActionResult> DeleteStudentPayment(int id)
+        {
+            var payment = await _context.Payments.FindAsync(id);
+            if (payment == null)
+            {
+                return NotFound(new { success = false, message = "Payment not found." });
+            }
+
+            _context.Payments.Remove(payment);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true, message = "Payment transaction deleted from ledger." });
+        }
+
+        // =========================================================
         // RECORD REAL STUDENT PAYMENT INTO DATABASE
         // POST: api/ClientPayments/record-student-payment
         // =========================================================
@@ -742,6 +793,24 @@ namespace School.Api.Controllers
                 orNumber = $"MBS-OR-2026-{rand}";
             }
 
+            string finalNotes = dto.Notes ?? "Student Modular Tuition Settlement";
+            if (!string.IsNullOrWhiteSpace(dto.StudentName) || !string.IsNullOrWhiteSpace(dto.StudentId) || !string.IsNullOrWhiteSpace(dto.FeeCategory))
+            {
+                var payload = new
+                {
+                    studentId = dto.StudentId ?? "",
+                    studentName = dto.StudentName ?? "Student",
+                    courseName = dto.CourseName ?? "Bachelor of Ministry (B.Min.)",
+                    yearLevel = dto.YearLevel ?? "1st Year",
+                    termCohort = dto.TermCohort ?? "1st Trimester 2026",
+                    feeCategory = dto.FeeCategory ?? "Tuition & Subject Units",
+                    particulars = dto.ParticularsJson,
+                    cashierName = dto.CashierName ?? "Office of the Seminary Bursar",
+                    remarks = dto.Notes ?? ""
+                };
+                finalNotes = System.Text.Json.JsonSerializer.Serialize(payload);
+            }
+
             var payment = new Payment
             {
                 SubscriptionId = subId,
@@ -753,7 +822,7 @@ namespace School.Api.Controllers
                 ReceiptNumber = orNumber,
                 InvoiceNumber = $"INV-{DateTime.UtcNow:yyyyMMddHHmmss}",
                 PaidDate = DateTime.UtcNow,
-                Notes = dto.Notes ?? "Student Modular Tuition Settlement",
+                Notes = finalNotes,
                 CreatedDate = DateTime.UtcNow
             };
 
@@ -763,12 +832,14 @@ namespace School.Api.Controllers
             {
                 CustomerId = 1,
                 Category = "Tuition & Fees",
-                Description = dto.Notes ?? $"Tuition Settlement - {orNumber}",
+                Description = !string.IsNullOrWhiteSpace(dto.StudentName)
+                    ? $"Tuition: {dto.StudentName} ({orNumber}) - {dto.FeeCategory ?? "Fees"}"
+                    : (dto.Notes ?? $"Tuition Settlement - {orNumber}"),
                 Amount = dto.Amount,
                 IncomeDate = DateTime.UtcNow,
                 PaymentMethod = dto.PaymentMethod ?? "Online",
                 ReferenceNumber = dto.ReferenceNumber,
-                RecordedBy = "Office of the Seminary Bursar",
+                RecordedBy = dto.CashierName ?? "Office of the Seminary Bursar",
                 RecordedDate = DateTime.UtcNow
             };
             _context.Incomes.Add(income);
@@ -837,6 +908,14 @@ namespace School.Api.Controllers
         public string? ReferenceNumber { get; set; }
         public string? ReceiptNumber { get; set; }
         public string? Notes { get; set; }
+        public string? StudentId { get; set; }
+        public string? StudentName { get; set; }
+        public string? CourseName { get; set; }
+        public string? YearLevel { get; set; }
+        public string? TermCohort { get; set; }
+        public string? FeeCategory { get; set; }
+        public string? ParticularsJson { get; set; }
+        public string? CashierName { get; set; }
     }
 
 }

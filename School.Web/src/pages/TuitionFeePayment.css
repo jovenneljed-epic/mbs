@@ -507,6 +507,25 @@
     border-color: #93c5fd;
 }
 
+.tuition-btn-action.danger {
+    color: #ef4444;
+}
+
+.tuition-btn-action.danger:hover {
+    background: #fee2e2;
+    color: #dc2626;
+    border-color: #fca5a5;
+}
+
+@keyframes tuitionSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.animate-spin {
+    animation: tuitionSpin 1s linear infinite;
+}
+
 /* Modal Overlay & Card */
 .tuition-modal-overlay {
     position: fixed;
