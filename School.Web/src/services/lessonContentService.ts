@@ -364,34 +364,8 @@ const INITIAL_LESSONS: CourseLesson[] = [
     }
 ];
 
-const INITIAL_SUBMISSIONS: StudentSubmission[] = [
-    {
-        id: "sub-seed-1",
-        lessonId: "cbs-104-l1",
-        courseCode: "CBS 104",
-        studentName: "Kezjed Solutions",
-        studentId: "STD-2026-KEZJED",
-        submissionDate: "2026-10-18T10:30:00.000Z",
-        reflectionText: "The grammatical-historical method safeguards the church from allegorical subjectivity by grounding meaning in the author-intended sense of Scripture.",
-        quizScore: 100,
-        status: "APPROVED",
-        grade: "A (98%)",
-        feedback: "Outstanding exegesis and defense of verbal plenary inspiration. Accurate hermeneutical synthesis."
-    },
-    {
-        id: "sub-seed-2",
-        lessonId: "cbs-104-l2",
-        courseCode: "CBS 104",
-        studentName: "Kezjed Solutions",
-        studentId: "STD-2026-KEZJED",
-        submissionDate: "2026-10-22T14:15:00.000Z",
-        reflectionText: "Bridging the hermeneutical gap requires thorough historical context and grammatical analysis before personal application.",
-        quizScore: 95,
-        status: "APPROVED",
-        grade: "A (95%)",
-        feedback: "Excellent historical background context provided."
-    }
-];
+const INITIAL_SUBMISSIONS: StudentSubmission[] = [];
+
 
 class LessonContentService {
     public async fetchLessonsFromApi(): Promise<CourseLesson[]> {

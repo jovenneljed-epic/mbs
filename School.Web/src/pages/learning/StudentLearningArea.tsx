@@ -75,7 +75,7 @@ const StudentLearningArea: React.FC = () => {
         } catch {
             // fallback
         }
-        return "Kezjed Solutions";
+        return "Enrolled Student";
     }, []);
 
     const studentId = useMemo(() => {
@@ -89,7 +89,7 @@ const StudentLearningArea: React.FC = () => {
         } catch {
             // fallback
         }
-        return "STD-2026-KEZJED";
+        return "MBS-STUDENT";
     }, []);
 
     // Refresh trigger to react to live changes in Lesson Studio or Curriculum

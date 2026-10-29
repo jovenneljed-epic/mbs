@@ -560,6 +560,50 @@ namespace School.Api.Controllers
             // Delete user
             // -----------------------------------------------------
 
+            // Remove CourseEnrollments & LessonProgresses
+            var enrollments = await _context.CourseEnrollments
+                .Where(e => e.UserId == user.UserId)
+                .ToListAsync();
+            if (enrollments.Count > 0)
+            {
+                var enrollmentIds = enrollments.Select(e => e.CourseEnrollmentId).ToList();
+                var lessonProgresses = await _context.LessonProgresses
+                    .Where(lp => enrollmentIds.Contains(lp.CourseEnrollmentId))
+                    .ToListAsync();
+                if (lessonProgresses.Count > 0)
+                {
+                    _context.LessonProgresses.RemoveRange(lessonProgresses);
+                }
+                _context.CourseEnrollments.RemoveRange(enrollments);
+            }
+
+            // Remove Certificates
+            var certificates = await _context.Certificates
+                .Where(c => c.UserId == user.UserId)
+                .ToListAsync();
+            if (certificates.Count > 0)
+            {
+                _context.Certificates.RemoveRange(certificates);
+            }
+
+            // Clean up corresponding ClientMember & Member if matched
+            var clientMembers = await _context.ClientMembers
+                .Where(cm => cm.Username == user.Username || (!string.IsNullOrEmpty(user.Email) && cm.Email == user.Email))
+                .ToListAsync();
+            foreach (var cm in clientMembers)
+            {
+                var memberId = cm.MemberId;
+                _context.ClientMembers.Remove(cm);
+                if (memberId > 0)
+                {
+                    var member = await _context.Members.FindAsync(memberId);
+                    if (member != null)
+                    {
+                        _context.Members.Remove(member);
+                    }
+                }
+            }
+
             _context.Users.Remove(user);
 
             try

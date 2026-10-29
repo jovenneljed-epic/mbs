@@ -380,13 +380,13 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ client, onNa
             return `${client.member.firstName} ${client.member.lastName}`.trim();
         }
         if (client.username) return client.username;
-        return "Kezjed Solutions";
+        return "Enrolled Student";
     }, [client]);
 
     const studentId = useMemo(() => {
         if (client.member?.memberCode) return client.member.memberCode;
         if (client.memberCode) return client.memberCode;
-        return "STD-2026-KEZJED";
+        return "MBS-STUDENT";
     }, [client]);
 
     // ---------------------------------------------------------
@@ -609,67 +609,7 @@ export const StudentDashboard: React.FC<StudentDashboardProps> = ({ client, onNa
             }
         } catch {}
 
-        // Real verified database receipts for Kezjed Solutions
-        return [
-            {
-                id: "rec-db-4118",
-                receiptNumber: "MBS-OR-2026-4118",
-                studentId: studentId,
-                studentName: studentName,
-                courseName: activeProgram.name,
-                yearLevel: "1st Year",
-                termCohort: "1st Trimester A.Y. 2026-2027",
-                paymentDate: "2026-10-29",
-                paymentTime: "07:03 PM",
-                paymentMethod: "GCash (PayMongo QR)",
-                referenceNumber: "PM-71811535",
-                feeCategory: "Modular Tuition & Units",
-                particulars: [
-                    { description: "CBS 104: Biblical Hermeneutics & Inductive Exegesis Settlement", amount: 2000 }
-                ],
-                totalUnitsPaid: 4,
-                ratePerUnit: 500,
-                subtotal: 2000,
-                discount: 0,
-                amountPaid: 2000,
-                amountInWords: "Two Thousand Pesos Only",
-                previousBalance: 5000,
-                remainingBalance: 3000,
-                cashierName: "PayMongo Automated Bursar Gateway",
-                notes: "Instant payment verified via PayMongo Gateway. Ref #PM-71811535",
-                status: "VERIFIED"
-            },
-            {
-                id: "rec-db-0001",
-                receiptNumber: "MBS-OR-2026-0001",
-                studentId: studentId,
-                studentName: studentName,
-                courseName: activeProgram.name,
-                yearLevel: "1st Year",
-                termCohort: "1st Trimester A.Y. 2026-2027",
-                paymentDate: "2026-08-25",
-                paymentTime: "10:15 AM",
-                paymentMethod: "GCash",
-                referenceNumber: "902184756201",
-                feeCategory: "Downpayment & Matriculation",
-                particulars: [
-                    { description: "Registration & Matriculation Assessment", amount: 1500 },
-                    { description: "SLM Modular Course Packages (CBS 101 & CBS 102)", amount: 1500 },
-                    { description: "Student ID & Learning Studio Registration", amount: 500 }
-                ],
-                totalUnitsPaid: 0,
-                ratePerUnit: 500,
-                subtotal: 3500,
-                discount: 0,
-                amountPaid: 3500,
-                amountInWords: "Three Thousand Five Hundred Pesos Only",
-                previousBalance: 8500,
-                remainingBalance: 5000,
-                cashierName: "Office of the Seminary Bursar",
-                notes: "Official enrollment clearance issued. Student portal activated.",
-                status: "VERIFIED"
-            }
-        ];
+        return [];
     }, [studentName, studentId, activeProgram]);
 
     const totalPaidAmount = useMemo(() => {
