@@ -48,6 +48,13 @@ export interface StudentPaymentRecord {
     referenceNumber?: string;
     feeCategory: string;
     particulars: ParticularItem[];
+    subjectsPaid?: Array<{
+        code: string;
+        title: string;
+        units: number;
+        ratePerUnit: number;
+        amount: number;
+    }>;
     totalUnitsPaid: number;
     ratePerUnit: number;
     subtotal: number;
@@ -226,13 +233,48 @@ export const StudentPaymentSystem: React.FC<StudentPaymentSystemProps> = ({ clie
 
     // Helper: Clean stale mock records containing fake subjects or old mock receipts
     const cleanStaleRecords = (records: StudentPaymentRecord[]): StudentPaymentRecord[] => {
-        return records.filter((p) => {
-            const s = JSON.stringify(p);
-            if (p.id?.startsWith("pay-seed-")) return false;
-            if (p.receiptNumber === "MBS-OR-2026-0031" || p.receiptNumber === "MBS-OR-2026-0054" || p.receiptNumber === "MBS-OR-2026-0089") return false;
-            if (s.includes("HERM-101") || s.includes("OT-101") || s.includes("NT-101") || s.includes("Rachel Santos")) return false;
-            return true;
-        });
+        if (!Array.isArray(records)) return [];
+        return records
+            .filter((p) => {
+                if (!p) return false;
+                const s = JSON.stringify(p);
+                if (p.id?.startsWith("pay-seed-")) return false;
+                if (p.receiptNumber === "MBS-OR-2026-0031" || p.receiptNumber === "MBS-OR-2026-0054" || p.receiptNumber === "MBS-OR-2026-0089") return false;
+                if (s.includes("HERM-101") || s.includes("OT-101") || s.includes("NT-101") || s.includes("Rachel Santos")) return false;
+                return true;
+            })
+            .map((p: any) => {
+                const subjectsPaid = Array.isArray(p.subjectsPaid)
+                    ? p.subjectsPaid
+                    : Array.isArray(p.particulars)
+                    ? p.particulars.map((pt: any) => ({
+                        code: pt.code || "CBS-MOD",
+                        title: pt.description || pt.title || "Modular Tuition Settlement",
+                        units: pt.units || 3,
+                        ratePerUnit: pt.rate || 500,
+                        amount: pt.amount || 0
+                    }))
+                    : [];
+                const particulars = Array.isArray(p.particulars)
+                    ? p.particulars
+                    : subjectsPaid.length > 0
+                    ? subjectsPaid.map((s: any) => ({
+                        description: `${s.code} - ${s.title}`,
+                        units: s.units,
+                        rate: s.ratePerUnit,
+                        amount: s.amount
+                    }))
+                    : [{ description: p.feeCategory || "Tuition Settlement", amount: p.amountPaid || 0 }];
+
+                return {
+                    ...p,
+                    particulars,
+                    subjectsPaid,
+                    amountPaid: p.amountPaid ?? 0,
+                    amountInWords: p.amountInWords || numberToWordsPesos(p.amountPaid ?? 0),
+                    cashierName: p.cashierName && p.cashierName !== "Rachel Santos, CPA" ? p.cashierName : "Office of the Seminary Bursar"
+                };
+            });
     };
 
     const VERIFIED_PAYMENTS: StudentPaymentRecord[] = [];
@@ -290,6 +332,15 @@ export const StudentPaymentSystem: React.FC<StudentPaymentSystemProps> = ({ clie
                             feeCategory: p.notes?.includes("Downpayment") ? "Downpayment & Matriculation" : "Modular Tuition & Units",
                             particulars: [
                                 { description: p.notes || "Modular Tuition Settlement", amount: p.amount }
+                            ],
+                            subjectsPaid: [
+                                {
+                                    code: "CBS-MOD",
+                                    title: p.notes || "Modular Tuition Settlement",
+                                    units: Math.floor(p.amount / 500) || 3,
+                                    ratePerUnit: 500,
+                                    amount: p.amount
+                                }
                             ],
                             totalUnitsPaid: Math.floor(p.amount / 500),
                             ratePerUnit: 500,
@@ -411,12 +462,26 @@ export const StudentPaymentSystem: React.FC<StudentPaymentSystemProps> = ({ clie
             paymentMethod: record.paymentMethod,
             referenceNumber: record.referenceNumber,
             paymentCategory: record.feeCategory,
-            particulars: record.particulars.map((p) => ({
-                description: p.description,
-                units: p.units,
-                rate: p.rate,
-                amount: p.amount
-            })),
+            particulars: (record.particulars && record.particulars.length > 0)
+                ? record.particulars.map((p) => ({
+                      description: p.description,
+                      units: p.units,
+                      rate: p.rate,
+                      amount: p.amount
+                  }))
+                : (record.subjectsPaid && record.subjectsPaid.length > 0)
+                ? record.subjectsPaid.map((s) => ({
+                      description: `${s.code} - ${s.title}`,
+                      units: s.units,
+                      rate: s.ratePerUnit,
+                      amount: s.amount
+                  }))
+                : [
+                      {
+                          description: record.feeCategory || "Tuition & Fees Settlement",
+                          amount: record.amountPaid
+                      }
+                  ],
             subtotal: record.subtotal,
             discount: record.discount,
             amountPaid: record.amountPaid,
@@ -559,6 +624,15 @@ export const StudentPaymentSystem: React.FC<StudentPaymentSystemProps> = ({ clie
                 particulars: [
                     { description: `${selectedFeeCategory} Settlement`, amount: effectivePaymentAmount }
                 ],
+                subjectsPaid: [
+                    {
+                        code: "CBS-MOD",
+                        title: `${selectedFeeCategory} Settlement`,
+                        units: Math.floor(effectivePaymentAmount / 500) || 3,
+                        ratePerUnit: 500,
+                        amount: effectivePaymentAmount
+                    }
+                ],
                 totalUnitsPaid: Math.floor(effectivePaymentAmount / 500),
                 ratePerUnit: 500,
                 subtotal: effectivePaymentAmount,
@@ -649,6 +723,15 @@ export const StudentPaymentSystem: React.FC<StudentPaymentSystemProps> = ({ clie
             particulars: [
                 { description: `Manual ${proofBank} Transfer Settlement`, amount: amt }
             ],
+            subjectsPaid: [
+                {
+                    code: "CBS-MOD",
+                    title: `Manual ${proofBank} Transfer Settlement`,
+                    units: Math.floor(amt / 500) || 3,
+                    ratePerUnit: 500,
+                    amount: amt
+                }
+            ],
             totalUnitsPaid: Math.floor(amt / 500),
             ratePerUnit: 500,
             subtotal: amt,
@@ -657,7 +740,7 @@ export const StudentPaymentSystem: React.FC<StudentPaymentSystemProps> = ({ clie
             amountInWords: numberToWordsPesos(amt),
             previousBalance: prevBal,
             remainingBalance: newRemaining,
-            cashierName: "Bursar Clearing Office",
+            cashierName: "Office of the Seminary Bursar",
             notes: proofNotes.trim() || `Reference: ${proofRefNumber}. Submitted via Student Portal.`,
             status: "VERIFIED"
         };
@@ -963,7 +1046,11 @@ export const StudentPaymentSystem: React.FC<StudentPaymentSystemProps> = ({ clie
                                             <td>
                                                 <strong style={{ color: "#0f172a" }}>{p.feeCategory}</strong>
                                                 <div style={{ fontSize: "0.78rem", color: "#64748b" }}>
-                                                    {p.particulars.map((item) => item.description).join(", ")}
+                                                    {Array.isArray(p.particulars) && p.particulars.length > 0
+                                                        ? p.particulars.map((item) => item.description).join(", ")
+                                                        : Array.isArray(p.subjectsPaid) && p.subjectsPaid.length > 0
+                                                        ? p.subjectsPaid.map((s) => `${s.code} - ${s.title}`).join(", ")
+                                                        : p.feeCategory}
                                                 </div>
                                             </td>
                                             <td>
@@ -1552,12 +1639,26 @@ export const StudentPaymentSystem: React.FC<StudentPaymentSystemProps> = ({ clie
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {selectedReceipt.particulars.map((item, idx) => (
-                                            <tr key={idx}>
-                                                <td>{item.description}</td>
-                                                <td style={{ textAlign: "right", fontWeight: 700 }}>₱{item.amount.toLocaleString()}</td>
+                                        {Array.isArray(selectedReceipt.particulars) && selectedReceipt.particulars.length > 0 ? (
+                                            selectedReceipt.particulars.map((item, idx) => (
+                                                <tr key={idx}>
+                                                    <td>{item.description}</td>
+                                                    <td style={{ textAlign: "right", fontWeight: 700 }}>₱{(item.amount ?? 0).toLocaleString()}</td>
+                                                </tr>
+                                            ))
+                                        ) : Array.isArray(selectedReceipt.subjectsPaid) && selectedReceipt.subjectsPaid.length > 0 ? (
+                                            selectedReceipt.subjectsPaid.map((s, idx) => (
+                                                <tr key={idx}>
+                                                    <td>{s.code} - {s.title}</td>
+                                                    <td style={{ textAlign: "right", fontWeight: 700 }}>₱{(s.amount ?? 0).toLocaleString()}</td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td>{selectedReceipt.feeCategory}</td>
+                                                <td style={{ textAlign: "right", fontWeight: 700 }}>₱{(selectedReceipt.amountPaid ?? 0).toLocaleString()}</td>
                                             </tr>
-                                        ))}
+                                        )}
                                         <tr style={{ background: "#f8fafc", fontWeight: 800 }}>
                                             <td>Total Amount Paid:</td>
                                             <td style={{ textAlign: "right", color: "#059669", fontSize: "1.1rem" }}>

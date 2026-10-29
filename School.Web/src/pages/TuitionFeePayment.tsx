@@ -65,10 +65,18 @@ export interface StudentPaymentRecord {
     termCohort: string;
     paymentDate: string;
     paymentTime: string;
-    paymentMethod: PaymentMethod;
+    paymentMethod: PaymentMethod | string;
     referenceNumber?: string;
-    feeCategory: FeeCategory;
+    feeCategory: FeeCategory | string;
     subjectsPaid: PaidSubjectItem[];
+    particulars?: Array<{
+        code?: string;
+        description?: string;
+        title?: string;
+        units?: number;
+        rate?: number;
+        amount: number;
+    }>;
     totalUnitsPaid: number;
     ratePerUnit: number;
     subtotal: number;
@@ -81,7 +89,7 @@ export interface StudentPaymentRecord {
     changeGiven?: number;
     cashierName: string;
     notes?: string;
-    status: "PAID" | "VERIFIED" | "VOID";
+    status: "PAID" | "VERIFIED" | "VOID" | "PENDING";
 }
 
 interface Member {
@@ -175,7 +183,7 @@ const DEFAULT_PAYMENT_RECORDS: StudentPaymentRecord[] = [
         amountInWords: "Three Thousand Pesos Only",
         previousBalance: 6000,
         remainingBalance: 3000,
-        cashierName: "Rachel Santos, CPA",
+        cashierName: "Office of the Seminary Bursar",
         notes: "Full payment for Prelim & Midterm Units (Hermeneutics & Systematic Theo)",
         status: "PAID"
     },
@@ -207,7 +215,7 @@ const DEFAULT_PAYMENT_RECORDS: StudentPaymentRecord[] = [
         remainingBalance: 1500,
         cashTendered: 3000,
         changeGiven: 500,
-        cashierName: "Rachel Santos, CPA",
+        cashierName: "Office of the Seminary Bursar",
         notes: "Granted ₱500 Pastoral Family Discount. Balance ₱1,500 due before Finals.",
         status: "PAID"
     },
@@ -238,7 +246,7 @@ const DEFAULT_PAYMENT_RECORDS: StudentPaymentRecord[] = [
         amountInWords: "Four Thousand Five Hundred Pesos Only",
         previousBalance: 4500,
         remainingBalance: 0,
-        cashierName: "Clarissa Mendez",
+        cashierName: "Office of the Seminary Bursar",
         notes: "Full payment of entire semester load (9 units). Account fully cleared.",
         status: "PAID"
     },
@@ -265,11 +273,69 @@ const DEFAULT_PAYMENT_RECORDS: StudentPaymentRecord[] = [
         amountInWords: "Two Thousand Pesos Only",
         previousBalance: 2000,
         remainingBalance: 0,
-        cashierName: "Rachel Santos, CPA",
+        cashierName: "Office of the Seminary Bursar",
         notes: "100% Sponsored by Northern Luzon Missions Board Grant.",
         status: "PAID"
     }
 ];
+
+const normalizePaymentRecord = (p: any): StudentPaymentRecord => {
+    let subjectsPaid: PaidSubjectItem[] = [];
+    if (Array.isArray(p.subjectsPaid)) {
+        subjectsPaid = p.subjectsPaid;
+    } else if (Array.isArray(p.particulars)) {
+        subjectsPaid = p.particulars.map((pt: any) => ({
+            code: pt.code || "CBS-MOD",
+            title: pt.description || pt.title || "Tuition & Modular Settlement",
+            units: pt.units || 3,
+            ratePerUnit: pt.rate || 500,
+            amount: pt.amount || 0
+        }));
+    }
+
+    const particulars = Array.isArray(p.particulars)
+        ? p.particulars
+        : subjectsPaid.length > 0
+        ? subjectsPaid.map((s) => ({
+            code: s.code,
+            description: `${s.code} - ${s.title}`,
+            units: s.units,
+            rate: s.ratePerUnit,
+            amount: s.amount
+        }))
+        : [{ description: p.feeCategory || "Tuition & Fees Settlement", amount: p.amountPaid || 0 }];
+
+    return {
+        id: p.id || `pay-${Math.random().toString(36).substring(2, 9)}`,
+        receiptNumber: p.receiptNumber || `MBS-OR-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+        studentId: p.studentId || "MBS-2026-0001",
+        studentName: p.studentName || "Student",
+        courseId: p.courseId,
+        courseName: p.courseName || "Bachelor of Ministry (B.Min.)",
+        yearLevel: p.yearLevel || "1st Year",
+        termCohort: p.termCohort || "1st Trimester 2026",
+        paymentDate: p.paymentDate || new Date().toISOString().split("T")[0],
+        paymentTime: p.paymentTime || "12:00 PM",
+        paymentMethod: p.paymentMethod || "Cash",
+        referenceNumber: p.referenceNumber,
+        feeCategory: p.feeCategory || "Tuition & Subject Units",
+        subjectsPaid,
+        particulars,
+        totalUnitsPaid: typeof p.totalUnitsPaid === "number" ? p.totalUnitsPaid : subjectsPaid.reduce((acc, s) => acc + (s.units || 0), 0),
+        ratePerUnit: p.ratePerUnit || 500,
+        subtotal: p.subtotal ?? p.amountPaid ?? 0,
+        scholarshipDiscount: p.scholarshipDiscount ?? p.discount ?? 0,
+        amountPaid: p.amountPaid ?? 0,
+        amountInWords: p.amountInWords || numberToWordsPesos(p.amountPaid ?? 0),
+        previousBalance: p.previousBalance ?? 0,
+        remainingBalance: p.remainingBalance ?? 0,
+        cashTendered: p.cashTendered,
+        changeGiven: p.changeGiven,
+        cashierName: p.cashierName && p.cashierName !== "Rachel Santos, CPA" ? p.cashierName : "Office of the Seminary Bursar",
+        notes: p.notes,
+        status: p.status === "VOID" ? "VOID" : (p.status === "VERIFIED" ? "VERIFIED" : "PAID")
+    };
+};
 
 const getToken = (): string | null => {
     const keys = ["token", "accessToken", "jwt", "authToken", "epicToken"];
@@ -285,9 +351,16 @@ export const TuitionFeePayment: React.FC = () => {
     const [payments, setPayments] = useState<StudentPaymentRecord[]>(() => {
         try {
             const raw = localStorage.getItem(STORAGE_KEY);
-            if (raw) return JSON.parse(raw);
-        } catch {}
-        return DEFAULT_PAYMENT_RECORDS;
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed)) {
+                    return parsed.map(normalizePaymentRecord);
+                }
+            }
+        } catch (e) {
+            console.error("Failed to parse cached tuition payments:", e);
+        }
+        return DEFAULT_PAYMENT_RECORDS.map(normalizePaymentRecord);
     });
 
     // Academic Registry
@@ -318,8 +391,29 @@ export const TuitionFeePayment: React.FC = () => {
     const [formCustomAmount, setFormCustomAmount] = useState<number | "">("");
     const [formScholarshipDiscount, setFormScholarshipDiscount] = useState<number>(0);
     const [formCashTendered, setFormCashTendered] = useState<number | "">("");
-    const [formCashierName, setFormCashierName] = useState("Rachel Santos, CPA");
+    const [formCashierName, setFormCashierName] = useState("Office of the Seminary Bursar");
     const [formNotes, setFormNotes] = useState("");
+
+    // Synchronize across tabs or local storage changes
+    useEffect(() => {
+        const handleSync = () => {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed)) {
+                        setPayments(parsed.map(normalizePaymentRecord));
+                    }
+                }
+            } catch {}
+        };
+        window.addEventListener("storage", handleSync);
+        window.addEventListener("sms_tuition_updated", handleSync);
+        return () => {
+            window.removeEventListener("storage", handleSync);
+            window.removeEventListener("sms_tuition_updated", handleSync);
+        };
+    }, []);
 
     // Save to LocalStorage
     useEffect(() => {
@@ -446,14 +540,16 @@ export const TuitionFeePayment: React.FC = () => {
 
         payments.forEach(p => {
             if (p.status !== "VOID") {
-                totalCollected += p.amountPaid;
-                if (p.paymentDate === todayStr) todayCollected += p.amountPaid;
-                if (p.paymentDate.startsWith(thisMonthStr)) monthCollected += p.amountPaid;
+                const amt = p.amountPaid || 0;
+                totalCollected += amt;
+                if (p.paymentDate === todayStr) todayCollected += amt;
+                if (p.paymentDate && p.paymentDate.startsWith(thisMonthStr)) monthCollected += amt;
 
-                if (p.paymentMethod === "Cash") cashTotal += p.amountPaid;
-                else if (p.paymentMethod === "GCash" || p.paymentMethod === "Maya") gcashTotal += p.amountPaid;
-                else if (p.paymentMethod.startsWith("Bank")) bankTotal += p.amountPaid;
-                else if (p.paymentMethod.includes("Scholarship")) scholarshipTotal += p.amountPaid;
+                const pm = p.paymentMethod || "";
+                if (pm === "Cash") cashTotal += amt;
+                else if (pm.includes("GCash") || pm.includes("Maya")) gcashTotal += amt;
+                else if (pm.startsWith("Bank")) bankTotal += amt;
+                else if (pm.includes("Scholarship")) scholarshipTotal += amt;
             }
         });
 
@@ -480,13 +576,14 @@ export const TuitionFeePayment: React.FC = () => {
 
     // Filter payments table
     const filteredPayments = useMemo(() => {
+        const sLower = search.toLowerCase();
         return payments.filter(p => {
             const matchesSearch =
-                p.studentName.toLowerCase().includes(search.toLowerCase()) ||
-                p.studentId.toLowerCase().includes(search.toLowerCase()) ||
-                p.receiptNumber.toLowerCase().includes(search.toLowerCase()) ||
-                (p.referenceNumber && p.referenceNumber.toLowerCase().includes(search.toLowerCase())) ||
-                p.courseName.toLowerCase().includes(search.toLowerCase());
+                (p.studentName || "").toLowerCase().includes(sLower) ||
+                (p.studentId || "").toLowerCase().includes(sLower) ||
+                (p.receiptNumber || "").toLowerCase().includes(sLower) ||
+                (p.referenceNumber && p.referenceNumber.toLowerCase().includes(sLower)) ||
+                (p.courseName || "").toLowerCase().includes(sLower);
 
             const matchesMethod = methodFilter === "ALL" || p.paymentMethod === methodFilter;
             const matchesCategory = categoryFilter === "ALL" || p.feeCategory === categoryFilter;
@@ -496,7 +593,7 @@ export const TuitionFeePayment: React.FC = () => {
             if (dateFilter === "TODAY") {
                 matchesDate = p.paymentDate === todayStr;
             } else if (dateFilter === "THIS_MONTH") {
-                matchesDate = p.paymentDate.startsWith(todayStr.substring(0, 7));
+                matchesDate = Boolean(p.paymentDate && p.paymentDate.startsWith(todayStr.substring(0, 7)));
             }
 
             return matchesSearch && matchesMethod && matchesCategory && matchesDate;
@@ -671,26 +768,33 @@ export const TuitionFeePayment: React.FC = () => {
             paymentMethod: rec.paymentMethod,
             referenceNumber: rec.referenceNumber,
             paymentCategory: rec.feeCategory,
-            particulars: rec.subjectsPaid.length > 0
+            particulars: ((rec.subjectsPaid?.length ?? 0) > 0)
                 ? rec.subjectsPaid.map(s => ({
                       description: `${s.code} - ${s.title}`,
                       units: s.units,
                       rate: s.ratePerUnit,
                       amount: s.amount
                   }))
+                : (Array.isArray(rec.particulars) && rec.particulars.length > 0)
+                ? rec.particulars.map(pt => ({
+                      description: pt.description || pt.title || rec.feeCategory,
+                      units: pt.units,
+                      rate: pt.rate,
+                      amount: pt.amount
+                  }))
                 : [
                       {
-                          description: rec.feeCategory,
-                          amount: rec.amountPaid
+                          description: rec.feeCategory || "Tuition & Fees Settlement",
+                          amount: rec.amountPaid || 0
                       }
                   ],
-            subtotal: rec.subtotal,
-            discount: rec.scholarshipDiscount,
-            amountPaid: rec.amountPaid,
-            amountInWords: rec.amountInWords,
-            previousBalance: rec.previousBalance,
-            remainingBalance: rec.remainingBalance,
-            cashierName: rec.cashierName,
+            subtotal: rec.subtotal ?? rec.amountPaid ?? 0,
+            discount: rec.scholarshipDiscount ?? 0,
+            amountPaid: rec.amountPaid ?? 0,
+            amountInWords: rec.amountInWords || numberToWordsPesos(rec.amountPaid ?? 0),
+            previousBalance: rec.previousBalance ?? 0,
+            remainingBalance: rec.remainingBalance ?? 0,
+            cashierName: rec.cashierName || "Office of the Seminary Bursar",
             notes: rec.notes
         };
 
@@ -729,8 +833,8 @@ export const TuitionFeePayment: React.FC = () => {
                 p.courseName,
                 `${p.paymentMethod}${p.referenceNumber ? ` (${p.referenceNumber})` : ""}`,
                 p.feeCategory,
-                `₱${p.amountPaid.toLocaleString("en-US", { minimumFractionDigits: 2 })}`,
-                `₱${p.remainingBalance.toLocaleString("en-US", { minimumFractionDigits: 2 })}`
+                `₱${(p.amountPaid ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}`,
+                `₱${(p.remainingBalance ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}`
             ])
         });
     };
@@ -947,7 +1051,7 @@ export const TuitionFeePayment: React.FC = () => {
                                     </td>
                                     <td>
                                         <span className="course-badge" title={rec.courseName}>{rec.courseName}</span>
-                                        {rec.totalUnitsPaid > 0 && (
+                                        {(rec.totalUnitsPaid ?? 0) > 0 && (
                                             <div style={{ marginTop: "4px" }}>
                                                 <span className="subject-count-pill">{rec.totalUnitsPaid} Units Paid</span>
                                             </div>
@@ -955,15 +1059,20 @@ export const TuitionFeePayment: React.FC = () => {
                                     </td>
                                     <td>
                                         <span style={{ fontWeight: 600, fontSize: "12.5px" }}>{rec.feeCategory}</span>
-                                        {rec.subjectsPaid.length > 0 && (
+                                        {Array.isArray(rec.subjectsPaid) && rec.subjectsPaid.length > 0 && (
                                             <div style={{ fontSize: "11px", color: "#64748b", marginTop: "2px" }}>
                                                 {rec.subjectsPaid.map(s => s.code).join(", ")}
+                                            </div>
+                                        )}
+                                        {(!rec.subjectsPaid || rec.subjectsPaid.length === 0) && Array.isArray((rec as any).particulars) && (rec as any).particulars.length > 0 && (
+                                            <div style={{ fontSize: "11px", color: "#64748b", marginTop: "2px" }}>
+                                                {(rec as any).particulars.map((pt: any) => pt.description || pt.code).join(", ")}
                                             </div>
                                         )}
                                     </td>
                                     <td>
                                         <span className="payment-method-tag">
-                                            {rec.paymentMethod.includes("Cash") ? "💵" : rec.paymentMethod.includes("GCash") || rec.paymentMethod.includes("Maya") ? "📱" : "🏦"} {rec.paymentMethod}
+                                            {rec.paymentMethod?.includes("Cash") ? "💵" : rec.paymentMethod?.includes("GCash") || rec.paymentMethod?.includes("Maya") ? "📱" : "🏦"} {rec.paymentMethod}
                                         </span>
                                         {rec.referenceNumber && (
                                             <div style={{ fontSize: "10.5px", color: "#64748b", marginTop: "2px", fontFamily: "monospace" }}>
@@ -973,12 +1082,12 @@ export const TuitionFeePayment: React.FC = () => {
                                     </td>
                                     <td style={{ textAlign: "right" }}>
                                         <span className="amount-col-bold">
-                                            ₱{rec.amountPaid.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                                            ₱{(rec.amountPaid ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                                         </span>
                                     </td>
                                     <td style={{ textAlign: "right" }}>
                                         <span className={`balance-col-due ${rec.remainingBalance === 0 ? "paid" : ""}`}>
-                                            {rec.remainingBalance === 0 ? "PAID IN FULL" : `₱${rec.remainingBalance.toLocaleString("en-US", { minimumFractionDigits: 2 })}`}
+                                            {rec.remainingBalance === 0 ? "PAID IN FULL" : `₱${(rec.remainingBalance ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}`}
                                         </span>
                                     </td>
                                     <td style={{ textAlign: "center" }}>
@@ -1353,13 +1462,23 @@ export const TuitionFeePayment: React.FC = () => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {selectedReceipt.subjectsPaid.length > 0 ? (
+                                        {(selectedReceipt.subjectsPaid?.length ?? 0) > 0 ? (
                                             selectedReceipt.subjectsPaid.map((s, idx) => (
                                                 <tr key={idx} style={{ borderBottom: "1px solid #e2e8f0" }}>
                                                     <td style={{ padding: "6px 8px" }}>{s.code} - {s.title}</td>
                                                     <td style={{ padding: "6px 8px", textAlign: "center" }}>{s.units}</td>
                                                     <td style={{ padding: "6px 8px", textAlign: "right", fontWeight: 700 }}>
-                                                        ₱{s.amount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                                                        ₱{(s.amount ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                                                    </td>
+                                                </tr>
+                                            ))
+                                        ) : Array.isArray((selectedReceipt as any).particulars) && (selectedReceipt as any).particulars.length > 0 ? (
+                                            (selectedReceipt as any).particulars.map((pt: any, idx: number) => (
+                                                <tr key={idx} style={{ borderBottom: "1px solid #e2e8f0" }}>
+                                                    <td style={{ padding: "6px 8px" }}>{pt.description || "Tuition Settlement"}</td>
+                                                    <td style={{ padding: "6px 8px", textAlign: "center" }}>{pt.units ?? "-"}</td>
+                                                    <td style={{ padding: "6px 8px", textAlign: "right", fontWeight: 700 }}>
+                                                        ₱{(pt.amount ?? selectedReceipt.amountPaid ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                                                     </td>
                                                 </tr>
                                             ))
@@ -1368,7 +1487,7 @@ export const TuitionFeePayment: React.FC = () => {
                                                 <td style={{ padding: "6px 8px" }}>{selectedReceipt.feeCategory}</td>
                                                 <td style={{ padding: "6px 8px", textAlign: "center" }}>-</td>
                                                 <td style={{ padding: "6px 8px", textAlign: "right", fontWeight: 700 }}>
-                                                    ₱{selectedReceipt.amountPaid.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                                                    ₱{(selectedReceipt.amountPaid ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                                                 </td>
                                             </tr>
                                         )}
@@ -1385,14 +1504,14 @@ export const TuitionFeePayment: React.FC = () => {
                                     <div style={{ textAlign: "right" }}>
                                         <span style={{ fontSize: "11px", color: "#64748b" }}>TOTAL PAID:</span>
                                         <div style={{ fontSize: "20px", fontWeight: 900, color: "#1e3a8a" }}>
-                                            ₱{selectedReceipt.amountPaid.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+                                            ₱{(selectedReceipt.amountPaid ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                                         </div>
                                     </div>
                                 </div>
 
                                 <div style={{ display: "flex", justifyContent: "space-between", marginTop: "14px", fontSize: "11.5px", color: "#64748b" }}>
-                                    <div>Previous Balance: ₱{selectedReceipt.previousBalance.toLocaleString()}</div>
-                                    <div>Remaining Balance: <strong>₱{selectedReceipt.remainingBalance.toLocaleString()}</strong></div>
+                                    <div>Previous Balance: ₱{(selectedReceipt.previousBalance ?? 0).toLocaleString()}</div>
+                                    <div>Remaining Balance: <strong>₱{(selectedReceipt.remainingBalance ?? 0).toLocaleString()}</strong></div>
                                 </div>
                             </div>
                         </div>
