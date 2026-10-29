@@ -18,7 +18,7 @@ import ClientChurchProfile from "./ClientChurchProfile";
 import ClientMembers from "./ClientMembers";
 import ClientAttendance from "./ClientAttendance";
 import ClientChurchServices from "./ClientChurchServices";
-import GivingManagementPage from "./GivingManagementPage";
+import StudentPaymentSystem from "./client/StudentPaymentSystem";
 import StudentLearningArea from "./learning/StudentLearningArea";
 import MbsSupportManager from "./admin/MbsSupportManager";
 import StudentDashboard from "./client/StudentDashboard";
@@ -835,7 +835,9 @@ const ClientPortal: React.FC<ClientPortalProps> = ({
                             {
                                 activePage === "dashboard"
                                     ? "Student Academic & Financial Dashboard"
-                                    : activePage
+                                    : activePage === "giving"
+                                        ? "Tuition, Fees & Student Payables"
+                                        : activePage
                                         .replace(
                                             "-",
                                             " "
@@ -1031,11 +1033,8 @@ const ClientPortal: React.FC<ClientPortalProps> = ({
     activePage === "giving" &&
     canView("Giving") && (
 
-        <GivingManagementPage
-            permissions={permissions}
-            canCreate={canCreate("Giving")}
-            canEdit={canEdit("Giving")}
-            canDelete={canDelete("Giving")}
+        <StudentPaymentSystem
+            client={client}
             onBack={() =>
                 handleNavigate("dashboard")
             }
