@@ -17,7 +17,7 @@ import ClientSidebar, {
 import ClientChurchProfile from "./ClientChurchProfile";
 import ClientMembers from "./ClientMembers";
 import ClientAttendance from "./ClientAttendance";
-import ClientChurchServices from "./ClientChurchServices";
+import StudentScheduleSystem from "./client/StudentScheduleSystem";
 import StudentPaymentSystem from "./client/StudentPaymentSystem";
 import StudentLearningArea from "./learning/StudentLearningArea";
 import MbsSupportManager from "./admin/MbsSupportManager";
@@ -837,7 +837,9 @@ const ClientPortal: React.FC<ClientPortalProps> = ({
                                     ? "Student Academic & Financial Dashboard"
                                     : activePage === "giving"
                                         ? "Tuition, Fees & Student Payables"
-                                        : activePage
+                                        : activePage === "services"
+                                            ? "Realtime Class, Exam & Meeting Schedules"
+                                            : activePage
                                         .replace(
                                             "-",
                                             " "
@@ -1014,8 +1016,9 @@ const ClientPortal: React.FC<ClientPortalProps> = ({
                   {
     activePage === "services" &&
     canView("Services") && (
-        <ClientChurchServices
+        <StudentScheduleSystem
             permissions={permissions}
+            onNavigate={handleNavigate}
         />
     )
 }
