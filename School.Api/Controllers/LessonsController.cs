@@ -22,6 +22,7 @@ namespace School.Api.Controllers
         // GET: api/Lessons/module/1
         // =========================================================
 
+        [AllowAnonymous]
         [HttpGet("module/{moduleId:int}")]
         public async Task<IActionResult> GetLessons(int moduleId)
         {
@@ -65,6 +66,7 @@ namespace School.Api.Controllers
         // GET: api/Lessons/1
         // =========================================================
 
+        [AllowAnonymous]
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetLesson(int id)
         {

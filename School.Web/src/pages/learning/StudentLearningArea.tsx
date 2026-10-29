@@ -63,6 +63,7 @@ const StudentLearningArea: React.FC = () => {
             const clientUser = localStorage.getItem("clientUser") || sessionStorage.getItem("clientUser");
             if (clientUser) {
                 const parsed = JSON.parse(clientUser);
+                if (parsed.member?.fullName) return parsed.member.fullName;
                 if (parsed.fullName) return parsed.fullName;
                 if (parsed.username) return parsed.username;
             }
@@ -74,7 +75,7 @@ const StudentLearningArea: React.FC = () => {
         } catch {
             // fallback
         }
-        return "Alexander Cruz Reyes";
+        return "Kezjed Solutions";
     }, []);
 
     const studentId = useMemo(() => {
@@ -82,18 +83,23 @@ const StudentLearningArea: React.FC = () => {
             const clientUser = localStorage.getItem("clientUser") || sessionStorage.getItem("clientUser");
             if (clientUser) {
                 const parsed = JSON.parse(clientUser);
+                if (parsed.member?.memberCode) return parsed.member.memberCode;
                 if (parsed.memberCode) return parsed.memberCode;
             }
         } catch {
             // fallback
         }
-        return "STD-2026-0001";
+        return "STD-2026-KEZJED";
     }, []);
 
     // Refresh trigger to react to live changes in Lesson Studio or Curriculum
     const [refreshNonce, setRefreshNonce] = useState(0);
 
     useEffect(() => {
+        // Load authentic curriculum and lessons directly from live database API
+        courseCurriculumService.fetchCoursesFromApi().then(() => setRefreshNonce((n) => n + 1));
+        lessonContentService.fetchLessonsFromApi().then(() => setRefreshNonce((n) => n + 1));
+
         const handleLessonsUpdated = () => {
             setRefreshNonce((n) => n + 1);
         };

@@ -22,6 +22,7 @@ namespace School.Api.Controllers
         // GET: api/Courses
         // =========================================================
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetCourses(
             [FromQuery] bool? published = null,
@@ -71,7 +72,37 @@ namespace School.Api.Controllers
 
                     LessonCount = c.Modules
                         .SelectMany(m => m.Lessons)
-                        .Count()
+                        .Count(),
+
+                    Modules = c.Modules
+                        .OrderBy(m => m.SortOrder)
+                        .Select(m => new
+                        {
+                            m.CourseModuleId,
+                            m.CourseId,
+                            m.Title,
+                            m.Description,
+                            m.SortOrder,
+                            m.IsPublished,
+                            LessonCount = m.Lessons.Count(),
+                            Lessons = m.Lessons
+                                .OrderBy(l => l.SortOrder)
+                                .Select(l => new
+                                {
+                                    l.LessonId,
+                                    l.CourseModuleId,
+                                    l.Title,
+                                    l.Content,
+                                    l.VideoUrl,
+                                    l.ResourceUrl,
+                                    l.SortOrder,
+                                    l.EstimatedMinutes,
+                                    l.IsPublished,
+                                    l.IsFreePreview
+                                })
+                                .ToList()
+                        })
+                        .ToList()
                 })
                 .ToListAsync();
 
@@ -83,6 +114,7 @@ namespace School.Api.Controllers
         // GET: api/Courses/5
         // =========================================================
 
+        [AllowAnonymous]
         [HttpGet("{id:int}")]
 public async Task<IActionResult> GetCourse(int id)
 {

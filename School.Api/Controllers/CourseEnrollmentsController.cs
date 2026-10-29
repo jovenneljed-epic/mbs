@@ -25,11 +25,11 @@ namespace School.Api.Controllers
         // =========================================================
 
         [HttpGet("my-courses")]
-        public async Task<IActionResult> GetMyCourses()
+        public async Task<IActionResult> GetMyCourses([FromQuery] int? userId = null)
         {
-            var userId = GetCurrentUserId();
+            var resolvedUserId = userId ?? GetCurrentUserId();
 
-            if (userId == null)
+            if (resolvedUserId == null)
             {
                 return Unauthorized(new
                 {
@@ -39,14 +39,18 @@ namespace School.Api.Controllers
 
             var enrollments = await _context.CourseEnrollments
                 .AsNoTracking()
-                .Where(e => e.UserId == userId.Value)
+                .Where(e => e.UserId == resolvedUserId.Value)
                 .Include(e => e.Course)
+                    .ThenInclude(c => c!.Modules)
+                        .ThenInclude(m => m.Lessons)
                 .OrderByDescending(e => e.EnrolledDate)
                 .Select(e => new
                 {
                     e.CourseEnrollmentId,
                     e.CourseId,
                     CourseTitle = e.Course!.Title,
+                    e.Course!.ShortDescription,
+                    e.Course!.Description,
                     e.Course!.ThumbnailUrl,
                     e.Course!.Category,
                     e.Course!.Level,
@@ -54,7 +58,28 @@ namespace School.Api.Controllers
                     e.EnrolledDate,
                     e.CompletedDate,
                     e.IsCompleted,
-                    e.ProgressPercentage
+                    e.ProgressPercentage,
+                    Modules = e.Course.Modules.OrderBy(m => m.SortOrder).Select(m => new
+                    {
+                        m.CourseModuleId,
+                        m.Title,
+                        m.Description,
+                        m.SortOrder,
+                        m.IsPublished,
+                        Lessons = m.Lessons.OrderBy(l => l.SortOrder).Select(l => new
+                        {
+                            l.LessonId,
+                            l.CourseModuleId,
+                            l.Title,
+                            l.Content,
+                            l.VideoUrl,
+                            l.ResourceUrl,
+                            l.SortOrder,
+                            l.EstimatedMinutes,
+                            l.IsPublished,
+                            l.IsFreePreview
+                        }).ToList()
+                    }).ToList()
                 })
                 .ToListAsync();
 

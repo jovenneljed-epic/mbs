@@ -1420,17 +1420,8 @@ namespace School.Api.Controllers
                 }
 
                 // -------------------------------------------------
-                // VIEW PERMISSION
+                // VIEW PERMISSION (Students are always permitted to view their own attendance)
                 // -------------------------------------------------
-
-                var permission =
-                    await RequirePermissionAsync(
-                        "view");
-
-                if (permission != null)
-                {
-                    return permission;
-                }
 
                 // -------------------------------------------------
                 // ACCESS

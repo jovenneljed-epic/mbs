@@ -1,3 +1,5 @@
+import axios from "axios";
+import { API_BASE_URL } from "../config";
 /* =========================================================
    LESSON CONTENT SERVICE
    Manages curriculum lessons, expository reading notes,
@@ -54,32 +56,32 @@ const SUBMISSIONS_STORAGE_KEY = "sms_student_submissions_store_v2";
 ========================================================= */
 
 const INITIAL_LESSONS: CourseLesson[] = [
-    // --- HERM-101 ---
+    // --- CBS 104: Biblical Hermeneutics & Inductive Exegesis ---
     {
-        id: "herm-101-l1",
-        courseCode: "HERM-101",
+        id: "cbs-104-l1",
+        courseCode: "CBS 104",
         lessonNumber: 1,
-        title: "Introduction to Biblical Exegesis & Divine Inspiration",
-        duration: "45 mins lecture • 12 pages reading",
+        title: "Lesson 1: Divine Inspiration & Verbal Plenary Authority (2 Timothy 3:16-17)",
+        duration: "45 mins lecture • Expository study",
         isPublished: true,
-        scriptureReference: "2 Timothy 3:16-17 • 'All Scripture is God-breathed and profitable for teaching...'",
-        overview: "Explores the dual authorship of Scripture, plenary verbal inspiration, and the foundational necessity of sound grammatical-historical interpretation.",
+        scriptureReference: "2 Timothy 3:16-17 • 'All Scripture is God-breathed (theopneustos) and profitable for doctrine...'",
+        overview: "Explores the dual authorship of Scripture, verbal plenary inspiration, and the foundational necessity of sound grammatical-historical interpretation.",
         readingContent: [
             "Biblical Hermeneutics is the science and art of biblical interpretation. It is a science because it is guided by recognized rules and principles; it is an art because application requires spiritual sensitivity and diligence.",
             "The primary objective of exegesis is to uncover the author-intended meaning (sensus literalis) within its original historical, cultural, and literary context before constructing homiletical applications.",
-            "The interpreter must bridge the hermeneutical gap: the temporal gap (thousands of years), the geographical gap (Near East / Mediterranean), the linguistic gap (Hebrew, Aramaic, Greek), and the cultural gap."
+            "The interpreter must bridge the hermeneutical gap: the temporal gap (thousands of years elapsed), the geographical gap (Near East / Mediterranean), the linguistic gap (Hebrew, Aramaic, Greek), and the cultural gap."
         ],
         keyTakeaways: [
             "Scripture cannot mean what it never meant to the original recipients.",
             "Context determines meaning: literary context, historical context, and canonical context.",
             "The Holy Spirit illuminates the text but does not replace careful study and grammatical exegesis."
         ],
-        videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-        audioUrl: "https://example.com/audio/herm-101-lesson-1.mp3",
+        videoUrl: "https://www.youtube.com/embed/fD309vK_jN0",
+        pdfSyllabusUrl: "https://mbs-seminary.edu.ph/syllabi/CBS104_Hermeneutics_StudyGuide.pdf",
         assignmentPrompt: "In 300-500 words, explain why verbal plenary inspiration necessitates the grammatical-historical method rather than allegorical reading.",
         quizQuestions: [
             {
-                id: "q-herm-1-1",
+                id: "q-cbs104-1-1",
                 question: "What is the primary objective of Biblical Exegesis?",
                 options: [
                     "To read modern personal feelings into the passage",
@@ -91,7 +93,7 @@ const INITIAL_LESSONS: CourseLesson[] = [
                 explanation: "Exegesis literally means 'to draw out' the meaning from the text, as opposed to eisegesis which reads ideas into the text."
             },
             {
-                id: "q-herm-1-2",
+                id: "q-cbs104-1-2",
                 question: "Which Scripture validates the plenary verbal inspiration of the Bible?",
                 options: [
                     "2 Timothy 3:16-17",
@@ -106,308 +108,256 @@ const INITIAL_LESSONS: CourseLesson[] = [
         updatedAt: new Date().toISOString()
     },
     {
-        id: "herm-101-l2",
-        courseCode: "HERM-101",
+        id: "cbs-104-l2",
+        courseCode: "CBS 104",
         lessonNumber: 2,
-        title: "Historical-Cultural & Grammatical Framework",
-        duration: "52 mins lecture • 15 pages reading",
+        title: "Lesson 2: Bridging the Hermeneutical Gap: Historical, Cultural & Grammatical Context",
+        duration: "50 mins lecture • Expository study",
         isPublished: true,
-        scriptureReference: "Nehemiah 8:8 • 'They read from the Book of the Law of God, making it clear and giving the meaning...'",
-        overview: "Detailed analysis of Ancient Near Eastern and Greco-Roman backgrounds, syntactical sentence diagramming, and word-study fallacies.",
+        scriptureReference: "Nehemiah 8:8 • 'They read from the Book of the Law of God, clearly, and gave the sense...'",
+        overview: "Methodology for analyzing original socio-cultural settings, ancient customs, idiom meanings, and syntax.",
         readingContent: [
-            "To understand Old Testament covenant stipulations, the student of theology must grasp the Hittite Suzerain-Vassal treaty structure common in the 2nd millennium BC.",
-            "Words have a semantic range (semantic field), but in any given sentence, a word carries only one specific meaning determined by its immediate syntactical context.",
-            "Beware of the Root Fallacy (assuming a word's etymology determines its current meaning) and Anachronistic Fallacies (reading modern definitions into ancient words)."
+            "The historical-cultural context involves investigating the writer's identity, date of writing, the historical situation of the recipients, and the social mores of biblical antiquity.",
+            "Failure to understand cultural idioms often produces misinterpretation. When Jesus spoke of a 'camel going through the eye of a needle,' He employed hyperbole to emphasize human impossibility without divine grace."
         ],
         keyTakeaways: [
-            "Never perform word studies in isolation from immediate sentence grammar.",
-            "Historical geography illuminates theological narratives in Israel's journey.",
-            "The Old Testament covenants find their ultimate fulfillment in Jesus Christ."
+            "Always reconstruct the historical setting of the author and audience.",
+            "Words have semantic ranges; their precise meaning is fixed by their sentence and paragraph context."
         ],
-        videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-        audioUrl: "https://example.com/audio/herm-101-lesson-2.mp3",
-        assignmentPrompt: "Identify three lexical or grammatical fallacies common in contemporary preaching and describe how rigorous hermeneutics prevents them.",
+        videoUrl: "https://www.youtube.com/embed/bXv40182RzI",
+        pdfSyllabusUrl: "https://mbs-seminary.edu.ph/syllabi/CBS104_Lesson2_Exegesis_Worksheet.pdf",
+        assignmentPrompt: "Select a biblical narrative and outline its historical, geographical, and cultural setting in 300 words.",
         quizQuestions: [
             {
-                id: "q-herm-2-1",
-                question: "What is the 'Root Fallacy' in lexical semantics?",
+                id: "q-cbs104-2-1",
+                question: "What is meant by the 'hermeneutical gap'?",
                 options: [
-                    "Studying plants in Genesis",
-                    "Assuming a word's ancient etymology defines its meaning in every context",
-                    "Believing roots of verbs don't matter",
-                    "Translating Hebrew directly into Latin"
+                    "A gap between the Old and New Testaments only",
+                    "The temporal, cultural, geographical, and linguistic differences between ancient texts and modern readers",
+                    "A typo in modern Bible translations",
+                    "The difference between King James and modern English"
                 ],
                 correctIndex: 1,
-                explanation: "The root fallacy falsely assumes the origin or etymological root of a word governs its usage centuries later."
+                explanation: "The interpreter must bridge the distance across time, culture, geography, and language to hear the text accurately."
             }
         ],
         updatedAt: new Date().toISOString()
     },
     {
-        id: "herm-101-l3",
-        courseCode: "HERM-101",
+        id: "cbs-104-l3",
+        courseCode: "CBS 104",
         lessonNumber: 3,
-        title: "Literary Genres: Epistles, Narratives, Prophecy & Parables",
-        duration: "58 mins lecture • 18 pages reading",
+        title: "Lesson 3: Literary Genre Analysis: Narrative, Law, Poetry, Prophecy & Epistles",
+        duration: "60 mins lecture • Expository study",
         isPublished: true,
-        scriptureReference: "Hebrews 1:1-2 • 'In the past God spoke to our ancestors through the prophets at many times and in various ways...'",
-        overview: "Methodology for interpreting differing biblical genres with fidelity to their literary structure and theological purpose.",
+        scriptureReference: "Luke 24:27 • 'And beginning with Moses and all the Prophets, He interpreted to them in all the Scriptures the things concerning Himself.'",
+        overview: "Techniques for interpreting different biblical genres with integrity and canonical consistency.",
         readingContent: [
-            "Epistles are task-theology written to specific first-century church situations. We must identify the occasion, problem addressed, and timeless theological principle.",
-            "Old Testament narratives are theological history, not mere moral fables. The hero of every biblical narrative is Yahweh God, working out His redemptive covenant.",
-            "Hebrew poetry relies heavily on parallelism (Synonymous, Antithetic, Synthetic, and Chiastic structures) rather than phonetic rhyme."
+            "Each genre in Scripture has its own 'rules of engagement.' Old Testament narrative records what took place historically, not necessarily what ought to take place morally.",
+            "Hebrew poetry uses parallelism—synonymous, antithetical, and synthetic—to emphasize theological realities rather than phonetic rhyming.",
+            "New Testament epistles are occasion-specific theological letters requiring careful tracking of logical connectors (therefore, because, in order that)."
         ],
         keyTakeaways: [
-            "Narratives describe what happened; they do not necessarily prescribe what we must do.",
-            "Parables typically center on one overarching theological focal point.",
-            "Apocalyptic literature utilizes vivid symbolic imagery to depict ultimate divine victory."
+            "Do not interpret poetry as strict prose, or descriptive narrative as prescriptive doctrine.",
+            "Identify the genre before applying hermeneutical principles."
         ],
-        videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-        audioUrl: "https://example.com/audio/herm-101-lesson-3.mp3",
-        assignmentPrompt: "Analyze the literary structure of Psalm 1 and outline its antithetical parallelism and tree metaphor.",
+        videoUrl: "https://www.youtube.com/embed/2YpX2bB9z5M",
+        pdfSyllabusUrl: "https://mbs-seminary.edu.ph/syllabi/CBS104_Lesson3_Genre_Matrix.pdf",
+        assignmentPrompt: "Compare how Psalm 23 (poetry) and Romans 8 (epistle) communicate God's unfailing protection.",
         quizQuestions: [
             {
-                id: "q-herm-3-1",
-                question: "How does Hebrew poetry primarily create rhythm and emphasis?",
+                id: "q-cbs104-3-1",
+                question: "What is the primary feature of Hebrew poetry?",
                 options: [
-                    "Through end-rhyming phonetic verses",
-                    "Through parallelism of thoughts and concepts",
-                    "Through musical notation only",
-                    "Through strict iambic pentameter"
+                    "End rhyme and iambic pentameter",
+                    "Parallelism of thought",
+                    "Alphabetical acrostics only",
+                    "Allegorical storytelling"
                 ],
                 correctIndex: 1,
-                explanation: "Hebrew poetry is characterized by semantic parallelism, where consecutive lines echo, contrast, or build upon each other."
+                explanation: "Hebrew poetry is structured around thought parallelism rather than phonetic meter."
             }
         ],
         updatedAt: new Date().toISOString()
     },
+
+    // --- CBS 102: Old Testament Survey & Pentateuch ---
     {
-        id: "herm-101-l4",
-        courseCode: "HERM-101",
-        lessonNumber: 4,
-        title: "Theological Synthesis & Modern Pastoral Application",
-        duration: "40 mins lecture • 10 pages reading",
+        id: "cbs-102-l1",
+        courseCode: "CBS 102",
+        lessonNumber: 1,
+        title: "Lesson 1: Creation, The Fall & The Protoevangelium in Genesis",
+        duration: "45 mins lecture • Pentateuch Exegesis",
         isPublished: true,
-        scriptureReference: "James 1:22 • 'Do not merely listen to the word, and so deceive yourselves. Do what it says.'",
-        overview: "Bridging the ancient biblical text to modern 21st-century church ministry, personal discipleship, and homiletical delivery.",
+        scriptureReference: "Genesis 3:15 • 'I will put enmity between you and the woman, and between your offspring and her offspring...'",
+        overview: "Genesis serves as the foundational seedbed for all biblical theology, tracing the creation ex nihilo, the fall, and the first promise of the Redeemer.",
         readingContent: [
-            "Once original meaning is established through exegesis, the interpreter builds a theological principle that transcends time, geography, and culture.",
-            "Application must align with the full counsel of God across the Old and New Testaments without legalism or antinomian license.",
-            "Every authentic sermon must point ultimately to the gospel of Jesus Christ and call for faith, repentance, and practical Christian obedience."
+            "Genesis 1-2 presents creation ex nihilo and the imago Dei endowed upon humanity.",
+            "Genesis 3 records the tragedy of the fall and God's first announcement of redemption (the Protoevangelium in Genesis 3:15), promising that the Seed of the woman would crush the serpent's head."
         ],
         keyTakeaways: [
-            "Exegesis without application is dead orthodoxy.",
-            "Application without sound exegesis is humanistic moralism.",
-            "Preach Christ from all of Scripture with Holy Spirit empowerment."
+            "Genesis establishes God as Sovereign Creator and Lawgiver.",
+            "The redemptive covenant begins in Genesis 3:15 and culminates at Calvary."
         ],
-        videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-        audioUrl: "https://example.com/audio/herm-101-lesson-4.mp3",
-        assignmentPrompt: "Construct an expository sermon outline on Romans 8:28-30 applying the theological synthesis method.",
+        videoUrl: "https://www.youtube.com/embed/g93U6q8_w1g",
+        pdfSyllabusUrl: "https://mbs-seminary.edu.ph/syllabi/CBS102_Pentateuch_Notes.pdf",
+        assignmentPrompt: "Trace the theme of the 'Seed' from Genesis 3:15 through Genesis 12:1-3.",
         quizQuestions: [
             {
-                id: "q-herm-4-1",
-                question: "What is the danger of application without sound grammatical-historical exegesis?",
+                id: "q-cbs102-1-1",
+                question: "What theological term describes the first gospel promise in Genesis 3:15?",
                 options: [
-                    "It becomes humanistic moralism and misrepresents God's Word",
-                    "It causes people to read too much Greek",
-                    "It has no danger at all",
-                    "It makes sermons too short"
+                    "Protoevangelium",
+                    "Theophany",
+                    "Hypostatic union",
+                    "Eschaton"
                 ],
                 correctIndex: 0,
-                explanation: "Without sound exegesis, applications stray from God's intended revelation and degenerate into humanistic advice."
-            }
-        ],
-        updatedAt: new Date().toISOString()
-    },
-
-    // --- OT-101 ---
-    {
-        id: "ot-101-l1",
-        courseCode: "OT-101",
-        lessonNumber: 1,
-        title: "The Pentateuch: Creation, Fall, and the Abrahamic Covenant",
-        duration: "50 mins lecture • 16 pages reading",
-        isPublished: true,
-        scriptureReference: "Genesis 12:1-3 • 'I will make of you a great nation, and I will bless you and make your name great...'",
-        overview: "Foundational study of Genesis through Deuteronomy, surveying the primeval history and God's unilateral redemptive covenant with Abraham.",
-        readingContent: [
-            "The Pentateuch (Torah) lays the non-negotiable theological substructure of the entire biblical canon.",
-            "In Genesis 15, Yahweh passes through the animal pieces alone, establishing an unconditional covenant guaranteeing land, seed, and blessing.",
-            "The Exodus event establishes Yahweh as Redeemer-King who delivers His chosen people from servitude to enter covenant fellowship at Sinai."
-        ],
-        keyTakeaways: [
-            "God initiates covenant redemption by sovereign grace alone.",
-            "The Abrahamic Covenant anticipates the salvation of all nations through Jesus Christ.",
-            "The Law of Moses was a tutor leading to Christ (Galatians 3:24)."
-        ],
-        videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-        assignmentPrompt: "Examine the unilateral nature of Genesis 15 and how it differs from ancient parity treaties.",
-        quizQuestions: [
-            {
-                id: "q-ot-1-1",
-                question: "Who passed through the animal pieces in Genesis 15 covenant ceremony?",
-                options: [
-                    "Abraham and Sarah",
-                    "Yahweh alone (represented by the smoking pot and flaming torch)",
-                    "Melchizedek",
-                    "The elders of Canaan"
-                ],
-                correctIndex: 1,
-                explanation: "God alone passed through the pieces, signaling that fulfillment depends solely on divine faithfulness."
+                explanation: "Protoevangelium literally means 'the first gospel announcement.'"
             }
         ],
         updatedAt: new Date().toISOString()
     },
     {
-        id: "ot-101-l2",
-        courseCode: "OT-101",
+        id: "cbs-102-l2",
+        courseCode: "CBS 102",
         lessonNumber: 2,
-        title: "The Historical Books: Theocratic Monarchy & Davidic Promise",
-        duration: "48 mins lecture • 14 pages reading",
+        title: "Lesson 2: The Abrahamic & Mosaic Covenants: Promise and Law",
+        duration: "50 mins lecture • Pentateuch Exegesis",
         isPublished: true,
-        scriptureReference: "2 Samuel 7:12-13 • 'I will raise up your offspring to succeed you... and I will establish the throne of his kingdom forever.'",
-        overview: "Chronicles the conquest of Canaan, the judges period, the rise of the monarchy, and God's eternal covenant with David.",
+        scriptureReference: "Genesis 12:1-3; Exodus 19:5-6 • Covenant faithfulness and priestly calling.",
+        overview: "Examines God's unconditional covenant with Abraham and the pedagogical role of the Sinai law.",
         readingContent: [
-            "Israel's history illustrates repetitive cycles of apostasy, oppression, repentance, and deliverance in the Book of Judges.",
-            "The Davidic Covenant in 2 Samuel 7 promises an eternal dynasty, throne, and kingdom, which finds ultimate fulfillment in King Jesus.",
-            "The exile to Babylon was not divine weakness, but the covenantal curses of Deuteronomy 28 executed in holy justice."
+            "God's covenant with Abraham guaranteed land, seed, and blessing, foreshadowing justification by faith (Romans 4).",
+            "The Mosaic covenant provided the moral, civil, and ceremonial law, revealing holiness and driving sinners to Christ."
         ],
         keyTakeaways: [
-            "God is sovereign over the rise and fall of nations and empires.",
-            "The Davidic King points to the Messiah who reigns in righteousness.",
-            "Unfaithfulness brings discipline, but God remembers His covenant mercy."
+            "The Abrahamic covenant is grounded in sovereign promise.",
+            "The Mosaic law acts as a paidagogos (tutor) pointing to the Messiah."
         ],
-        videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-        assignmentPrompt: "Trace the motif of the Messianic Davidic King through Isaiah, Jeremiah, and the Gospels.",
+        videoUrl: "https://www.youtube.com/embed/7V2VvP2XfHQ",
+        pdfSyllabusUrl: "https://mbs-seminary.edu.ph/syllabi/CBS102_Covenants_Overview.pdf",
+        assignmentPrompt: "Explain how Galatians 3 harmonizes the Abrahamic promise and the Mosaic law.",
         quizQuestions: [
             {
-                id: "q-ot-2-1",
-                question: "What does God promise David in 2 Samuel 7?",
+                id: "q-cbs102-2-1",
+                question: "What was the purpose of the Mosaic law according to Galatians 3:24?",
                 options: [
-                    "A massive physical temple made of gold",
-                    "An eternal kingdom, house, and throne through his seed",
-                    "Victory over Egypt in his lifetime only",
-                    "Direct wealth and silver"
+                    "To replace the Abrahamic promise",
+                    "To serve as a guardian/tutor to lead us to Christ",
+                    "To prove human moral perfection",
+                    "To eliminate the sacrificial system"
                 ],
                 correctIndex: 1,
-                explanation: "2 Samuel 7 is the Davidic Covenant establishing an eternal dynasty fulfilled in Christ."
+                explanation: "Paul teaches that the law reveals sin to lead believers to justification by faith in Christ."
             }
         ],
         updatedAt: new Date().toISOString()
     },
 
-    // --- NT-101 ---
+    // --- CBS 103: New Testament Survey & Apostolic Epistles ---
     {
-        id: "nt-101-l1",
-        courseCode: "NT-101",
+        id: "cbs-103-l1",
+        courseCode: "CBS 103",
         lessonNumber: 1,
-        title: "The Synoptic Gospels: Kingdom of God & Messianic Identity",
-        duration: "45 mins lecture • 13 pages reading",
+        title: "Lesson 1: The Fourfold Gospel Witness to the Messianic King",
+        duration: "55 mins lecture • Canonical Gospels",
         isPublished: true,
-        scriptureReference: "Mark 1:14-15 • 'The time has come. The kingdom of God has come near. Repent and believe the good news!'",
-        overview: "Examination of Matthew, Mark, and Luke emphasizing the inaugurated eschatology of the Kingdom and Jesus as the promised Messiah.",
+        scriptureReference: "John 20:31 • 'These are written that you may believe that Jesus is the Christ, the Son of God...'",
+        overview: "Distinct portraits of Christ presented by Matthew, Mark, Luke, and John.",
         readingContent: [
-            "The Synoptic Gospels provide complementary portraits of the life, death, and resurrection of Jesus Christ.",
-            "The Kingdom of God is 'already but not yet': already inaugurated in Christ's first advent, and consummated at His glorious return.",
-            "Jesus' miracles are not mere spectacles, but signposts of cosmic restoration breaking into the present fallen age."
+            "Matthew portrays the King fulfilling prophecy; Mark reveals the Servant acting with divine urgency; Luke displays the Son of Man seeking the lost; John unveils the Eternal Word made flesh."
         ],
         keyTakeaways: [
-            "Matthew highlights Jesus as the fulfillment of Old Testament Messianic prophecy.",
-            "Mark presents Jesus as the Suffering Servant who gives His life a ransom for many.",
-            "Luke emphasizes Christ's compassion for the marginalized and the power of the Holy Spirit."
+            "The four Gospels offer an infallible, multidimensional portrait of the Lord Jesus Christ.",
+            "The synoptics emphasize chronological narrative while John provides theological reflection."
         ],
-        videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-        assignmentPrompt: "Discuss the theological significance of the 'already and not yet' tension in Christian daily discipleship.",
+        videoUrl: "https://www.youtube.com/embed/3vO9Yd1Z2wQ",
+        pdfSyllabusUrl: "https://mbs-seminary.edu.ph/syllabi/CBS103_Gospels_Synoptic_Chart.pdf",
+        assignmentPrompt: "Write a comparative analysis of the introductions of Matthew 1 and John 1.",
         quizQuestions: [
             {
-                id: "q-nt-1-1",
-                question: "What is the primary message of Jesus' preaching in Mark 1:15?",
-                options: [
-                    "Revolt against the Roman empire",
-                    "The Kingdom of God has come near; repent and believe the good news",
-                    "Keep the traditions of the Pharisees",
-                    "Build synagogues across Galilee"
-                ],
+                id: "q-cbs103-1-1",
+                question: "Which Gospel writer emphasizes Jesus as the promised Davidic Messianic King to Jewish readers?",
+                options: ["Mark", "Matthew", "Luke", "John"],
                 correctIndex: 1,
-                explanation: "Jesus declared the inauguration of God's redemptive rule calling for repentance and faith."
+                explanation: "Matthew frequently quotes OT prophecies fulfilling Christ's kingship."
             }
         ],
         updatedAt: new Date().toISOString()
     },
 
-    // --- THEO-101 ---
+    // --- CBS 101: Life of Christ & Synoptic Gospels ---
     {
-        id: "theo-101-l1",
-        courseCode: "THEO-101",
+        id: "cbs-101-l1",
+        courseCode: "CBS 101",
         lessonNumber: 1,
-        title: "Bibliology: Revelation, Inerrancy & Canon of Scripture",
-        duration: "55 mins lecture • 20 pages reading",
+        title: "Lesson 1: The Incarnation & Virgin Conception of Christ",
+        duration: "45 mins lecture • Christology",
         isPublished: true,
-        scriptureReference: "Psalm 19:1-4 & 2 Peter 1:20-21 • 'Men spoke from God as they were carried along by the Holy Spirit.'",
-        overview: "Investigation into General and Special Revelation, the doctrine of biblical inerrancy, and the historical formation of the Canon.",
+        scriptureReference: "Luke 1:35; John 1:14 • The Word became flesh and dwelt among us.",
+        overview: "Examines the hypostatic union, virgin birth, and deity of Christ.",
         readingContent: [
-            "General revelation discloses God's existence, eternal power, and divine nature through creation and conscience, leaving humanity without excuse.",
-            "Special revelation provides the explicit verbal knowledge of God's redemptive will, culminative in the Incarnate Word (Jesus) and the Inscripturated Word (the Bible).",
-            "Inerrancy means that Scripture in its original autographs is entirely true and trustworthy in all that it affirms."
+            "Jesus Christ is truly God and truly man in one undivided person.",
+            "The virgin conception ensured His sinless human nature to redeem humanity."
         ],
         keyTakeaways: [
-            "General revelation reveals God's power; special revelation reveals God's salvation.",
-            "The church did not create the Canon; the church recognized God's inspired voice.",
-            "The Chicago Statement on Biblical Inerrancy provides a robust defense of Scripture's truthfulness."
+            "The hypostatic union: two natures without mixture, change, division, or separation.",
+            "Christ is the spotless Lamb who alone could pay our sin debt."
         ],
-        videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-        assignmentPrompt: "Defend biblical inerrancy against modern postmodern critiques using Scripture and historical orthodox theology.",
+        videoUrl: "https://www.youtube.com/embed/5kLw3V2n6uM",
+        pdfSyllabusUrl: "https://mbs-seminary.edu.ph/syllabi/CBS101_Incarnation_Doctrine.pdf",
+        assignmentPrompt: "Summarize the Council of Chalcedon (451 AD) definition of Christ's two natures.",
         quizQuestions: [
             {
-                id: "q-theo-1-1",
-                question: "What is the difference between General and Special Revelation?",
+                id: "q-cbs101-1-1",
+                question: "What does the theological term 'hypostatic union' mean?",
                 options: [
-                    "General is for angels, Special is for humans",
-                    "General is through creation/nature, Special is through Scripture and Jesus Christ",
-                    "General is written in Hebrew, Special is written in Greek",
-                    "There is no difference"
+                    "The combination of faith and good works",
+                    "The union of Christ's divine and human natures in one divine Person",
+                    "The fellowship between believers and the local church",
+                    "The harmony of the Old and New Testaments"
                 ],
                 correctIndex: 1,
-                explanation: "General revelation is given to all mankind through creation, while Special revelation reveals the gospel through God's Word."
+                explanation: "The hypostatic union defines the coexistence of Christ's full humanity and full divinity."
             }
         ],
         updatedAt: new Date().toISOString()
     },
 
-    // --- MIN-101 ---
+    // --- DPS 201: Systematic Theology I ---
     {
-        id: "min-101-l1",
-        courseCode: "MIN-101",
+        id: "dps-201-l1",
+        courseCode: "DPS 201",
         lessonNumber: 1,
-        title: "The Biblical Shepherd: Character, Calling & Pastoral Qualifications",
-        duration: "45 mins lecture • 15 pages reading",
+        title: "Lesson 1: Bibliology: The Canon, Sufficiency & Infallibility of the Word",
+        duration: "50 mins lecture • Systematic Doctrine",
         isPublished: true,
-        scriptureReference: "1 Peter 5:2-3 • 'Be shepherds of God's flock that is under your care, watching over them... as examples to the flock.'",
-        overview: "Comprehensive study of the biblical mandates for elders and shepherds in 1 Timothy 3, Titus 1, and 1 Peter 5.",
+        scriptureReference: "Psalm 19:7-11 • The law of the Lord is perfect, reviving the soul.",
+        overview: "Canonical boundaries, self-authenticating authority, and Sola Scriptura.",
         readingContent: [
-            "Biblical ministry flows from spiritual character rather than corporate managerial charisma.",
-            "The pastor must be above reproach: a faithful husband, hospitable, able to teach, gentle, and self-controlled.",
-            "Shepherding involves feeding the sheep sound doctrine, guarding them from ravenous wolves, and leading them into spiritual maturity."
+            "Scripture alone is the ultimate infallible rule of faith and life (Sola Scriptura).",
+            "The internal testimony of the Holy Spirit confirms the canonical validity of the sixty-six books."
         ],
         keyTakeaways: [
-            "Character takes precedence over gifting in biblical leadership.",
-            "Ministry is servanthood modeled on the Good Shepherd who lays down His life.",
-            "Family health and moral integrity are primary qualifications for church oversight."
+            "God's Word is sufficient for life, godliness, and ministry.",
+            "The canon was recognized by the church, not created by church decree."
         ],
-        videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
-        assignmentPrompt: "Draft a personal pastoral rule of life reflecting the qualifications of 1 Timothy 3:1-7.",
+        videoUrl: "https://www.youtube.com/embed/6eZ4m9Q3m0A",
+        pdfSyllabusUrl: "https://mbs-seminary.edu.ph/syllabi/DPS201_Bibliology_Syllabus.pdf",
+        assignmentPrompt: "Defend the doctrine of Sola Scriptura against modern cultural relativism.",
         quizQuestions: [
             {
-                id: "q-min-1-1",
-                question: "According to 1 Timothy 3, what is the primary prerequisite for pastoral leadership?",
+                id: "q-dps201-1-1",
+                question: "What does Sola Scriptura affirm?",
                 options: [
-                    "Wealth and business influence",
-                    "Blameless moral and spiritual character",
-                    "High popularity ratings on social media",
-                    "Extensive political connections"
+                    "No books other than the Bible may ever be read",
+                    "Scripture is the only infallible rule for Christian faith and practice",
+                    "Church tradition holds equal authority with Scripture",
+                    "Every Christian must learn ancient languages"
                 ],
                 correctIndex: 1,
-                explanation: "Paul specifies that overseers must be 'above reproach' with godly household leadership and spiritual integrity."
+                explanation: "Sola Scriptura establishes Scripture as the sole infallible norma normans."
             }
         ],
         updatedAt: new Date().toISOString()
@@ -416,49 +366,94 @@ const INITIAL_LESSONS: CourseLesson[] = [
 
 const INITIAL_SUBMISSIONS: StudentSubmission[] = [
     {
-        id: "sub-001",
-        lessonId: "herm-101-l1",
-        courseCode: "HERM-101",
-        studentName: "Joshua Mark Bautista",
-        studentId: "MBS-2026-0012",
-        submissionDate: "2026-10-18T14:30:00.000Z",
-        reflectionText: "Because verbal plenary inspiration affirms that every word of the original text was breathed out by God, we are bound to seek the exact sense intended by the human author whom the Spirit carried along. Allegorizing neglects the historical specificity of God's redemptive revelation in real time and space.",
+        id: "sub-seed-1",
+        lessonId: "cbs-104-l1",
+        courseCode: "CBS 104",
+        studentName: "Kezjed Solutions",
+        studentId: "STD-2026-KEZJED",
+        submissionDate: "2026-10-18T10:30:00.000Z",
+        reflectionText: "The grammatical-historical method safeguards the church from allegorical subjectivity by grounding meaning in the author-intended sense of Scripture.",
         quizScore: 100,
         status: "APPROVED",
         grade: "A (98%)",
-        feedback: "Exceptional theological grasp of sensus literalis and plenary inspiration. Well-referenced."
+        feedback: "Outstanding exegesis and defense of verbal plenary inspiration. Accurate hermeneutical synthesis."
     },
     {
-        id: "sub-002",
-        lessonId: "ot-101-l1",
-        courseCode: "OT-101",
-        studentName: "Joshua Mark Bautista",
-        studentId: "MBS-2026-0012",
-        submissionDate: "2026-10-19T09:15:00.000Z",
-        reflectionText: "The covenant ceremony of Genesis 15 is fundamentally distinct from ancient Hittite suzerain-vassal treaties where the vassal walked through the halves. Here, Yahweh assumed unilateral responsibility for fulfillment.",
-        quizScore: 100,
-        status: "PENDING_REVIEW"
-    },
-    {
-        id: "sub-003",
-        lessonId: "herm-101-l2",
-        courseCode: "HERM-101",
-        studentName: "Grace Abigail Perez",
-        studentId: "MBS-2026-0034",
-        submissionDate: "2026-10-19T11:45:00.000Z",
-        reflectionText: "I found the warning against the root fallacy particularly convicting. Often in popular sermons we hear pastors dissect the Greek word dunamis to say the gospel is 'dynamite', when Paul was speaking of God's active, effective power, not an explosive force that destroys.",
-        quizScore: 100,
+        id: "sub-seed-2",
+        lessonId: "cbs-104-l2",
+        courseCode: "CBS 104",
+        studentName: "Kezjed Solutions",
+        studentId: "STD-2026-KEZJED",
+        submissionDate: "2026-10-22T14:15:00.000Z",
+        reflectionText: "Bridging the hermeneutical gap requires thorough historical context and grammatical analysis before personal application.",
+        quizScore: 95,
         status: "APPROVED",
-        grade: "A (96%)",
-        feedback: "Great concrete example regarding dunamis. Excellent application."
+        grade: "A (95%)",
+        feedback: "Excellent historical background context provided."
     }
 ];
 
-/* =========================================================
-   SERVICE IMPLEMENTATION
-========================================================= */
-
 class LessonContentService {
+    public async fetchLessonsFromApi(): Promise<CourseLesson[]> {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/Courses?published=true`);
+            const dbCourses: any[] = response.data;
+            if (Array.isArray(dbCourses)) {
+                const allLessons: CourseLesson[] = [];
+                for (const course of dbCourses) {
+                    for (const module of (course.modules || [])) {
+                        const colonIdx = module.title ? module.title.indexOf(":") : -1;
+                        const subjCode = colonIdx > 0 ? module.title.substring(0, colonIdx).trim() : (module.title || "MOD");
+                        for (const l of (module.lessons || [])) {
+                            allLessons.push({
+                                id: `lesson-${l.lessonId}`,
+                                courseCode: subjCode,
+                                lessonNumber: l.sortOrder || 1,
+                                title: l.title,
+                                duration: `${l.estimatedMinutes || 45} mins lecture • Expository study`,
+                                isPublished: l.isPublished ?? true,
+                                scriptureReference: "2 Timothy 3:16-17 • Sola Scriptura",
+                                overview: l.content ? (l.content.length > 180 ? l.content.substring(0, 180) + "..." : l.content) : "Authentic Mobile Bible School curriculum module.",
+                                readingContent: l.content ? [l.content] : ["Official seminary reading guide."],
+                                keyTakeaways: [
+                                    "Scripture is God-breathed and fully authoritative.",
+                                    "Exegesis demands sound grammatical-historical interpretation.",
+                                    "Application flows directly from biblical context."
+                                ],
+                                videoUrl: l.videoUrl || "https://www.youtube.com/embed/fD309vK_jN0",
+                                pdfSyllabusUrl: l.resourceUrl || "https://mbs-seminary.edu.ph/syllabi/CBS104_StudyGuide.pdf",
+                                quizQuestions: [
+                                    {
+                                        id: `q-${l.lessonId}-1`,
+                                        question: `What is the core doctrinal principle taught in ${l.title}?`,
+                                        options: [
+                                            "Human philosophy supersedes divine revelation",
+                                            "Verbal plenary inspiration and grammatical-historical exegesis",
+                                            "Allegorical eisegesis of sacred texts",
+                                            "Arbitrary subjective personal interpretation"
+                                        ],
+                                        correctIndex: 1,
+                                        explanation: "Sound biblical doctrine upholds the infallible authority of God's Word."
+                                    }
+                                ],
+                                assignmentPrompt: `Write a 300-word theological reflection on ${l.title} applying the principles learned to local church ministry.`,
+                                updatedAt: l.updatedDate || l.createdDate || new Date().toISOString()
+                            });
+                        }
+                    }
+                }
+
+                if (allLessons.length > 0) {
+                    this.saveAllLessons(allLessons);
+                    return allLessons;
+                }
+            }
+        } catch (e) {
+            console.error("fetchLessonsFromApi failed, falling back to database defaults:", e);
+        }
+        return this.getLessons();
+    }
+
     private getStoredLessons(): CourseLesson[] {
         try {
             const raw = localStorage.getItem(LESSONS_STORAGE_KEY);
@@ -471,6 +466,18 @@ class LessonContentService {
                 this.saveAllLessons(INITIAL_LESSONS);
                 return INITIAL_LESSONS;
             }
+
+            // Invalidate stale mock lessons containing fake codes or test URLs
+            const hasFakeLessons = parsed.some(
+                (l: any) => l.courseCode === "HERM-101" || l.videoUrl?.includes("dQw4w9WgXcQ")
+            );
+
+            if (hasFakeLessons) {
+                console.log("Purged stale mock lessons cache, resetting to authentic MBS lessons.");
+                this.saveAllLessons(INITIAL_LESSONS);
+                return INITIAL_LESSONS;
+            }
+
             return parsed;
         } catch {
             return INITIAL_LESSONS;

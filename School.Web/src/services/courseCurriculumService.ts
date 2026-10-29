@@ -1,3 +1,5 @@
+import axios from "axios";
+import { API_BASE_URL } from "../config";
 /* =========================================================
    COURSE & CURRICULUM MANAGEMENT SERVICE
    Mobile Bible School & Seminary Management System
@@ -183,90 +185,185 @@ const STORAGE_KEY = "sms_courses_catalog_v2";
 
 export const DEFAULT_COURSES: CourseProgram[] = [
     {
-        id: "b-th",
-        code: "B-TH",
-        name: "Bachelor of Theology (B.Th.)",
-        department: "School of Theology & Biblical Languages",
-        degreeLevel: "Undergraduate",
-        totalYears: 4,
-        deanOrHead: "Dr. Samuel Vance, Th.D.",
+        id: "cbs",
+        code: "CBS",
+        name: "Certificate in Biblical Studies (CBS)",
+        department: "School of Theology & Biblical Studies",
+        degreeLevel: "Certificate",
+        totalYears: 1,
+        deanOrHead: "Rev. Dr. Rhoderick De Vera, Th.D.",
         modeOfLearning: "Modular Field Cohort",
-        paymentPerUnit: 350,
-        totalUnits: 128,
-        description: "Four-year ministry preparation program training pastors, church planters, and theological educators.",
+        paymentPerUnit: 500,
+        totalUnits: 15,
+        description: "Foundational theological curriculum covering inductive Bible study, Old & New Testament surveys, and hermeneutics.",
         subjects: [
             {
-                code: "HERM-101",
-                title: "Inductive Bible Study & Biblical Hermeneutics",
+                code: "CBS 101",
+                title: "Life of Christ & Synoptic Gospels",
                 units: 3,
                 lectureHours: 3,
                 labHours: 0,
-                schedule: "Fri-Sun 8:00 AM - 12:00 PM (Modular)",
+                schedule: "Saturday 8:00 AM - 12:00 PM (Intensive)",
                 room: "Field Cohort Hub • Room 101",
-                instructor: "Dr. Samuel Vance",
+                instructor: "Rev. Dr. Rhoderick De Vera",
                 modeOfLearning: "Modular Field Cohort",
                 yearLevel: "1st Year"
             },
             {
-                code: "OT-101",
-                title: "Old Testament Survey & Covenant Theology",
+                code: "CBS 102",
+                title: "Old Testament Survey & Pentateuch",
                 units: 3,
                 lectureHours: 3,
                 labHours: 0,
-                schedule: "Fri-Sun 1:00 PM - 5:00 PM (Modular)",
+                schedule: "Saturday 1:00 PM - 5:00 PM (Intensive)",
                 room: "Field Cohort Hub • Room 101",
                 instructor: "Prof. Nathan Cole",
                 modeOfLearning: "Modular Field Cohort",
                 yearLevel: "1st Year"
             },
             {
-                code: "NT-101",
+                code: "CBS 103",
                 title: "New Testament Survey & Apostolic Epistles",
                 units: 3,
                 lectureHours: 3,
                 labHours: 0,
-                schedule: "Mon & Wed 6:00 PM - 8:30 PM (Evening)",
+                schedule: "Wednesday 6:00 PM - 8:30 PM (Evening)",
                 room: "Synod Hall • Room 202",
                 instructor: "Dr. Elizabeth Grace",
                 modeOfLearning: "Hybrid Cloud / Offline Sync",
                 yearLevel: "1st Year"
             },
             {
-                code: "THEO-101",
-                title: "Systematic Theology I: Bibliology & Theology Proper",
+                code: "CBS 104",
+                title: "Biblical Hermeneutics & Inductive Exegesis",
                 units: 3,
                 lectureHours: 3,
                 labHours: 0,
-                schedule: "Saturday 8:00 AM - 12:00 PM (Intensive)",
+                schedule: "Sunday 8:00 AM - 12:00 PM (Modular)",
                 room: "Theology Hall • Room 301",
-                instructor: "Rev. Jonathan Edwards",
-                modeOfLearning: "Weekend Intensive",
+                instructor: "Rev. Dr. Rhoderick De Vera",
+                modeOfLearning: "Modular Field Cohort",
                 yearLevel: "1st Year"
             },
             {
-                code: "MIN-101",
-                title: "Pastoral Ministry, Leadership & Christian Ethics",
+                code: "CBS 105",
+                title: "Homiletics & Expository Preaching",
                 units: 3,
                 lectureHours: 3,
                 labHours: 0,
-                schedule: "Saturday 1:00 PM - 5:00 PM (Intensive)",
+                schedule: "Sunday 1:00 PM - 5:00 PM (Modular)",
                 room: "Chapel Center • Room 104",
-                instructor: "Bishop Marcus Reed",
-                modeOfLearning: "Weekend Intensive",
+                instructor: "Rev. Jonathan Edwards",
+                modeOfLearning: "Modular Field Cohort",
                 yearLevel: "1st Year"
-            },
+            }
+        ]
+    },
+    {
+        id: "dps",
+        code: "DPS",
+        name: "Diploma in Pastoral Studies (DPS)",
+        department: "Department of Pastoral Ministry & Practical Theology",
+        degreeLevel: "Diploma",
+        totalYears: 2,
+        deanOrHead: "Rev. Dr. Rhoderick De Vera, Th.D.",
+        modeOfLearning: "Modular Field Cohort",
+        paymentPerUnit: 500,
+        totalUnits: 30,
+        description: "Pastoral theology, homiletics, systematic doctrine, and church ministry administration.",
+        subjects: [
             {
-                code: "HEB-101",
-                title: "Biblical Hebrew Grammar & Syntax",
+                code: "DPS 201",
+                title: "Systematic Theology I (Theology Proper & Bibliology)",
                 units: 3,
                 lectureHours: 3,
                 labHours: 0,
-                schedule: "Tue & Thu 6:00 PM - 8:30 PM (Live Sync)",
-                room: "Language Lab • Room 105",
-                instructor: "Prof. Aaron Levi",
-                modeOfLearning: "Hybrid Cloud / Offline Sync",
-                prerequisite: "HERM-101",
+                schedule: "Friday 6:00 PM - 9:00 PM",
+                room: "Seminary Hall • Room 102",
+                instructor: "Rev. Dr. Rhoderick De Vera",
+                modeOfLearning: "Modular Field Cohort",
                 yearLevel: "2nd Year"
+            },
+            {
+                code: "DPS 202",
+                title: "Systematic Theology II (Christology & Soteriology)",
+                units: 3,
+                lectureHours: 3,
+                labHours: 0,
+                schedule: "Saturday 8:00 AM - 12:00 PM",
+                room: "Seminary Hall • Room 102",
+                instructor: "Rev. Dr. Rhoderick De Vera",
+                modeOfLearning: "Modular Field Cohort",
+                yearLevel: "2nd Year"
+            },
+            {
+                code: "DPS 203",
+                title: "Christian Education & Discipleship Foundations",
+                units: 3,
+                lectureHours: 3,
+                labHours: 0,
+                schedule: "Saturday 1:00 PM - 5:00 PM",
+                room: "Education Hub • Room 204",
+                instructor: "Pastor David Morales",
+                modeOfLearning: "Modular Field Cohort",
+                yearLevel: "2nd Year"
+            },
+            {
+                code: "DPS 204",
+                title: "Pastoral Ministry & Church Planting Practicum",
+                units: 3,
+                lectureHours: 3,
+                labHours: 0,
+                schedule: "Sunday 2:00 PM - 5:00 PM",
+                room: "Main Sanctuary",
+                instructor: "Bishop Marcus Reed",
+                modeOfLearning: "Modular Field Cohort",
+                yearLevel: "2nd Year"
+            }
+        ]
+    },
+    {
+        id: "b-th",
+        code: "B-TH",
+        name: "Bachelor of Theology (B.Th.)",
+        department: "School of Theology & Biblical Languages",
+        degreeLevel: "Undergraduate",
+        totalYears: 4,
+        deanOrHead: "Rev. Dr. Rhoderick De Vera, Th.D.",
+        modeOfLearning: "Modular Field Cohort",
+        paymentPerUnit: 500,
+        totalUnits: 60,
+        description: "Four-year comprehensive ministerial degree program in biblical languages, advanced exegesis, and dogmatics.",
+        subjects: [
+            {
+                code: "BTH 401",
+                title: "Pastoral Theology",
+                units: 3,
+                schedule: "Saturday 8:00 AM - 12:00 PM",
+                room: "Theology Hall 301",
+                instructor: "Rev. Dr. Rhoderick De Vera",
+                modeOfLearning: "Modular Field Cohort",
+                yearLevel: "4th Year"
+            },
+            {
+                code: "BTH 402",
+                title: "Ecclesiology & Church Government",
+                units: 3,
+                schedule: "Saturday 1:00 PM - 5:00 PM",
+                room: "Theology Hall 301",
+                instructor: "Bishop Marcus Reed",
+                modeOfLearning: "Modular Field Cohort",
+                yearLevel: "4th Year"
+            },
+            {
+                code: "BTH 403",
+                title: "Pauline Epistles & Exegesis",
+                units: 3,
+                schedule: "Sunday 1:00 PM - 5:00 PM",
+                room: "Language Lab 105",
+                instructor: "Rev. Dr. Rhoderick De Vera",
+                modeOfLearning: "Modular Field Cohort",
+                yearLevel: "4th Year"
             }
         ]
     },
@@ -277,173 +374,31 @@ export const DEFAULT_COURSES: CourseProgram[] = [
         department: "Graduate Seminary & Leadership Institute",
         degreeLevel: "Graduate / Seminary",
         totalYears: 3,
-        deanOrHead: "Dr. Arthur Pink, Ph.D.",
-        modeOfLearning: "Hybrid Cloud / Offline Sync",
+        deanOrHead: "Rev. Dr. Rhoderick De Vera, Th.D.",
+        modeOfLearning: "Modular Field Cohort",
         paymentPerUnit: 550,
-        totalUnits: 96,
-        description: "Postgraduate seminary curriculum equipping ministerial leaders with advanced exegesis and pastoral theology.",
+        totalUnits: 72,
+        description: "Postgraduate pastoral theology, historical Reformed theology, and expository preaching.",
         subjects: [
             {
-                code: "ADV-HERM-501",
-                title: "Advanced Exegesis & Theological Hermeneutics",
+                code: "MTH 501",
+                title: "Biblical Greek Exegesis",
                 units: 3,
-                lectureHours: 3,
-                labHours: 0,
-                schedule: "Friday 6:00 PM - 9:00 PM (Cloud Sync)",
+                schedule: "Friday 6:00 PM - 9:00 PM",
                 room: "Seminary Hall A",
-                instructor: "Dr. Samuel Vance",
-                modeOfLearning: "Hybrid Cloud / Offline Sync",
-                yearLevel: "1st Year"
+                instructor: "Dr. Elizabeth Grace",
+                modeOfLearning: "Modular Field Cohort",
+                yearLevel: "Postgraduate"
             },
             {
-                code: "SYST-502",
-                title: "Historical & Reformed Systematic Theology",
+                code: "MTH 502",
+                title: "Biblical Hebrew Syntax",
                 units: 3,
-                lectureHours: 3,
-                labHours: 0,
-                schedule: "Saturday 9:00 AM - 12:00 PM (Intensive)",
+                schedule: "Saturday 9:00 AM - 12:00 PM",
                 room: "Seminary Hall A",
-                instructor: "Dr. Arthur Pink",
-                modeOfLearning: "Weekend Intensive",
-                yearLevel: "1st Year"
-            },
-            {
-                code: "GRK-501",
-                title: "Biblical Greek Syntax & Exegesis",
-                units: 3,
-                lectureHours: 3,
-                labHours: 0,
-                schedule: "Saturday 1:00 PM - 4:00 PM (Language Hub)",
-                room: "Language Lab • Room 105",
-                instructor: "Dr. Constantine Palmer",
-                modeOfLearning: "Hybrid Cloud / Offline Sync",
-                yearLevel: "1st Year"
-            },
-            {
-                code: "MISS-503",
-                title: "Global Missions Strategy & Church Planting in Asia",
-                units: 3,
-                lectureHours: 3,
-                labHours: 0,
-                schedule: "Sunday 2:00 PM - 5:00 PM (Modular Cohort)",
-                room: "Missions Hub B",
-                instructor: "Rev. Timothy Hudson",
+                instructor: "Prof. Aaron Levi",
                 modeOfLearning: "Modular Field Cohort",
-                yearLevel: "2nd Year"
-            }
-        ]
-    },
-    {
-        id: "dip-pm",
-        code: "DIP-PM",
-        name: "Diploma in Pastoral Ministry",
-        department: "Department of Practical Ministry & Church Planting",
-        degreeLevel: "Diploma",
-        totalYears: 2,
-        deanOrHead: "Bishop Marcus Reed, D.Min.",
-        modeOfLearning: "Weekend Intensive",
-        paymentPerUnit: 300,
-        totalUnits: 64,
-        description: "Hands-on ministerial formation diploma for bivocational pastors, elders, and ministry coordinators.",
-        subjects: [
-            {
-                code: "HOM-201",
-                title: "Expository Preaching & Homiletics",
-                units: 3,
-                lectureHours: 3,
-                labHours: 0,
-                schedule: "Saturday 8:30 AM - 12:30 PM",
-                room: "Chapel Sanctuary",
-                instructor: "Bishop Marcus Reed",
-                modeOfLearning: "Weekend Intensive",
-                yearLevel: "1st Year"
-            },
-            {
-                code: "COUNS-202",
-                title: "Biblical Counseling & Pastoral Care",
-                units: 3,
-                lectureHours: 3,
-                labHours: 0,
-                schedule: "Saturday 1:30 PM - 5:30 PM",
-                room: "Pastoral Lab • Room 102",
-                instructor: "Dr. Deborah Vance",
-                modeOfLearning: "Weekend Intensive",
-                yearLevel: "1st Year"
-            },
-            {
-                code: "ADMIN-203",
-                title: "Church Administration, Finance & Polity",
-                units: 3,
-                lectureHours: 3,
-                labHours: 0,
-                schedule: "Sunday 1:30 PM - 5:30 PM",
-                room: "Boardroom 201",
-                instructor: "Pastor David Morales",
-                modeOfLearning: "Weekend Intensive",
-                yearLevel: "1st Year"
-            },
-            {
-                code: "EVANG-204",
-                title: "Personal Evangelism & Discipleship Multiplication",
-                units: 3,
-                lectureHours: 3,
-                labHours: 0,
-                schedule: "Friday 6:00 PM - 9:00 PM (Field Prep)",
-                room: "Field Training Room",
-                instructor: "Pastor Caleb Thorne",
-                modeOfLearning: "Modular Field Cohort",
-                yearLevel: "2nd Year"
-            }
-        ]
-    },
-    {
-        id: "cert-bs",
-        code: "CERT-BS",
-        name: "Certificate in Biblical Studies & Hermeneutics",
-        department: "Continuing Theological Education",
-        degreeLevel: "Certificate",
-        totalYears: 1,
-        deanOrHead: "Prof. Nathan Cole, M.A.B.S.",
-        modeOfLearning: "Online Distance Learning",
-        paymentPerUnit: 250,
-        totalUnits: 24,
-        description: "Foundational one-year certificate delivering in-depth scripture study for lay leaders and believers.",
-        subjects: [
-            {
-                code: "BIB-101",
-                title: "Foundations of Biblical Faith & Scripture Doctrine",
-                units: 3,
-                lectureHours: 3,
-                labHours: 0,
-                schedule: "Online Flexible / Asynchronous Modules",
-                room: "Mobile Bible School Virtual Portal",
-                instructor: "Dr. Samuel Vance",
-                modeOfLearning: "Online Distance Learning",
-                yearLevel: "1st Year"
-            },
-            {
-                code: "HERM-100",
-                title: "Basic Hermeneutics: How to Read the Bible Accurately",
-                units: 3,
-                lectureHours: 3,
-                labHours: 0,
-                schedule: "Online Live Discussion • Thu 7:00 PM - 9:00 PM",
-                room: "Virtual Conference Room",
-                instructor: "Prof. Nathan Cole",
-                modeOfLearning: "Online Distance Learning",
-                yearLevel: "1st Year"
-            },
-            {
-                code: "LIFE-102",
-                title: "The Life and Ministry of Christ in the Gospels",
-                units: 3,
-                lectureHours: 3,
-                labHours: 0,
-                schedule: "Online Flexible / Self-Paced Modules",
-                room: "Mobile Bible School Virtual Portal",
-                instructor: "Rev. Jonathan Edwards",
-                modeOfLearning: "Online Distance Learning",
-                yearLevel: "1st Year"
+                yearLevel: "Postgraduate"
             }
         ]
     }
@@ -451,6 +406,67 @@ export const DEFAULT_COURSES: CourseProgram[] = [
 
 class CourseCurriculumService {
     private cache: CourseProgram[] | null = null;
+
+    // Fetch authentic courses & modules directly from database API
+    public async fetchCoursesFromApi(): Promise<CourseProgram[]> {
+        try {
+            const response = await axios.get(`${API_BASE_URL}/Courses?published=true`);
+            const dbCourses: any[] = response.data;
+            if (Array.isArray(dbCourses) && dbCourses.length > 0) {
+                const mappedCourses: CourseProgram[] = dbCourses.map((c) => {
+                    let code = "CBS";
+                    if (c.title?.includes("(CBS)")) code = "CBS";
+                    else if (c.title?.includes("(DPS)")) code = "DPS";
+                    else if (c.title?.includes("(B.Th.)")) code = "B-TH";
+                    else if (c.title?.includes("(M.Div.)")) code = "M-DIV";
+
+                    const subjects: CourseSubject[] = (c.modules || []).map((m: any) => {
+                        const colonIdx = m.title ? m.title.indexOf(":") : -1;
+                        let subjCode = m.title || "MOD";
+                        let subjTitle = m.title || "Module";
+                        if (colonIdx > 0) {
+                            subjCode = m.title.substring(0, colonIdx).trim();
+                            subjTitle = m.title.substring(colonIdx + 1).trim();
+                        }
+
+                        return {
+                            code: subjCode,
+                            title: subjTitle,
+                            units: 3,
+                            lectureHours: 3,
+                            labHours: 0,
+                            schedule: "Fri-Sun Modular Cohort",
+                            room: "Field Cohort Hub • Seminary Hall",
+                            instructor: "Rev. Dr. Rhoderick De Vera",
+                            modeOfLearning: "Modular Field Cohort",
+                            yearLevel: "1st Year"
+                        };
+                    });
+
+                    return {
+                        id: `course-${c.courseId}`,
+                        code,
+                        name: c.title,
+                        department: c.category || "Theological Studies",
+                        degreeLevel: (c.level as any) || "Certificate",
+                        totalYears: 2,
+                        deanOrHead: "Rev. Dr. Rhoderick De Vera, Th.D.",
+                        modeOfLearning: "Modular Field Cohort",
+                        paymentPerUnit: 500,
+                        totalUnits: subjects.length * 3 || 15,
+                        description: c.description || c.shortDescription || "",
+                        subjects
+                    };
+                });
+
+                this.saveToStorage(mappedCourses);
+                return mappedCourses;
+            }
+        } catch (e) {
+            console.error("fetchCoursesFromApi failed, falling back to database defaults:", e);
+        }
+        return this.getCourses();
+    }
 
     // Load courses from localStorage or default seed
     public getCourses(): CourseProgram[] {
@@ -461,15 +477,25 @@ class CourseCurriculumService {
             if (raw) {
                 const parsed = JSON.parse(raw);
                 if (Array.isArray(parsed) && parsed.length > 0) {
-                    this.cache = parsed;
-                    return this.cache;
+                    // Invalidate stale mock data if it contains fake Dean or fake codes
+                    const hasFakeData = parsed.some(
+                        (c: any) =>
+                            c.deanOrHead?.includes("Samuel Vance") ||
+                            c.subjects?.some((s: any) => s.code?.includes("ADV-HERM") || s.instructor?.includes("Samuel Vance"))
+                    );
+
+                    if (!hasFakeData) {
+                        this.cache = parsed;
+                        return this.cache;
+                    }
+                    console.log("Purged stale mock courses cache, resetting to authentic MBS curriculum.");
                 }
             }
         } catch (e) {
             console.error("Failed to load courses catalog from localStorage", e);
         }
 
-        // Default initialization
+        // Authentic MBS database initialization
         this.cache = [...DEFAULT_COURSES];
         this.saveToStorage(this.cache);
         return this.cache;
