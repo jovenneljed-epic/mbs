@@ -647,3 +647,129 @@
         max-height: 95vh;
     }
 }
+
+/* ============================================================ */
+/* FACULTY PHOTO UPLOADER & THUMBNAILS                          */
+/* ============================================================ */
+
+.mbs-faculty-photo-upload-row {
+    margin-bottom: 22px;
+}
+
+.mbs-faculty-photo-uploader {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px dashed rgba(245, 158, 11, 0.4);
+    border-radius: 12px;
+    padding: 16px;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.mbs-faculty-photo-uploader:hover {
+    border-color: rgba(245, 158, 11, 0.7);
+    background: rgba(15, 23, 42, 0.85);
+}
+
+.mbs-faculty-photo-preview-wrap {
+    width: 92px;
+    height: 92px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border: 3px solid #f59e0b;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.mbs-faculty-preview-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.mbs-faculty-photo-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.mbs-faculty-photo-actions-box {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+}
+
+.mbs-photo-btn-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.mbs-upload-btn-label {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 8px 16px;
+    font-size: 0.86rem;
+    font-weight: 600;
+}
+
+.mbs-photo-remove-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #ef4444 !important;
+    border-color: rgba(239, 68, 68, 0.3) !important;
+    padding: 8px 14px;
+    font-size: 0.84rem;
+}
+
+.mbs-photo-remove-btn:hover {
+    background: rgba(239, 68, 68, 0.15) !important;
+    border-color: #ef4444 !important;
+}
+
+.mbs-photo-url-input {
+    font-size: 0.82rem;
+    padding: 8px 12px;
+    background: rgba(15, 23, 42, 0.75);
+}
+
+.mbs-photo-error-text {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #f87171;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.mbs-photo-hint-text {
+    color: #94a3b8;
+    font-size: 0.75rem;
+    line-height: 1.35;
+}
+
+.mbs-faculty-thumb-img {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid rgba(245, 158, 11, 0.5);
+    flex-shrink: 0;
+}

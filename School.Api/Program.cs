@@ -113,6 +113,14 @@ var galleryPhotoFolder =
 Directory.CreateDirectory(
     galleryPhotoFolder);
 
+var facultyPhotoFolder =
+    Path.Combine(
+        app.Environment.ContentRootPath,
+        "root-uploads-faculty");
+
+Directory.CreateDirectory(
+    facultyPhotoFolder);
+
 
 // ============================================================
 // SWAGGER
@@ -163,6 +171,17 @@ app.UseStaticFiles(
 
         RequestPath =
             "/gallery-photos"
+    });
+
+app.UseStaticFiles(
+    new StaticFileOptions
+    {
+        FileProvider =
+            new PhysicalFileProvider(
+                facultyPhotoFolder),
+
+        RequestPath =
+            "/faculty-photos"
     });
 
 

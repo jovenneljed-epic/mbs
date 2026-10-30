@@ -11,6 +11,7 @@ import type {
     DoctrinalArticle,
     FacultyMember
 } from "../../services/aboutContentService";
+import { uploadFacultyPhoto } from "../../services/aboutContentService";
 import {
     X,
     Save,
@@ -25,7 +26,9 @@ import {
     MapPin,
     ScrollText,
     Landmark,
-    CheckCircle2
+    CheckCircle2,
+    Upload,
+    Camera
 } from "lucide-react";
 
 interface AboutEditorModalProps {
@@ -73,10 +76,13 @@ export const AboutEditorModal: React.FC<AboutEditorModalProps> = ({
         degrees: [],
         courses: [],
         bio: "",
-        tenureYears: 10
+        tenureYears: 10,
+        photoUrl: ""
     });
     const [facultyDegreesInput, setFacultyDegreesInput] = useState("");
     const [facultyCoursesInput, setFacultyCoursesInput] = useState("");
+    const [uploadingPhoto, setUploadingPhoto] = useState(false);
+    const [photoUploadError, setPhotoUploadError] = useState<string | null>(null);
 
     // Sync draft when content or initialTab updates
     useEffect(() => {
@@ -208,9 +214,10 @@ export const AboutEditorModal: React.FC<AboutEditorModalProps> = ({
     const handleOpenFacultyEdit = (idx: number) => {
         const fac = draft.faculty.members[idx];
         setEditingFacultyIdx(idx);
-        setFacultyForm({ ...fac });
+        setFacultyForm({ ...fac, photoUrl: fac.photoUrl || "" });
         setFacultyDegreesInput(fac.degrees.join(", "));
         setFacultyCoursesInput(fac.courses.join(", "));
+        setPhotoUploadError(null);
     };
 
     const handleOpenNewFaculty = () => {
@@ -224,10 +231,44 @@ export const AboutEditorModal: React.FC<AboutEditorModalProps> = ({
             degrees: [],
             courses: [],
             bio: "",
-            tenureYears: 5
+            tenureYears: 5,
+            photoUrl: ""
         });
         setFacultyDegreesInput("");
         setFacultyCoursesInput("");
+        setPhotoUploadError(null);
+    };
+
+    const handlePhotoFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (!file.type.startsWith("image/")) {
+            setPhotoUploadError("Please select a valid image file (JPG, PNG, WEBP, GIF).");
+            return;
+        }
+
+        if (file.size > 15 * 1024 * 1024) {
+            setPhotoUploadError("Image size exceeds 15 MB limit.");
+            return;
+        }
+
+        setUploadingPhoto(true);
+        setPhotoUploadError(null);
+        try {
+            const url = await uploadFacultyPhoto(file);
+            setFacultyForm(prev => ({ ...prev, photoUrl: url }));
+        } catch (err: any) {
+            setPhotoUploadError(err?.message || "Failed to process photo.");
+        } finally {
+            setUploadingPhoto(false);
+            e.target.value = "";
+        }
+    };
+
+    const handleRemovePhoto = () => {
+        setFacultyForm(prev => ({ ...prev, photoUrl: "" }));
+        setPhotoUploadError(null);
     };
 
     const handleSaveFaculty = () => {
@@ -250,7 +291,8 @@ export const AboutEditorModal: React.FC<AboutEditorModalProps> = ({
             ...facultyForm,
             departmentLabel: deptLabels[facultyForm.department] || "Theology & Ministry",
             degrees,
-            courses
+            courses,
+            photoUrl: facultyForm.photoUrl?.trim() || ""
         };
 
         const newMembers = [...draft.faculty.members];
@@ -709,6 +751,79 @@ export const AboutEditorModal: React.FC<AboutEditorModalProps> = ({
                                         </button>
                                     </div>
 
+                                    {/* FACULTY PHOTO UPLOAD & PREVIEW */}
+                                    <div className="mbs-form-row mbs-faculty-photo-upload-row">
+                                        <label className="mbs-form-label">
+                                            <span>Faculty Portrait Photo / Headshot</span>
+                                        </label>
+                                        <div className="mbs-faculty-photo-uploader">
+                                            <div className="mbs-faculty-photo-preview-wrap">
+                                                {facultyForm.photoUrl ? (
+                                                    <img
+                                                        src={facultyForm.photoUrl}
+                                                        alt={facultyForm.name || "Faculty Photo"}
+                                                        className="mbs-faculty-preview-image"
+                                                    />
+                                                ) : (
+                                                    <div className="mbs-faculty-photo-empty">
+                                                        <Camera size={30} />
+                                                        <span>No Photo</span>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className="mbs-faculty-photo-actions-box">
+                                                <div className="mbs-photo-btn-group">
+                                                    <label className="mbs-btn-primary mbs-upload-btn-label">
+                                                        <Upload size={14} />
+                                                        <span>{uploadingPhoto ? "Processing Photo..." : facultyForm.photoUrl ? "Change Photo" : "Upload Headshot"}</span>
+                                                        <input
+                                                            type="file"
+                                                            accept="image/jpeg,image/png,image/webp,image/gif"
+                                                            onChange={handlePhotoFileSelect}
+                                                            disabled={uploadingPhoto}
+                                                            hidden
+                                                        />
+                                                    </label>
+
+                                                    {facultyForm.photoUrl && (
+                                                        <button
+                                                            type="button"
+                                                            className="mbs-btn-secondary mbs-photo-remove-btn"
+                                                            onClick={handleRemovePhoto}
+                                                            disabled={uploadingPhoto}
+                                                            title="Remove Photo"
+                                                        >
+                                                            <Trash2 size={14} />
+                                                            <span>Remove</span>
+                                                        </button>
+                                                    )}
+                                                </div>
+
+                                                <div className="mbs-photo-url-fallback">
+                                                    <input
+                                                        type="text"
+                                                        className="mbs-form-input mbs-photo-url-input"
+                                                        placeholder="Or paste direct image URL (https://...)"
+                                                        value={facultyForm.photoUrl || ""}
+                                                        onChange={e => setFacultyForm({ ...facultyForm, photoUrl: e.target.value.trim() })}
+                                                        disabled={uploadingPhoto}
+                                                    />
+                                                </div>
+
+                                                {photoUploadError && (
+                                                    <div className="mbs-photo-error-text">
+                                                        <AlertCircle size={13} />
+                                                        <span>{photoUploadError}</span>
+                                                    </div>
+                                                )}
+                                                <small className="mbs-photo-hint-text">
+                                                    Upload photo from device (JPG, PNG, WEBP, GIF up to 15MB) or enter image URL.
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div className="mbs-form-grid-2">
                                         <label className="mbs-form-label">
                                             <span>Professor Full Name &amp; Title</span>
@@ -830,7 +945,22 @@ export const AboutEditorModal: React.FC<AboutEditorModalProps> = ({
                                         {draft.faculty.members.map((fac, idx) => (
                                             <div key={fac.id + idx} className="mbs-item-row">
                                                 <div className="mbs-item-info">
-                                                    <span className="mbs-faculty-initials-badge">
+                                                    {fac.photoUrl ? (
+                                                        <img
+                                                            src={fac.photoUrl}
+                                                            alt={fac.name}
+                                                            className="mbs-faculty-thumb-img"
+                                                            onError={(e) => {
+                                                                (e.currentTarget as HTMLElement).style.display = "none";
+                                                                const fallback = e.currentTarget.parentElement?.querySelector(".mbs-faculty-initials-badge") as HTMLElement;
+                                                                if (fallback) fallback.style.display = "inline-flex";
+                                                            }}
+                                                        />
+                                                    ) : null}
+                                                    <span
+                                                        className="mbs-faculty-initials-badge"
+                                                        style={{ display: fac.photoUrl ? "none" : "inline-flex" }}
+                                                    >
                                                         {fac.name.split(" ").filter(p => !p.includes(".")).map(n => n[0]).slice(0, 2).join("")}
                                                     </span>
                                                     <div>

@@ -25,6 +25,7 @@ export interface FacultyMember {
     courses: string[];
     bio: string;
     tenureYears: number;
+    photoUrl?: string;
 }
 
 export interface PillarItem {
@@ -315,7 +316,8 @@ export const DEFAULT_ABOUT_CONTENT: AboutContentData = {
                 degrees: ["Th.D. in Systematic Theology (ATS)", "D.Min. in Pastoral Leadership (DTS)", "M.Div. in Biblical Studies"],
                 courses: ["Systematic Theology I & II", "Trinitarian Dogmatics", "Theological Prolegomena", "Ecclesiology & Eschatology"],
                 bio: "Dr. Ramos has served in pastoral ministry and seminary leadership for over 35 years. He is the author of four theological monographs and has trained over 250 pastors across Luzon, Visayas, and Mindanao.",
-                tenureYears: 32
+                tenureYears: 32,
+                photoUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&auto=format&fit=crop&q=80"
             },
             {
                 id: "fac-2",
@@ -326,7 +328,8 @@ export const DEFAULT_ABOUT_CONTENT: AboutContentData = {
                 degrees: ["Ph.D. in New Testament Exegesis (AGST)", "Th.M. in Greek Grammar (Magna Cum Laude)", "M.Div."],
                 courses: ["Biblical Greek Grammar I & II", "Greek Exegesis of Romans", "Advanced Hermeneutics", "Pauline Epistles"],
                 bio: "Renowned Greek syntactician with 28 years of academic instruction. Passionate about empowering church planters and pastors to read the New Testament in its inspired original tongue.",
-                tenureYears: 28
+                tenureYears: 28,
+                photoUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&auto=format&fit=crop&q=80"
             },
             {
                 id: "fac-3",
@@ -337,7 +340,8 @@ export const DEFAULT_ABOUT_CONTENT: AboutContentData = {
                 degrees: ["D.Min. in Expository Preaching", "M.Div. in Pastoral Ministry", "B.Th."],
                 courses: ["Expository Preaching Practicum", "Pastoral Theology & Shepherding", "Principles of Church Planting", "Evangelism & Disciple Making"],
                 bio: "Veteran pastor and church planter responsible for 14 daughter church plants. Oversees the Mobile Bible School grassroots modular cohorts across provincial hubs.",
-                tenureYears: 24
+                tenureYears: 24,
+                photoUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&auto=format&fit=crop&q=80"
             },
             {
                 id: "fac-4",
@@ -348,7 +352,8 @@ export const DEFAULT_ABOUT_CONTENT: AboutContentData = {
                 degrees: ["Th.M. in Old Testament Literature", "M.Div. in Hebrew Exegesis", "B.S. Education"],
                 courses: ["Biblical Hebrew Grammar", "The Pentateuch & Covenant Theology", "Old Testament Historical Books", "Hebrew Poetry & Wisdom"],
                 bio: "Old Testament specialist committed to the historical-grammatical interpretation of the Hebrew Scriptures. Guides students through textual criticism and canonical exegesis.",
-                tenureYears: 19
+                tenureYears: 19,
+                photoUrl: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&auto=format&fit=crop&q=80"
             },
             {
                 id: "fac-5",
@@ -359,7 +364,8 @@ export const DEFAULT_ABOUT_CONTENT: AboutContentData = {
                 degrees: ["M.Th. in Christian Education", "M.A. in Christian Counseling", "B.Th."],
                 courses: ["Christian Education in the Church", "Biblical Counseling & Care", "Family Discipleship", "Curriculum Design"],
                 bio: "Over 20 years developing curriculum for theological extensions and Sunday school leadership throughout the Philippines. Advisor for women's ministries and child catechesis.",
-                tenureYears: 21
+                tenureYears: 21,
+                photoUrl: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&auto=format&fit=crop&q=80"
             },
             {
                 id: "fac-6",
@@ -370,7 +376,8 @@ export const DEFAULT_ABOUT_CONTENT: AboutContentData = {
                 degrees: ["M.Div. in Evangelism & Missions", "D.Min. (cand.) in Urban Ministry", "B.A. Theology"],
                 courses: ["Field Ministry Practicum", "Christian Apologetics", "Missions History & Strategy", "Spiritual Formation"],
                 bio: "Field director coordinating Mobile Bible School modular weekend sessions across 35 provincial centers. Serves as active church revitalizer and mentor to rural pastors.",
-                tenureYears: 16
+                tenureYears: 16,
+                photoUrl: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&auto=format&fit=crop&q=80"
             }
         ]
     },
@@ -671,4 +678,78 @@ export async function resetAboutContent(): Promise<AboutContentData> {
 
     window.dispatchEvent(new CustomEvent(ABOUT_CONTENT_UPDATED_EVENT, { detail: DEFAULT_ABOUT_CONTENT }));
     return DEFAULT_ABOUT_CONTENT;
+}
+
+// ------------------------------------------------------------
+// UPLOAD FACULTY PHOTO (API + COMPRESSED CLIENT DATA URL FALLBACK)
+// ------------------------------------------------------------
+export async function uploadFacultyPhoto(file: File): Promise<string> {
+    // 1. Try backend API upload
+    try {
+        const formData = new FormData();
+        formData.append("file", file);
+        const token = localStorage.getItem("token") || "";
+
+        const res = await fetch(`${API_BASE_URL}/AboutContent/upload-faculty-photo`, {
+            method: "POST",
+            headers: {
+                ...(token ? { "Authorization": `Bearer ${token}` } : {})
+            },
+            body: formData
+        });
+
+        if (res.ok) {
+            const data = await res.json();
+            if (data.url) {
+                const fullUrl = data.url.startsWith("http")
+                    ? data.url
+                    : `${API_BASE_URL.replace(/\/api$/, "")}${data.url}`;
+                return fullUrl;
+            }
+        }
+    } catch (err) {
+        console.warn("[AboutContent] Photo upload to API failed, falling back to compressed client DataURL:", err);
+    }
+
+    // 2. High-reliability client-side Data URL fallback with canvas compression
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement("canvas");
+                const MAX_WIDTH = 600;
+                const MAX_HEIGHT = 600;
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > MAX_WIDTH) {
+                        height = Math.round((height * MAX_WIDTH) / width);
+                        width = MAX_WIDTH;
+                    }
+                } else {
+                    if (height > MAX_HEIGHT) {
+                        width = Math.round((width * MAX_HEIGHT) / height);
+                        height = MAX_HEIGHT;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext("2d");
+                if (ctx) {
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL("image/jpeg", 0.85));
+                } else {
+                    resolve((e.target?.result as string) || "");
+                }
+            };
+            img.onerror = () => {
+                resolve((e.target?.result as string) || "");
+            };
+            img.src = (e.target?.result as string) || "";
+        };
+        reader.readAsDataURL(file);
+    });
 }

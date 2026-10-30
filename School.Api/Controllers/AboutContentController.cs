@@ -1,3 +1,5 @@
+using System.Linq;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.IO;
 using System.Text.Json;
@@ -106,6 +108,50 @@ namespace School.Api.Controllers
             {
                 _lock.Release();
             }
+        }
+
+        // =========================================================
+        // POST: /api/AboutContent/upload-faculty-photo
+        // Admin photo upload for faculty and deans
+        // =========================================================
+        [HttpPost("upload-faculty-photo")]
+        [RequestSizeLimit(15 * 1024 * 1024)] // 15 MB
+        public async Task<IActionResult> UploadFacultyPhoto([FromForm] IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest(new { message = "No image file provided." });
+            }
+
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif" };
+            var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+
+            if (!allowedExtensions.Contains(ext))
+            {
+                return BadRequest(new { message = "Only JPG, PNG, WEBP, or GIF images are allowed." });
+            }
+
+            var facultyFolder = Path.Combine(_env.ContentRootPath, "root-uploads-faculty");
+            if (!Directory.Exists(facultyFolder))
+            {
+                Directory.CreateDirectory(facultyFolder);
+            }
+
+            var uniqueName = $"faculty-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid():N}{ext}";
+            var destinationPath = Path.Combine(facultyFolder, uniqueName);
+
+            await using (var stream = new FileStream(destinationPath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            var relativeUrl = $"/faculty-photos/{uniqueName}";
+            return Ok(new
+            {
+                url = relativeUrl,
+                fileName = uniqueName,
+                size = file.Length
+            });
         }
 
         // =========================================================

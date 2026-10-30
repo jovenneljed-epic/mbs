@@ -591,7 +591,22 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, initialTab = "
                                 <div key={fac.id} className="mbs-faculty-card">
                                     <div className="mbs-faculty-header">
                                         <div className="mbs-faculty-avatar-box">
-                                            <span className="mbs-faculty-initials">
+                                            {fac.photoUrl ? (
+                                                <img
+                                                    src={fac.photoUrl}
+                                                    alt={fac.name}
+                                                    className="mbs-faculty-photo"
+                                                    onError={(e) => {
+                                                        (e.currentTarget as HTMLElement).style.display = "none";
+                                                        const fallback = (e.currentTarget.parentElement?.querySelector(".mbs-faculty-initials") as HTMLElement);
+                                                        if (fallback) fallback.style.display = "flex";
+                                                    }}
+                                                />
+                                            ) : null}
+                                            <span
+                                                className="mbs-faculty-initials"
+                                                style={{ display: fac.photoUrl ? "none" : "flex" }}
+                                            >
                                                 {fac.name.split(" ").filter(p => !p.includes(".")).map(n => n[0]).slice(0, 2).join("")}
                                             </span>
                                         </div>
