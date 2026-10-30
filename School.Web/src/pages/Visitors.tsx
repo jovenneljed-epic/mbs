@@ -362,7 +362,7 @@ export default function Visitors() {
         applicationDate: getTodayString(),
         examScore: "",
         interviewRating: "",
-        interviewerName: "Dr. Samuel Vance, Th.D.",
+        interviewerName: "Rev. Dr. Rhoderick De Vera, Th.D.",
         interviewNotes: "",
         admissionStage: "APPLICATION_FILED",
         documents: {
@@ -391,7 +391,7 @@ export default function Visitors() {
         category: "Entrance Diagnostic Exam",
         sessionDate: getTodayString(),
         roomVenue: "Examination Room • Rm 101",
-        evaluator: "Dr. Samuel Vance, Th.D.",
+        evaluator: "Rev. Dr. Rhoderick De Vera, Th.D.",
         scoreRating: "88.5%",
         result: "Passed - Recommended for Admission",
         notes: "Demonstrated strong scripture familiarity and high scholastic aptitude.",
@@ -542,7 +542,7 @@ export default function Visitors() {
             applicationDate: getTodayString(),
             examScore: "",
             interviewRating: "",
-            interviewerName: "Dr. Samuel Vance, Th.D.",
+            interviewerName: "Rev. Dr. Rhoderick De Vera, Th.D.",
             interviewNotes: "",
             admissionStage: "APPLICATION_FILED",
             documents: {
@@ -584,7 +584,7 @@ export default function Visitors() {
             applicationDate: applicant.applicationDate,
             examScore: applicant.meta.examScore || "",
             interviewRating: applicant.meta.interviewRating || "",
-            interviewerName: applicant.meta.interviewerName || "Dr. Samuel Vance, Th.D.",
+            interviewerName: applicant.meta.interviewerName || "Rev. Dr. Rhoderick De Vera, Th.D.",
             interviewNotes: applicant.meta.interviewNotes || "",
             admissionStage: applicant.admissionStage,
             documents: { ...(applicant.meta.documents || {}) },
@@ -606,7 +606,7 @@ export default function Visitors() {
             category: "Entrance Diagnostic Exam",
             sessionDate: getTodayString(),
             roomVenue: "Examination Hall • Rm 101",
-            evaluator: applicant.meta.interviewerName || "Dr. Samuel Vance, Th.D.",
+            evaluator: applicant.meta.interviewerName || "Rev. Dr. Rhoderick De Vera, Th.D.",
             scoreRating: applicant.meta.examScore || "88.5%",
             result: "Passed - Recommended for Admission",
             notes: "Exemplary understanding of Christian doctrine and strong academic readiness.",
@@ -1832,7 +1832,7 @@ export default function Visitors() {
                                                     type="text"
                                                     value={applicantForm.interviewerName}
                                                     onChange={e => setApplicantForm({ ...applicantForm, interviewerName: e.target.value })}
-                                                    placeholder="e.g. Dr. Samuel Vance, Th.D."
+                                                    placeholder="e.g. Rev. Dr. Rhoderick De Vera, Th.D."
                                                 />
                                             </div>
                                             <div className="form-group">
@@ -2224,7 +2224,7 @@ export default function Visitors() {
                                             required
                                             value={screeningForm.evaluator}
                                             onChange={e => setScreeningForm({ ...screeningForm, evaluator: e.target.value })}
-                                            placeholder="e.g. Dr. Samuel Vance, Th.D."
+                                            placeholder="e.g. Rev. Dr. Rhoderick De Vera, Th.D."
                                         />
                                     </div>
                                 </div>

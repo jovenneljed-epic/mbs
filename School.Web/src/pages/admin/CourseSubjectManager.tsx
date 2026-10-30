@@ -6,6 +6,7 @@ import {
     Trash2,
     Search,
     RotateCcw,
+    RefreshCw,
     DollarSign,
     Clock,
     MapPin,
@@ -90,8 +91,10 @@ export const CourseSubjectManager: React.FC<CourseSubjectManagerProps> = ({ onBa
     const [courses, setCourses] = useState<CourseProgram[]>([]);
     const [selectedCourseId, setSelectedCourseId] = useState<string>("");
     const [courseSearch, setCourseSearch] = useState<string>("");
+    const [selectedCategoryTab, setSelectedCategoryTab] = useState<string>("ALL");
     const [subjectSearch, setSubjectSearch] = useState<string>("");
     const [feedbackMessage, setFeedbackMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+    const [isSyncing, setIsSyncing] = useState(false);
 
     // Course Modal State
     const [isCourseModalOpen, setIsCourseModalOpen] = useState(false);
@@ -100,7 +103,7 @@ export const CourseSubjectManager: React.FC<CourseSubjectManagerProps> = ({ onBa
         code: string;
         name: string;
         department: string;
-        degreeLevel: "Undergraduate" | "Graduate / Seminary" | "Diploma" | "Certificate" | "Basic Education";
+        degreeLevel: "Undergraduate" | "Graduate / Seminary" | "Diploma" | "Certificate" | "Associate" | "Doctorate" | "Specialized / Bridge" | "Basic Education" | string;
         modeOfLearning: ModeOfLearningType;
         paymentPerUnit: number;
         totalYears: number;
@@ -109,12 +112,12 @@ export const CourseSubjectManager: React.FC<CourseSubjectManagerProps> = ({ onBa
     }>({
         code: "",
         name: "",
-        department: "School of Theology & Biblical Studies",
+        department: "Mobile Bible School & Theological Seminary",
         degreeLevel: "Undergraduate",
         modeOfLearning: "Modular Field Cohort",
-        paymentPerUnit: 350,
+        paymentPerUnit: 500,
         totalYears: 4,
-        deanOrHead: "",
+        deanOrHead: "Rev. Dr. Rhoderick De Vera, Th.D.",
         description: ""
     });
 
@@ -129,7 +132,7 @@ export const CourseSubjectManager: React.FC<CourseSubjectManagerProps> = ({ onBa
         labHours: 0,
         schedule: "Fri-Sun 8:00 AM - 12:00 PM (Modular)",
         room: "Field Hub • Room 101",
-        instructor: "Dr. Samuel Vance",
+        instructor: "Rev. Dr. Rhoderick De Vera, Th.D.",
         modeOfLearning: "Modular Field Cohort",
         prerequisite: "",
         yearLevel: "1st Year"
@@ -256,29 +259,67 @@ export const CourseSubjectManager: React.FC<CourseSubjectManagerProps> = ({ onBa
 
     useEffect(() => {
         refreshCourses();
+        // Load live courses from database
+        courseCurriculumService.fetchCoursesFromApi().then(apiCourses => {
+            if (apiCourses && apiCourses.length > 0) {
+                setCourses(apiCourses);
+            }
+        }).catch(() => {});
+
         const unsubscribe = courseCurriculumService.subscribe(() => {
             refreshCourses();
         });
         return () => unsubscribe();
     }, []);
 
-    // Currently selected course
-    const selectedCourse = useMemo(() => {
-        return courses.find(c => c.id === selectedCourseId || c.code === selectedCourseId) || courses[0];
-    }, [courses, selectedCourseId]);
+    // Manual sync with SQL Server database
+    const handleSyncWithDb = async () => {
+        setIsSyncing(true);
+        try {
+            const liveCourses = await courseCurriculumService.fetchCoursesFromApi();
+            setCourses(liveCourses);
+            showFeedback("success", `Synchronized ${liveCourses.length} authentic courses from database.`);
+        } catch {
+            showFeedback("error", "Failed to sync courses from database.");
+        } finally {
+            setIsSyncing(false);
+        }
+    };
 
     // Filtered courses
     const filteredCourses = useMemo(() => {
-        if (!courseSearch.trim()) return courses;
+        let result = courses;
+        if (selectedCategoryTab !== "ALL") {
+            result = result.filter(c => {
+                const level = (c.degreeLevel || "").toLowerCase();
+                const dept = (c.department || "").toLowerCase();
+                const name = (c.name || "").toLowerCase();
+                const cat = selectedCategoryTab.toLowerCase();
+                if (cat === "certificate") return level.includes("certificate") || dept.includes("certificate") || name.includes("certificate");
+                if (cat === "diploma") return level.includes("diploma") || dept.includes("diploma") || name.includes("diploma");
+                if (cat === "associate") return level.includes("associate") || dept.includes("associate") || name.includes("associate");
+                if (cat === "bachelor") return level.includes("undergraduate") || level.includes("bachelor") || name.includes("bachelor") || name.includes("ab ");
+                if (cat === "masteral") return level.includes("graduate") || level.includes("seminary") || level.includes("master") || name.includes("master");
+                if (cat === "doctorate") return level.includes("doctorate") || name.includes("doctor");
+                if (cat === "specialized") return level.includes("specialized") || level.includes("bridge") || dept.includes("subject") || dept.includes("honorary") || name.includes("bccst") || name.includes("llp") || name.includes("honorary");
+                return true;
+            });
+        }
+        if (!courseSearch.trim()) return result;
         const q = courseSearch.toLowerCase();
-        return courses.filter(
+        return result.filter(
             c =>
                 c.name.toLowerCase().includes(q) ||
                 c.code.toLowerCase().includes(q) ||
                 c.department.toLowerCase().includes(q) ||
                 c.modeOfLearning.toLowerCase().includes(q)
         );
-    }, [courses, courseSearch]);
+    }, [courses, courseSearch, selectedCategoryTab]);
+
+    // Currently selected course
+    const selectedCourse = useMemo(() => {
+        return courses.find(c => c.id === selectedCourseId || c.code === selectedCourseId) || filteredCourses[0] || courses[0];
+    }, [courses, filteredCourses, selectedCourseId]);
 
     // Filtered subjects of currently selected course
     const filteredSubjects = useMemo(() => {
@@ -311,12 +352,12 @@ export const CourseSubjectManager: React.FC<CourseSubjectManagerProps> = ({ onBa
         setCourseForm({
             code: "",
             name: "",
-            department: "School of Theology & Biblical Studies",
+            department: "Mobile Bible School & Theological Seminary",
             degreeLevel: "Undergraduate",
             modeOfLearning: "Modular Field Cohort",
-            paymentPerUnit: 350,
+            paymentPerUnit: 500,
             totalYears: 4,
-            deanOrHead: "Dr. Samuel Vance, Th.D.",
+            deanOrHead: "Rev. Dr. Rhoderick De Vera, Th.D.",
             description: ""
         });
         setIsCourseModalOpen(true);
@@ -613,7 +654,7 @@ export const CourseSubjectManager: React.FC<CourseSubjectManagerProps> = ({ onBa
     // Reset to defaults
     const handleResetDefaults = () => {
         const confirmed = window.confirm(
-            "Are you sure you want to reset all courses and subjects to Mobile Bible School defaults?\n\nThis will restore Bachelor of Theology, Master of Divinity, Diploma in Pastoral Ministry, and Certificate in Biblical Studies."
+            "Are you sure you want to reset all courses and subjects to official Mobile Bible School curriculum?\n\nThis will restore all 16 academic programs (Certificate, Diploma, Associate, Bachelor, Masteral, Doctorate, and Bridge pathways)."
         );
         if (!confirmed) return;
 
@@ -647,12 +688,22 @@ export const CourseSubjectManager: React.FC<CourseSubjectManagerProps> = ({ onBa
                             <span className="course-mgr-badge">Mobile Bible School CMS</span>
                         </div>
                         <p className="course-mgr-subtitle">
-                            Manually configure courses, units, class schedules, modes of learning, and editable tuition rates per unit.
+                            Manage authentic theological courses, subjects, units, class schedules, and tuition rates per unit.
                         </p>
                     </div>
                 </div>
 
                 <div className="course-mgr-header-actions">
+                    <button
+                        type="button"
+                        className="course-mgr-btn btn-secondary"
+                        onClick={handleSyncWithDb}
+                        disabled={isSyncing}
+                        title="Fetch real-time courses and modules from database"
+                    >
+                        <RefreshCw size={16} className={isSyncing ? "animate-spin" : ""} />
+                        <span>{isSyncing ? "Syncing..." : "Sync Database"}</span>
+                    </button>
                     <button
                         type="button"
                         className="course-mgr-btn btn-secondary"
@@ -708,6 +759,30 @@ export const CourseSubjectManager: React.FC<CourseSubjectManagerProps> = ({ onBa
                                     <X size={12} />
                                 </button>
                             )}
+                        </div>
+
+                        {/* Category filter tabs matching MBS menu */}
+                        <div className="course-category-chips">
+                            {[
+                                { id: "ALL", label: "All", count: courses.length },
+                                { id: "Certificate", label: "Certificate", count: courses.filter(c => (c.degreeLevel || "").toLowerCase().includes("certificate") || (c.department || "").toLowerCase().includes("certificate")).length },
+                                { id: "Diploma", label: "Diploma", count: courses.filter(c => (c.degreeLevel || "").toLowerCase().includes("diploma")).length },
+                                { id: "Associate", label: "Associate", count: courses.filter(c => (c.degreeLevel || "").toLowerCase().includes("associate")).length },
+                                { id: "Bachelor", label: "Bachelor", count: courses.filter(c => (c.degreeLevel || "").toLowerCase().includes("undergraduate") || (c.degreeLevel || "").toLowerCase().includes("bachelor") || (c.name || "").toLowerCase().includes("ab ")).length },
+                                { id: "Masteral", label: "Masteral", count: courses.filter(c => (c.degreeLevel || "").toLowerCase().includes("graduate") || (c.degreeLevel || "").toLowerCase().includes("seminary") || (c.name || "").toLowerCase().includes("master")).length },
+                                { id: "Doctorate", label: "Doctorate", count: courses.filter(c => (c.degreeLevel || "").toLowerCase().includes("doctorate")).length },
+                                { id: "Specialized", label: "Bridge / Specialized", count: courses.filter(c => (c.degreeLevel || "").toLowerCase().includes("specialized") || (c.degreeLevel || "").toLowerCase().includes("bridge")).length }
+                            ].map(tab => (
+                                <button
+                                    key={tab.id}
+                                    type="button"
+                                    className={`category-chip ${selectedCategoryTab === tab.id ? "active" : ""}`}
+                                    onClick={() => setSelectedCategoryTab(tab.id)}
+                                >
+                                    <span>{tab.label}</span>
+                                    <span className="chip-badge">{tab.count}</span>
+                                </button>
+                            ))}
                         </div>
                     </div>
 
@@ -1122,11 +1197,13 @@ export const CourseSubjectManager: React.FC<CourseSubjectManagerProps> = ({ onBa
                                                 })
                                             }
                                         >
-                                            <option value="Undergraduate">Undergraduate (Bachelor)</option>
-                                            <option value="Graduate / Seminary">Graduate / Seminary (Master/Doctorate)</option>
-                                            <option value="Diploma">Diploma (2-Year Ministry)</option>
-                                            <option value="Certificate">Certificate (Foundational / Lay)</option>
-                                            <option value="Basic Education">Basic Education</option>
+                                            <option value="Certificate">Certificate Level (Short Term Courses)</option>
+                                            <option value="Diploma">Diploma Level (2-Year Ministry)</option>
+                                            <option value="Associate">Associate Degree (2-Year Pastoral / Naturopathy)</option>
+                                            <option value="Undergraduate">Bachelor Degree (4-Year Theological / Arts)</option>
+                                            <option value="Graduate / Seminary">Masteral Degree (Postgraduate Seminary)</option>
+                                            <option value="Doctorate">Doctorate Degree (Terminal Doctoral Degree)</option>
+                                            <option value="Specialized / Bridge">Bridge & Accelerated Programs (BCCST / LLP / Honorary)</option>
                                         </select>
                                     </div>
                                 </div>

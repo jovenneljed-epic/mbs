@@ -270,6 +270,55 @@
     padding: 2px;
 }
 
+/* Category filter tabs */
+.course-category-chips {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 10px 0 2px;
+    margin-top: 6px;
+    scrollbar-width: thin;
+}
+
+.category-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 14px;
+    background: #f0f2f5;
+    border: 1px solid #e4e6eb;
+    font-size: 11px;
+    font-weight: 600;
+    color: #4b4f56;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.category-chip:hover {
+    background: #e4e6eb;
+    color: #1c1e21;
+}
+
+.category-chip.active {
+    background: #1877f2;
+    border-color: #1877f2;
+    color: #ffffff;
+}
+
+.category-chip .chip-badge {
+    padding: 1px 5px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.08);
+    font-size: 10px;
+}
+
+.category-chip.active .chip-badge {
+    background: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+}
+
 .course-items-list {
     overflow-y: auto;
     flex: 1;

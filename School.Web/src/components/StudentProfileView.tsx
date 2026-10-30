@@ -418,7 +418,7 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
                             </div>
                             <div className="metric-chip">
                                 <span className="metric-label">Dean / Program Chair:</span>
-                                <strong>{programInfo?.deanOrHead || dynamicCourse?.deanOrHead || "Dr. Samuel Vance, Th.D."}</strong>
+                                <strong>{programInfo?.deanOrHead || dynamicCourse?.deanOrHead || "Rev. Dr. Rhoderick De Vera, Th.D."}</strong>
                             </div>
                         </div>
 
@@ -789,7 +789,7 @@ export const StudentProfileView: React.FC<StudentProfileViewProps> = ({
 
                                 <div className="cor-sig-box">
                                     <div className="cor-sig-line"></div>
-                                    <span className="cor-sig-name">{programInfo?.deanOrHead || dynamicCourse?.deanOrHead || "Dr. Samuel Vance, Th.D."}</span>
+                                    <span className="cor-sig-name">{programInfo?.deanOrHead || dynamicCourse?.deanOrHead || "Rev. Dr. Rhoderick De Vera, Th.D."}</span>
                                     <span className="cor-sig-role">Dean of Academic Affairs</span>
                                 </div>
 

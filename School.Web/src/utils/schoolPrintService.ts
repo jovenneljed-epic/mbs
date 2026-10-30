@@ -415,7 +415,7 @@ export class SchoolPrintService {
                         </div>
                         <div class="sig-box">
                             <div class="sig-line"></div>
-                            <div class="sig-name">Dr. Samuel Vance, Th.D.</div>
+                            <div class="sig-name">Rev. Dr. Rhoderick De Vera, Th.D.</div>
                             <div class="sig-role">Dean of Academic Affairs</div>
                         </div>
                         <div class="sig-box">
@@ -483,7 +483,7 @@ export class SchoolPrintService {
                     <div class="diploma-signatures">
                         <div class="diploma-sig-box">
                             <div class="diploma-line"></div>
-                            <div class="diploma-sig-name">Dr. Samuel Vance, Th.D.</div>
+                            <div class="diploma-sig-name">Rev. Dr. Rhoderick De Vera, Th.D.</div>
                             <div class="diploma-sig-title">Dean of Academic Affairs</div>
                         </div>
                         <div class="diploma-seal">
@@ -1641,7 +1641,7 @@ export class SchoolPrintService {
                 <div class="sig-col">
                     <div class="sig-box">
                         <div class="sig-line"></div>
-                        <div class="sig-name">Dr. Samuel Vance, Th.D.</div>
+                        <div class="sig-name">Rev. Dr. Rhoderick De Vera, Th.D.</div>
                         <div class="sig-title">Dean of Academic Affairs</div>
                     </div>
                 </div>

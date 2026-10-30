@@ -1363,11 +1363,12 @@ export const TuitionFeePayment: React.FC = () => {
                                             {c.name} ({c.code})
                                         </option>
                                     ))}
-                                    <option value="Bachelor of Ministry (B.Min.)">Bachelor of Ministry (B.Min.)</option>
-                                    <option value="Associate in Theology (Th.A.)">Associate in Theology (Th.A.)</option>
                                     <option value="Certificate in Biblical Studies (CBS)">Certificate in Biblical Studies (CBS)</option>
+                                    <option value="Diploma in Pastoral Studies (DPS)">Diploma in Pastoral Studies (DPS)</option>
+                                    <option value="Associate in Ministerial Leadership & Theology (AML)">Associate in Ministerial Leadership & Theology (AML)</option>
+                                    <option value="Bachelor of Theology (B.Th.)">Bachelor of Theology (B.Th.)</option>
                                     <option value="Master of Divinity (M.Div.)">Master of Divinity (M.Div.)</option>
-                                    <option value="Diploma in Pastoral Leadership">Diploma in Pastoral Leadership</option>
+                                    <option value="Doctor of Theology (Th.D.)">Doctor of Theology (Th.D.)</option>
                                 </select>
                             </div>
 
