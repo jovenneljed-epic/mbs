@@ -725,7 +725,7 @@ namespace School.Api.Controllers
                     return NotFound(new
                     {
                         message =
-                            "The selected church service was not found.",
+                            "The selected class session was not found.",
 
                         churchServiceId
                     });
@@ -746,18 +746,10 @@ namespace School.Api.Controllers
                         BuildUnavailableServiceResponse(
                             service,
                             "CANCELLED",
-                            "This church service was cancelled. Attendance cannot be recorded."));
+                            "This class session was cancelled. Attendance cannot be recorded."));
                 }
 
-                if (serviceStatus !=
-                    "COMPLETED")
-                {
-                    return Ok(
-                        BuildUnavailableServiceResponse(
-                            service,
-                            serviceStatus,
-                            "This church service has not happened yet. Attendance will become available after the service is completed."));
-                }
+// Student attendance can be recorded for any scheduled or ongoing class session!
 
                 // -------------------------------------------------
                 // ACTIVE MEMBERS
@@ -782,7 +774,8 @@ namespace School.Api.Controllers
                             m.MemberCode,
                             m.FirstName,
                             m.MiddleName,
-                            m.LastName
+                            m.LastName,
+                            ministry = m.Ministry ?? "Theology & Biblical Studies"
                         })
                         .ToListAsync();
 
@@ -911,7 +904,7 @@ namespace School.Api.Controllers
                         true,
 
                     message =
-                        "Attendance is available for this completed church service.",
+                        "Attendance is available for this class session.",
 
                     summary,
 
@@ -921,7 +914,7 @@ namespace School.Api.Controllers
             catch (Exception ex)
             {
                 return AttendanceError(
-                    "Unable to load attendance for the selected church service.",
+                    "Unable to load attendance for the selected class session.",
                     ex);
             }
         }
@@ -985,7 +978,7 @@ namespace School.Api.Controllers
                     return NotFound(new
                     {
                         message =
-                            "The selected church service was not found.",
+                            "The selected class session was not found.",
 
                         churchServiceId
                     });
@@ -1005,19 +998,11 @@ namespace School.Api.Controllers
                     return BadRequest(new
                     {
                         message =
-                            "Attendance cannot be recorded because this church service was cancelled."
+                            "Attendance cannot be recorded because this class session was cancelled."
                     });
                 }
 
-                if (serviceStatus !=
-                    "COMPLETED")
-                {
-                    return BadRequest(new
-                    {
-                        message =
-                            "Attendance cannot be recorded yet. Complete the church service first."
-                    });
-                }
+// Student class attendance can be recorded and saved at any time during or after class!
 
                 // -------------------------------------------------
                 // DUPLICATES

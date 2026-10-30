@@ -79,6 +79,8 @@ interface AttendanceApiRecord {
     MemberCode?: string;
 
     status?: string;
+    ministry?: string;
+    Ministry?: string;
     attendanceId?: number;
     attendanceDate?: string;
 }
@@ -473,8 +475,12 @@ const getMemberCode = (
 // =============================================================
 
 const getMemberMinistry = (
-    member: Member
+    member: Member | any
 ): string => {
+
+    if (!member) {
+        return "Theology and Biblical Studies";
+    }
 
     const data =
         member as any;
@@ -486,7 +492,13 @@ const getMemberMinistry = (
         safeString(
             data.Ministry
         ) ||
-        "—"
+        safeString(
+            data.degreeProgram
+        ) ||
+        safeString(
+            data.DegreeProgram
+        ) ||
+        "Theology and Biblical Studies"
     );
 };
 
@@ -821,7 +833,7 @@ const Attendance: React.FC = () => {
                     lastError instanceof Error
                         ? lastError
                         : new Error(
-                            "Unable to load church services."
+                            "Unable to load class sessions."
                         )
                 );
             },
@@ -886,7 +898,7 @@ const Attendance: React.FC = () => {
                         setError(
                             serviceResult.reason instanceof Error
                                 ? serviceResult.reason.message
-                                : "Unable to load church services."
+                                : "Unable to load class sessions."
                         );
                     }
 
@@ -994,7 +1006,7 @@ const Attendance: React.FC = () => {
                     if (!service) {
 
                         throw new Error(
-                            "The selected church service was not found."
+                            "The selected class session was not found."
                         );
                     }
 
@@ -1015,8 +1027,8 @@ const Attendance: React.FC = () => {
                     // -------------------------------------------------
 
                     if (
-                        serviceStatus !==
-                        "COMPLETED"
+                        serviceStatus ===
+                        "CANCELLED"
                     ) {
 
                         setAttendance(
@@ -1029,24 +1041,15 @@ const Attendance: React.FC = () => {
                             false
                         );
 
-                        if (
-                            serviceStatus ===
-                            "CANCELLED"
-                        ) {
-
-                            setMessage(
-                                "This church service was cancelled. Attendance cannot be recorded."
-                            );
-
-                        } else {
-
-                            setMessage(
-                                "This church service has not been completed yet. Attendance will become available after the service is completed."
-                            );
-                        }
+                        setMessage(
+                            "This class session was cancelled. Attendance cannot be recorded."
+                        );
 
                         return;
                     }
+
+                    // Student attendance is immediately available for active class sessions
+                    setAttendanceAvailable(true);
 
                     // -------------------------------------------------
                     // GET ATTENDANCE
@@ -1126,7 +1129,7 @@ const Attendance: React.FC = () => {
 
                         setMessage(
                             data.message ||
-                            "Attendance is not available for this church service."
+                            "Attendance is not available for this class session."
                         );
 
                         return;
@@ -1261,8 +1264,14 @@ const Attendance: React.FC = () => {
 
                                     ministry:
                                         getMemberMinistry(
-                                            member
-                                        ),
+                                            record
+                                        ) !== "Theology and Biblical Studies"
+                                            ? getMemberMinistry(
+                                                record
+                                            )
+                                            : getMemberMinistry(
+                                                member
+                                            ),
 
                                     status:
                                         normalizeStatus(
@@ -1294,7 +1303,7 @@ const Attendance: React.FC = () => {
 
                     setMessage(
                         data.message ||
-                        "Attendance is available for this completed church service."
+                        "Attendance is available for this class session."
                     );
 
                 } catch (err) {
@@ -1380,7 +1389,7 @@ const Attendance: React.FC = () => {
             ) {
 
                 setError(
-                    "Invalid church service selected."
+                    "Invalid class session selected."
                 );
 
                 return;
@@ -1439,7 +1448,7 @@ const Attendance: React.FC = () => {
             if (!selectedServiceId) {
 
                 setError(
-                    "Please select a church service."
+                    "Please select a class session."
                 );
 
                 return;
@@ -1448,7 +1457,7 @@ const Attendance: React.FC = () => {
             if (!selectedService) {
 
                 setError(
-                    "Church service information is unavailable."
+                    "Class session information is unavailable."
                 );
 
                 return;
@@ -1463,12 +1472,12 @@ const Attendance: React.FC = () => {
                     .toUpperCase();
 
             if (
-                status !==
-                "COMPLETED"
+                status ===
+                "CANCELLED"
             ) {
 
                 setError(
-                    "Attendance cannot be saved until the church service is completed."
+                    "Attendance cannot be saved because this class session was cancelled."
                 );
 
                 return;
@@ -1660,7 +1669,7 @@ const Attendance: React.FC = () => {
                         resetDashboard();
 
                         setError(
-                            "The selected church service was not found."
+                            "The selected class session was not found."
                         );
 
                         return;
@@ -1918,7 +1927,7 @@ const filteredAttendance =
                                 )
                                 : ""
                         }
-                        placeholder="Select a church service"
+                        placeholder="Select a class session date"
                     />
 
                 </div>
@@ -1926,12 +1935,12 @@ const filteredAttendance =
                 <div className="control-group search-group">
 
                     <label>
-                        SEARCH MEMBER
+                        SEARCH STUDENT
                     </label>
 
                     <input
                         type="text"
-                        placeholder="Search name, code, ministry..."
+                        placeholder="Search student name, student ID #, degree program..."
                         value={
                             search
                         }
@@ -2013,7 +2022,7 @@ const filteredAttendance =
                     {!attendanceAvailable && (
 
                         <span>
-                            {" — Attendance not yet available"}
+                            {" — Class Session"}
                         </span>
                     )}
 
@@ -2025,7 +2034,7 @@ const filteredAttendance =
             <div className="attendance-stat-grid">
 
                 <StatCard
-                    label="TOTAL MEMBERS"
+                    label="TOTAL STUDENTS"
                     value={
                         dashboard.totalRecords
                     }
@@ -2114,14 +2123,14 @@ const filteredAttendance =
                     <div>
 
                         <h2>
-                            Attendance List
+                            Student Class Attendance Sheet
                         </h2>
 
                         <p>
 
                             {attendanceAvailable
-                                ? "Mark the attendance status of each active member."
-                                : "Attendance becomes available after the church service is completed."}
+                                ? "Mark the attendance status (Present, Late, Early, Absent, Excused) of each enrolled student."
+                                : "Record and manage student attendance for this class lecture session."}
 
                         </p>
 
@@ -2143,7 +2152,7 @@ const filteredAttendance =
 
                         {saving
                             ? "Saving..."
-                            : "✓ Save All Attendance"}
+                            : "✓ Save Class Attendance"}
 
                     </button>
 
@@ -2167,7 +2176,7 @@ const filteredAttendance =
 
                     <div className="empty-attendance">
 
-                        Select a church service to begin.
+                        Select a class session or subject above to begin recording student attendance.
 
                     </div>
 
@@ -2191,9 +2200,9 @@ const filteredAttendance =
                             ).toUpperCase() ===
                             "CANCELLED"
 
-                                ? "This church service was cancelled. Attendance cannot be recorded."
+                                ? "This class session was cancelled. Attendance cannot be recorded."
 
-                                : "This church service is still scheduled. Once the service is completed, attendance recording will become available."}
+                                : "This class session is scheduled. Student attendance can now be recorded."}
 
                         </p>
 
@@ -2214,15 +2223,15 @@ const filteredAttendance =
                                     </th>
 
                                     <th>
-                                        MEMBER
+                                        STUDENT NAME
                                     </th>
 
                                     <th>
-                                        CODE
+                                        STUDENT ID #
                                     </th>
 
                                     <th>
-                                        MINISTRY
+                                        DEGREE PROGRAM
                                     </th>
 
                                     <th>
@@ -2246,7 +2255,7 @@ const filteredAttendance =
                                             className="empty-attendance"
                                         >
 
-                                            No members found.
+                                            No enrolled students found.
 
                                         </td>
 
