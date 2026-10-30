@@ -35,6 +35,15 @@ export interface PillarItem {
     icon: string;
 }
 
+export interface HistoryPhotoItem {
+    id: string;
+    title: string;
+    year: string;
+    imageUrl: string;
+    description: string;
+    category?: string;
+}
+
 export interface TimelineItem {
     year: string;
     text: string;
@@ -86,6 +95,7 @@ export interface AboutContentData {
             title: string;
             desc: string;
             timeline: TimelineItem[];
+            photos?: HistoryPhotoItem[];
         };
     };
     faith: {
@@ -217,6 +227,50 @@ export const DEFAULT_ABOUT_CONTENT: AboutContentData = {
                 {
                     year: "2026",
                     text: "Launch of MBS Theological LMS 3.0, expanding global extension cohorts to international pastors."
+                }
+            ],
+            photos: [
+                {
+                    id: "hist-1",
+                    title: "First Mobile Pastoral Cohort (Luzon, 1986)",
+                    year: "1986",
+                    imageUrl: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80",
+                    description: "Pioneer traveling faculty conducting intensive weekend theological training with 28 local pastors in provincial Luzon."
+                },
+                {
+                    id: "hist-2",
+                    title: "Main Campus Theological Research Library (1998)",
+                    year: "1998",
+                    imageUrl: "https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=800&auto=format&fit=crop&q=80",
+                    description: "Formal dedication of the 15,000-volume theological research library and study hall at the main seminary campus."
+                },
+                {
+                    id: "hist-3",
+                    title: "Regional Pastoral Cohort Commissioning (2005)",
+                    year: "2005",
+                    imageUrl: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800&auto=format&fit=crop&q=80",
+                    description: "Ordination and commissioning assembly of 40 rural church planters across the Visayas provincial extensions."
+                },
+                {
+                    id: "hist-4",
+                    title: "ACTS Institutional Accreditation Charter (2012)",
+                    year: "2012",
+                    imageUrl: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=800&auto=format&fit=crop&q=80",
+                    description: "Asian Association of Christian Theological Studies granting accredited institutional member status."
+                },
+                {
+                    id: "hist-5",
+                    title: "Provincial Extension Modular Class Session (2018)",
+                    year: "2018",
+                    imageUrl: "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=800&auto=format&fit=crop&q=80",
+                    description: "Weekend modular exegesis session held at a satellite cohort center for bi-vocational pastors."
+                },
+                {
+                    id: "hist-6",
+                    title: "Modern Theological LMS & Extension Center (2026)",
+                    year: "2026",
+                    imageUrl: "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?w=800&auto=format&fit=crop&q=80",
+                    description: "Integration of high-definition digital lectures with regional satellite cohort campuses across the Philippines."
                 }
             ]
         }
@@ -588,7 +642,13 @@ export async function getAboutContent(): Promise<AboutContentData> {
                         ...DEFAULT_ABOUT_CONTENT.overview,
                         ...(data.overview || {}),
                         chancellor: { ...DEFAULT_ABOUT_CONTENT.overview.chancellor, ...(data.overview?.chancellor || {}) },
-                        history: { ...DEFAULT_ABOUT_CONTENT.overview.history, ...(data.overview?.history || {}) }
+                        history: {
+                            ...DEFAULT_ABOUT_CONTENT.overview.history,
+                            ...(data.overview?.history || {}),
+                            photos: Array.isArray(data.overview?.history?.photos) && data.overview.history.photos.length > 0
+                                ? data.overview.history.photos
+                                : DEFAULT_ABOUT_CONTENT.overview.history.photos
+                        }
                     },
                     faith: {
                         ...DEFAULT_ABOUT_CONTENT.faith,
@@ -741,6 +801,80 @@ export async function uploadFacultyPhoto(file: File): Promise<string> {
                 if (ctx) {
                     ctx.drawImage(img, 0, 0, width, height);
                     resolve(canvas.toDataURL("image/jpeg", 0.85));
+                } else {
+                    resolve((e.target?.result as string) || "");
+                }
+            };
+            img.onerror = () => {
+                resolve((e.target?.result as string) || "");
+            };
+            img.src = (e.target?.result as string) || "";
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+// ------------------------------------------------------------
+// UPLOAD HISTORY ARCHIVE PHOTO (API + CANVAS DATA URL FALLBACK)
+// ------------------------------------------------------------
+export async function uploadHistoryPhoto(file: File): Promise<string> {
+    // 1. Try backend API upload
+    try {
+        const formData = new FormData();
+        formData.append("file", file);
+        const token = localStorage.getItem("token") || "";
+
+        const res = await fetch(`${API_BASE_URL}/AboutContent/upload-history-photo`, {
+            method: "POST",
+            headers: {
+                ...(token ? { "Authorization": `Bearer ${token}` } : {})
+            },
+            body: formData
+        });
+
+        if (res.ok) {
+            const data = await res.json();
+            if (data.url) {
+                const fullUrl = data.url.startsWith("http")
+                    ? data.url
+                    : `${API_BASE_URL.replace(/\/api$/, "")}${data.url}`;
+                return fullUrl;
+            }
+        }
+    } catch (err) {
+        console.warn("[AboutContent] History photo upload to API failed, falling back to client DataURL:", err);
+    }
+
+    // 2. High quality canvas-compressed client Data URL fallback
+    return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement("canvas");
+                const MAX_WIDTH = 1200;
+                const MAX_HEIGHT = 900;
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > MAX_WIDTH) {
+                        height = Math.round((height * MAX_WIDTH) / width);
+                        width = MAX_WIDTH;
+                    }
+                } else {
+                    if (height > MAX_HEIGHT) {
+                        width = Math.round((width * MAX_HEIGHT) / height);
+                        height = MAX_HEIGHT;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext("2d");
+                if (ctx) {
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL("image/jpeg", 0.88));
                 } else {
                     resolve((e.target?.result as string) || "");
                 }

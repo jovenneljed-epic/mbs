@@ -155,6 +155,50 @@ namespace School.Api.Controllers
         }
 
         // =========================================================
+        // POST: /api/AboutContent/upload-history-photo
+        // Admin photo upload for MBS history archives
+        // =========================================================
+        [HttpPost("upload-history-photo")]
+        [RequestSizeLimit(20 * 1024 * 1024)] // 20 MB
+        public async Task<IActionResult> UploadHistoryPhoto([FromForm] IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest(new { message = "No image file provided." });
+            }
+
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif" };
+            var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+
+            if (!allowedExtensions.Contains(ext))
+            {
+                return BadRequest(new { message = "Only JPG, PNG, WEBP, or GIF images are allowed." });
+            }
+
+            var historyFolder = Path.Combine(_env.ContentRootPath, "root-uploads-history");
+            if (!Directory.Exists(historyFolder))
+            {
+                Directory.CreateDirectory(historyFolder);
+            }
+
+            var uniqueName = $"history-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid():N}{ext}";
+            var destinationPath = Path.Combine(historyFolder, uniqueName);
+
+            await using (var stream = new FileStream(destinationPath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            var relativeUrl = $"/history-photos/{uniqueName}";
+            return Ok(new
+            {
+                url = relativeUrl,
+                fileName = uniqueName,
+                size = file.Length
+            });
+        }
+
+        // =========================================================
         // POST: /api/AboutContent/reset
         // Admin reset endpoint - restores factory defaults
         // =========================================================

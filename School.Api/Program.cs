@@ -121,6 +121,14 @@ var facultyPhotoFolder =
 Directory.CreateDirectory(
     facultyPhotoFolder);
 
+var historyPhotoFolder =
+    Path.Combine(
+        app.Environment.ContentRootPath,
+        "root-uploads-history");
+
+Directory.CreateDirectory(
+    historyPhotoFolder);
+
 
 // ============================================================
 // SWAGGER
@@ -182,6 +190,17 @@ app.UseStaticFiles(
 
         RequestPath =
             "/faculty-photos"
+    });
+
+app.UseStaticFiles(
+    new StaticFileOptions
+    {
+        FileProvider =
+            new PhysicalFileProvider(
+                historyPhotoFolder),
+
+        RequestPath =
+            "/history-photos"
     });
 
 

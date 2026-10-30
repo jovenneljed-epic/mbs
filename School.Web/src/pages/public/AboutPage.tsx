@@ -15,9 +15,10 @@ import {
     resetAboutContent,
     isUserAdmin,
     ABOUT_CONTENT_UPDATED_EVENT,
-    DEFAULT_ABOUT_CONTENT
+    DEFAULT_ABOUT_CONTENT,
+    uploadHistoryPhoto
 } from "../../services/aboutContentService";
-import type { AboutContentData } from "../../services/aboutContentService";
+import type { AboutContentData, HistoryPhotoItem } from "../../services/aboutContentService";
 import AboutEditorModal from "./AboutEditorModal";
 import {
     BookOpen,
@@ -37,7 +38,14 @@ import {
     ScrollText,
     Edit2,
     Eye,
-    Check
+    Check,
+    History,
+    Camera,
+    AlertCircle,
+    Upload,
+    Trash2,
+    ZoomIn,
+    X
 } from "lucide-react";
 
 export type AboutTab = "overview" | "faith" | "faculty" | "accreditations" | "campuses";
@@ -62,6 +70,139 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, initialTab = "
     const [isEditorOpen, setIsEditorOpen] = useState<boolean>(false);
     const [editorTab, setEditorTab] = useState<"hero" | "faith" | "faculty" | "campuses" | "accreditations">("hero");
     const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+    // History Archival Photos State
+    const [selectedLightboxPhoto, setSelectedLightboxPhoto] = useState<HistoryPhotoItem | null>(null);
+    const [isHistoryPhotoModalOpen, setIsHistoryPhotoModalOpen] = useState<boolean>(false);
+    const [editingHistoryPhotoIdx, setEditingHistoryPhotoIdx] = useState<number | null>(null);
+    const [historyPhotoForm, setHistoryPhotoForm] = useState<HistoryPhotoItem>({
+        id: "",
+        title: "",
+        year: "1986",
+        imageUrl: "",
+        description: ""
+    });
+    const [uploadingHistoryPhoto, setUploadingHistoryPhoto] = useState(false);
+    const [historyPhotoError, setHistoryPhotoError] = useState<string | null>(null);
+
+    // History Photo Action Handlers (Admin Only)
+    const handleOpenNewHistoryPhoto = () => {
+        setEditingHistoryPhotoIdx(-1);
+        setHistoryPhotoForm({
+            id: `hist-${Date.now()}`,
+            title: "",
+            year: "1986",
+            imageUrl: "",
+            description: ""
+        });
+        setHistoryPhotoError(null);
+        setIsHistoryPhotoModalOpen(true);
+    };
+
+    const handleEditHistoryPhoto = (idx: number) => {
+        const photo = (content.overview.history.photos || [])[idx];
+        if (!photo) return;
+        setEditingHistoryPhotoIdx(idx);
+        setHistoryPhotoForm({ ...photo });
+        setHistoryPhotoError(null);
+        setIsHistoryPhotoModalOpen(true);
+    };
+
+    const handleHistoryPhotoFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (!file.type.startsWith("image/")) {
+            setHistoryPhotoError("Please select a valid image file (JPG, PNG, WEBP, GIF).");
+            return;
+        }
+
+        if (file.size > 20 * 1024 * 1024) {
+            setHistoryPhotoError("Image size exceeds 20 MB limit.");
+            return;
+        }
+
+        setUploadingHistoryPhoto(true);
+        setHistoryPhotoError(null);
+        try {
+            const url = await uploadHistoryPhoto(file);
+            setHistoryPhotoForm(prev => ({ ...prev, imageUrl: url }));
+        } catch (err: any) {
+            setHistoryPhotoError(err?.message || "Failed to process photo.");
+        } finally {
+            setUploadingHistoryPhoto(false);
+            e.target.value = "";
+        }
+    };
+
+    const handleSaveHistoryPhotoModal = async () => {
+        if (!historyPhotoForm.imageUrl.trim()) {
+            setHistoryPhotoError("Please upload an image file or provide an image URL.");
+            return;
+        }
+        if (!historyPhotoForm.title.trim()) {
+            setHistoryPhotoError("Please provide a title for this historical photo.");
+            return;
+        }
+
+        const currentPhotos = [...(content.overview.history.photos || [])];
+        const updatedItem: HistoryPhotoItem = {
+            id: historyPhotoForm.id || `hist-${Date.now()}`,
+            title: historyPhotoForm.title.trim(),
+            year: historyPhotoForm.year.trim() || "1986",
+            imageUrl: historyPhotoForm.imageUrl.trim(),
+            description: historyPhotoForm.description.trim()
+        };
+
+        if (editingHistoryPhotoIdx !== null && editingHistoryPhotoIdx >= 0) {
+            currentPhotos[editingHistoryPhotoIdx] = updatedItem;
+        } else {
+            currentPhotos.unshift(updatedItem);
+        }
+
+        const updatedContent: AboutContentData = {
+            ...content,
+            overview: {
+                ...content.overview,
+                history: {
+                    ...content.overview.history,
+                    photos: currentPhotos
+                }
+            }
+        };
+
+        setContent(updatedContent);
+        setIsHistoryPhotoModalOpen(false);
+        const success = await handleSaveContent(updatedContent);
+        if (success) {
+            setToastMessage(editingHistoryPhotoIdx === -1 ? "Historical photo added to archives." : "Historical photo updated.");
+        }
+    };
+
+    const handleDeleteHistoryPhoto = async (idx: number) => {
+        const photo = (content.overview.history.photos || [])[idx];
+        if (!window.confirm(`Remove archival photograph "${photo?.title || 'this photo'}"?`)) {
+            return;
+        }
+
+        const currentPhotos = (content.overview.history.photos || []).filter((_, i) => i !== idx);
+        const updatedContent: AboutContentData = {
+            ...content,
+            overview: {
+                ...content.overview,
+                history: {
+                    ...content.overview.history,
+                    photos: currentPhotos
+                }
+            }
+        };
+
+        setContent(updatedContent);
+        const success = await handleSaveContent(updatedContent);
+        if (success) {
+            setToastMessage("Archival photograph removed.");
+        }
+    };
 
     // ------------------------------------------------------------
     // INITIALIZATION & LIFECYCLE
@@ -309,8 +450,8 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, initialTab = "
                         className={`mbs-dossier-tab ${activeTab === "overview" ? "active" : ""}`}
                         onClick={() => handleTabChange("overview")}
                     >
-                        <Landmark size={16} />
-                        <span>Institutional Overview</span>
+                        <History size={16} />
+                        <span>MBS History &amp; Heritage</span>
                     </button>
 
                     <button
@@ -427,6 +568,115 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, initialTab = "
                                     <div key={i} className="mbs-timeline-point">
                                         <strong className="mbs-timeline-year">{point.year}</strong>
                                         <span>{point.text}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* ============================================================ */}
+                        {/* SEMINARY HISTORICAL PHOTO ARCHIVES (ADMIN UPLOAD ONLY)       */}
+                        {/* ============================================================ */}
+                        <div className="mbs-history-photos-section">
+                            <div className="mbs-history-photos-header">
+                                <div>
+                                    <span className="mbs-label-eyebrow">PHOTOGRAPHIC ARCHIVES (1986–PRESENT)</span>
+                                    <h3 className="mbs-history-photos-title">MBS Historical Photo Archives</h3>
+                                    <p className="mbs-history-photos-subtitle">
+                                        Archival photographic documentation of Mobile Bible School’s journey from traveling grassroots cohorts to an accredited seminary institution.
+                                    </p>
+                                </div>
+
+                                {canEdit && (
+                                    <button
+                                        type="button"
+                                        className="mbs-btn-upload-history"
+                                        onClick={handleOpenNewHistoryPhoto}
+                                    >
+                                        <Upload size={15} />
+                                        <span>+ Upload History Photo</span>
+                                    </button>
+                                )}
+                            </div>
+
+                            <div className="mbs-history-photos-grid">
+                                {/* Admin Direct Upload Tile */}
+                                {canEdit && (
+                                    <div
+                                        className="mbs-history-photo-add-tile"
+                                        onClick={handleOpenNewHistoryPhoto}
+                                        role="button"
+                                        tabIndex={0}
+                                    >
+                                        <div className="mbs-photo-add-icon">
+                                            <Camera size={30} />
+                                        </div>
+                                        <strong>Upload Historical Photo</strong>
+                                        <p>Add archive photograph with year, title &amp; description</p>
+                                        <span className="mbs-admin-badge-mini">Admin Account Only</span>
+                                    </div>
+                                )}
+
+                                {/* Historical Photo Cards */}
+                                {(content.overview.history.photos || []).map((photo, pIdx) => (
+                                    <div
+                                        key={photo.id || pIdx}
+                                        className="mbs-history-photo-card"
+                                        onClick={() => setSelectedLightboxPhoto(photo)}
+                                    >
+                                        <div className="mbs-history-photo-img-wrap">
+                                            <img
+                                                src={photo.imageUrl}
+                                                alt={photo.title}
+                                                className="mbs-history-photo-img"
+                                                loading="lazy"
+                                                onError={(e) => {
+                                                    (e.currentTarget as HTMLImageElement).src = "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=800&auto=format&fit=crop&q=80";
+                                                }}
+                                            />
+                                            <div className="mbs-history-photo-badge">
+                                                <Clock size={12} />
+                                                <span>{photo.year}</span>
+                                            </div>
+
+                                            <div className="mbs-history-photo-overlay">
+                                                <ZoomIn size={26} color="#FFFFFF" />
+                                                <span>View Archive</span>
+                                            </div>
+
+                                            {canEdit && (
+                                                <div
+                                                    className="mbs-history-photo-admin-actions"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                >
+                                                    <button
+                                                        type="button"
+                                                        className="mbs-photo-action-btn edit"
+                                                        onClick={() => handleEditHistoryPhoto(pIdx)}
+                                                        title="Edit Photo Details"
+                                                    >
+                                                        <Edit2 size={13} />
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        className="mbs-photo-action-btn delete"
+                                                        onClick={() => handleDeleteHistoryPhoto(pIdx)}
+                                                        title="Delete Archive Photo"
+                                                    >
+                                                        <Trash2 size={13} />
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="mbs-history-photo-content">
+                                            <div className="mbs-history-photo-meta">
+                                                <span className="mbs-history-photo-year-tag">{photo.year}</span>
+                                                <h4 className="mbs-history-photo-name">{photo.title}</h4>
+                                            </div>
+                                            {photo.description && (
+                                                <p className="mbs-history-photo-desc">{photo.description}</p>
+                                            )}
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -874,6 +1124,198 @@ export const AboutPage: React.FC<AboutPageProps> = ({ onNavigate, initialTab = "
                     </div>
                 </div>
             </section>
+
+            {/* ============================================================ */}
+            {/* HISTORICAL PHOTO LIGHTBOX MODAL (FOR ALL USERS)              */}
+            {/* ============================================================ */}
+            {selectedLightboxPhoto && (
+                <div
+                    className="mbs-lightbox-overlay animate-fade-in"
+                    onClick={() => setSelectedLightboxPhoto(null)}
+                >
+                    <div
+                        className="mbs-lightbox-modal"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            type="button"
+                            className="mbs-lightbox-close-btn"
+                            onClick={() => setSelectedLightboxPhoto(null)}
+                            title="Close preview"
+                        >
+                            <X size={22} />
+                        </button>
+
+                        <div className="mbs-lightbox-image-wrap">
+                            <img
+                                src={selectedLightboxPhoto.imageUrl}
+                                alt={selectedLightboxPhoto.title}
+                                className="mbs-lightbox-img"
+                            />
+                        </div>
+
+                        <div className="mbs-lightbox-details">
+                            <div className="mbs-lightbox-header">
+                                <span className="mbs-lightbox-year-badge">Era / Year {selectedLightboxPhoto.year}</span>
+                                <h3>{selectedLightboxPhoto.title}</h3>
+                            </div>
+                            {selectedLightboxPhoto.description && (
+                                <p className="mbs-lightbox-desc">{selectedLightboxPhoto.description}</p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* ============================================================ */}
+            {/* ADMIN-ONLY PHOTO UPLOAD MODAL                                */}
+            {/* ============================================================ */}
+            {canEdit && isHistoryPhotoModalOpen && (
+                <div
+                    className="mbs-admin-photo-modal-overlay animate-fade-in"
+                    onClick={() => setIsHistoryPhotoModalOpen(false)}
+                >
+                    <div
+                        className="mbs-admin-photo-modal"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="mbs-admin-modal-header">
+                            <div>
+                                <span className="mbs-admin-modal-eyebrow">ADMINISTRATOR ARCHIVES</span>
+                                <h3>{editingHistoryPhotoIdx === -1 ? "Upload Historical Photograph" : "Edit Historical Photograph"}</h3>
+                            </div>
+                            <button
+                                type="button"
+                                className="mbs-editor-close-btn"
+                                onClick={() => setIsHistoryPhotoModalOpen(false)}
+                            >
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div className="mbs-admin-modal-body">
+                            {/* PHOTO UPLOADER */}
+                            <div className="mbs-form-row">
+                                <label className="mbs-form-label">
+                                    <span>Photograph File / Image Source</span>
+                                </label>
+                                <div className="mbs-history-upload-box">
+                                    {historyPhotoForm.imageUrl ? (
+                                        <div className="mbs-history-preview-container">
+                                            <img
+                                                src={historyPhotoForm.imageUrl}
+                                                alt="Preview"
+                                                className="mbs-history-modal-preview-img"
+                                            />
+                                            <button
+                                                type="button"
+                                                className="mbs-btn-secondary mbs-modal-clear-photo-btn"
+                                                onClick={() => setHistoryPhotoForm(prev => ({ ...prev, imageUrl: "" }))}
+                                                disabled={uploadingHistoryPhoto}
+                                            >
+                                                <Trash2 size={14} />
+                                                <span>Remove Photo</span>
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="mbs-history-dropzone">
+                                            <Camera size={38} color="#F59E0B" />
+                                            <strong>Select a photo from your computer</strong>
+                                            <p>JPG, PNG, WEBP, GIF up to 20MB. Auto-optimized for archival showcase.</p>
+                                            <label className="mbs-btn-primary mbs-modal-browse-btn">
+                                                <Upload size={15} />
+                                                <span>{uploadingHistoryPhoto ? "Processing..." : "Choose Image File"}</span>
+                                                <input
+                                                    type="file"
+                                                    accept="image/jpeg,image/png,image/webp,image/gif"
+                                                    onChange={handleHistoryPhotoFileSelect}
+                                                    disabled={uploadingHistoryPhoto}
+                                                    hidden
+                                                />
+                                            </label>
+                                        </div>
+                                    )}
+
+                                    <div className="mbs-modal-url-input-wrap">
+                                        <input
+                                            type="text"
+                                            className="mbs-form-input"
+                                            placeholder="Or enter direct image URL (https://...)"
+                                            value={historyPhotoForm.imageUrl}
+                                            onChange={e => setHistoryPhotoForm({ ...historyPhotoForm, imageUrl: e.target.value.trim() })}
+                                            disabled={uploadingHistoryPhoto}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="mbs-form-grid-2">
+                                <label className="mbs-form-label">
+                                    <span>Historical Year / Era</span>
+                                    <input
+                                        type="text"
+                                        className="mbs-form-input"
+                                        placeholder="e.g. 1986, 1998, 2012"
+                                        value={historyPhotoForm.year}
+                                        onChange={e => setHistoryPhotoForm({ ...historyPhotoForm, year: e.target.value })}
+                                    />
+                                </label>
+
+                                <label className="mbs-form-label">
+                                    <span>Photograph Title / Milestone</span>
+                                    <input
+                                        type="text"
+                                        className="mbs-form-input"
+                                        placeholder="e.g. First Mobile Pastoral Cohort (Luzon)"
+                                        value={historyPhotoForm.title}
+                                        onChange={e => setHistoryPhotoForm({ ...historyPhotoForm, title: e.target.value })}
+                                    />
+                                </label>
+                            </div>
+
+                            <div className="mbs-form-row">
+                                <label className="mbs-form-label">
+                                    <span>Historical Description &amp; Context</span>
+                                    <textarea
+                                        className="mbs-form-textarea"
+                                        rows={3}
+                                        placeholder="Describe the milestone, cohort location, professors or leaders present..."
+                                        value={historyPhotoForm.description}
+                                        onChange={e => setHistoryPhotoForm({ ...historyPhotoForm, description: e.target.value })}
+                                    />
+                                </label>
+                            </div>
+
+                            {historyPhotoError && (
+                                <div className="mbs-admin-modal-error">
+                                    <AlertCircle size={15} />
+                                    <span>{historyPhotoError}</span>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="mbs-admin-modal-footer">
+                            <button
+                                type="button"
+                                className="mbs-btn-secondary"
+                                onClick={() => setIsHistoryPhotoModalOpen(false)}
+                                disabled={uploadingHistoryPhoto}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                className="mbs-btn-primary"
+                                onClick={handleSaveHistoryPhotoModal}
+                                disabled={uploadingHistoryPhoto}
+                            >
+                                <Check size={16} />
+                                <span>{editingHistoryPhotoIdx === -1 ? "Save to Archives" : "Apply Changes"}</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* ============================================================ */}
             {/* ADMIN MASTER MODAL EDITOR                                    */}

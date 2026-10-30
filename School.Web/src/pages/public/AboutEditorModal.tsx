@@ -25,7 +25,7 @@ import {
     ShieldCheck,
     MapPin,
     ScrollText,
-    Landmark,
+    History,
     CheckCircle2,
     Upload,
     Camera
@@ -358,8 +358,8 @@ export const AboutEditorModal: React.FC<AboutEditorModalProps> = ({
                         className={`mbs-editor-tab ${activeTab === "hero" ? "active" : ""}`}
                         onClick={() => setActiveTab("hero")}
                     >
-                        <Landmark size={15} />
-                        <span>Hero &amp; Overview</span>
+                        <History size={15} />
+                        <span>Hero &amp; History ({draft.overview.history.photos?.length || 0})</span>
                     </button>
                     <button
                         type="button"
@@ -584,6 +584,59 @@ export const AboutEditorModal: React.FC<AboutEditorModalProps> = ({
                                         })}
                                     />
                                 </label>
+                            </div>
+
+                            {/* SEMINARY HISTORY ARCHIVAL PHOTOGRAPHS */}
+                            <div className="mbs-editor-group-title" style={{ marginTop: 36 }}>
+                                <div>
+                                    <h3>Seminary Historical Photo Archives ({draft.overview.history.photos?.length || 0})</h3>
+                                    <p>Historical photographic record displayed on the MBS History &amp; Heritage page</p>
+                                </div>
+                            </div>
+
+                            <div className="mbs-items-list" style={{ marginTop: 16 }}>
+                                {(draft.overview.history.photos || []).map((photo, pIdx) => (
+                                    <div key={photo.id || pIdx} className="mbs-item-row">
+                                        <div className="mbs-item-info">
+                                            <img
+                                                src={photo.imageUrl}
+                                                alt={photo.title}
+                                                className="mbs-faculty-thumb-img"
+                                                style={{ width: 44, height: 44, borderRadius: 6 }}
+                                            />
+                                            <div>
+                                                <strong>{photo.title}</strong>
+                                                <span className="mbs-dept-sub-badge">Year / Era {photo.year}</span>
+                                                <p>{photo.description}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="mbs-item-actions">
+                                            <button
+                                                type="button"
+                                                className="mbs-action-btn delete"
+                                                onClick={() => {
+                                                    if (window.confirm(`Remove archival photograph "${photo.title}"?`)) {
+                                                        const updatedPhotos = (draft.overview.history.photos || []).filter((_, i) => i !== pIdx);
+                                                        setDraft({
+                                                            ...draft,
+                                                            overview: {
+                                                                ...draft.overview,
+                                                                history: {
+                                                                    ...draft.overview.history,
+                                                                    photos: updatedPhotos
+                                                                }
+                                                            }
+                                                        });
+                                                    }
+                                                }}
+                                                title="Delete archive photo"
+                                            >
+                                                <Trash2 size={15} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     )}
